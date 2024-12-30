@@ -25,6 +25,7 @@ public class User {
 
     @JsonFormat(pattern = "dd-MM-yyyy")
     @Column(nullable = false)
+    @NonNull
     private LocalDate dob;
 
     @OneToOne(cascade = CascadeType.ALL)
