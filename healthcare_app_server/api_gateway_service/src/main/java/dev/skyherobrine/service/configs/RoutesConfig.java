@@ -12,6 +12,7 @@ public class RoutesConfig {
     public RouteLocator configRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
                 .route("authenticate_service", r -> r.path("/authenticate/**").uri("lb://authenticate_service/**"))
+                .route("admin_service", r -> r.path("/admin/**").uri("lb://admin_service/**"))
                 .build();
     }
 }
