@@ -11,7 +11,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
-@Slf4j
 public class RegisterService {
 
     private UserRepository ur;
