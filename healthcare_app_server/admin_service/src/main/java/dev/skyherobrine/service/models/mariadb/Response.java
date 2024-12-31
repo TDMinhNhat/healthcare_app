@@ -1,4 +1,4 @@
-package dev.skyherobrine.service.models;
+package dev.skyherobrine.service.models.mariadb;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

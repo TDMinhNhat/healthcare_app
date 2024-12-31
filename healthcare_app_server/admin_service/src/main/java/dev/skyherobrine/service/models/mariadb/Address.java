@@ -1,4 +1,4 @@
-package dev.skyherobrine.service.models;
+package dev.skyherobrine.service.models.mariadb;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
