@@ -3,6 +3,7 @@ package dev.skyherobrine.service.messages.consumers;
 import dev.skyherobrine.service.models.AuthenticateProvider;
 import dev.skyherobrine.service.repositories.AuthenticateProviderRepository;
 import dev.skyherobrine.service.utils.ObjectParser;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -18,9 +19,11 @@ public class AuthenticateProviderConsumer {
     }
 
     @KafkaListener(topics = "insert_authenticate_provider", id = "authenticate_insert_authenticate_provider")
+    @Transactional
     public void insertAuthenticateProvider(String message) throws Exception {
         log.info("Listen insert authenticate provider message: {}", message);
         AuthenticateProvider ap = ObjectParser.convertJsonToObject(message, AuthenticateProvider.class);
-        apr.save(ap);
+        AuthenticateProvider apNew = new AuthenticateProvider(ap.getAuthenName());
+        apr.save(apNew);
     }
 }
