@@ -18,6 +18,7 @@ public class UserRoleConsumers {
     @KafkaListener(topics = "insert_user_role", id = "authenticate_insert_user_role")
     public void insertUserRole(String message) throws Exception {
         UserRole target = ObjectParser.convertJsonToObject(message, UserRole.class);
-        urr.save(target);
+        UserRole newTarget = new UserRole(target.getRoleName());
+        urr.save(newTarget);
     }
 }
