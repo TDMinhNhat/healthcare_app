@@ -4,9 +4,11 @@ import dev.skyherobrine.service.controllers.IManagement;
 import dev.skyherobrine.service.models.mariadb.AuthenticateProvider;
 import dev.skyherobrine.service.models.mariadb.Response;
 import dev.skyherobrine.service.repositories.mariadb.AuthenticateProviderRepository;
+import dev.skyherobrine.service.utils.ObjectParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,9 +17,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthenticateProviderController implements IManagement<String, Long> {
 
     private AuthenticateProviderRepository apr;
+    private KafkaTemplate template;
 
-    public AuthenticateProviderController(AuthenticateProviderRepository apr) {
+    public AuthenticateProviderController(AuthenticateProviderRepository apr, KafkaTemplate template) {
         this.apr = apr;
+        this.template = template;
     }
 
     @GetMapping
@@ -66,6 +70,7 @@ public class AuthenticateProviderController implements IManagement<String, Long>
             log.info("Call add authenticate provider");
             AuthenticateProvider ap = new AuthenticateProvider(methodName);
             AuthenticateProvider result = apr.save(ap);
+            template.send("insert_authenticate_provider", ObjectParser.convertObjectToJson(result));
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "The authenticate provider is added",
