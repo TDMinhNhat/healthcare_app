@@ -4,9 +4,11 @@ import dev.skyherobrine.service.controllers.IManagement;
 import dev.skyherobrine.service.models.mariadb.Response;
 import dev.skyherobrine.service.models.mariadb.UserRole;
 import dev.skyherobrine.service.repositories.mariadb.UserRoleRepository;
+import dev.skyherobrine.service.utils.ObjectParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,9 +17,11 @@ import org.springframework.web.bind.annotation.*;
 public class UserRoleController implements IManagement<String,Long> {
 
     private UserRoleRepository urr;
+    private KafkaTemplate template;
 
-    public UserRoleController(UserRoleRepository urr) {
+    public UserRoleController(UserRoleRepository urr, KafkaTemplate template) {
         this.urr = urr;
+        this.template = template;
     }
 
     @GetMapping
@@ -66,6 +70,7 @@ public class UserRoleController implements IManagement<String,Long> {
         try {
             UserRole ur = new UserRole(s);
             UserRole target = urr.save(ur);
+            template.send("insert_user_role", ObjectParser.convertObjectToJson(target));
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "Add user role success",
