@@ -11,8 +11,8 @@ public class RoutesConfig {
     @Bean
     public RouteLocator configRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
-                .route("authenticate_service", r -> r.path("/authenticate/**").uri("lb://authenticate_service/**"))
-                .route("admin_service", r -> r.path("/admin/**").uri("lb://admin_service/**"))
+                .route("authenticate_service", r -> r.path("/authenticate/**").uri("http://localhost:9000"))
+                .route("admin_service", r -> r.path("/admin/**").uri("http://localhost:8000"))
                 .build();
     }
 }
