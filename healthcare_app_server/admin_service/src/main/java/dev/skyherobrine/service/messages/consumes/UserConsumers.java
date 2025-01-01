@@ -21,6 +21,17 @@ public class UserConsumers {
     public void insertUser(String message) throws Exception {
         log.info("Listen insert user message: {}", message);
         User user = ObjectParser.convertJsonToObject(message, User.class);
-        ur.save(user);
+        User newUser = new User(
+                user.getUserId(),
+                user.getFullName(),
+                user.getSex(),
+                user.getDob(),
+                user.getPhone(),
+                user.getEmail(),
+                user.getPassword()
+        );
+        newUser.setAuthedProvider(user.getAuthedProvider());
+        newUser.setRole(user.getRole());
+        ur.save(newUser);
     }
 }
