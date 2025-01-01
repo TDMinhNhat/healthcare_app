@@ -3,6 +3,7 @@ package dev.skyherobrine.service.controllers;
 import dev.skyherobrine.service.models.Response;
 import dev.skyherobrine.service.models.User;
 import dev.skyherobrine.service.repositories.UserRepository;
+import dev.skyherobrine.service.utils.EncodeDecodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,9 @@ public class LoginController {
     ) {
         try {
             log.info("Call the login method");
-            User result = ur.findByEmailAndPassword(email, password).orElse(null);
+            String getEmail = EncodeDecodeUtil.encode(email);
+            String getPassword = EncodeDecodeUtil.encode(password);
+            User result = ur.findByEmailAndPassword(getEmail, getPassword).orElse(null);
             if(result == null) {
                 return ResponseEntity.ok(new Response(
                         HttpStatus.UNAUTHORIZED.value(),
