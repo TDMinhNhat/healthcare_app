@@ -18,6 +18,17 @@ spring:
     jpa:
       repositories:
         enabled: true
+  kafka:
+    consumer:
+      auto-offset-reset: earliest
+      bootstrap-servers: localhost:9092
+      group-id: admin_service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 server:
   port: 8000
 eureka:
@@ -28,3 +39,4 @@ eureka:
   instance:
     hostname: localhost
     preferIpAddress: true
+
