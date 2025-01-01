@@ -17,7 +17,7 @@ public class UserConsumers {
         this.ur = ur;
     }
 
-    @KafkaListener(topics = "insert_user", groupId = "insert_user_admin_authed")
+    @KafkaListener(topics = "insert_user", id = "admin_insert_user")
     public void insertUser(String message) throws Exception {
         log.info("Listen insert user message: {}", message);
         User user = ObjectParser.convertJsonToObject(message, User.class);
