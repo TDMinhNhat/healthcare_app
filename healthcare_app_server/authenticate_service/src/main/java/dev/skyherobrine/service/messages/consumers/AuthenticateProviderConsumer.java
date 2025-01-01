@@ -17,9 +17,9 @@ public class AuthenticateProviderConsumer {
         this.apr = apr;
     }
 
-    @KafkaListener(topics = "insert_authenticate_provider", groupId = "insert_authenticate_provider_authenticate_admin")
+    @KafkaListener(topics = "insert_authenticate_provider", id = "authenticate_insert_authenticate_provider")
     public void insertAuthenticateProvider(String message) throws Exception {
-        log.info("Listen insert authenticate provider message");
+        log.info("Listen insert authenticate provider message: {}", message);
         AuthenticateProvider ap = ObjectParser.convertJsonToObject(message, AuthenticateProvider.class);
         apr.save(ap);
     }
