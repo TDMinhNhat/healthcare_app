@@ -15,6 +15,20 @@
 	</p>
 </div>
 
+## GIỚI THIỆU
+<p align="center">Ứng dụng phần mềm <b>SolarHealth</b> là một ứng dụng cho phép mọi người có thể tư vấn, khám chữa bệnh từ xa mà không nhất thiết phải di chuyển. Việc sử dụng ứng dụng này
+sẽ làm tối giản hoá việc đi lại cũng như công nghệ hoá hiện đại thay vì làm việc trực tiếp. Thay vì các bệnh nhân phải gặp trực tiếp bác sĩ, thì các bệnh nhân có thể làm việc với bác sĩ
+từ xa với nhiều phương thức giao tiếp khác nhau (tin nhắn, cuộc gọi). 
+</br>
+😍 🌏 ❤️ 👫
+</p>
+
+Một số tính năng đặc trưng của ứng dụng:
+1. Cho phép bệnh nhân có thể tư vấn khám sức khoẻ từ xa
+2. Bác sĩ có thể biết được vị trí bệnh nhân để tới khám
+3. Phần mềm có thể chuẩn đoán bệnh cơ bản cho bệnh nhân dựa vào các thông tin cung cấp
+4. Phần mềm có thể xác thực các triệu chứng thông qua các hình ảnh chụp x-quang, siêu âm,... 
+
 ## CÔNG NGHỆ SỬ DỤNG
 <div>
 	<ul>
