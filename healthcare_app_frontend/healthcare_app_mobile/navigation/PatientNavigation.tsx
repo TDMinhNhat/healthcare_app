@@ -2,6 +2,7 @@ import { createStaticNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "../screens/authentication/LoginScreen";
 import SignUpScreen from "../screens/authentication/SignUpScreen";
+import HomeScreen from "../screens/home/HomeScreen";
 
 const PatientStack = createNativeStackNavigator({
   screens: {
@@ -15,6 +16,12 @@ const PatientStack = createNativeStackNavigator({
       screen: SignUpScreen,
       options: {
         headerShown: false,
+      },
+    },
+    Home: {
+      screen: HomeScreen,
+      options: {
+        // headerShown: false,
       },
     },
   },

@@ -24,7 +24,7 @@ const TextInput: React.FC<TextInputProps> = ({ name, label, placeholder }) => {
     setPasswordVisible(!isPasswordVisible);
   };
 
-  const isPassword = name.toLowerCase().includes("password");
+  const isPassword = name.includes("password");
 
   return (
     <View style={{}}>

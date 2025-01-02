@@ -35,5 +35,6 @@
   "resendOTP": "Gửi lại OTP trong",
   "yourPasswordHasBeenChanged": "Mật khẩu của bạn đã được thay đổi",
   "goToHome": "Đi đến trang chủ",
-  "dontHaveAnAccount": "Chưa có tài khoản?"
+  "dontHaveAnAccount": "Chưa có tài khoản?",
+  "biometricAuthentication": "Xác thực sinh trắc học"
 }

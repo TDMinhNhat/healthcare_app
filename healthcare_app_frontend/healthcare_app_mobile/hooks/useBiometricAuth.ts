@@ -13,14 +13,18 @@ export const useBiometricAuth = () => {
       const types =
         await LocalAuthentication.supportedAuthenticationTypesAsync();
 
-      setSupportsFingerprint(
-        types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)
-      );
-      setSupportsFaceID(
-        types.includes(
-          LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION
-        )
-      );
+      if (types) {
+        setSupportsFingerprint(
+          types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)
+        );
+        setSupportsFaceID(
+          types.includes(
+            LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION
+          )
+        );
+      } else {
+        console.error("No supported authentication types found");
+      }
     } catch (error) {
       console.error("Error checking biometric support:", error);
     }

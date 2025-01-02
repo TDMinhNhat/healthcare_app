@@ -36,5 +36,6 @@
   "resendOTP": "Resend OTP in",
   "yourPasswordHasBeenChanged": "Your password has been changed",
   "goToHome": "Go to home",
-  "dontHaveAnAccount": "Don't have an account?"
+  "dontHaveAnAccount": "Don't have an account?",
+  "biometricAuthentication": "Biometric authentication"
 }

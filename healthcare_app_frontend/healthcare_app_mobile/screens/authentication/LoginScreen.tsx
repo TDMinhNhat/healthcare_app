@@ -4,7 +4,7 @@ import {
   useNavigation,
   useTheme,
 } from "@react-navigation/native";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
 import Button from "../../components/Button";
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -14,10 +14,24 @@ import Layout from "../Layout";
 import { useState } from "react";
 import Checkbox from "expo-checkbox";
 import IconButton from "../../components/IconButton";
+import { useBiometricAuth } from "../../hooks/useBiometricAuth";
+import Ionicons from "@expo/vector-icons/Ionicons";
 export default function LoginScreen() {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const { colors } = useTheme();
   const [isChecked, setChecked] = useState(false);
+  const {
+    authenticate,
+    supportsFingerprint,
+    supportsFaceID,
+    isAuthenticating,
+  } = useBiometricAuth();
+  const handleBiometricLogin = async () => {
+    const isAuthenticated = await authenticate();
+    if (isAuthenticated) {
+      navigation.navigate("Home");
+    }
+  };
   return (
     <Layout
       style={{
@@ -109,7 +123,24 @@ export default function LoginScreen() {
           </View>
         )}
       </Formik>
-
+      <View style={{ padding: 20 }}>
+        {(supportsFingerprint || supportsFaceID) && (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            {supportsFingerprint ? (
+              <TouchableOpacity onPress={handleBiometricLogin}>
+                <Ionicons name="finger-print" size={24} color="black" />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity onPress={handleBiometricLogin}>
+                <Ionicons name="scan" size={24} color="black" />
+              </TouchableOpacity>
+            )}
+            <Text style={{ color: colors.textIcon.contentPrimary }}>
+              {i18n.t("biometricAuthentication")}
+            </Text>
+          </View>
+        )}
+      </View>
       <View
         style={{
           flexDirection: "row",
@@ -118,11 +149,11 @@ export default function LoginScreen() {
           width: "100%",
         }}
       >
-        <View style={{ flex: 1, height: 0.5, backgroundColor: "black" }} />
+        <View style={{ flex: 1, height: 1, backgroundColor: "black" }} />
         <View>
           <Text style={{ width: 40, textAlign: "center" }}>or</Text>
         </View>
-        <View style={{ flex: 1, height: 0.5, backgroundColor: "black" }} />
+        <View style={{ flex: 1, height: 1, backgroundColor: "black" }} />
       </View>
 
       <View
