@@ -43,3 +43,23 @@ Một số tính năng đặc trưng của ứng dụng:
 		<li>Công cụ khác: S3 (AWS - Lưu trữ dữ liệu), Jira (lập kế hoạch)</li>
 	</ul>
 </div> 
+
+## THÀNH VIÊN THỰC HIỆN
+<table align="center">
+	<tbody> 
+		<tr align="center" valign="top">
+			<td>
+				<a href="https://github.com/TDMinhNhat">
+					<img src="https://avatars.githubusercontent.com/u/158603211?v=4?s=100" height=150 />
+					<div>Minh Nhật</div>
+				</a>
+			</td>
+			<td>
+				<a href="https://github.com/DangQuang31122022">
+					<img src="https://avatars.githubusercontent.com/u/121714705?v=4?s=100" height=150 />
+					<div>Đăng Quang</div>
+				</a>
+			</td>
+		</tr>
+	</tbody>
+</table>
