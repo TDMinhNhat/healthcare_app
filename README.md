@@ -14,3 +14,18 @@
 		<a href="#thành-viên-thực-hiện">👪 Thành viên thực hiện</a>
 	</p>
 </div>
+
+## CÔNG NGHỆ SỬ DỤNG
+<div>
+	<ul>
+		<li>Frontend: Website (ReactJS), Mobile (React-native), Desktop App (C# Winform)</li>
+		<li>Backend: Java (Spring boot), Javascript/Typescript (NodeJS), Python (Django)</li>
+		<li>Database: MariaDB, SQLite, MongoDB, Redis</li>
+		<li>Security: JWT (Json Web Token), Spring OAuth2 (đăng nhập bằng: Github, Discord, Microsoft,...)</li>
+		<li>CI/CD: Docker, Jenkins</li>
+		<li>Deployment: Vercel (cho Frontend) - có thể deploy lên: Google Play (Android) & App Store (iOS), EC2 (AWS - cho Backend)</li>
+		<li>Kiến trúc: Microservices, Event-driven và Multi-layered</li>
+		<li>Công nghệ khác: Spring OpenFeign, AI (dự báo, xử lý ảnh,...), Apache Kafka, Socket I/O</li>
+		<li>Công cụ khác: S3 (AWS - Lưu trữ dữ liệu), Jira (lập kế hoạch)</li>
+	</ul>
+</div> 
