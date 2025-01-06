@@ -14,7 +14,7 @@ function HeadersComponent({ language, tab, setTab } : { language: object, tab: s
 
     return (
         <Box id={"menu"} className={"bg-opacity-10 bg-black fixed-top w-100"}>
-            <Stack direction={"row"} className={"ms-3 me-3 d-flex align-items-center justify-content-between"}>
+            <Stack direction={"row"} className={"ms-5 me-5 d-flex align-items-center justify-content-between"}>
                 <Box>
                     <Link to={"/"} className={"d-flex align-items-center"}>
                         <img
