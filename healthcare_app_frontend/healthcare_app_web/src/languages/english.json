@@ -1,0 +1,28 @@
+{
+  "header": {
+    "home": "Home",
+    "our_services": "Services",
+    "find_doctors": "Find Doctors",
+    "reviews": "Reviews",
+    "login": "Login"
+  },
+  "body": {
+    "home": {
+
+    },
+    "our_services": {
+
+    },
+    "find_doctors": {
+
+    },
+    "reviews": {
+
+    }
+  },
+  "footer": {
+    "select_language": "Select Language",
+    "description": "Copyrighted products belong to KLTN_IUH, please do not copy or sell products without the consent of the authors in any form.",
+    "copyright": "© 2025 SolarHealth"
+  }
+}

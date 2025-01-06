@@ -5,6 +5,7 @@ import RegisterPage from "./pages/RegisterPage.tsx";
 import AdminPage from "./pages/AdminPage.tsx";
 import {useEffect, useState} from "react";
 import vietnamese from "./languages/vietnamese.json";
+import english from "./languages/english.json";
 import "./styles/main.scss";
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
     useEffect(() => {
         async function fetchData() {
             if(language === "vietnamese") setLanguageData(vietnamese);
+            else if(language === "english") setLanguageData(english);
         }
         fetchData();
     }, [language]);
