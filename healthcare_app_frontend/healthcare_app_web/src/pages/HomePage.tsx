@@ -5,8 +5,9 @@ import HomeComponent from "../components/HomeComponent.tsx";
 import OurServiceComponent from "../components/OurServiceComponent.tsx";
 import FindDoctorComponent from "../components/FindDoctorComponent.tsx";
 import ReviewsComponent from "../components/ReviewsComponent.tsx";
+import FooterComponent from "../components/FooterComponent.tsx";
 
-function HomePage({ language } : { language: object }) {
+function HomePage({ language, setLanguage, languageType } : { language: object, setLanguage: void, languageType: string }) {
 
     const [tab, setTab] = useState("home");
 
@@ -21,7 +22,7 @@ function HomePage({ language } : { language: object }) {
                 { tab === "reviews" && <ReviewsComponent language={language.body.reviews} />}
             </Container>
 
-
+            <FooterComponent footer={language.footer} setLanguage={setLanguage} languageType={languageType} />
         </Container>
     )
 }

@@ -19,5 +19,10 @@
     "reviews": {
 
     }
+  },
+  "footer": {
+    "select_language": "Chọn Ngôn Ngữ",
+    "description": "Sản phẩm bản quyền thuộc về KLTN_IUH, yêu cầu không sao chép hoặc bán sản phẩm mà không có sự đồng ý của các tác giả dưới mọi hình thức.",
+    "copyright": "© 2025 SolarHealth"
   }
 }
