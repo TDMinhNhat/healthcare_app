@@ -1,7 +1,15 @@
+import {Container} from "@mui/material";
+import HeadersComponent from "../components/HeadersComponent.tsx";
+import {useState} from "react";
 
-function HomePage() {
+function HomePage({ language } : { language: object }) {
+
+    const [tab, setTab] = useState("home");
+
     return (
-        <h1>Home Page</h1>
+        <Container maxWidth={false} disableGutters={true}>
+            <HeadersComponent language={language.headers} tab={tab} setTab={setTab} />
+        </Container>
     )
 }
 
