@@ -1,10 +1,10 @@
-import {Avatar, Box, Container, Stack, Typography} from "@mui/material";
+import {Avatar, Box, Stack, Typography} from "@mui/material";
 import "../../node_modules/bootstrap/dist/css/bootstrap.css";
 import "../../node_modules/bootstrap/dist/js/bootstrap.js";
 import "../styles/headers.scss"
 import {Link} from "react-router";
 
-function HeadersComponent({ language, tab, setTab } : { language: object, tab: string, setTab: void }) {
+function HeaderComponent({ language, tab, setTab } : { language: object, tab: string, setTab: void }) {
 
     function checkTabEnable(value: string, type: string) {
         if(tab === value) {
@@ -52,4 +52,4 @@ function HeadersComponent({ language, tab, setTab } : { language: object, tab: s
     )
 }
 
-export default HeadersComponent;
+export default HeaderComponent;

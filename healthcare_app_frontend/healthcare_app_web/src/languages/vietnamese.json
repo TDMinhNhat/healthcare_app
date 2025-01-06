@@ -1,9 +1,23 @@
 {
-  "headers": {
+  "header": {
     "home": "Trang Chủ",
     "our_services": "Dịch Vụ",
     "find_doctors": "Tìm Bác Sĩ",
     "reviews": "Xem Nhận Xét",
     "login": "Đăng Nhập"
+  },
+  "body": {
+    "home": {
+
+    },
+    "our_services": {
+
+    },
+    "find_doctors": {
+
+    },
+    "reviews": {
+
+    }
   }
 }
