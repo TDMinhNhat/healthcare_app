@@ -24,5 +24,14 @@
     "select_language": "Chọn Ngôn Ngữ",
     "description": "Sản phẩm bản quyền thuộc về KLTN_IUH, yêu cầu không sao chép hoặc bán sản phẩm mà không có sự đồng ý của các tác giả dưới mọi hình thức.",
     "copyright": "© 2025 SolarHealth"
+  },
+  "login": {
+    "title": "Đăng Nhập",
+    "email": "Email",
+    "password": "Mật Khẩu",
+    "button_login": "Đăng Nhập",
+    "other_login": "Hoặc đăng nhập với",
+    "link_register": "Đăng ký tài khoản",
+    "link_forgot_pass": "Quên mật khẩu"
   }
 }

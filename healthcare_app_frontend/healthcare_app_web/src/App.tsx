@@ -25,7 +25,7 @@ function App() {
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={ <HomePage language={languageData} setLanguage={setLanguage} languageType={language}/>} />
-                <Route path="/login" element={ <LoginPage /> } />
+                <Route path="/login" element={ <LoginPage loginLanguage={languageData.login} /> } />
                 <Route path="/register" element={ <RegisterPage/> } />
                 <Route path="/admin" element={ <AdminPage/> } />
             </Routes>
