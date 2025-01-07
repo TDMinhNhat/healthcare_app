@@ -27,6 +27,9 @@
   },
   "login": {
     "title": "Đăng Nhập",
+    "login_standard": "Đăng nhập bằng tài khoản",
+    "login_face": "Đăng nhập bằng khuôn mặt",
+    "login_others_app": "Đăng nhập bằng ứng dụng khác",
     "email": "Email",
     "password": "Mật Khẩu",
     "button_login": "Đăng Nhập",

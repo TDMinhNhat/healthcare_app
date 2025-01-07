@@ -1,10 +1,13 @@
 import { useState } from "react";
-import {Box, Button, Container, Input, InputAdornment, Stack, Typography} from "@mui/material";
-import EmailIcon from '@mui/icons-material/Email';
-import KeyIcon from '@mui/icons-material/Key';
-import {Link} from "react-router";
+import {Box, Container, Stack, Tab, Tabs, Typography} from "@mui/material";
+import LoginStandard from "../components/login/LoginStandard.tsx";
+import LoginFace from "../components/login/LoginFace.tsx";
+import LoginOthersApp from "../components/login/LoginOthersApp.tsx"
 
 function LoginPage({ loginLanguage } : { loginLanguage:object }) {
+
+    const [tab, setTab] = useState("standard");
+
     return (
         <Container maxWidth={false} disableGutters={true}>
             <Box className={"z-0 fixed-top"}>
@@ -24,10 +27,20 @@ function LoginPage({ loginLanguage } : { loginLanguage:object }) {
                                 width={"50%"}
                             />
                         </Box>
-                        <Box>
-                            <Typography variant={"h3"}>{loginLanguage.title}</Typography>
-                        </Box>
                     </Stack>
+                    <Box className={"w-100 mt-5"}>
+                        <Tabs className={"d-flex justify-content-between"} value={tab} onChange={(e, newValue) => setTab(newValue)}>
+                            <Tab label={loginLanguage.login_standard} value={"standard"}/>
+                            <Tab label={loginLanguage.login_face} value={"face"}/>
+                            <Tab label={loginLanguage.login_others_app} value={"others_app"}/>
+                        </Tabs>
+
+                        <Box className={"mt-3"}>
+                            {tab === "standard" && <LoginStandard loginLanguage={loginLanguage}/>}
+                            {tab === "face" && <LoginFace loginLanguage={loginLanguage}/>}
+                            {tab === "others_app" && <LoginOthersApp loginLanguage={loginLanguage}/>}
+                        </Box>
+                    </Box>
                 </Stack>
             </Box>
         </Container>
