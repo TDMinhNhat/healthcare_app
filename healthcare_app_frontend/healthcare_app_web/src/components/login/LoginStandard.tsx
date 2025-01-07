@@ -6,8 +6,47 @@ import {useState} from "react";
 
 function LoginStandard({ loginLanguage } : { loginLanguage: object}) {
 
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    const solveLogin = () => {
+
+    }
+
     return (
-        <h1>Login Standard</h1>
+        <Box>
+            <Box className={"w-100"}>
+                <Typography>{loginLanguage.email}:</Typography>
+                <Input className={"w-100 fs-5"} startAdornment={
+                    <InputAdornment position={"start"}>
+                        <EmailIcon />
+                    </InputAdornment>
+                } onChange={(e) => setEmail(e.target.value)}/>
+            </Box>
+            <Box className={"w-100 mt-4"}>
+                <Typography>{loginLanguage.password}:</Typography>
+                <Input className={"w-100 fs-5"} type={"password"} startAdornment={
+                    <InputAdornment position={"start"}>
+                        <KeyIcon />
+                    </InputAdornment>
+                } onChange={(e) => setPassword(e.target.value)}/>
+            </Box>
+            <Stack direction={"row"} className={"w-100 d-flex justify-content-between mt-3"}>
+                <Box>
+                    <Link to={"/forgot_pass"}>
+                        <Typography>{loginLanguage.link_forgot_pass}</Typography>
+                    </Link>
+                </Box>
+                <Box>
+                    <Link to={"/register"}>
+                        <Typography>{loginLanguage.link_register}</Typography>
+                    </Link>
+                </Box>
+            </Stack>
+            <Box className={"w-100 mt-3"}>
+                <Button className={"w-100"} variant="contained" onClick={() => solveLogin()}>{loginLanguage.button_login}</Button>
+            </Box>
+        </Box>
     )
 }
 
