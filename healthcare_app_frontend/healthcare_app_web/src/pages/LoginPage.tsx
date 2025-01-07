@@ -17,7 +17,8 @@ function LoginPage({ loginLanguage } : { loginLanguage:object }) {
                     width={"100%"}
                 />
             </Box>
-            <Box className={"d-flex align-items-center justify-content-center bg-white position-absolute top-50 start-50 translate-middle p-5"}>
+            <Box className={"d-flex align-items-center justify-content-center bg-white position-absolute top-50 start-50 translate-middle p-5 shadow-lg rounded"}
+            style={{width: "45%"}}>
                 <Stack direction={"column"}>
                     <Stack direction={"column"} className={"d-flex flex-column align-items-center"}>
                         <Box className={"d-flex justify-content-center"}>

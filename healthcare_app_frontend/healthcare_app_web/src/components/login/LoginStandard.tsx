@@ -16,7 +16,7 @@ function LoginStandard({ loginLanguage } : { loginLanguage: object}) {
     return (
         <Box>
             <Box className={"w-100"}>
-                <Typography>{loginLanguage.email}:</Typography>
+                <Typography variant={"h6"} className={"fw-bold"}>{loginLanguage.email}:</Typography>
                 <Input className={"w-100 fs-5"} startAdornment={
                     <InputAdornment position={"start"}>
                         <EmailIcon />
@@ -24,7 +24,7 @@ function LoginStandard({ loginLanguage } : { loginLanguage: object}) {
                 } onChange={(e) => setEmail(e.target.value)}/>
             </Box>
             <Box className={"w-100 mt-4"}>
-                <Typography>{loginLanguage.password}:</Typography>
+                <Typography variant={"h6"} className={"fw-bold"}>{loginLanguage.password}:</Typography>
                 <Input className={"w-100 fs-5"} type={"password"} startAdornment={
                     <InputAdornment position={"start"}>
                         <KeyIcon />
