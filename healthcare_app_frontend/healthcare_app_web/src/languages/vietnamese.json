@@ -8,16 +8,12 @@
   },
   "body": {
     "home": {
-
     },
     "our_services": {
-
     },
     "find_doctors": {
-
     },
     "reviews": {
-
     }
   },
   "footer": {
@@ -36,5 +32,52 @@
     "other_login": "Hoặc đăng nhập với",
     "link_register": "Đăng ký tài khoản",
     "link_forgot_pass": "Quên mật khẩu"
+  },
+  "register": {
+    "tabs": [
+      {
+        "name": "Điền thông tin cá nhân",
+        "isOptional": false,
+        "optional": "Bắt buộc"
+      },
+      {
+        "name": "Đăng ký tài khoản",
+        "isOptional": false,
+        "optional": "Bắt buộc"
+      },
+      {
+        "name": "Xác nhận Email",
+        "isOptional": false,
+        "optional": "Bắt buộc"
+      },
+      {
+        "name": "Quét khuôn mặt",
+        "isOptional": true,
+        "optional": "Có thể bỏ qua"
+      },
+      {
+        "name": "Hoàn tất",
+        "isOptional": false,
+        "optional": "Bắt buộc"
+      }
+    ],
+    "button_next": "Tiếp theo",
+    "button_skip": "Bỏ qua",
+    "button_back": "Quay lại",
+    "input_info": {
+
+    },
+    "register_account": {
+
+    },
+    "face_detect": {
+
+    },
+    "verify_email": {
+
+    },
+    "complete_register": {
+
+    }
   }
 }

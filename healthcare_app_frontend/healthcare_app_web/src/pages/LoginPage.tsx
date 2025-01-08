@@ -1,5 +1,5 @@
 import { useState } from "react";
-import {Box, Container, Stack, Tab, Tabs, Typography} from "@mui/material";
+import {Box, Container, Stack, Tab, Tabs} from "@mui/material";
 import LoginStandard from "../components/login/LoginStandard.tsx";
 import LoginFace from "../components/login/LoginFace.tsx";
 import LoginOthersApp from "../components/login/LoginOthersApp.tsx"
