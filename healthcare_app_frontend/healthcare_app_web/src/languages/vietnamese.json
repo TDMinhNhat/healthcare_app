@@ -41,11 +41,6 @@
         "optional": "Bắt buộc"
       },
       {
-        "name": "Đăng ký tài khoản",
-        "isOptional": false,
-        "optional": "Bắt buộc"
-      },
-      {
         "name": "Xác nhận Email",
         "isOptional": false,
         "optional": "Bắt buộc"
@@ -65,10 +60,19 @@
     "button_skip": "Bỏ qua",
     "button_back": "Quay lại",
     "input_info": {
-
-    },
-    "register_account": {
-
+      "first_name": "Tên",
+      "last_name": "Họ",
+      "sex": "Giới tính",
+      "date_of_birth": "Ngày sinh",
+      "phone": "Số điện thoại",
+      "address": {
+        "number": "Số nhà",
+        "street": "Đường",
+        "ward": "Phường",
+        "district": "Quận",
+        "city": "Thành phố",
+        "country": "Quốc gia"
+      }
     },
     "face_detect": {
 

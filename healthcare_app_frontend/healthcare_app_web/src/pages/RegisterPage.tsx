@@ -1,7 +1,6 @@
 import {Container, Box, Stack, Typography, Step, Stepper, StepLabel, Button} from "@mui/material";
 import React, {useState} from "react";
 import InputInfoComponent from "../components/register/InputInfoComponent";
-import RegisterAccountComponent from "../components/register/RegisterAccountComponent.tsx";
 import FaceDetectComponent from "../components/register/FaceDetectComponent.tsx";
 import EmailVerifyComponent from "../components/register/EmailVerifyComponent.tsx";
 import CompleteRegisterComponent from "../components/register/CompleteRegisterComponent.tsx";
@@ -39,7 +38,7 @@ function RegisterPage({registerLanguage}: { registerLanguage: object }) {
                     width={"100%"}
                 />
             </Box>
-            <Box className={"w-75 h-75 bg-white position-absolute top-50 start-50 translate-middle shadow-lg rounded p-5"}>
+            <Box className={"w-50 h-75 bg-white position-absolute top-50 start-50 translate-middle shadow-lg rounded p-5"}>
                 <Box className={"h-100"}>
                     <Stepper activeStep={activeStep}>
                         {steps.map((item, index) => {
@@ -58,17 +57,16 @@ function RegisterPage({registerLanguage}: { registerLanguage: object }) {
                             return (
                                 <Step key={item.name} {...stepProps}>
                                     <StepLabel {...labelProps}>
-                                        <Typography variant={"h6"}>{item.name}</Typography>
+                                        <Typography variant={"span"}>{item.name}</Typography>
                                     </StepLabel>
                                 </Step>
                             );
                         })}
                     </Stepper>
                     {activeStep === 0 && <InputInfoComponent registerLanguage={registerLanguage} handleNext={handleNext} handleBack={handleBack} activeStep={activeStep} />}
-                    {activeStep === 1 && <RegisterAccountComponent registerLanguage={registerLanguage} handleNext={handleNext} handleBack={handleBack} activeStep={activeStep}/>}
-                    {activeStep === 2 && <EmailVerifyComponent registerLanguage={registerLanguage} handleNext={handleNext} handleBack={handleBack} activeStep={activeStep}/>}
-                    {activeStep === 3 && <FaceDetectComponent registerLanguage={registerLanguage} handleNext={handleNext} activeStep={activeStep} />}
-                    {activeStep === 4 && <CompleteRegisterComponent registerLanguage={registerLanguage}/>}
+                    {activeStep === 1 && <EmailVerifyComponent registerLanguage={registerLanguage} handleNext={handleNext} handleBack={handleBack} activeStep={activeStep}/>}
+                    {activeStep === 2 && <FaceDetectComponent registerLanguage={registerLanguage} handleNext={handleNext} activeStep={activeStep} />}
+                    {activeStep === 3 && <CompleteRegisterComponent registerLanguage={registerLanguage}/>}
                 </Box>
             </Box>
         </Container>
