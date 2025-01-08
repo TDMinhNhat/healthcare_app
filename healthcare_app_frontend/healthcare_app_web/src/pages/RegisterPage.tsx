@@ -38,7 +38,7 @@ function RegisterPage({registerLanguage}: { registerLanguage: object }) {
                     width={"100%"}
                 />
             </Box>
-            <Box className={"w-50 h-75 bg-white position-absolute top-50 start-50 translate-middle shadow-lg rounded p-5"}>
+            <Box className={"w-50 bg-white position-absolute top-50 start-50 translate-middle shadow-lg rounded p-5"} sx={{height: "80%"}}>
                 <Box className={"h-100"}>
                     <Stepper activeStep={activeStep}>
                         {steps.map((item, index) => {
@@ -57,12 +57,13 @@ function RegisterPage({registerLanguage}: { registerLanguage: object }) {
                             return (
                                 <Step key={item.name} {...stepProps}>
                                     <StepLabel {...labelProps}>
-                                        <Typography variant={"span"}>{item.name}</Typography>
+                                        <Typography variant={"p"}>{item.name}</Typography>
                                     </StepLabel>
                                 </Step>
                             );
                         })}
                     </Stepper>
+                    <Box className={"mt-3"}></Box>
                     {activeStep === 0 && <InputInfoComponent registerLanguage={registerLanguage} handleNext={handleNext} handleBack={handleBack} activeStep={activeStep} />}
                     {activeStep === 1 && <EmailVerifyComponent registerLanguage={registerLanguage} handleNext={handleNext} handleBack={handleBack} activeStep={activeStep}/>}
                     {activeStep === 2 && <FaceDetectComponent registerLanguage={registerLanguage} handleNext={handleNext} activeStep={activeStep} />}

@@ -15,9 +15,11 @@
     "@mui/icons-material": "^6.2.1",
     "@mui/material": "^6.2.1",
     "@mui/styled-engine-sc": "^6.2.1",
+    "@mui/x-date-pickers": "^7.23.3",
     "@reduxjs/toolkit": "^2.5.0",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
+    "dayjs": "^1.11.13",
     "formik": "^2.4.6",
     "jquery": "^3.7.1",
     "react": "^18.3.1",
@@ -38,9 +40,9 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.13.0",
+    "sass-embedded": "^1.83.1",
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.18.1",
-    "vite": "^6.0.3",
-    "sass-embedded": "^1.83.1"
+    "vite": "^6.0.3"
   }
 }

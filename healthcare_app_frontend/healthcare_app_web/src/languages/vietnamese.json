@@ -63,8 +63,14 @@
       "first_name": "Tên",
       "last_name": "Họ",
       "sex": "Giới tính",
+      "sex_male": "Nam",
+      "sex_female": "Nữ",
       "date_of_birth": "Ngày sinh",
       "phone": "Số điện thoại",
+      "username": "Tên tài khoản",
+      "email": "Tài khoản email",
+      "password": "Mật khẩu",
+      "repeat_password": "Nhập lại mật khẩu",
       "address": {
         "number": "Số nhà",
         "street": "Đường",
@@ -72,6 +78,15 @@
         "district": "Quận",
         "city": "Thành phố",
         "country": "Quốc gia"
+      },
+      "error": {
+        "null": "Không được để trống",
+        "contains_number": "Không được chứa số",
+        "contains_text": "Không được chứa chữ",
+        "contains_special_character": "Không được chứa ký tự đặc biệt",
+        "start_number": "Không được bắt đầu bằng số",
+        "invalid_email": "Email không hợp lệ",
+        "not_match_password": "Mật khẩu không trùng khớp"
       }
     },
     "face_detect": {
