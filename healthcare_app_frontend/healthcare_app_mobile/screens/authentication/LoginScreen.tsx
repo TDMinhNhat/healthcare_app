@@ -14,24 +14,17 @@ import Layout from "../Layout";
 import { useState } from "react";
 import Checkbox from "expo-checkbox";
 import IconButton from "../../components/IconButton";
-import { useBiometricAuth } from "../../hooks/useBiometricAuth";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { useAuthentication } from "../../hooks/useAuthentication";
+import { useUser } from "../../hooks/useUser";
 export default function LoginScreen() {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const { colors } = useTheme();
   const [isChecked, setChecked] = useState(false);
-  const {
-    authenticate,
-    supportsFingerprint,
-    supportsFaceID,
-    isAuthenticating,
-  } = useBiometricAuth();
-  const handleBiometricLogin = async () => {
-    const isAuthenticated = await authenticate();
-    if (isAuthenticated) {
-      navigation.navigate("Home");
-    }
-  };
+
+  const { loginMutation } = useAuthentication();
+  useUser.useUserQuery("2");
+  // useUser.useUserQuery(loginMutation.data?.data?.id);
+
   return (
     <Layout
       style={{
@@ -71,14 +64,15 @@ export default function LoginScreen() {
         </Text>
       </View>
       <Formik
-        initialValues={{ email: "", password: "" }}
+        initialValues={{ email: "eve.holt@reqres.in", password: "123" }}
         validationSchema={Yup.object({
           email: Yup.string().email().required("Required"),
           password: Yup.string().required("Required"),
         })}
         onSubmit={(values) => {
           const { email, password } = values;
-          console.log(email, password);
+          // console.log(email, password);
+          loginMutation.mutate({ email, password });
         }}
       >
         {({ handleSubmit }) => (
@@ -119,28 +113,11 @@ export default function LoginScreen() {
                 </Text>
               </TouchableOpacity>
             </View>
-            <Button title="Login" onPress={() => handleSubmit()} />
+            <Button title={i18n.t("login")} onPress={() => handleSubmit()} />
           </View>
         )}
       </Formik>
-      <View style={{ padding: 20 }}>
-        {(supportsFingerprint || supportsFaceID) && (
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            {supportsFingerprint ? (
-              <TouchableOpacity onPress={handleBiometricLogin}>
-                <Ionicons name="finger-print" size={24} color="black" />
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity onPress={handleBiometricLogin}>
-                <Ionicons name="scan" size={24} color="black" />
-              </TouchableOpacity>
-            )}
-            <Text style={{ color: colors.textIcon.contentPrimary }}>
-              {i18n.t("biometricAuthentication")}
-            </Text>
-          </View>
-        )}
-      </View>
+
       <View
         style={{
           flexDirection: "row",
