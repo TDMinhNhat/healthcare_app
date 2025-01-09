@@ -23,13 +23,20 @@ public class UserConsumers {
         User user = ObjectParser.convertJsonToObject(message, User.class);
         User newUser = new User(
                 user.getUserId(),
-                user.getFullName(),
+                user.getFirstName(),
+                user.getLastName(),
                 user.getSex(),
                 user.getDob(),
                 user.getPhone(),
+                user.getUsername(),
                 user.getEmail(),
                 user.getPassword()
         );
+
+        if(user.getAddress() != null) {
+            newUser.setAddress(user.getAddress());
+        }
+
         newUser.setAuthedProvider(user.getAuthedProvider());
         newUser.setRole(user.getRole());
         ur.save(newUser);

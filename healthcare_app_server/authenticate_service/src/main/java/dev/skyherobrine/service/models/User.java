@@ -17,8 +17,11 @@ public class User {
     @Column(name = "user_id", length = 50, unique = true, nullable = false) @NonNull
     private String userId;
 
-    @Column(name = "full_name", length = 200, nullable = false) @NonNull
-    private String fullName;
+    @Column(name = "first_name", length = 100, nullable = false) @NonNull
+    private String firstName;
+
+    @Column(name = "last_name", length = 100, nullable = false) @NonNull
+    private String lastName;
 
     @Column(nullable = false) @NonNull
     private Boolean sex;
@@ -34,6 +37,9 @@ public class User {
 
     @Column(length = 20, nullable = false) @NonNull
     private String phone;
+
+    @Column(length = 50, unique = true, nullable = false) @NonNull
+    private String username;
 
     @Column(length = 200, unique = true, nullable = false) @NonNull
     private String email;
@@ -52,6 +58,9 @@ public class User {
     @JoinColumn(name = "role_id", nullable = false)
     private UserRole role;
 
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified;
+
     @Column(nullable = false)
     private boolean status;
 
@@ -66,6 +75,7 @@ public class User {
     @PrePersist
     public void prePersist() {
         this.status = true;
+        this.emailVerified = false;
         createdAt = LocalDateTime.now();
     }
 

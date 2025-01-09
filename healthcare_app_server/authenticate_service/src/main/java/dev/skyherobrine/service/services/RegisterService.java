@@ -30,13 +30,19 @@ public class RegisterService {
         String getUserId = generateUserId(userRegisterDTO);
         User user = new User(
                 getUserId,
-                userRegisterDTO.getFullName(),
+                userRegisterDTO.getFirstName(),
+                userRegisterDTO.getLastName(),
                 userRegisterDTO.getSex(),
                 userRegisterDTO.getDobLocalDate(),
                 userRegisterDTO.getPhone(),
+                userRegisterDTO.getUsername(),
                 EncodeDecodeUtil.encode(userRegisterDTO.getEmail()),
                 EncodeDecodeUtil.encode(userRegisterDTO.getPassword())
         );
+        if(userRegisterDTO.getAddress() != null) {
+            user.setAddress(userRegisterDTO.getAddress());
+        }
+
         user.setAuthedProvider(apr.findAuthenticateProviderByAuthenName("APPLICATION").get());
         user.setRole(urr.findUserRoleByRoleName("USER").get());
 
