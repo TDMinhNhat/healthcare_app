@@ -79,6 +79,7 @@
         "city": "Thành phố",
         "country": "Quốc gia"
       },
+      "eula": "Tôi đồng ý với các điều khoản và điều kiện",
       "error": {
         "null": "Không được để trống",
         "contains_number": "Không được chứa số",

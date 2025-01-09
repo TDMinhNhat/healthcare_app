@@ -1,4 +1,15 @@
-import {Box, Button, TextField, Stack, Typography, RadioGroup, Radio, FormControlLabel, Select} from "@mui/material";
+import {
+    Box,
+    Button,
+    TextField,
+    Stack,
+    Typography,
+    RadioGroup,
+    Radio,
+    FormControlLabel,
+    Select,
+    Checkbox
+} from "@mui/material";
 import {useState} from "react";
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
@@ -16,6 +27,7 @@ function InputInfoComponent({ registerLanguage, handleNext, handleBack, activeSt
     const [email, setEmail] = useState<string>();
     const [password, setPassword] = useState<string>();
     const [repeatPassword, setRepeatPassword] = useState<string>();
+    const [acceptEula, setAcceptEula] = useState<boolean>(false);
     const [address, setAddress] = useState<object>({
         "number": null,
         "street": null,
@@ -59,6 +71,7 @@ function InputInfoComponent({ registerLanguage, handleNext, handleBack, activeSt
         } else if(/^[0-9]+/g.test(field)) {
             return { result: true, message: registerLanguage.input_info.error.start_number }
         }
+        return { result: false, message: "" };
     }
 
     const checkEmail = (field: string) => {
@@ -87,14 +100,19 @@ function InputInfoComponent({ registerLanguage, handleNext, handleBack, activeSt
     }
 
     const checkNumberAddress = (field: string) => {
-        if(/\D+/g.test(field)) {
+        if(field === null || field === undefined || field === "") {
+            return { result: false, message: "" };
+        } else if(/\D+/g.test(field)) {
             return { result: true, message: registerLanguage.input_info.error.contains_text };
         }
-        return { result: false, message: "" }
+        return { result: false, message: "" };
     }
 
     const checkIsNext = () => {
-        return false;
+        if(checkPatternName(firstName).result || checkPatternName(lastName).result || checkDob(dob).result || checkPhone(phone).result || checkUsername(username).result || checkEmail(email).result || checkPassword(password).result || checkRepeatPassword(repeatPassword).result || checkNumberAddress(address.number).result || !acceptEula) {
+            return false;
+        }
+        return true;
     }
 
     const addIconForce = () => {
@@ -183,7 +201,13 @@ function InputInfoComponent({ registerLanguage, handleNext, handleBack, activeSt
                     </Box>
                     <Box className={"d-flex flex-row align-items-start ms-5"}>
                         <Typography>{registerLanguage.input_info.address.city}:</Typography>
-                        <TextField variant={"standard"} className={"ms-3"} ex={{width: "150px"}} onChange={(e) => setAddress({...address, "city": e.target.value})} />
+                        <TextField variant={"standard"} className={"ms-3"} sx={{width: "150px"}} onChange={(e) => setAddress({...address, "city": e.target.value})} />
+                    </Box>
+                </Stack>
+                <Stack direction={"row"} className={"mt-3"}>
+                    <Box className={"d-flex flex-row align-items-center"}>
+                        <Checkbox checked={acceptEula} onChange={(e) => setAcceptEula(e.target.checked)}/>
+                        <Typography className={"ms-3"}>{registerLanguage.input_info.eula}</Typography>
                     </Box>
                 </Stack>
             </Stack>
