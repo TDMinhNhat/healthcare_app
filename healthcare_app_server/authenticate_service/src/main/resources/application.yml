@@ -14,6 +14,9 @@ spring:
     jpa:
       repositories:
         enabled: true
+    redis:
+      host: localhost
+      port: 6379
   kafka:
     consumer:
       auto-offset-reset: earliest
@@ -25,6 +28,8 @@ spring:
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  cache:
+    type: redis
 server:
   port: 9000
 eureka:

@@ -41,4 +41,13 @@ public class UserConsumers {
         newUser.setRole(user.getRole());
         ur.save(newUser);
     }
+
+    @KafkaListener(topics = "verify_user", id = "admin_verify_user")
+    public void verifyUser(String message) throws Exception {
+        log.info("Listen verify user message: {}", message);
+        String userId = ObjectParser.convertJsonToObject(message, String.class);
+        User user = ur.findById(Long.parseLong(userId)).orElseThrow(() -> new Exception("User not found"));
+        user.setEmailVerified(true);
+        ur.save(user);
+    }
 }

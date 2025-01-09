@@ -12,4 +12,9 @@ public class UserProducers {
     public NewTopic addUser() {
         return TopicBuilder.name("insert_user").build();
     }
+
+    @Bean
+    public NewTopic verifyUser() {
+        return TopicBuilder.name("verify_user").build();
+    }
 }
