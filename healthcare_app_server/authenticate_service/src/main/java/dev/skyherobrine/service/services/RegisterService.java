@@ -1,13 +1,17 @@
 package dev.skyherobrine.service.services;
 
 import dev.skyherobrine.service.dtos.UserRegisterDTO;
+import dev.skyherobrine.service.models.Address;
 import dev.skyherobrine.service.models.AuthenticateProvider;
 import dev.skyherobrine.service.models.User;
+import dev.skyherobrine.service.repositories.AddressRepository;
 import dev.skyherobrine.service.repositories.AuthenticateProviderRepository;
 import dev.skyherobrine.service.repositories.UserRepository;
 import dev.skyherobrine.service.repositories.UserRoleRepository;
 import dev.skyherobrine.service.utils.EncodeDecodeUtil;
+import dev.skyherobrine.service.utils.ObjectParser;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -16,14 +20,18 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class RegisterService {
 
-    private UserRepository ur;
-    private AuthenticateProviderRepository apr;
-    private UserRoleRepository urr;
+    private final AddressRepository ar;
+    private final UserRepository ur;
+    private final AuthenticateProviderRepository apr;
+    private final UserRoleRepository urr;
+    private final KafkaTemplate<String,String> kafkaTemplate;
 
-    public RegisterService(UserRepository ur, AuthenticateProviderRepository apr, UserRoleRepository urr) {
+    public RegisterService(UserRepository ur, AuthenticateProviderRepository apr, UserRoleRepository urr, AddressRepository ar, KafkaTemplate<String,String> kafkaTemplate) {
         this.ur = ur;
         this.apr = apr;
         this.urr = urr;
+        this.ar = ar;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     public User registerAccount(UserRegisterDTO userRegisterDTO) throws Exception {
@@ -40,7 +48,10 @@ public class RegisterService {
                 EncodeDecodeUtil.encode(userRegisterDTO.getPassword())
         );
         if(userRegisterDTO.getAddress() != null) {
-            user.setAddress(userRegisterDTO.getAddress());
+            Address address = userRegisterDTO.getAddress();
+            Address result = ar.save(address);
+            kafkaTemplate.send("insert_address", ObjectParser.convertObjectToJson(result));
+            user.setAddress(result);
         }
 
         user.setAuthedProvider(apr.findAuthenticateProviderByAuthenName("APPLICATION").get());
@@ -48,8 +59,7 @@ public class RegisterService {
 
         if(ur.findByUserId(user.getUserId()).isPresent()) return null;
 
-        User target = ur.save(user);
-        return target;
+        return ur.save(user);
     }
 
     private String generateUserId(UserRegisterDTO userRegisterDTO) {

@@ -6,6 +6,7 @@ import dev.skyherobrine.service.models.User;
 import dev.skyherobrine.service.repositories.UserRepository;
 import dev.skyherobrine.service.services.RegisterService;
 import dev.skyherobrine.service.utils.ObjectParser;
+import dev.skyherobrine.service.utils.SendMailUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -26,12 +27,14 @@ public class RegisterController {
     private final UserRepository ur;
     private final KafkaTemplate<String, String> template;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final SendMailUtil sendMailUtil;
 
-    public RegisterController(RegisterService rs, UserRepository ur, KafkaTemplate<String, String> template, RedisTemplate<String, Object> redisTemplate) {
+    public RegisterController(RegisterService rs, UserRepository ur, KafkaTemplate<String, String> template, RedisTemplate<String, Object> redisTemplate, SendMailUtil sendMailUtil) {
         this.rs = rs;
         this.ur = ur;
         this.template = template;
         this.redisTemplate = redisTemplate;
+        this.sendMailUtil = sendMailUtil;
     }
 
     @PostMapping
@@ -71,6 +74,7 @@ public class RegisterController {
             User user = ur.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
             int valueRandom = new Random().nextInt(111111111, 999999999);
+            sendMailUtil.sendSimpleMessage(email, "Active SolarHealth Account", "Your OTP message to active your account is: " + valueRandom);
             redisTemplate.opsForValue().set(user.getId() + "_otp", valueRandom, 120, TimeUnit.SECONDS);
 
             return ResponseEntity.ok(new Response(

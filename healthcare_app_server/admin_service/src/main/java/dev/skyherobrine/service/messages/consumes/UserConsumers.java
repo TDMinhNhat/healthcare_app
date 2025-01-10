@@ -1,6 +1,8 @@
 package dev.skyherobrine.service.messages.consumes;
 
+import dev.skyherobrine.service.models.mariadb.Address;
 import dev.skyherobrine.service.models.mariadb.User;
+import dev.skyherobrine.service.repositories.mariadb.AddressRepository;
 import dev.skyherobrine.service.repositories.mariadb.UserRepository;
 import dev.skyherobrine.service.utils.ObjectParser;
 import lombok.extern.slf4j.Slf4j;
@@ -11,10 +13,12 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class UserConsumers {
 
+    private final AddressRepository ar;
     private final UserRepository ur;
 
-    public UserConsumers(UserRepository ur) {
+    public UserConsumers(UserRepository ur, AddressRepository ar) {
         this.ur = ur;
+        this.ar = ar;
     }
 
     @KafkaListener(topics = "insert_user", id = "admin_insert_user")
@@ -33,13 +37,15 @@ public class UserConsumers {
                 user.getPassword()
         );
 
-        if(user.getAddress() != null) {
-            newUser.setAddress(user.getAddress());
-        }
-
         newUser.setAuthedProvider(user.getAuthedProvider());
         newUser.setRole(user.getRole());
-        ur.save(newUser);
+        User target = ur.save(newUser);
+
+        Address address = ar.findById(user.getAddress().getId()).orElse(null);
+        if (address != null) {
+            target.setAddress(address);
+            ur.save(target);
+        }
     }
 
     @KafkaListener(topics = "verify_user", id = "admin_verify_user")
