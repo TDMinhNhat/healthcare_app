@@ -52,6 +52,8 @@ public class RegisterController {
                 ));
             }
 
+            result.setEmail(EncodeDecodeUtil.decode(result.getEmail()));
+
             template.send("insert_user", ObjectParser.convertObjectToJson(result));
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
