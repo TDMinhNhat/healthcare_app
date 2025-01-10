@@ -8,6 +8,7 @@ import CompleteRegisterComponent from "../components/register/CompleteRegisterCo
 function RegisterPage({registerLanguage}: { registerLanguage: object }) {
 
     const steps = registerLanguage.tabs;
+    const [registerUserData, setRegisterUserData] = useState<object>();
     const [activeStep, setActiveStep] = useState(0);
     const [skipped, setSkipped] = useState(new Set<number>());
     const isStepSkipped = (step: number) => {
@@ -64,9 +65,9 @@ function RegisterPage({registerLanguage}: { registerLanguage: object }) {
                         })}
                     </Stepper>
                     <Box className={"mt-3"}></Box>
-                    {activeStep === 0 && <InputInfoComponent registerLanguage={registerLanguage} handleNext={handleNext} handleBack={handleBack} activeStep={activeStep} />}
-                    {activeStep === 1 && <EmailVerifyComponent registerLanguage={registerLanguage} handleNext={handleNext} handleBack={handleBack} activeStep={activeStep}/>}
-                    {activeStep === 2 && <FaceDetectComponent registerLanguage={registerLanguage} handleNext={handleNext} activeStep={activeStep} />}
+                    {activeStep === 0 && <InputInfoComponent registerLanguage={registerLanguage} handleNext={handleNext} handleBack={handleBack} activeStep={activeStep} setRegisterUserData={setRegisterUserData} />}
+                    {activeStep === 1 && <EmailVerifyComponent registerLanguage={registerLanguage} handleNext={handleNext} handleBack={handleBack} activeStep={activeStep} registerUserData={registerUserData}/>}
+                    {activeStep === 2 && <FaceDetectComponent registerLanguage={registerLanguage} handleNext={handleNext} activeStep={activeStep} registerUserData={registerUserData}/>}
                     {activeStep === 3 && <CompleteRegisterComponent registerLanguage={registerLanguage}/>}
                 </Box>
             </Box>

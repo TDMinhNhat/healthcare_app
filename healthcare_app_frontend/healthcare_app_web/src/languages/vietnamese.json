@@ -91,13 +91,13 @@
       }
     },
     "face_detect": {
-
     },
     "verify_email": {
-
+      "message_info": "Chúng tôi đã gửi một mã xác nhận đến email của bạn đã đăng ký. Nếu chưa nhận được vui lòng nhấn vào đây: ",
+      "label_input_otp": "Nhập mã xác nhận để kích hoạt tài khoản",
+      "button_resend_otp": "Gửi lại mã OTP"
     },
     "complete_register": {
-
     }
   }
 }

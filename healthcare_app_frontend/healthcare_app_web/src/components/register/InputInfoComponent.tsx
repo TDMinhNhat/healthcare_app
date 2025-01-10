@@ -7,16 +7,15 @@ import {
     RadioGroup,
     Radio,
     FormControlLabel,
-    Select,
     Checkbox
 } from "@mui/material";
 import {useState} from "react";
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import {Dayjs} from "dayjs";
-import countryList from 'react-select-country-list'
+import registerAccount from "../../controllers/register-account.ts"
 
-function InputInfoComponent({ registerLanguage, handleNext, handleBack, activeStep }:{ registerLanguage: object, handleNext: void, handleBack: void, activeStep: number }) {
+function InputInfoComponent({ registerLanguage, handleNext, handleBack, activeStep, setRegisterUserData }:{ registerLanguage: object, handleNext: void, handleBack: void, activeStep: number, setRegisterUserData: void }) {
 
     const [firstName, setFirstName] = useState<string>();
     const [lastName, setLastName] = useState<string>();
@@ -117,6 +116,15 @@ function InputInfoComponent({ registerLanguage, handleNext, handleBack, activeSt
 
     const addIconForce = () => {
         return <Typography variant={"p"} color={"error"}>*</Typography>
+    }
+
+    const solveRegisterAccount: void = async () => {
+        const result = await registerAccount.addUser(firstName, lastName, sex, phone, dob, username, email, password, address).then(response => response.data).catch(error => error);
+        console.log(result);
+        if(result.code === 200) {
+            setRegisterUserData(result.data);
+            handleNext();
+        }
     }
 
     return (
@@ -226,7 +234,7 @@ function InputInfoComponent({ registerLanguage, handleNext, handleBack, activeSt
 
                 <Box>
                     {activeStep !== 4 &&
-                        <Button color="success" disabled={!checkIsNext()} variant={"contained"} onClick={handleNext}>
+                        <Button color="success" disabled={!checkIsNext()} variant={"contained"} onClick={() => solveRegisterAccount()}>
                             {registerLanguage.button_next}
                         </Button>
                     }
