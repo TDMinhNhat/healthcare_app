@@ -5,6 +5,7 @@ import dev.skyherobrine.service.models.Response;
 import dev.skyherobrine.service.models.User;
 import dev.skyherobrine.service.repositories.UserRepository;
 import dev.skyherobrine.service.services.RegisterService;
+import dev.skyherobrine.service.utils.EncodeDecodeUtil;
 import dev.skyherobrine.service.utils.ObjectParser;
 import dev.skyherobrine.service.utils.SendMailUtil;
 import jakarta.persistence.EntityNotFoundException;
@@ -71,11 +72,13 @@ public class RegisterController {
     public ResponseEntity<Response> sendOTPActiveUser(@RequestParam("email") String email) {
         try {
             log.info("Call the send otp active user method");
-            User user = ur.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
+            User user = ur.findByEmail(EncodeDecodeUtil.encode(email)).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-            int valueRandom = new Random().nextInt(111111111, 999999999);
+            String valueRandom = Integer.valueOf(new Random().nextInt(111111111, 999999999)).toString();
             sendMailUtil.sendSimpleMessage(email, "Active SolarHealth Account", "Your OTP message to active your account is: " + valueRandom);
-            redisTemplate.opsForValue().set(user.getId() + "_otp", valueRandom, 120, TimeUnit.SECONDS);
+
+            String keyRedisOtp = user.getId().toString() + "_otp";
+            redisTemplate.opsForValue().set(keyRedisOtp, valueRandom, 120, TimeUnit.SECONDS);
 
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
@@ -106,7 +109,8 @@ public class RegisterController {
 
             User user = ur.findById(Long.parseLong(userId)).orElseThrow(() -> new EntityNotFoundException("The entity was not found"));
 
-            String result = (String) redisTemplate.opsForValue().get(user.getUserId() + "_otp");
+            String keyRedisOtp = user.getId().toString() + "_otp";
+            String result = (String) redisTemplate.opsForValue().get(keyRedisOtp);
             if(result == null) {
                 log.warn("The OTP message from the user {}", (user.getUserId() + " - " + user.getUsername()) + " was expired");
                 return ResponseEntity.ok(new Response(
@@ -119,9 +123,9 @@ public class RegisterController {
                 user.setEmailVerified(true);
                 ur.save(user);
 
-                template.send("verify_user", ObjectParser.convertObjectToJson(user));
+                template.send("verify_user", ObjectParser.convertObjectToJson(user.getId().toString()));
 
-                redisTemplate.delete(user.getUserId() + "_otp");
+                redisTemplate.delete(keyRedisOtp);
                 return ResponseEntity.ok(new Response(
                         HttpStatus.OK.value(),
                         "The user is activated successfully",

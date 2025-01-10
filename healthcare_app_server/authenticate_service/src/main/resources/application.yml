@@ -33,13 +33,14 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: skyherobrine
+    username: skyherobrine13092003@gmail.com
     password: tzkb bxhq yhlf hnnw
     properties:
       mail.smtp:
         auth: true
         starttls:
           enable: true
+    protocol: smtp
 server:
   port: 9000
 eureka:
