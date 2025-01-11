@@ -2,7 +2,7 @@ import {Box, Button, Stack, TextField, Typography} from "@mui/material";
 import { useState, useEffect } from "react";
 import registerAccount from "../../controllers/register-account.ts";
 
-function EmailVerifyComponent({ registerLanguage, handleBack, handleNext, activeStep, registerUserData }:{ registerLanguage: object, handleBack: void, handleNext: void, activeStep: number, registerUserData: object }) {
+function EmailVerifyComponent({ registerLanguage, handleNext, activeStep, registerUserData }:{ registerLanguage: object, handleNext: void, activeStep: number, registerUserData: object }) {
 
     const [inputOtpMessage, setInputOtpMessage] = useState<string>();
 
@@ -15,7 +15,9 @@ function EmailVerifyComponent({ registerLanguage, handleBack, handleNext, active
     }, [])
 
     const solveHandleNext = async () => {
-        const result = registerAccount.verifyOtpMessage(registerUserData.id, inputOtpMessage);
+        console.log(inputOtpMessage)
+        const result = await registerAccount.verifyOtpMessage(registerUserData.id, inputOtpMessage).then(response => response.data).catch(error => error);
+        console.log(result)
         if(result.code === 200) {
             handleNext();
         }

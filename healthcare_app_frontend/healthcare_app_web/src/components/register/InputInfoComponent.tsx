@@ -15,7 +15,7 @@ import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import {Dayjs} from "dayjs";
 import registerAccount from "../../controllers/register-account.ts"
 
-function InputInfoComponent({ registerLanguage, handleNext, handleBack, activeStep, setRegisterUserData }:{ registerLanguage: object, handleNext: void, handleBack: void, activeStep: number, setRegisterUserData: void }) {
+function InputInfoComponent({ registerLanguage, handleNext, activeStep, setRegisterUserData }:{ registerLanguage: object, handleNext: void, activeStep: number, setRegisterUserData: void }) {
 
     const [firstName, setFirstName] = useState<string>();
     const [lastName, setLastName] = useState<string>();
@@ -219,19 +219,7 @@ function InputInfoComponent({ registerLanguage, handleNext, handleBack, activeSt
                     </Box>
                 </Stack>
             </Stack>
-            <Stack direction={"row"} className={"d-flex justify-content-between mb-4"}>
-                {activeStep !== 4 &&
-                    <Button
-                        color="secondary"
-                        disabled={activeStep === 0}
-                        onClick={handleBack}
-                        variant={"contained"}
-                        sx={{mr: 1}}
-                    >
-                        <Typography>{registerLanguage.button_back}</Typography>
-                    </Button>
-                }
-
+            <Stack direction={"row"} className={"d-flex flex-row justify-content-end mb-4"}>
                 <Box>
                     {activeStep !== 4 &&
                         <Button color="success" disabled={!checkIsNext()} variant={"contained"} onClick={() => solveRegisterAccount()}>
