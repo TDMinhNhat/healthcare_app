@@ -8,16 +8,12 @@
   },
   "body": {
     "home": {
-
     },
     "our_services": {
-
     },
     "find_doctors": {
-
     },
     "reviews": {
-
     }
   },
   "footer": {
@@ -95,13 +91,13 @@
       }
     },
     "face_detect": {
-
     },
     "verify_email": {
-
+      "message_info": "We have sent a verification code to your email. Please check your email and enter the code below: ",
+      "label_input_otp": "Enter the verification code to activate your account",
+      "button_resend_otp": "Resend OTP"
     },
     "complete_register": {
-
     }
   }
 }
