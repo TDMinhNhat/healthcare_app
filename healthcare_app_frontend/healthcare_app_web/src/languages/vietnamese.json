@@ -118,7 +118,16 @@
           "image": "",
           "value": "appointments"
         }
-      ]
+      ],
+      "tab_dashboard_content": {
+
+      },
+      "tab_users_content": {
+
+      },
+      "tab_appointments_content": {
+
+      }
     }
   }
 }

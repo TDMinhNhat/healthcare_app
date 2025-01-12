@@ -1,5 +1,5 @@
 import {Box, Stack, Tab, Tabs, Typography} from "@mui/material";
-import "../styles/tab_admin.scss"
+import "../styles/tab-admin.scss"
 function TabAdminComponent({ tab, setTab, tabsLanguage }:{ tab: string, setTab: void, tabsLanguage: object }) {
 
     const list = tabsLanguage.list;
@@ -20,7 +20,7 @@ function TabAdminComponent({ tab, setTab, tabsLanguage }:{ tab: string, setTab: 
                     { list.map((item, index) => {
                         return (
                             <Box className={"d-flex flex-row justify-content-start align-items-center p-3 tab-item w-100"} onClick={() => setTab(item.value)}>
-                                <img src={""} width={"40px"} height={"40px"}/>
+                                <img src={item.image} width={"40px"} height={"40px"}/>
                                 <Typography className={"ms-2"}>{item.name}</Typography>
                             </Box>
                         )
