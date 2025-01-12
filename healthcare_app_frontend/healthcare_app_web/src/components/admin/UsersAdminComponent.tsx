@@ -15,6 +15,8 @@ import "../../styles/tab-users-admin.scss"
 
 function UsersAdminComponent({ tabUserContentLanguage }:{ tabUserContentLanguage: object }) {
 
+    
+
     const solveDeleteUser = (event, user: object) => {
 
     }
