@@ -15,7 +15,11 @@ import "../../styles/tab-users-admin.scss"
 
 function UsersAdminComponent({ tabUserContentLanguage }:{ tabUserContentLanguage: object }) {
 
-    const solveDeleteUser = (event, id) => {
+    const solveDeleteUser = (event, user: object) => {
+
+    }
+
+    const solveViewDetail = (event, user: object) => {
 
     }
 
@@ -76,7 +80,7 @@ function UsersAdminComponent({ tabUserContentLanguage }:{ tabUserContentLanguage
                             <TableCell align={"center"}>john.doe</TableCell>
                             <TableCell align={"center"}>
                                 <Button variant={"contained"} color={"error"} onClick={(event) => solveDeleteUser(event, 1)}>{tabUserContentLanguage.table.btn_delete}</Button>
-                                <Button variant={"contained"} color={"error"} onClick={(event) => solveDeleteUser(event, 1)}>{tabUserContentLanguage.table.btn_view_detail}</Button>
+                                <Button variant={"contained"} color={"error"} onClick={(event) => solveViewDetail(event, 1)}>{tabUserContentLanguage.table.btn_view_detail}</Button>
                             </TableCell>
                         </TableRow>
                     </TableBody>
