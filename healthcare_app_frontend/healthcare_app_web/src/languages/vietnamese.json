@@ -109,12 +109,22 @@
           "value": "dashboard"
         },
         {
-          "name": "Người Dùng",
+          "name": "Quản Lý Người Dùng",
           "image": "",
           "value": "users"
         },
         {
-          "name": "Lịch Hẹn",
+          "name": "Quản Lý Chức Vụ",
+          "image": "",
+          "value": "roles"
+        },
+        {
+          "name": "Quản Lý Đăng Nhập",
+          "image": "",
+          "value": "authenticate_providers"
+        },
+        {
+          "name": "Quản Lý Lịch Hẹn",
           "image": "",
           "value": "appointments"
         }
@@ -123,7 +133,23 @@
 
       },
       "tab_users_content": {
-
+        "total_users_system": "Số Người Dùng",
+        "total_users_patient": "Số Bệnh Nhân",
+        "total_users_doctor": "Số Bác Sĩ",
+        "total_users_manager": "Số Quản Lý",
+        "table": {
+          "id": "ID",
+          "userId": "ID Người Dùng",
+          "first_name": "Tên",
+          "last_name": "Họ",
+          "user_name": "Tên Tài Khoản",
+          "email": "Địa Chỉ Mail",
+          "phone": "Số Điện Thoại",
+          "role": "Chức Vụ",
+          "status": "Trạng Thái Tài Khoản",
+          "action": "Hành Động",
+          "btn_delete": "Xoá"
+        }
       },
       "tab_appointments_content": {
 
