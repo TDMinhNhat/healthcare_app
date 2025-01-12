@@ -99,5 +99,26 @@
     },
     "complete_register": {
     }
+  },
+  "admin": {
+    "tabs": {
+      "list": [
+        {
+          "name": "Thống Kê",
+          "image": "",
+          "value": "dashboard"
+        },
+        {
+          "name": "Người Dùng",
+          "image": "",
+          "value": "users"
+        },
+        {
+          "name": "Lịch Hẹn",
+          "image": "",
+          "value": "appointments"
+        }
+      ]
+    }
   }
 }
