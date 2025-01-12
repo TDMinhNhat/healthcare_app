@@ -76,6 +76,7 @@ function UsersAdminComponent({ tabUserContentLanguage }:{ tabUserContentLanguage
                             <TableCell align={"center"}>john.doe</TableCell>
                             <TableCell align={"center"}>
                                 <Button variant={"contained"} color={"error"} onClick={(event) => solveDeleteUser(event, 1)}>{tabUserContentLanguage.table.btn_delete}</Button>
+                                <Button variant={"contained"} color={"error"} onClick={(event) => solveDeleteUser(event, 1)}>{tabUserContentLanguage.table.btn_view_detail}</Button>
                             </TableCell>
                         </TableRow>
                     </TableBody>

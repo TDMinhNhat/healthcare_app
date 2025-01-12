@@ -148,7 +148,8 @@
           "role": "Chức Vụ",
           "status": "Trạng Thái Tài Khoản",
           "action": "Hành Động",
-          "btn_delete": "Xoá"
+          "btn_delete": "Xoá",
+          "btn_view_detail": "Xem Chi Tiết"
         }
       },
       "tab_appointments_content": {
