@@ -17,9 +17,9 @@ function TabAdminComponent({ tab, setTab, tabsLanguage }:{ tab: string, setTab: 
                 </Box>
 
                 <Stack className={"w-100 d-flex flex-column align-items-start"}>
-                    { list.map((item, index) => {
+                    { list.map((item: object, index: number) => {
                         return (
-                            <Box className={"d-flex flex-row justify-content-start align-items-center p-3 tab-item w-100"} onClick={() => setTab(item.value)}>
+                            <Box key={index} className={"d-flex flex-row justify-content-start align-items-center p-3 tab-item w-100"} onClick={() => setTab(item.value)}>
                                 <img src={item.image} width={"40px"} height={"40px"}/>
                                 <Typography className={"ms-2"}>{item.name}</Typography>
                             </Box>

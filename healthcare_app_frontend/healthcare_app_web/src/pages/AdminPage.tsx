@@ -4,6 +4,8 @@ import TabAdminComponent from "../components/TabAdminComponent.tsx"
 import DashboardAdminComponent from "../components/admin/DashboardAdminComponent.tsx";
 import UsersAdminComponent from "../components/admin/UsersAdminComponent.tsx";
 import AppointmentsAdminComponent from "../components/admin/AppointmentsAdminComponent.tsx";
+import UserRolesAdminComponent from "../components/admin/UserRolesAdminComponent.tsx";
+import AuthenticateProviderAdminComponent from "../components/admin/AuthenticateProviderAdminComponent.tsx";
 
 function AdminPage({adminLanguage}: { adminLanguage: object }) {
 
@@ -19,6 +21,8 @@ function AdminPage({adminLanguage}: { adminLanguage: object }) {
                 {tab === "users" &&
                     <UsersAdminComponent tabUserContentLanguage={adminLanguage.tabs.tab_users_content}/>}
                 {tab === "appointments" && <AppointmentsAdminComponent/>}
+                {tab === "roles" && <UserRolesAdminComponent/>}
+                {tab === "authenticate_providers" && <AuthenticateProviderAdminComponent />}
             </Box>
         </Stack>
     )
