@@ -1,10 +1,14 @@
 package dev.skyherobrine.service.controllers;
 
+import dev.skyherobrine.service.dtos.BookAppointmentDTO;
+import dev.skyherobrine.service.models.Appointment;
 import dev.skyherobrine.service.models.Response;
 import dev.skyherobrine.service.repositories.AppointmentRepository;
+import dev.skyherobrine.service.utils.ObjectParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,9 +17,11 @@ import org.springframework.web.bind.annotation.*;
 public class AppointmentController {
 
     private final AppointmentRepository ar;
+    private final KafkaTemplate<String,String> kafkaTemplate;
 
-    public AppointmentController(AppointmentRepository ar) {
+    public AppointmentController(AppointmentRepository ar, KafkaTemplate kafkaTemplate) {
         this.ar = ar;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @GetMapping("user/{id}")
@@ -67,6 +73,28 @@ public class AppointmentController {
                     HttpStatus.OK.value(),
                     "Get all appointments from user and doctor",
                     ar.findByUserIdAndDoctorId(Long.parseLong(userId), Long.parseLong(doctorId))
+            ));
+        } catch (Exception e) {
+            log.error("Server return an error: {}", e);
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Server return an error",
+                    e
+            ));
+        }
+    }
+
+    @PostMapping
+    public synchronized ResponseEntity<Response> bookAppointment(@RequestBody BookAppointmentDTO dto) {
+        try {
+            log.info("Call book the appointment method");
+            Appointment appointment = dto.toObject();
+            Appointment result = ar.save(appointment);
+            kafkaTemplate.send("insert_appointment", ObjectParser.convertObjectToJson(result));
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Book the appointment",
+                    result
             ));
         } catch (Exception e) {
             log.error("Server return an error: {}", e);
