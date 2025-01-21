@@ -3,9 +3,16 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "../screens/authentication/LoginScreen";
 import SignUpScreen from "../screens/authentication/SignUpScreen";
 import HomeScreen from "../screens/home/HomeScreen";
+import CameraDetect from "../components/CameraDetect";
 
 const PatientStack = createNativeStackNavigator({
   screens: {
+    detect: {
+      screen: CameraDetect,
+      options: {
+        headerShown: false,
+      },
+    },
     Login: {
       screen: LoginScreen,
       options: {
