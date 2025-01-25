@@ -7,6 +7,7 @@
   "login": "Login",
   "register": "Register",
   "logout": "Logout",
+  "confirm": "Confirm",
   "forgotPassword": "Forgot password",
   "resetPassword": "Reset password",
   "enterEmail": "Enter your email",
@@ -37,5 +38,6 @@
   "yourPasswordHasBeenChanged": "Your password has been changed",
   "goToHome": "Go to home",
   "dontHaveAnAccount": "Don't have an account?",
-  "biometricAuthentication": "Biometric authentication"
+  "biometricAuthentication": "Biometric authentication",
+  "enterEmailToSendOTP": "Enter your Email to send you OTP"
 }

@@ -31,6 +31,7 @@ export default function SignUpScreen() {
       }}
     >
       <HeaderAuthentication />
+
       <View
         style={{
           width: "100%",
@@ -54,11 +55,14 @@ export default function SignUpScreen() {
             marginTop: 10,
             marginBottom: 40,
             fontSize: 16,
+            textAlign: "center",
+            alignSelf: "center",
           }}
         >
           {i18n.t("enterYourInformationBelow")}
         </Text>
       </View>
+
       <Formik
         initialValues={{ name: "", email: "", password: "" }}
         validationSchema={Yup.object({
@@ -112,7 +116,7 @@ export default function SignUpScreen() {
                 {i18n.t("byCreateAnAccount")}
               </Text>
             </View>
-            <Button title="Login" onPress={() => handleSubmit()} />
+            <Button title={i18n.t("register")} onPress={() => handleSubmit()} />
           </View>
         )}
       </Formik>

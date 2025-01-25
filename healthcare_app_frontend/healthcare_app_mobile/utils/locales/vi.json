@@ -7,6 +7,7 @@
   "login": "Đăng nhập",
   "register": "Đăng ký",
   "logout": "Đăng xuất",
+  "confirm": "Xác nhận",
   "forgotPassword": "Quên mật khẩu",
   "resetPassword": "Đặt lại mật khẩu",
   "enterEmail": "Nhập email của bạn",
@@ -36,5 +37,6 @@
   "yourPasswordHasBeenChanged": "Mật khẩu của bạn đã được thay đổi",
   "goToHome": "Đi đến trang chủ",
   "dontHaveAnAccount": "Chưa có tài khoản?",
-  "biometricAuthentication": "Xác thực sinh trắc học"
+  "biometricAuthentication": "Xác thực sinh trắc học",
+  "enterEmailToSendOTP": "Nhập Email của bạn để gửi cho bạn OTP"
 }
