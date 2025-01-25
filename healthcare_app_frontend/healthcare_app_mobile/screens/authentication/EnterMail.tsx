@@ -14,7 +14,7 @@ import * as Yup from "yup";
 import TextInput from "../../components/TextInput";
 import Button from "../../components/Button";
 
-export default function ResetPass() {
+export default function EnterMail() {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const { colors } = useTheme();
   const [email, setEmail] = useState("");
@@ -76,24 +76,29 @@ export default function ResetPass() {
         </Text>
       </View>
       <Formik
-        initialValues={{ email: "" }}
+        initialValues={{ email: "a@gmail.com" }}
         validationSchema={Yup.object({
           email: Yup.string().email().required("Required"),
         })}
         onSubmit={(values) => {
           setEmail(values.email);
           //   resetPassword();
+          navigation.navigate("EnterOTP");
         }}
       >
         {({ handleSubmit }) => (
-          <View style={{ width: "100%", gap: 20, flex: 1 }}>
+          <View
+            style={{
+              width: "100%",
+              gap: 20,
+              flex: 1,
+            }}
+          >
             <TextInput
               name="email"
               label="Email"
               placeholder={i18n.t("enterEmail")}
             />
-            {/* Space container  */}
-            <View style={{ flex: 1 }} />
             <Button title={i18n.t("confirm")} onPress={() => handleSubmit()} />
           </View>
         )}

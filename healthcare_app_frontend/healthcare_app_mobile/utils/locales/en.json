@@ -34,10 +34,12 @@
   "signUp": "Sign up",
   "enterYourOTP": "Enter your OTP",
   "verify": "Verify",
-  "resendOTP": "Resend OTP in",
+  "resendOTPin": "Resend OTP in",
   "yourPasswordHasBeenChanged": "Your password has been changed",
   "goToHome": "Go to home",
   "dontHaveAnAccount": "Don't have an account?",
   "biometricAuthentication": "Biometric authentication",
-  "enterEmailToSendOTP": "Enter your Email to send you OTP"
+  "enterEmailToSendOTP": "Enter your Email to send you OTP",
+  "sending": "Sending",
+  "resendOTP": "Resend OTP"
 }

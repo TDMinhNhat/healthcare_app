@@ -3,7 +3,9 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "../screens/authentication/LoginScreen";
 import SignUpScreen from "../screens/authentication/SignUpScreen";
 import HomeScreen from "../screens/home/HomeScreen";
-import ResetPass from "../screens/authentication/ResetPass";
+import EnterOTP from "../screens/authentication/EnterOTP";
+import EnterMail from "../screens/authentication/EnterMail";
+import ResetPassword from "../screens/authentication/ResetPassword";
 
 const PatientStack = createNativeStackNavigator({
   screens: {
@@ -19,8 +21,20 @@ const PatientStack = createNativeStackNavigator({
         headerShown: false,
       },
     },
-    ResetPass: {
-      screen: ResetPass,
+    EnterMail: {
+      screen: EnterMail,
+      options: {
+        headerShown: false,
+      },
+    },
+    EnterOTP: {
+      screen: EnterOTP,
+      options: {
+        headerShown: false,
+      },
+    },
+    ResetPassword: {
+      screen: ResetPassword,
       options: {
         headerShown: false,
       },

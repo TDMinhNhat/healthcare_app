@@ -108,7 +108,7 @@ export default function LoginScreen() {
                 </Text>
               </View>
               <TouchableOpacity
-                onPress={() => navigation.navigate("ResetPass")}
+                onPress={() => navigation.navigate("EnterMail")}
               >
                 <Text style={{ color: colors.main.primary }}>
                   {i18n.t("forgotPassword")}
