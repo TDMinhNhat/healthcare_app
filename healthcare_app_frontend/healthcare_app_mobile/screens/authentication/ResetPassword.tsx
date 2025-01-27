@@ -12,10 +12,14 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 import Button from "../../components/Button";
 import TextInput from "../../components/TextInput";
+import { useState } from "react";
+import Modal from "../../components/Modal";
 
 export default function ResetPassword() {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const { colors } = useTheme();
+  const [showToast, setShowToast] = useState(false);
+
   return (
     <Layout
       style={{
@@ -51,13 +55,14 @@ export default function ResetPassword() {
             marginTop: 10,
             marginBottom: 40,
             fontSize: 16,
+            textAlign: "center",
           }}
         >
           {i18n.t("enterEmailToSendOTP")}
         </Text>
       </View>
       <Formik
-        initialValues={{ password: "", confirmPassword: "" }}
+        initialValues={{ password: "123456", confirmPassword: "123456" }}
         validationSchema={Yup.object({
           password: Yup.string()
             .min(6, "Password must be at least 6 characters")
@@ -68,7 +73,7 @@ export default function ResetPassword() {
         })}
         onSubmit={(values) => {
           console.log(values);
-          navigation.navigate("Home");
+          setShowToast(true);
         }}
       >
         {({ handleSubmit }) => (
@@ -87,6 +92,16 @@ export default function ResetPassword() {
           </View>
         )}
       </Formik>
+      {showToast && (
+        <Modal
+          visible={showToast}
+          type="success"
+          title={i18n.t("resetPasswordSuccess")}
+          message={i18n.t("yourPasswordHasBeenChanged")}
+          buttonText={i18n.t("goToHome")}
+          onClose={() => setShowToast(false)}
+        />
+      )}
     </Layout>
   );
 }
