@@ -7,6 +7,7 @@ import EnterOTP from "../screens/authentication/EnterOTP";
 import EnterMail from "../screens/authentication/EnterMail";
 import ResetPassword from "../screens/authentication/ResetPassword";
 import { HomeScreen } from "../screens/home/HomeScreen";
+import BottomTabNavigator from "./BottomTabNavigator";
 
 const PatientStack = createNativeStackNavigator({
   screens: {
@@ -40,8 +41,8 @@ const PatientStack = createNativeStackNavigator({
         headerShown: false,
       },
     },
-    Home: {
-      screen: HomeScreen,
+    Main: {
+      screen: BottomTabNavigator,
       options: {
         headerShown: false,
       },

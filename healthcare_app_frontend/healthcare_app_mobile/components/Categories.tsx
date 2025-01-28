@@ -83,7 +83,8 @@ export const Categories = () => {
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 16,
+    marginVertical: 8,
+    marginTop: 0,
   },
   header: {
     flexDirection: "row",
@@ -119,7 +120,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     marginTop: 12,
-    marginBottom: 8,
+    // marginBottom: 8,
   },
   priceContainer: {
     flexDirection: "row",

@@ -49,6 +49,7 @@ export const HeaderHome = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
+    paddingTop: 6,
     backgroundColor: "#fff",
   },
   locationContainer: {

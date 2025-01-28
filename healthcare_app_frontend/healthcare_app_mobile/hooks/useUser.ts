@@ -24,7 +24,7 @@ const useUserQuery = (id: string | undefined) => {
     if (userQuery.data?.data) {
       console.log(userQuery.data.data);
       dispatch(setUser(userQuery.data.data));
-      navigation.navigate("Home");
+      navigation.navigate("Main");
     } else if (userQuery.isError) {
       console.log(userQuery.error?.message);
     }
