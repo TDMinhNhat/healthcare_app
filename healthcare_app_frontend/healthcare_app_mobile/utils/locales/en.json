@@ -41,5 +41,9 @@
   "biometricAuthentication": "Biometric authentication",
   "enterEmailToSendOTP": "Enter your Email to send you OTP",
   "sending": "Sending",
-  "resendOTP": "Resend OTP"
+  "resendOTP": "Resend OTP",
+  "search": "Search...",
+  "lookingForSpecialistDoctor": "Looking for specialist doctor?",
+  "upLoadAPrescription": "Upload a Prescription and Tell Us what you Need. We do the Rest!",
+  "bookNow": "Book now"
 }
