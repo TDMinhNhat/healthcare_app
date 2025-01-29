@@ -16,6 +16,7 @@ import {
   useNavigation,
   useTheme,
 } from "@react-navigation/native";
+import Header from "../../components/Header";
 
 const specialties = [
   { id: "1", name: "All", isSelected: true },
@@ -87,7 +88,7 @@ export const TopDoctorsScreen = () => {
   };
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+      {/* <View style={styles.header}>
         <BackButton />
         <Text style={styles.title}>Top Doctors</Text>
         <View style={styles.headerRight}>
@@ -101,7 +102,14 @@ export const TopDoctorsScreen = () => {
             <Ionicons name="bookmark-outline" size={24} color="#000" />
           </TouchableOpacity>
         </View>
-      </View>
+      </View> */}
+      <Header
+        title="Top Doctors"
+        icon="search"
+        icon2="bookmark-outline"
+        onPress={() => {}} // Thêm handler cho chức năng search
+        onPress2={handleNavigateFavouriteDoctors} // Handler cho bookmark
+      />
 
       <ScrollView>
         <View style={styles.specialtiesWrapper}>

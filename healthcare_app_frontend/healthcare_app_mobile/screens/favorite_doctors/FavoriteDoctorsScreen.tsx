@@ -10,6 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { DoctorCard } from "../../components/DoctorCard";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "../../components/BackButton";
+import Header from "../../components/Header";
 
 const favouriteDoctors = [
   {
@@ -35,13 +36,7 @@ const favouriteDoctors = [
 export const FavouriteDoctorsScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <BackButton />
-        <Text style={styles.title}>Favourite Doctors</Text>
-        <TouchableOpacity style={styles.iconButton}>
-          <Ionicons name="search" size={24} color="#000" />
-        </TouchableOpacity>
-      </View>
+      <Header title="Favourite Doctors" />
 
       <ScrollView style={styles.doctorsContainer}>
         {favouriteDoctors.map((doctor) => (
@@ -56,20 +51,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "600",
-  },
-  iconButton: {
-    padding: 4,
   },
   doctorsContainer: {
     paddingHorizontal: 16,
