@@ -8,6 +8,8 @@ import EnterMail from "../screens/authentication/EnterMail";
 import ResetPassword from "../screens/authentication/ResetPassword";
 import { HomeScreen } from "../screens/home/HomeScreen";
 import BottomTabNavigator from "./BottomTabNavigator";
+import { TopDoctorsScreen } from "../screens/top_doctors/TopDoctorsScreen";
+import { FavouriteDoctorsScreen } from "../screens/favorite_doctors/FavoriteDoctorsScreen";
 
 const PatientStack = createNativeStackNavigator({
   screens: {
@@ -43,6 +45,18 @@ const PatientStack = createNativeStackNavigator({
     },
     Main: {
       screen: BottomTabNavigator,
+      options: {
+        headerShown: false,
+      },
+    },
+    TopDoctors: {
+      screen: TopDoctorsScreen,
+      options: {
+        headerShown: false,
+      },
+    },
+    FavoriteDoctors: {
+      screen: FavouriteDoctorsScreen,
       options: {
         headerShown: false,
       },
