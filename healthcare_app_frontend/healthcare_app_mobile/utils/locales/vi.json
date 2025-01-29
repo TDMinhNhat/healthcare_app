@@ -7,6 +7,7 @@
   "login": "Đăng nhập",
   "register": "Đăng ký",
   "logout": "Đăng xuất",
+  "confirm": "Xác nhận",
   "forgotPassword": "Quên mật khẩu",
   "resetPassword": "Đặt lại mật khẩu",
   "enterEmail": "Nhập email của bạn",
@@ -32,9 +33,16 @@
   "signUp": "Đăng ký",
   "enterYourOTP": "Nhập OTP của bạn",
   "verify": "Xác minh",
-  "resendOTP": "Gửi lại OTP trong",
+  "resendOTPin": "Gửi lại OTP trong",
   "yourPasswordHasBeenChanged": "Mật khẩu của bạn đã được thay đổi",
   "goToHome": "Đi đến trang chủ",
   "dontHaveAnAccount": "Chưa có tài khoản?",
-  "biometricAuthentication": "Xác thực sinh trắc học"
+  "biometricAuthentication": "Xác thực sinh trắc học",
+  "enterEmailToSendOTP": "Nhập Email của bạn để gửi cho bạn OTP",
+  "sending": "Đang gửi",
+  "resendOTP": "Gửi lại OTP",
+  "search": "Tìm kiếm...",
+  "lookingForSpecialistDoctor": "Đang tìm bác sĩ chuyên khoa?",
+  "upLoadAPrescription": "Tải lên đơn thuốc và cho chúng tôi biết bạn cần gì. Chúng tôi sẽ làm phần còn lại!",
+  "bookNow": "Đặt ngay"
 }

@@ -107,7 +107,9 @@ export default function LoginScreen() {
                   {i18n.t("rememberMe")}
                 </Text>
               </View>
-              <TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("EnterMail")}
+              >
                 <Text style={{ color: colors.main.primary }}>
                   {i18n.t("forgotPassword")}
                 </Text>
