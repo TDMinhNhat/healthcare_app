@@ -2,6 +2,11 @@ import React, { useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import {
+  NavigationProp,
+  ParamListBase,
+  useNavigation,
+} from "@react-navigation/native";
 interface DoctorCardProps {
   name: string;
   specialty: string;
@@ -22,14 +27,16 @@ export const DoctorCard = ({
   onBookmarkPress,
 }: DoctorCardProps) => {
   const [isMarked, setIsMarked] = useState(isBookmarked);
-
+  const navigation: NavigationProp<ParamListBase> = useNavigation();
   const handleBookmarkPress = () => {
     setIsMarked(!isMarked);
     onBookmarkPress?.(); // Call the function if it exists
   };
-
+  const handleNavigateDetails = () => {
+    navigation.navigate("DoctorDetail");
+  };
   return (
-    <TouchableOpacity style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={handleNavigateDetails}>
       <Image source={{ uri: imageUrl }} style={styles.image} />
       <View style={styles.content}>
         <View style={styles.header}>
