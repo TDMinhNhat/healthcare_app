@@ -1,11 +1,11 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { HomeScreen } from "../screens/home/HomeScreen";
-import ProfileScreen from "../screens/profile/ProfileScreen";
 import ChatScreen from "../screens/chat/ChatScreen";
 import AppointmentScreen from "../screens/appointment/AppointmentScreen";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet } from "react-native";
 import { theme } from "../theme/theme";
+import { ProfileScreen } from "../screens/profile/ProfileScreen";
 
 const Tab = createBottomTabNavigator();
 

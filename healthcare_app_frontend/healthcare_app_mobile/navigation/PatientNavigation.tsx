@@ -11,6 +11,7 @@ import BottomTabNavigator from "./BottomTabNavigator";
 import { TopDoctorsScreen } from "../screens/top_doctors/TopDoctorsScreen";
 import { FavouriteDoctorsScreen } from "../screens/favorite_doctors/FavoriteDoctorsScreen";
 import DoctorDetailsScreen from "../screens/doctor_detail/DoctorDetailScreen";
+import { ProfileScreen } from "../screens/profile/ProfileScreen";
 
 const PatientStack = createNativeStackNavigator({
   screens: {
