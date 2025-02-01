@@ -2,6 +2,7 @@ django
 djangorestframework
 django-cors-headers
 py-eureka-client
+asyncio
 mysqlclient
 pillow
 boto3
