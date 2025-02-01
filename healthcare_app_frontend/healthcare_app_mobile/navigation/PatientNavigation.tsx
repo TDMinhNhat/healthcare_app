@@ -12,6 +12,7 @@ import { TopDoctorsScreen } from "../screens/top_doctors/TopDoctorsScreen";
 import { FavouriteDoctorsScreen } from "../screens/favorite_doctors/FavoriteDoctorsScreen";
 import DoctorDetailsScreen from "../screens/doctor_detail/DoctorDetailScreen";
 import { ProfileScreen } from "../screens/profile/ProfileScreen";
+import { EditProfileScreen } from "../screens/profile/EditProfileScreen";
 
 const PatientStack = createNativeStackNavigator({
   screens: {
@@ -65,6 +66,12 @@ const PatientStack = createNativeStackNavigator({
     },
     DoctorDetail: {
       screen: DoctorDetailsScreen,
+      options: {
+        headerShown: false,
+      },
+    },
+    EditProfile: {
+      screen: EditProfileScreen,
       options: {
         headerShown: false,
       },

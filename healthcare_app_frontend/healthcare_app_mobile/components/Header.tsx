@@ -25,7 +25,7 @@ export default function Header({
       <Text style={[styles.title, { flex: 1, textAlign: "center" }]}>
         {title}
       </Text>
-      {hasIcons && (
+      {hasIcons ? (
         <View style={styles.iconsContainer}>
           {icon && (
             <TouchableOpacity style={styles.iconButton} onPress={onPress}>
@@ -41,6 +41,9 @@ export default function Header({
             </TouchableOpacity>
           )}
         </View>
+      ) : (
+        // thêm placeholderWidth để title nằm ở giữa màn hình khi không có icon
+        <View style={styles.placeholderWidth} />
       )}
     </View>
   );
@@ -64,5 +67,8 @@ const styles = StyleSheet.create({
   iconsContainer: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  placeholderWidth: {
+    width: 40, // Approximate width of BackButton
   },
 });
