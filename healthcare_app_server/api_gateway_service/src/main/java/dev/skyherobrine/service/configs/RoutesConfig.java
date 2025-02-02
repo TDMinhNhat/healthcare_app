@@ -13,7 +13,7 @@ public class RoutesConfig {
         return builder.routes()
                 .route("authenticate_service", r -> r.path("/authenticate/**").uri("http://localhost:9000"))
                 .route("admin_service", r -> r.path("/admin/**").uri("http://localhost:10000"))
-                .route("ai_service", r -> r.path("/ai/**").uri("http://localhost:8000"))
+                .route("image_detect_service", r -> r.path("/image_detect/**").uri("http://localhost:8000"))
                 .build();
     }
 }
