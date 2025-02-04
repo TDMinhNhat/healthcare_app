@@ -7,3 +7,4 @@ mysqlclient
 pillow
 boto3
 opencv-python
+numpy==1.26.4
