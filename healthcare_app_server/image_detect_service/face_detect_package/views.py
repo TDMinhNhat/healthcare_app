@@ -20,11 +20,11 @@ def send_image(request: HttpRequest) -> JsonResponse:
             serializer = ResponseSerializer(response)
             return JsonResponse(serializer.data, safe = False)
         elif result == 2:
-            response = Response(200, "New User", None)
+            response = Response(200, "New User", "New")
             serializer = ResponseSerializer(response)
             return JsonResponse(serializer.data, safe = False)
         else:
-            response = Response(200, "This user has existed in database", None)
+            response = Response(200, "This user has existed in database", "Exist")
             serializer = ResponseSerializer(response)
             return JsonResponse(serializer.data, safe = False)
 
