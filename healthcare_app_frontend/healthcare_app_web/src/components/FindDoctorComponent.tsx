@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {Container} from "@mui/material";
-import FaceDetect from "./find_doctor/FaceDetect.tsx";
-import GPSMap from "./find_doctor/GPSMap.tsx";
+import FaceDetectComponent from "./find_doctor/FaceDetectComponent.tsx";
+import GPSMapComponent from "./find_doctor/GPSMapComponent.tsx";
 
 function FindDoctorComponent({ language }:{ language: object }) {
 
@@ -9,8 +9,8 @@ function FindDoctorComponent({ language }:{ language: object }) {
 
     return (
         <Container>
-            { step === "authenticate" && <FaceDetect language={language} setStep={setStep} /> }
-            { step === "gps" && <GPSMap language={language} /> }
+            { step === "authenticate" && <FaceDetectComponent language={language} setStep={setStep} /> }
+            { step === "gps" && <GPSMapComponent language={language} /> }
         </Container>
     )
 }

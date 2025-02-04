@@ -3,7 +3,7 @@ import WebCam from "react-webcam";
 import {useEffect, useRef} from "react";
 import axios from "axios";
 
-export default function FaceDetect({ language, setStep }:{ language: object, setStep: void }) {
+export default function FaceDetectComponent({ language, setStep }:{ language: object, setStep: void }) {
 
     const webcamRef = useRef(null);
     const intervalId = useRef(10);
