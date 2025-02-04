@@ -6,7 +6,7 @@ class User(models.Model):
 
     id = models.BigAutoField(primary_key = True)
     user_id = models.CharField(max_length = 30, null = False, blank = False, unique = True)
-    face_encoding = models.TextField(null = False, blank = False)
+    face_detect_data = models.TextField(null = False, blank = False)
 
 class TypeDetect(models.Model):
     class Meta:
