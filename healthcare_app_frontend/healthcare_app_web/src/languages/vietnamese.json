@@ -12,6 +12,11 @@
     "our_services": {
     },
     "find_doctors": {
+      "face_detect": {
+        "title": "Quét Khuôn Mặt",
+        "description": "Quét khuôn mặt để có thể nhận diện bạn là ai trong hệ thống của chúng tôi từ đó chúng tôi có thể định vị các bác sĩ gần nhất để hỗ trợ bạn",
+        "notice": "Hãy đảm bảo rằng thiết bị của bạn cho phép ứng dụng chúng tôi truy cập vào camera để có thể nhận diện khuôn mặt của bạn"
+      }
     },
     "reviews": {
     }
