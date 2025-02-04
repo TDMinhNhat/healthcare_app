@@ -50,7 +50,12 @@ export default function FaceDetectComponent({ language, setStep }:{ language: ob
 
             if(result.code === 200) {
                 clearInterval(intervalId.current);
-                setStep("gps");
+
+                if(result.data === "New")
+                    setStep("info");
+                else
+                    setStep("gps");
+
             } else {
                 console.log(result);
             }
