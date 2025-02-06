@@ -47,6 +47,9 @@ public class User {
     @Column(length = 100, nullable = false) @NonNull
     private String password;
 
+    @Column(name = "image_detects", nullable = false) @NonNull
+    private String imageDetect;
+
     @Column(length = 500)
     private String avatar;
 

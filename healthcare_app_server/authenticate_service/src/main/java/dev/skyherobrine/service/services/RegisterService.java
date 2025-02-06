@@ -45,7 +45,8 @@ public class RegisterService {
                 userRegisterDTO.getPhone(),
                 userRegisterDTO.getUsername(),
                 EncodeDecodeUtil.encode(userRegisterDTO.getEmail()),
-                EncodeDecodeUtil.encode(userRegisterDTO.getPassword())
+                EncodeDecodeUtil.encode(userRegisterDTO.getPassword()),
+                userRegisterDTO.getImageDetect()
         );
         if(userRegisterDTO.getAddress() != null) {
             Address address = userRegisterDTO.getAddress();
