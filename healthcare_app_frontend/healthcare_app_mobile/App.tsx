@@ -17,6 +17,7 @@ export default function App() {
     return (
       <QueryClientProvider client={queryClient}>
         <Provider store={store}>
+          <StatusBar />
           <PatientNavigation theme={theme} />
         </Provider>
       </QueryClientProvider>
@@ -25,6 +26,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
+        <StatusBar />
         <DoctorNavigation theme={theme} />
       </Provider>
     </QueryClientProvider>

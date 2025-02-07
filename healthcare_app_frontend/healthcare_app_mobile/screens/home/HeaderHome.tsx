@@ -3,18 +3,29 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import NotificationBell from "../../components/NotficationBell";
 import SearchBox from "../../components/SearchBox";
+import {
+  NavigationProp,
+  ParamListBase,
+  useNavigation,
+  useTheme,
+} from "@react-navigation/native";
 
 export const HeaderHome = () => {
   const [value, onChangeText] = useState("");
+  const navigation: NavigationProp<ParamListBase> = useNavigation();
+
   const handleNotifications = () => {
-    // Navigate to notifications screen or toggle notifications panel
     console.log("Notifications clicked");
     // TODO: Add navigation to notifications screen
     // navigation.navigate('Notifications');
   };
 
-  const handleSearch = () => {
-    console.log("Search clicked");
+  const handleSearchPress = () => {
+    navigation.navigate("SearchScreen");
+  };
+
+  const handleSearchFocus = () => {
+    navigation.navigate("SearchScreen");
   };
 
   return (
@@ -39,8 +50,7 @@ export const HeaderHome = () => {
       <SearchBox
         value={value}
         onChangeText={onChangeText}
-        // placeholder="Search..."
-        onSubmit={() => handleSearch()}
+        onFocus={handleSearchPress}
       />
     </View>
   );

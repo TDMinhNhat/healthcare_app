@@ -13,9 +13,17 @@ import { FavouriteDoctorsScreen } from "../screens/favorite_doctors/FavoriteDoct
 import DoctorDetailsScreen from "../screens/doctor_detail/DoctorDetailScreen";
 import { ProfileScreen } from "../screens/profile/ProfileScreen";
 import { EditProfileScreen } from "../screens/profile/EditProfileScreen";
+import SearchScreen from "../screens/search/SearchSreen";
+import CameraDetect from "../components/CameraDetect";
 
 const PatientStack = createNativeStackNavigator({
   screens: {
+    CameraDetect: {
+      screen: CameraDetect,
+      options: {
+        headerShown: false,
+      },
+    },
     Login: {
       screen: LoginScreen,
       options: {
@@ -72,6 +80,12 @@ const PatientStack = createNativeStackNavigator({
     },
     EditProfile: {
       screen: EditProfileScreen,
+      options: {
+        headerShown: false,
+      },
+    },
+    SearchScreen: {
+      screen: SearchScreen,
       options: {
         headerShown: false,
       },

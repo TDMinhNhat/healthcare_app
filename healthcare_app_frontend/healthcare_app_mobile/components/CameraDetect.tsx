@@ -15,7 +15,6 @@ export default function CameraDetect() {
   const [isProcessing, setIsProcessing] = useState(false);
   const { hasPermission } = useCameraPermission();
 
-
   if (!hasPermission) {
     return (
       <View style={styles.center}>
@@ -36,7 +35,7 @@ export default function CameraDetect() {
       <Camera
         style={StyleSheet.absoluteFill}
         device={device}
-        isActive={true}// Điều chỉnh tần suất xử lý frame (fps)
+        isActive={true} // Điều chỉnh tần suất xử lý frame (fps)
       />
       {isProcessing && (
         <View style={styles.loading}>
