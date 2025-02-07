@@ -1,19 +1,43 @@
 // CameraDetect.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Text, View, StyleSheet, ActivityIndicator } from "react-native";
 import {
   Camera,
-  useCameraDevices,
   useCameraPermission,
-  Frame,
-  useFrameProcessor,
   useCameraDevice,
 } from "react-native-vision-camera";
-import { runOnJS } from "react-native-reanimated";
+import useDetect from "../hooks/useDetect";
+
 export default function CameraDetect() {
   const device = useCameraDevice("front");
-  const [isProcessing, setIsProcessing] = useState(false);
   const { hasPermission } = useCameraPermission();
+  const camera = useRef<Camera>(null);
+  const { detectFace, isPending } = useDetect();
+
+  const takePicture = async () => {
+    if (camera.current && !isPending) {
+      try {
+        const photo = await camera.current.takePhoto({
+          flash: "off",
+        });
+        console.log("Photo taken:", photo?.path);
+
+        // Use the hook to detect face
+        const result = await detectFace(photo.path);
+        console.log("Detection result:", result);
+      } catch (error) {
+        console.error("Failed to take or detect photo:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      takePicture();
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   if (!hasPermission) {
     return (
@@ -33,11 +57,14 @@ export default function CameraDetect() {
   return (
     <View style={styles.container}>
       <Camera
+        ref={camera}
         style={StyleSheet.absoluteFill}
         device={device}
-        isActive={true} // Điều chỉnh tần suất xử lý frame (fps)
+        isActive={true}
+        photo={true}
+        photoQualityBalance="speed"
       />
-      {isProcessing && (
+      {isPending && (
         <View style={styles.loading}>
           <ActivityIndicator size="large" color="#fff" />
           <Text style={styles.loadingText}>Detecting Faces...</Text>
