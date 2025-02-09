@@ -1,5 +1,4 @@
 import os.path
-
 import numpy as np
 import cv2
 from healthcare_app_server.models import *
@@ -17,7 +16,7 @@ class FaceDetectService:
     def get_net(self):
         return self.net
 
-    def detect_face(self) -> int:
+    def detect_face(self) -> str:
         image_array = np.asarray(bytearray(self.face_image), dtype=np.uint8)
         image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
 
@@ -34,24 +33,24 @@ class FaceDetectService:
 
         for i in range(detections.shape[2]):
             confidence = detections[0, 0, i, 2]
-            if confidence >= 0.9:
+            if confidence >= 0.8:
                 box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
                 (x1, y1, x2, y2) = box.astype("int")
                 face_data.append(f"{x1},{y1},{x2},{y2}")
 
         if len(face_data) == 0:
             print("No face detected")
-            return 0
+            return "No Detect"
         elif len(face_data) > 1:
             print("Must be 1 face in image")
-            return -1
+            return "Multiple Face"
 
         face_data_str = face_data[0]
 
         if self.__check_user__(face_data_str):
-            return 3
+            return "Exist User"
         else:
-            return 2
+            return face_data_str
 
     def __check_user__(self, face_data_str: str):
         # Get all users

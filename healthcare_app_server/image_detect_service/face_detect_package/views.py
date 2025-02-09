@@ -11,20 +11,20 @@ def send_image(request: HttpRequest) -> JsonResponse:
         image = get_image.read()
         result = FaceDetectService(image).detect_face()
 
-        if result == 0:
+        if result == "No Detect":
             response = Response(400, "Can't detect the face", None)
             serializer = ResponseSerializer(response)
             return JsonResponse(serializer.data, safe = False)
-        elif result == -1:
+        elif result == "Multiple Face":
             response = Response(400, "Must be 1 face in image", None)
             serializer = ResponseSerializer(response)
             return JsonResponse(serializer.data, safe = False)
-        elif result == 2:
-            response = Response(200, "New User", "New")
+        elif result == "Exist User":
+            response = Response(200, "This user has existed in database", "Exist")
             serializer = ResponseSerializer(response)
             return JsonResponse(serializer.data, safe = False)
         else:
-            response = Response(200, "This user has existed in database", "Exist")
+            response = Response(200, "New User", result)
             serializer = ResponseSerializer(response)
             return JsonResponse(serializer.data, safe = False)
 
