@@ -12,6 +12,39 @@
     "our_services": {
     },
     "find_doctors": {
+      "face_detect": {
+        "title": "Face Detection",
+        "description": "Scan your face to identify who you are in our system so that we can locate the nearest doctors to assist you",
+        "notice": "Make sure your device allows our application to access the camera to be able to recognize your face"
+      },
+      "input_info": {
+        "title": "Input Personal Information",
+        "subtitle": "Please fill in your personal information to be able to use our services, some information may be provided to the doctor for support.",
+        "first_name": "First Name",
+        "last_name": "Last Name",
+        "sex": {
+          "title": "Se",
+          "male": "Male",
+          "female": "Female"
+        },
+        "dob": "Date Of Birth",
+        "phone": "Phone Number",
+        "username": "Username",
+        "email": "Email",
+        "password": "Password",
+        "repeat_password": "Repeat Password",
+        "address": {
+          "title": "Address",
+          "number": "House Number",
+          "street": "Street",
+          "ward": "Ward",
+          "district": "District",
+          "city": "City",
+          "country": "Country"
+        },
+        "btn_clear": "Clear",
+        "btn_submit": "Sign Up"
+      }
     },
     "reviews": {
     }

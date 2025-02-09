@@ -16,6 +16,34 @@
         "title": "Quét Khuôn Mặt",
         "description": "Quét khuôn mặt để có thể nhận diện bạn là ai trong hệ thống của chúng tôi từ đó chúng tôi có thể định vị các bác sĩ gần nhất để hỗ trợ bạn",
         "notice": "Hãy đảm bảo rằng thiết bị của bạn cho phép ứng dụng chúng tôi truy cập vào camera để có thể nhận diện khuôn mặt của bạn"
+      },
+      "input_info": {
+        "title": "Điền Thông Tin Cá Nhân",
+        "subtitle": "Vui lòng điền các thông tin cá nhân của bạn để có thể sử dụng dịch vụ của chúng tôi, một số thông tin có thể cung cấp cho bác sĩ để hỗ trợ.",
+        "first_name": "Tên",
+        "last_name": "Họ",
+        "sex": {
+          "title": "Giới Tính",
+          "male": "Nam",
+          "female": "Nữ"
+        },
+        "dob": "Ngày Sinh",
+        "phone": "Số Điện Thoại",
+        "username": "Tên Tài Khoản",
+        "email": "Địa Chỉ Email",
+        "password": "Mật Khẩu",
+        "repeat_password": "Nhập Lại Mật Khẩu",
+        "address": {
+          "title": "Địa Chỉ",
+          "number": "Số Nhà",
+          "street": "Đường",
+          "ward": "Phường",
+          "district": "Quận",
+          "city": "Thành Phố",
+          "country": "Quốc Gia"
+        },
+        "btn_clear": "Xoá Trắng",
+        "btn_submit": "Đăng Ký"
       }
     },
     "reviews": {
