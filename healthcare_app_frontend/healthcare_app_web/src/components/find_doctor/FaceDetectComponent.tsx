@@ -3,14 +3,14 @@ import WebCam from "react-webcam";
 import {useEffect, useRef} from "react";
 import axios from "axios";
 
-export default function FaceDetectComponent({ language, setStep }:{ language: object, setStep: void }) {
+export default function FaceDetectComponent({language, setStep}: { language: object, setStep: void }) {
 
+    let intervalId = useRef(null)
     const webcamRef = useRef(null);
-    const intervalId = useRef(10);
 
     const checkCameraPermission = async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const stream = await navigator.mediaDevices.getUserMedia({video: true});
             stream.getTracks().forEach(track => track.stop());
             return true;
         } catch (error) {
@@ -21,9 +21,8 @@ export default function FaceDetectComponent({ language, setStep }:{ language: ob
 
     useEffect(() => {
         intervalId.current = setInterval(async () => {
-
             const hasPermission = await checkCameraPermission();
-            if(!hasPermission) {
+            if (!hasPermission) {
                 console.log("Camera is required for authentication");
                 return;
             }
@@ -37,30 +36,44 @@ export default function FaceDetectComponent({ language, setStep }:{ language: ob
                 byteArray[i] = byteCharacters.charCodeAt(i);
             }
 
-            const blob = new Blob([byteArray], { type: "image/jpeg" });
+            const blob = new Blob([byteArray], {type: "image/jpeg"});
 
             const formData = new FormData();
             formData.append("file", blob, "image.jpg");
 
-            const result = await axios.post("http://localhost:8000/image_detect/face/auth", formData,{
+            const result = await axios.post("http://localhost:8081/image_detect/face/auth", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data"
                 }
             }).then(response => response.data).catch(error => console.log("Server return an error: ", error))
-
-            if(result.code === 200) {
-                clearInterval(intervalId.current);
-
-                if(result.data === "New")
-                    setStep("info");
-                else
+            if (result.code === 200) {
+                if (result.data === "Exist") {
+                    stopCamera();
                     setStep("gps");
-
+                } else {
+                    sessionStorage.setItem("face_detect", result.data);
+                    setStep("info");
+                }
             } else {
                 console.log(result);
             }
         }, 2000)
+
+        return () => {
+            clearInterval(intervalId.current)
+        }
+
     }, [])
+
+    const stopCamera = () => {
+        if (webcamRef.current && webcamRef.current.video) {
+            const stream = webcamRef.current.video.srcObject;
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                webcamRef.current.video.srcObject = null;
+            }
+        }
+    }
 
     return (
         <Container>
