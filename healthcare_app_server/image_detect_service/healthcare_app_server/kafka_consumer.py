@@ -60,7 +60,7 @@ class KafkaConsumer(threading.Thread):
 
             user = User(
                 user_id = data_json['userId'],
-                face_detect_data = data_json['imageDetect']
+                face_detect_data = data_json['faceImageEncode']
             )
 
             user.save()

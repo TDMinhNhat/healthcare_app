@@ -19,6 +19,10 @@ def send_image(request: HttpRequest) -> JsonResponse:
             response = Response(400, "Must be 1 face in image", None)
             serializer = ResponseSerializer(response)
             return JsonResponse(serializer.data, safe = False)
+        elif result == "Can't detect":
+            response = Response(400, "Can't detect who is this", None)
+            serializer = ResponseSerializer(response)
+            return JsonResponse(serializer.data, safe = False)
         elif result == "Exist User":
             response = Response(200, "This user has existed in database", "Exist")
             serializer = ResponseSerializer(response)

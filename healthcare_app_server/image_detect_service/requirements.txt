@@ -7,4 +7,6 @@ mysqlclient
 pillow
 boto3
 opencv-python
+scipy
 numpy==1.26.4
+confluent-kafka
