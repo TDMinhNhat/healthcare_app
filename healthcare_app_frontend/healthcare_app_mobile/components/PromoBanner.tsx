@@ -29,6 +29,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     margin: 16,
+    marginTop: 3,
     flexDirection: "row",
   },
   content: {

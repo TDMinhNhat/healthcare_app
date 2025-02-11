@@ -1,13 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
-
+import Ionicons from "@expo/vector-icons/Ionicons";
+import {
+  NavigationProp,
+  ParamListBase,
+  useNavigation,
+} from "@react-navigation/native";
 interface DoctorCardProps {
   name: string;
   specialty: string;
   qualifications: string;
   rating: number;
   imageUrl: string;
+  isBookmarked?: boolean;
+  onBookmarkPress?: () => void;
 }
 
 export const DoctorCard = ({
@@ -16,9 +23,23 @@ export const DoctorCard = ({
   qualifications,
   rating,
   imageUrl,
+  isBookmarked = false,
+  onBookmarkPress,
 }: DoctorCardProps) => {
+  const [isMarked, setIsMarked] = useState(isBookmarked);
+  const navigation: NavigationProp<ParamListBase> = useNavigation();
+  const handleBookmarkPress = () => {
+    setIsMarked(!isMarked);
+    onBookmarkPress?.(); // Call the function if it exists
+  };
+  const handleNavigateDetails = () => {
+    navigation.navigate("DoctorDetail");
+  };
+  const handleNavigateMap = () => {
+    navigation.navigate("Map");
+  };
   return (
-    <TouchableOpacity style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={handleNavigateDetails}>
       <Image source={{ uri: imageUrl }} style={styles.image} />
       <View style={styles.content}>
         <View style={styles.header}>
@@ -27,9 +48,16 @@ export const DoctorCard = ({
             <Text style={styles.specialty}>{specialty}</Text>
             <Text style={styles.qualifications}>{qualifications}</Text>
           </View>
-          <View style={styles.bookmark}>
-            <AntDesign name="book" size={20} color="#5B21B6" />
-          </View>
+          <TouchableOpacity
+            style={styles.bookmark}
+            onPress={handleBookmarkPress}
+          >
+            <Ionicons
+              name={isMarked ? "bookmark" : "bookmark-outline"}
+              size={24}
+              color="#5B21B6"
+            />
+          </TouchableOpacity>
         </View>
         <View style={styles.footer}>
           <View style={styles.rating}>
@@ -40,7 +68,10 @@ export const DoctorCard = ({
             <AntDesign name="enviromento" size={16} color="#666" />
             <Text style={styles.locationText}>2.5 km</Text>
           </View>
-          <TouchableOpacity style={styles.mapButton}>
+          <TouchableOpacity
+            style={styles.mapButton}
+            onPress={handleNavigateMap}
+          >
             <AntDesign name="enviroment" size={16} color="#5B21B6" />
             <Text style={styles.mapButtonText}>Map</Text>
           </TouchableOpacity>
@@ -53,27 +84,30 @@ export const DoctorCard = ({
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    padding: 12,
+    // padding: 12,
     backgroundColor: "#fff",
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    // borderRadius: 12,
+    marginBottom: 14,
+    // shadowColor: "#000",
+    // shadowOffset: {
+    //   width: 0,
+    //   height: 2,
+    // },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 3,
+    // elevation: 3,
   },
   image: {
-    width: 100,
-    height: 110,
+    width: 108,
+    height: 132,
     borderRadius: 10,
     marginRight: 12,
   },
   content: {
     flex: 1,
+    padding: 12,
+    backgroundColor: "#faf3ed",
+    borderRadius: 12,
   },
   header: {
     flexDirection: "row",
@@ -81,12 +115,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   name: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
     color: "#111",
   },
   specialty: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#666",
     marginTop: 2,
   },

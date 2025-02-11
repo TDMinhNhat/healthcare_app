@@ -1,6 +1,11 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { DoctorCard } from "./DoctorCard";
+import {
+  NavigationProp,
+  ParamListBase,
+  useNavigation,
+} from "@react-navigation/native";
 
 const doctors = [
   {
@@ -22,11 +27,16 @@ const doctors = [
 ];
 
 export const TopDoctors = () => {
+  const navigation: NavigationProp<ParamListBase> = useNavigation();
+
+  const handleNavigate = () => {
+    navigation.navigate("TopDoctors");
+  };
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Top Doctors</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleNavigate}>
           <Text style={styles.seeAll}>See All</Text>
         </TouchableOpacity>
       </View>

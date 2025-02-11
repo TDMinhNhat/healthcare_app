@@ -7,6 +7,7 @@ import { DoctorNavigation } from "./navigation/DoctorNavigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const queryClient = new QueryClient();
 
@@ -15,16 +16,20 @@ export default function App() {
 
   if (userRole === "patient") {
     return (
-      <QueryClientProvider client={queryClient}>
-        <Provider store={store}>
-          <PatientNavigation theme={theme} />
-        </Provider>
-      </QueryClientProvider>
+      <SafeAreaProvider>
+        <QueryClientProvider client={queryClient}>
+          <Provider store={store}>
+            <StatusBar style="dark" />
+            <PatientNavigation theme={theme} />
+          </Provider>
+        </QueryClientProvider>
+      </SafeAreaProvider>
     );
   }
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
+        <StatusBar />
         <DoctorNavigation theme={theme} />
       </Provider>
     </QueryClientProvider>

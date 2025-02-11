@@ -8,43 +8,11 @@ import {
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 
-type IconName = React.ComponentProps<typeof AntDesign>["name"];
+interface CategoriesProps {
+  arrayObject: any[]; // Replace 'any[]' with the actual type of your array
+}
 
-const categories: {
-  id: string;
-  title: string;
-  price: number;
-  originalPrice: number;
-  color: string;
-  icon: IconName;
-}[] = [
-  {
-    id: "1",
-    title: "Video Consultation Chat",
-    price: 13.77,
-    originalPrice: 14.97,
-    color: "#57315a",
-    icon: "videocamera",
-  },
-  {
-    id: "2",
-    title: "Clinic Visit Appointment",
-    price: 11.77,
-    originalPrice: 13.97,
-    color: "#F87171",
-    icon: "calendar",
-  },
-  {
-    id: "3",
-    title: "Magnetic Resonance",
-    price: 15.77,
-    originalPrice: 16.97,
-    color: "#F59E0B",
-    icon: "scan1",
-  },
-];
-
-export const Categories = () => {
+export const Categories = ({ arrayObject }: CategoriesProps) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -55,7 +23,7 @@ export const Categories = () => {
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {categories.map((category) => (
+        {arrayObject.map((category) => (
           <TouchableOpacity
             key={category.id}
             style={[styles.card, { backgroundColor: category.color }]}
@@ -83,7 +51,8 @@ export const Categories = () => {
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 16,
+    marginVertical: 8,
+    marginTop: 0,
   },
   header: {
     flexDirection: "row",
@@ -119,7 +88,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     marginTop: 12,
-    marginBottom: 8,
+    // marginBottom: 8,
   },
   priceContainer: {
     flexDirection: "row",

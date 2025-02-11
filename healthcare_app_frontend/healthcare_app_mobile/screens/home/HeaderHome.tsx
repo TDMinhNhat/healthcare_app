@@ -3,18 +3,29 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import NotificationBell from "../../components/NotficationBell";
 import SearchBox from "../../components/SearchBox";
+import {
+  NavigationProp,
+  ParamListBase,
+  useNavigation,
+  useTheme,
+} from "@react-navigation/native";
 
 export const HeaderHome = () => {
   const [value, onChangeText] = useState("");
+  const navigation: NavigationProp<ParamListBase> = useNavigation();
+
   const handleNotifications = () => {
-    // Navigate to notifications screen or toggle notifications panel
     console.log("Notifications clicked");
     // TODO: Add navigation to notifications screen
     // navigation.navigate('Notifications');
   };
 
-  const handleSearch = () => {
-    console.log("Search clicked");
+  const handleSearchPress = () => {
+    navigation.navigate("SearchScreen");
+  };
+
+  const handleNavigateMap = () => {
+    navigation.navigate("Map");
   };
 
   return (
@@ -27,7 +38,10 @@ export const HeaderHome = () => {
           marginBottom: 12,
         }}
       >
-        <TouchableOpacity style={styles.locationContainer}>
+        <TouchableOpacity
+          style={styles.locationContainer}
+          onPress={handleNavigateMap}
+        >
           <AntDesign name="enviroment" size={20} color="#000" />
           <Text style={styles.locationText}>Seattle, USA</Text>
         </TouchableOpacity>
@@ -39,8 +53,7 @@ export const HeaderHome = () => {
       <SearchBox
         value={value}
         onChangeText={onChangeText}
-        // placeholder="Search..."
-        onSubmit={() => handleSearch()}
+        onFocus={handleSearchPress}
       />
     </View>
   );
@@ -49,6 +62,7 @@ export const HeaderHome = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
+    paddingTop: 6,
     backgroundColor: "#fff",
   },
   locationContainer: {
