@@ -15,106 +15,109 @@ import {
 } from "@react-navigation/native";
 import BackButton from "../../components/BackButton";
 import Button from "../../components/Button";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const DoctorDetailsScreen = () => {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <BackButton />
-      </View>
-
-      <View style={styles.profileSection}>
-        <Image
-          source={{
-            uri: "https://randomuser.me/api/portraits/women/35.jpg",
-          }}
-          style={styles.profileImage}
-        />
-        <Text style={styles.doctorName}>Dr. Uroos Fatima</Text>
-        <Text style={styles.doctorSpecialty}>Psychiatrist</Text>
-      </View>
-
-      <View style={styles.statsContainer}>
-        <View style={styles.statItem}>
-          <View style={[styles.statIcon, { backgroundColor: "#E6F2FF" }]}>
-            <Ionicons name="people" size={28} color="#4A90E2" />
-          </View>
-          <Text style={styles.statValue}>1000+</Text>
-          <Text style={styles.statLabel}>Patients</Text>
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <BackButton />
         </View>
-        <View style={styles.statItem}>
-          <View style={[styles.statIcon, { backgroundColor: "#FFF0F5" }]}>
-            <Ionicons name="time" size={28} color="#FF69B4" />
-          </View>
-          <Text style={styles.statValue}>10 Yrs</Text>
-          <Text style={styles.statLabel}>Experience</Text>
+
+        <View style={styles.profileSection}>
+          <Image
+            source={{
+              uri: "https://randomuser.me/api/portraits/women/35.jpg",
+            }}
+            style={styles.profileImage}
+          />
+          <Text style={styles.doctorName}>Dr. Uroos Fatima</Text>
+          <Text style={styles.doctorSpecialty}>Psychiatrist</Text>
         </View>
-        <View style={styles.statItem}>
-          <View style={[styles.statIcon, { backgroundColor: "#FFFACD" }]}>
-            <Ionicons name="star" size={28} color="#FFD700" />
+
+        <View style={styles.statsContainer}>
+          <View style={styles.statItem}>
+            <View style={[styles.statIcon, { backgroundColor: "#E6F2FF" }]}>
+              <Ionicons name="people" size={28} color="#4A90E2" />
+            </View>
+            <Text style={styles.statValue}>1000+</Text>
+            <Text style={styles.statLabel}>Patients</Text>
           </View>
-          <Text style={styles.statValue}>4.5</Text>
-          <Text style={styles.statLabel}>Ratings</Text>
+          <View style={styles.statItem}>
+            <View style={[styles.statIcon, { backgroundColor: "#FFF0F5" }]}>
+              <Ionicons name="time" size={28} color="#FF69B4" />
+            </View>
+            <Text style={styles.statValue}>10 Yrs</Text>
+            <Text style={styles.statLabel}>Experience</Text>
+          </View>
+          <View style={styles.statItem}>
+            <View style={[styles.statIcon, { backgroundColor: "#FFFACD" }]}>
+              <Ionicons name="star" size={28} color="#FFD700" />
+            </View>
+            <Text style={styles.statValue}>4.5</Text>
+            <Text style={styles.statLabel}>Ratings</Text>
+          </View>
         </View>
-      </View>
 
-      <View style={styles.consultationOptions}>
-        <ConsultationOption
-          icon="videocam"
-          title="Video Consultation"
-          subtitle="Chat"
-          price="$23.77"
-          color="#4A90E2"
-        />
-        <ConsultationOption
-          icon="call"
-          title="Audio Consultation"
-          subtitle="Chat"
-          price="$23.77"
-          color="#FF69B4"
-        />
-        <ConsultationOption
-          icon="chatbubble"
-          title="Message"
-          subtitle="Online"
-          price="Free"
-          color="#8A2BE2"
-        />
-      </View>
+        <View style={styles.consultationOptions}>
+          <ConsultationOption
+            icon="videocam"
+            title="Video Consultation"
+            subtitle="Chat"
+            price="$23.77"
+            color="#4A90E2"
+          />
+          <ConsultationOption
+            icon="call"
+            title="Audio Consultation"
+            subtitle="Chat"
+            price="$23.77"
+            color="#FF69B4"
+          />
+          <ConsultationOption
+            icon="chatbubble"
+            title="Message"
+            subtitle="Online"
+            price="Free"
+            color="#8A2BE2"
+          />
+        </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>About Doctor</Text>
-        <Text style={styles.sectionContent}>
-          Dr. Bellamy Nicholas is a top specialist London Bridge Hospital at
-          London. He has achieved several awards and recognition
-        </Text>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Working time</Text>
-        <View style={styles.workingTime}>
-          <Ionicons name="time-outline" size={20} color="#666" />
-          <Text style={styles.workingTimeText}>
-            Mon - Sat (08:30 AM - 09:00 PM)
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>About Doctor</Text>
+          <Text style={styles.sectionContent}>
+            Dr. Bellamy Nicholas is a top specialist London Bridge Hospital at
+            London. He has achieved several awards and recognition
           </Text>
         </View>
-      </View>
 
-      <View style={styles.reviewsSection}>
-        <Text style={styles.sectionTitle}>Reviews</Text>
-        <TouchableOpacity>
-          <Text style={styles.seeAllText}>See all</Text>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Working time</Text>
+          <View style={styles.workingTime}>
+            <Ionicons name="time-outline" size={20} color="#666" />
+            <Text style={styles.workingTimeText}>
+              Mon - Sat (08:30 AM - 09:00 PM)
+            </Text>
+          </View>
+        </View>
 
-      <Button
-        title="Set Appointment"
-        onPress={() => {}}
-        style={styles.setApoinmentButton}
-      />
-    </ScrollView>
+        <View style={styles.reviewsSection}>
+          <Text style={styles.sectionTitle}>Reviews</Text>
+          <TouchableOpacity>
+            <Text style={styles.seeAllText}>See all</Text>
+          </TouchableOpacity>
+        </View>
+
+        <Button
+          title="Set Appointment"
+          onPress={() => {}}
+          style={styles.setApoinmentButton}
+        />
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

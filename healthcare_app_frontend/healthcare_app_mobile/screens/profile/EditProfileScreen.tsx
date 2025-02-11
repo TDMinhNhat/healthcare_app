@@ -8,6 +8,7 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 import Header from "../../components/Header";
 import { Picker } from "@react-native-picker/picker";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export const EditProfileScreen = () => {
   const navigation = useNavigation();
@@ -34,7 +35,7 @@ export const EditProfileScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Header title="Edit Profile" />
 
       <Formik
@@ -124,7 +125,7 @@ export const EditProfileScreen = () => {
           </>
         )}
       </Formik>
-    </View>
+    </SafeAreaView>
   );
 };
 

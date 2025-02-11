@@ -35,6 +35,9 @@ export const DoctorCard = ({
   const handleNavigateDetails = () => {
     navigation.navigate("DoctorDetail");
   };
+  const handleNavigateMap = () => {
+    navigation.navigate("Map");
+  };
   return (
     <TouchableOpacity style={styles.container} onPress={handleNavigateDetails}>
       <Image source={{ uri: imageUrl }} style={styles.image} />
@@ -65,7 +68,10 @@ export const DoctorCard = ({
             <AntDesign name="enviromento" size={16} color="#666" />
             <Text style={styles.locationText}>2.5 km</Text>
           </View>
-          <TouchableOpacity style={styles.mapButton}>
+          <TouchableOpacity
+            style={styles.mapButton}
+            onPress={handleNavigateMap}
+          >
             <AntDesign name="enviroment" size={16} color="#5B21B6" />
             <Text style={styles.mapButtonText}>Map</Text>
           </TouchableOpacity>

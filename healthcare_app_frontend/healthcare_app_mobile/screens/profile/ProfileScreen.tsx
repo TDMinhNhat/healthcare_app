@@ -7,6 +7,7 @@ import {
   ParamListBase,
   useTheme,
 } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
 export const ProfileScreen = () => {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
 
@@ -15,56 +16,57 @@ export const ProfileScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Profile</Text>
-
-      <ProfileHeader
-        name="Jhalok Deb"
-        email="jhalokde@gmail.com"
-        imageUrl="https://randomuser.me/api/portraits/men/1.jpg"
-        onEditPress={handleEditProfile}
-      />
-      <View style={styles.menuContainer}>
-        <MenuItem
-          icon="person-outline"
-          title="Edit Profile"
-          onPress={handleEditProfile}
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView style={styles.container}>
+        <Text style={styles.title}>Profile</Text>
+        <ProfileHeader
+          name="Jhalok Deb"
+          email="jhalokde@gmail.com"
+          imageUrl="https://randomuser.me/api/portraits/men/1.jpg"
+          onEditPress={handleEditProfile}
         />
-        <MenuItem
-          icon="notifications-outline"
-          title="Notification"
-          onPress={() => {}}
-        />
-        <MenuItem
-          icon="calendar-outline"
-          title="My Appointments"
-          onPress={() => {}}
-        />
-        <MenuItem icon="heart-outline" title="Favorite" onPress={() => {}} />
-        <MenuItem
-          icon="fitness-outline"
-          title="Health Assessment"
-          onPress={() => {}}
-        />
-        <MenuItem
-          icon="help-circle-outline"
-          title="Help & Support"
-          onPress={() => {}}
-        />
-        <MenuItem
-          icon="information-circle-outline"
-          title="About DocSwift"
-          onPress={() => {}}
-        />
-        <MenuItem icon="language" title="Language" onPress={() => {}} />
-        <MenuItem
-          icon="log-out-outline"
-          title="Log Out"
-          onPress={() => {}}
-          textColor="#FF4444"
-        />
-      </View>
-    </ScrollView>
+        <View style={styles.menuContainer}>
+          <MenuItem
+            icon="person-outline"
+            title="Edit Profile"
+            onPress={handleEditProfile}
+          />
+          <MenuItem
+            icon="notifications-outline"
+            title="Notification"
+            onPress={() => {}}
+          />
+          <MenuItem
+            icon="calendar-outline"
+            title="My Appointments"
+            onPress={() => {}}
+          />
+          <MenuItem icon="heart-outline" title="Favorite" onPress={() => {}} />
+          <MenuItem
+            icon="fitness-outline"
+            title="Health Assessment"
+            onPress={() => {}}
+          />
+          <MenuItem
+            icon="help-circle-outline"
+            title="Help & Support"
+            onPress={() => {}}
+          />
+          <MenuItem
+            icon="information-circle-outline"
+            title="About DocSwift"
+            onPress={() => {}}
+          />
+          <MenuItem icon="language" title="Language" onPress={() => {}} />
+          <MenuItem
+            icon="log-out-outline"
+            title="Log Out"
+            onPress={() => {}}
+            textColor="#FF4444"
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

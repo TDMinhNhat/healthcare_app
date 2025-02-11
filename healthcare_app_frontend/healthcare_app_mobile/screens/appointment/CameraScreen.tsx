@@ -6,9 +6,10 @@ import {
   useCameraPermission,
   useCameraDevice,
 } from "react-native-vision-camera";
-import useDetect from "../hooks/useDetect";
+import useDetect from "../../hooks/useDetect";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function CameraDetect() {
+export default function CameraScreen() {
   const device = useCameraDevice("front");
   const { hasPermission } = useCameraPermission();
   const camera = useRef<Camera>(null);
@@ -55,7 +56,7 @@ export default function CameraDetect() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Camera
         ref={camera}
         style={StyleSheet.absoluteFill}
@@ -74,7 +75,7 @@ export default function CameraDetect() {
         <Text style={styles.infoText}>Face Detection</Text>
         <Text style={styles.infoText}>Front Camera</Text>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

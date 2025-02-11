@@ -1,10 +1,11 @@
 import React from "react";
-import { SafeAreaView, ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StatusBar, StyleSheet } from "react-native";
 import { HeaderHome } from "./HeaderHome";
 import { PromoBanner } from "../../components/PromoBanner";
 import { Categories } from "../../components/Categories";
 import { TopDoctors } from "../../components/TopDoctors";
 import { AntDesign } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 type IconName = React.ComponentProps<typeof AntDesign>["name"];
 
 const categories: {
@@ -57,5 +58,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+    // marginTop: StatusBar.currentHeight,
   },
 });

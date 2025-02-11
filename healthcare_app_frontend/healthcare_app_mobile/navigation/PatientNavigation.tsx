@@ -2,7 +2,6 @@ import { createStaticNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "../screens/authentication/LoginScreen";
 import SignUpScreen from "../screens/authentication/SignUpScreen";
-
 import EnterOTP from "../screens/authentication/EnterOTP";
 import EnterMail from "../screens/authentication/EnterMail";
 import ResetPassword from "../screens/authentication/ResetPassword";
@@ -14,16 +13,11 @@ import DoctorDetailsScreen from "../screens/doctor_detail/DoctorDetailScreen";
 import { ProfileScreen } from "../screens/profile/ProfileScreen";
 import { EditProfileScreen } from "../screens/profile/EditProfileScreen";
 import SearchScreen from "../screens/search/SearchSreen";
-import CameraDetect from "../components/CameraDetect";
+import CameraScreen from "../screens/appointment/CameraScreen";
+import MapScreen from "../screens/appointment/MapScreen";
 
 const PatientStack = createNativeStackNavigator({
   screens: {
-    CameraDetect: {
-      screen: CameraDetect,
-      options: {
-        headerShown: false,
-      },
-    },
     Login: {
       screen: LoginScreen,
       options: {
@@ -86,6 +80,18 @@ const PatientStack = createNativeStackNavigator({
     },
     SearchScreen: {
       screen: SearchScreen,
+      options: {
+        headerShown: false,
+      },
+    },
+    Map: {
+      screen: MapScreen,
+      options: {
+        headerShown: false,
+      },
+    },
+    CameraDetect: {
+      screen: CameraScreen,
       options: {
         headerShown: false,
       },

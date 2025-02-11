@@ -24,8 +24,8 @@ export const HeaderHome = () => {
     navigation.navigate("SearchScreen");
   };
 
-  const handleSearchFocus = () => {
-    navigation.navigate("SearchScreen");
+  const handleNavigateMap = () => {
+    navigation.navigate("Map");
   };
 
   return (
@@ -38,7 +38,10 @@ export const HeaderHome = () => {
           marginBottom: 12,
         }}
       >
-        <TouchableOpacity style={styles.locationContainer}>
+        <TouchableOpacity
+          style={styles.locationContainer}
+          onPress={handleNavigateMap}
+        >
           <AntDesign name="enviroment" size={20} color="#000" />
           <Text style={styles.locationText}>Seattle, USA</Text>
         </TouchableOpacity>
