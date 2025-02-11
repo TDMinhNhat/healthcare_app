@@ -1,35 +1,36 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import {BrowserRouter, Routes, Route} from "react-router";
+import HomePage from "./pages/HomePage.tsx";
+import LoginPage from "./pages/LoginPage.tsx";
+import RegisterPage from "./pages/RegisterPage.tsx";
+import AdminPage from "./pages/AdminPage.tsx";
+import {useEffect, useState} from "react";
+import vietnamese from "./languages/vietnamese.json";
+import english from "./languages/english.json";
+import "./styles/main.scss";
 
 function App() {
-  const [count, setCount] = useState(0)
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    const [language, setLanguage] = useState("vietnamese");
+    const [languageData, setLanguageData] = useState(vietnamese);
+
+    useEffect(() => {
+        async function fetchData() {
+            if(language === "vietnamese") setLanguageData(vietnamese);
+            else if(language === "english") setLanguageData(english);
+        }
+        fetchData();
+    }, [language]);
+
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={ <HomePage language={languageData} setLanguage={setLanguage} languageType={language}/>} />
+                <Route path="/login" element={ <LoginPage loginLanguage={languageData.login} /> } />
+                <Route path="/register" element={ <RegisterPage registerLanguage={languageData.register} /> } />
+                <Route path="/admin" element={ <AdminPage adminLanguage={languageData.admin}/> } />
+            </Routes>
+        </BrowserRouter>
+    )
 }
 
-export default App
+export default App;

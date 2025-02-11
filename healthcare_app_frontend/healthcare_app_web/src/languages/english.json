@@ -1,0 +1,103 @@
+{
+  "header": {
+    "home": "Home",
+    "our_services": "Services",
+    "find_doctors": "Find Doctors",
+    "reviews": "Reviews",
+    "login": "Login"
+  },
+  "body": {
+    "home": {
+    },
+    "our_services": {
+    },
+    "find_doctors": {
+    },
+    "reviews": {
+    }
+  },
+  "footer": {
+    "select_language": "Select Language",
+    "description": "Copyrighted products belong to KLTN_IUH, please do not copy or sell products without the consent of the authors in any form.",
+    "copyright": "© 2025 SolarHealth"
+  },
+  "login": {
+    "title": "Login",
+    "login_standard": "Login by account",
+    "login_face": "Login by face detection",
+    "login_others_app": "Login by others app",
+    "email": "Email",
+    "password": "Password",
+    "button_login": "Sign In",
+    "other_login": "Or login with",
+    "link_register": "Register account",
+    "link_forgot_pass": "Forgot password"
+  },
+  "register": {
+    "tabs": [
+      {
+        "name": "Input personal information",
+        "isOptional": false,
+        "optional": "Bắt buộc"
+      },
+      {
+        "name": "Verify Email",
+        "isOptional": false,
+        "optional": "Bắt buộc"
+      },
+      {
+        "name": "Face detection",
+        "isOptional": true,
+        "optional": "You can skip"
+      },
+      {
+        "name": "Complete Registration",
+        "isOptional": false,
+        "optional": "Bắt buộc"
+      }
+    ],
+    "button_next": "Next",
+    "button_skip": "Skip",
+    "button_back": "Back",
+    "input_info": {
+      "first_name": "First name",
+      "last_name": "Last name",
+      "sex": "Sex",
+      "sex_male": "Male",
+      "sex_female": "Female",
+      "date_of_birth": "Date of birth",
+      "phone": "Phone",
+      "username": "Username",
+      "email": "Email",
+      "password": "Password",
+      "repeat_password": "Repeat password",
+      "address": {
+        "number": "Number address",
+        "street": "Street",
+        "ward": "Ward",
+        "district": "District",
+        "city": "City",
+        "country": "Country"
+      },
+      "eula": "I agree with the terms and conditions",
+      "error": {
+        "null": "Can't be empty",
+        "contains_number": "Can't contains the number",
+        "contains_text": "Can't contains the text",
+        "contains_special_character": "Can't contains special characters",
+        "start_number": "Can't start with the number",
+        "invalid_email": "Email is not valid",
+        "not_match_password": "Password does not match"
+      }
+    },
+    "face_detect": {
+    },
+    "verify_email": {
+      "message_info": "We have sent a verification code to your email. Please check your email and enter the code below: ",
+      "label_input_otp": "Enter the verification code to activate your account",
+      "button_resend_otp": "Resend OTP"
+    },
+    "complete_register": {
+    }
+  }
+}

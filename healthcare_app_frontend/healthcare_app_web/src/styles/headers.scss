@@ -1,0 +1,24 @@
+#menu {
+  .menu_item {
+    height: 75px;
+
+    .menu_item_text_active {
+      color: #432C81;
+    }
+
+    .menu_item_text {
+      height: 100%;
+      line-height: 350%;
+    }
+
+    .menu_item_text:hover {
+      color: red;
+      cursor: pointer;
+      border-bottom: red 5px solid !important;
+    }
+  }
+
+  .menu_item_active {
+    border-bottom: #432C81 5px solid !important;
+  }
+}
