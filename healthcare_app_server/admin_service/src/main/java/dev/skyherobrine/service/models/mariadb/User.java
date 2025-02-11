@@ -54,8 +54,8 @@ public class User {
     @JoinColumn(name = "authed_provider_id", nullable = false)
     private AuthenticateProvider authedProvider;
 
-    @Column(name = "image_detects", nullable = false) @NonNull
-    private String imageDetect;
+    @Column(name = "face_image_encode", length = 60000, nullable = false) @NonNull
+    private String faceImageEncode;
 
     @ManyToOne
     @JoinColumn(name = "role_id", nullable = false)

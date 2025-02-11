@@ -35,7 +35,7 @@ public class UserConsumers {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
-                user.getImageDetect()
+                user.getFaceImageEncode()
         );
 
         newUser.setAuthedProvider(user.getAuthedProvider());
