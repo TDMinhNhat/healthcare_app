@@ -5,6 +5,8 @@ import { useEffect, useState, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { DoctorCard } from "../../components/DoctorCard";
 import { SafeAreaView } from "react-native-safe-area-context";
+import BackButton from "../../components/BackButton";
+import HeaderAuthentication from "../authentication/HeaderAuthentication";
 
 const sampleHospitals = [
   {
@@ -56,13 +58,13 @@ const sampleHospitals = [
 
 const styles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFillObject,
     flex: 1,
     justifyContent: "flex-end",
     alignItems: "center",
   },
   map: {
     ...StyleSheet.absoluteFillObject,
+    // flex: 1,
   },
   locationButton: {
     position: "absolute",
@@ -98,6 +100,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  headerContainer: {
+    position: "absolute",
+    top: 30,
+    left: 20,
+    right: 0,
+    zIndex: 1,
+    width: 50,
+    backgroundColor: "white",
+    borderRadius: 16,
   },
 });
 
@@ -163,6 +175,9 @@ export default function MapScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.headerContainer}>
+        <BackButton />
+      </View>
       <MapView
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
