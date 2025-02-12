@@ -1,6 +1,8 @@
 import os.path
 import numpy as np
 import cv2
+import requests
+
 from healthcare_app_server.models import *
 from scipy.spatial.distance import cosine
 
@@ -40,7 +42,7 @@ class FaceDetectService:
         i = np.argmax(detections[0, 0, :, 2])
         confidence = detections[0, 0, i, 2]
 
-        if confidence >= 0.9:
+        if confidence >= 0.95:
             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
             (startX, startY, endX, endY) = box.astype("int")
 
@@ -64,9 +66,6 @@ class FaceDetectService:
         for user in users:
             vector_check = np.array(list(map(float, user.face_detect_data.split(","))))
             similarity = 1 - cosine(vector_check, vector)
-            if similarity >= 0.6:
+            if similarity >= 0.8:
                 return True
         return False
-
-    def get_user_info(self) -> any:
-        return None

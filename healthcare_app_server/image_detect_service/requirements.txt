@@ -8,5 +8,6 @@ pillow
 boto3
 opencv-python
 scipy
+requests
 numpy==1.26.4
 confluent-kafka
