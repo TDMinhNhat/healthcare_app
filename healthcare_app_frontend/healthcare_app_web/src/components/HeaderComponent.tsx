@@ -1,8 +1,8 @@
-import {Avatar, Box, Stack, Typography} from "@mui/material";
 import "../../node_modules/bootstrap/dist/css/bootstrap.css";
 import "../../node_modules/bootstrap/dist/js/bootstrap.js";
 import "../styles/headers.scss"
 import {Link} from "react-router";
+import { Avatar, Box, Stack, Typography } from "@mui/material";
 
 function HeaderComponent({ language, tab, setTab } : { language: object, tab: string, setTab: void }) {
 

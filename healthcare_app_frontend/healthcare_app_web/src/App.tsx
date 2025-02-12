@@ -6,7 +6,6 @@ import AdminPage from "./pages/AdminPage.tsx";
 import {useEffect, useState} from "react";
 import vietnamese from "./languages/vietnamese.json";
 import english from "./languages/english.json";
-import "./styles/main.scss";
 
 function App() {
 

@@ -16,7 +16,7 @@ export default function GPSMapComponent({ language }:{ language: object }) {
                     setLongitude(position.coords.longitude);
                 },
                 (error) => console.error("Error getting location:", error),
-                {enableHighAccuracy: true, timeout: 5000, maximumAge: 0}
+                {enableHighAccuracy: true, timeout: 10000, maximumAge: 0}
             );
         }
     }, []);

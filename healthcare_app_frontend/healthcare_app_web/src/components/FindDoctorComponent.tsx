@@ -6,7 +6,7 @@ import InputInfoComponent from "./find_doctor/InputInfoComponent.tsx";
 
 function FindDoctorComponent({ language }:{ language: object }) {
 
-    const [step, setStep] = useState("gps");
+    const [step, setStep] = useState("authenticate");
 
     return (
         <Container className={"container-fluid w-100"}>
