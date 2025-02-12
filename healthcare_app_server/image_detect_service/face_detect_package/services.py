@@ -59,10 +59,8 @@ class FaceDetectService:
         return "Can't detect"
 
     def __check_user__(self, vector):
-        # Get all users
         users = User.objects.all()
 
-        # Check the user have same as face_data detect
         for user in users:
             vector_check = np.array(list(map(float, user.face_detect_data.split(","))))
             similarity = 1 - cosine(vector_check, vector)

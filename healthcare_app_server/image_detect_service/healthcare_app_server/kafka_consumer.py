@@ -68,4 +68,14 @@ class KafkaConsumer(threading.Thread):
             print(f"Exception: {e}")
 
     def __insert_type_detect__(self, data) -> None:
-        return None
+        try:
+            data_json = json.loads(data)
+
+            type_detect = TypeDetect(
+                type_name = data_json["typeName"]
+            )
+
+            type_detect.save()
+
+        except Exception as e:
+            print(f"Exception: {e}")
