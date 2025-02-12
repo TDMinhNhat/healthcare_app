@@ -111,4 +111,14 @@ public class UserController implements IManagement<User,Long> {
                 ur.findByRole_Id(userRoleId)
         ));
     }
+
+    @GetMapping("user_id/{id}")
+    public ResponseEntity<Response> getUserByUserId(@PathVariable("id") String userId) {
+        log.info("Call get user by user id");
+        return ResponseEntity.ok(new Response(
+                HttpStatus.OK.value(),
+                "Get user by user id",
+                ur.findUserByUserId(userId).orElse(null)
+        ));
+    }
 }
