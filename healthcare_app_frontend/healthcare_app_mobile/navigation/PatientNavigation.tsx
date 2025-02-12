@@ -15,6 +15,7 @@ import { EditProfileScreen } from "../screens/profile/EditProfileScreen";
 import SearchScreen from "../screens/search/SearchSreen";
 import CameraScreen from "../screens/appointment/CameraScreen";
 import MapScreen from "../screens/appointment/MapScreen";
+import SavedAddressesScreen from "../screens/address/SavedAddressesScreen";
 
 const PatientStack = createNativeStackNavigator({
   screens: {
@@ -92,6 +93,12 @@ const PatientStack = createNativeStackNavigator({
     },
     CameraDetect: {
       screen: CameraScreen,
+      options: {
+        headerShown: false,
+      },
+    },
+    SavedAddresses: {
+      screen: SavedAddressesScreen,
       options: {
         headerShown: false,
       },

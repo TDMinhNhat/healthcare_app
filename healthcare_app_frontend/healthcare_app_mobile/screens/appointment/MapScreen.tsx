@@ -1,4 +1,10 @@
-import { StyleSheet, View, Pressable, Animated } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Pressable,
+  Animated,
+  ActivityIndicator,
+} from "react-native";
 import MapView, { PROVIDER_GOOGLE, Marker } from "react-native-maps";
 import Geolocation from "@react-native-community/geolocation";
 import { useEffect, useState, useRef } from "react";
@@ -7,6 +13,7 @@ import { DoctorCard } from "../../components/DoctorCard";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "../../components/BackButton";
 import HeaderAuthentication from "../authentication/HeaderAuthentication";
+import { useSelector } from "react-redux";
 
 const sampleHospitals = [
   {
@@ -111,38 +118,38 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 16,
   },
+  loadingContainer: {
+    position: "absolute",
+    right: 20,
+    bottom: 260,
+    backgroundColor: "white",
+    padding: 10,
+    borderRadius: 30,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
 });
 
 export default function MapScreen() {
-  const [location, setLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
+  const currentLocation = useSelector(
+    (state: any) => state.user.currentLocation
+  );
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const mapRef = useRef<MapView | null>(null);
-
-  useEffect(() => {
-    Geolocation.requestAuthorization();
-
-    Geolocation.getCurrentPosition(
-      (position) => {
-        setLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
-      },
-      (error) => console.log("Error", error),
-      // yêu cầu vị trí chính xác nhất có thể, quá 20s trả về error, cache 1s lấy vị trí mới
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 } // 20s
-    );
-  }, []);
+  const [isLoading, setIsLoading] = useState(false);
 
   const moveToCurrentLocation = () => {
-    if (location && mapRef.current) {
+    if (currentLocation && mapRef.current) {
       mapRef.current.animateToRegion(
         {
-          latitude: location.latitude,
-          longitude: location.longitude,
+          latitude: currentLocation.latitude,
+          longitude: currentLocation.longitude,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         },
@@ -182,20 +189,21 @@ export default function MapScreen() {
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
         style={styles.map}
-        region={{
-          latitude: location?.latitude || 10.7769,
-          longitude: location?.longitude || 106.7009,
+        initialRegion={{
+          latitude: currentLocation?.latitude || 10.7769,
+          longitude: currentLocation?.longitude || 106.7009,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
       >
-        {location && (
+        {currentLocation && (
           <Marker
             coordinate={{
-              latitude: location.latitude,
-              longitude: location.longitude,
+              latitude: currentLocation.latitude,
+              longitude: currentLocation.longitude,
             }}
             title="Vị trí của bạn"
+            description={currentLocation.address}
             pinColor="blue"
           />
         )}
@@ -208,6 +216,13 @@ export default function MapScreen() {
           />
         ))}
       </MapView>
+
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" color="#000" />
+        </View>
+      )}
+
       <Pressable style={styles.locationButton} onPress={moveToCurrentLocation}>
         <Ionicons name="locate" size={24} color="#000" />
       </Pressable>

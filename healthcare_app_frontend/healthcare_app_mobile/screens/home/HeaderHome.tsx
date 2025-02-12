@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import NotificationBell from "../../components/NotficationBell";
@@ -13,6 +14,12 @@ import {
 export const HeaderHome = () => {
   const [value, onChangeText] = useState("");
   const navigation: NavigationProp<ParamListBase> = useNavigation();
+  const currentLocation = useSelector(
+    (state: any) => state.user.currentLocation
+  );
+  const locationText = currentLocation
+    ? `${currentLocation.address}`
+    : "Loading...";
 
   const handleNotifications = () => {
     console.log("Notifications clicked");
@@ -24,8 +31,8 @@ export const HeaderHome = () => {
     navigation.navigate("SearchScreen");
   };
 
-  const handleNavigateMap = () => {
-    navigation.navigate("Map");
+  const handleNavigateChooseAddress = () => {
+    navigation.navigate("SavedAddresses");
   };
 
   return (
@@ -40,10 +47,12 @@ export const HeaderHome = () => {
       >
         <TouchableOpacity
           style={styles.locationContainer}
-          onPress={handleNavigateMap}
+          onPress={handleNavigateChooseAddress}
         >
           <AntDesign name="enviroment" size={20} color="#000" />
-          <Text style={styles.locationText}>Seattle, USA</Text>
+          <Text numberOfLines={1} style={styles.locationText}>
+            {locationText}
+          </Text>
         </TouchableOpacity>
         <NotificationBell
           hasNotification={true}
@@ -68,11 +77,14 @@ const styles = StyleSheet.create({
   locationContainer: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
+    marginRight: 16,
   },
   locationText: {
     fontSize: 16,
     fontWeight: "600",
     marginLeft: 8,
+    flex: 1,
   },
   searchContainer: {
     flexDirection: "row",
