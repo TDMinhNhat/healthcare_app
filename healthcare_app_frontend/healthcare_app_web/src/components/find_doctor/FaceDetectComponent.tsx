@@ -2,12 +2,15 @@ import {Box, Container, Typography} from "@mui/material";
 import WebCam from "react-webcam";
 import {useEffect, useRef} from "react";
 import axios from "axios";
-import * as https from "https";
+import {useSelector, useDispatch} from "react-redux";
+import { setUser } from "../../stores/slices/user-slice.ts";
 
 export default function FaceDetectComponent({language, setStep}: { language: object, setStep: void }) {
 
     let intervalId = useRef(null)
     const webcamRef = useRef(null);
+    const user = useSelector((state) => state.user);
+    const dispatch = useDispatch();
 
     const checkCameraPermission = async () => {
         try {
@@ -45,14 +48,14 @@ export default function FaceDetectComponent({language, setStep}: { language: obj
             const result = await axios.post("http://localhost:8081/image_detect/face/auth", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data"
-                },
-                httpsAgent: https.Agent
+                }
             }).then(response => response.data).catch(error => console.log("Server return an error: ", error))
             console.log(result)
             if (result.code === 200) {
                 if (result.message !== "New User") {
                     stopCamera();
                     sessionStorage.setItem("user", result.data);
+                    dispatch(setUser(result.data))
                     setStep("gps");
                 } else {
                     sessionStorage.setItem("face_detect", result.data);
