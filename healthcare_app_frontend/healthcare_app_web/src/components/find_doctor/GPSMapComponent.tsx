@@ -22,26 +22,22 @@ export default function GPSMapComponent({ language }:{ language: object }) {
     }, []);
 
     return (
-        <Container className={"w-100 d-flex flex-row flex-1 align-items-center justify-content-center"}>
-            <Box style={{ height: "800px", width: "100%" }}>
-                { latitude != undefined && longitude != undefined && (
-                    <Box className={"w-100 h-100"}>
-                        <MapContainer center={[latitude, longitude]} zoom={23} scrollWheelZoom={true} style={{ height: "100%", width: "100%" }}>
-                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <Box className={"ms-0 me-0 mt-2 mb-2 container-fluid w-100 h-100"}>
+            { latitude != undefined && longitude != undefined && (
+                <MapContainer center={[latitude, longitude]} zoom={23} scrollWheelZoom={true} style={{ height: "850px", width: "100%" }}>
+                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-                            <Marker position={[latitude, longitude]}>
-                                <Popup>You are here!</Popup>
-                            </Marker>
-                        </MapContainer>
-                    </Box>
-                )}
-                { latitude == undefined && longitude == undefined && (
-                    <Box>
-                        <Typography>Make sure you had allow access your location to use</Typography>
-                    </Box>
-                )}
-            </Box>
-        </Container>
+                    <Marker position={[latitude, longitude]}>
+                        <Popup>You are here!</Popup>
+                    </Marker>
+                </MapContainer>
+            )}
+            { latitude == undefined && longitude == undefined && (
+                <Box>
+                    <Typography>Make sure you had allow access your location to use</Typography>
+                </Box>
+            )}
+        </Box>
 
     )
 }
