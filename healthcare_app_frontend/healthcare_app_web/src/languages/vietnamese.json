@@ -1,0 +1,193 @@
+{
+  "header": {
+    "home": "Trang Chủ",
+    "our_services": "Dịch Vụ",
+    "find_doctors": "Tìm Bác Sĩ",
+    "reviews": "Xem Nhận Xét",
+    "login": "Đăng Nhập"
+  },
+  "body": {
+    "home": {
+    },
+    "our_services": {
+    },
+    "find_doctors": {
+      "face_detect": {
+        "title": "Quét Khuôn Mặt",
+        "description": "Quét khuôn mặt để có thể nhận diện bạn là ai trong hệ thống của chúng tôi từ đó chúng tôi có thể định vị các bác sĩ gần nhất để hỗ trợ bạn",
+        "notice": "Hãy đảm bảo rằng thiết bị của bạn cho phép ứng dụng chúng tôi truy cập vào camera để có thể nhận diện khuôn mặt của bạn"
+      },
+      "input_info": {
+        "title": "Điền Thông Tin Cá Nhân",
+        "subtitle": "Vui lòng điền các thông tin cá nhân của bạn để có thể sử dụng dịch vụ của chúng tôi, một số thông tin có thể cung cấp cho bác sĩ để hỗ trợ.",
+        "first_name": "Tên",
+        "last_name": "Họ",
+        "sex": {
+          "title": "Giới Tính",
+          "male": "Nam",
+          "female": "Nữ"
+        },
+        "dob": "Ngày Sinh",
+        "phone": "Số Điện Thoại",
+        "username": "Tên Tài Khoản",
+        "email": "Địa Chỉ Email",
+        "password": "Mật Khẩu",
+        "repeat_password": "Nhập Lại Mật Khẩu",
+        "address": {
+          "title": "Địa Chỉ",
+          "number": "Số Nhà",
+          "street": "Đường",
+          "ward": "Phường",
+          "district": "Quận",
+          "city": "Thành Phố",
+          "country": "Quốc Gia"
+        },
+        "btn_clear": "Xoá Trắng",
+        "btn_submit": "Đăng Ký"
+      }
+    },
+    "reviews": {
+    }
+  },
+  "footer": {
+    "select_language": "Chọn Ngôn Ngữ",
+    "description": "Sản phẩm bản quyền thuộc về KLTN_IUH, yêu cầu không sao chép hoặc bán sản phẩm mà không có sự đồng ý của các tác giả dưới mọi hình thức.",
+    "copyright": "© 2025 SolarHealth"
+  },
+  "login": {
+    "title": "Đăng Nhập",
+    "login_standard": "Đăng nhập bằng tài khoản",
+    "login_face": "Đăng nhập bằng khuôn mặt",
+    "login_others_app": "Đăng nhập bằng ứng dụng khác",
+    "email": "Email",
+    "password": "Mật Khẩu",
+    "button_login": "Đăng Nhập",
+    "other_login": "Hoặc đăng nhập với",
+    "link_register": "Đăng ký tài khoản",
+    "link_forgot_pass": "Quên mật khẩu"
+  },
+  "register": {
+    "tabs": [
+      {
+        "name": "Điền thông tin cá nhân",
+        "isOptional": false,
+        "optional": "Bắt buộc"
+      },
+      {
+        "name": "Xác nhận Email",
+        "isOptional": false,
+        "optional": "Bắt buộc"
+      },
+      {
+        "name": "Quét khuôn mặt",
+        "isOptional": true,
+        "optional": "Có thể bỏ qua"
+      },
+      {
+        "name": "Hoàn tất",
+        "isOptional": false,
+        "optional": "Bắt buộc"
+      }
+    ],
+    "button_next": "Tiếp theo",
+    "button_skip": "Bỏ qua",
+    "button_back": "Quay lại",
+    "input_info": {
+      "first_name": "Tên",
+      "last_name": "Họ",
+      "sex": "Giới tính",
+      "sex_male": "Nam",
+      "sex_female": "Nữ",
+      "date_of_birth": "Ngày sinh",
+      "phone": "Số điện thoại",
+      "username": "Tên tài khoản",
+      "email": "Tài khoản email",
+      "password": "Mật khẩu",
+      "repeat_password": "Nhập lại mật khẩu",
+      "address": {
+        "number": "Số nhà",
+        "street": "Đường",
+        "ward": "Phường",
+        "district": "Quận",
+        "city": "Thành phố",
+        "country": "Quốc gia"
+      },
+      "eula": "Tôi đồng ý với các điều khoản và điều kiện",
+      "error": {
+        "null": "Không được để trống",
+        "contains_number": "Không được chứa số",
+        "contains_text": "Không được chứa chữ",
+        "contains_special_character": "Không được chứa ký tự đặc biệt",
+        "start_number": "Không được bắt đầu bằng số",
+        "invalid_email": "Email không hợp lệ",
+        "not_match_password": "Mật khẩu không trùng khớp"
+      }
+    },
+    "face_detect": {
+    },
+    "verify_email": {
+      "message_info": "Chúng tôi đã gửi một mã xác nhận đến email của bạn đã đăng ký. Nếu chưa nhận được vui lòng nhấn vào đây: ",
+      "label_input_otp": "Nhập mã xác nhận để kích hoạt tài khoản",
+      "button_resend_otp": "Gửi lại mã OTP"
+    },
+    "complete_register": {
+    }
+  },
+  "admin": {
+    "tabs": {
+      "list": [
+        {
+          "name": "Thống Kê",
+          "image": "",
+          "value": "dashboard"
+        },
+        {
+          "name": "Quản Lý Người Dùng",
+          "image": "",
+          "value": "users"
+        },
+        {
+          "name": "Quản Lý Chức Vụ",
+          "image": "",
+          "value": "roles"
+        },
+        {
+          "name": "Quản Lý Đăng Nhập",
+          "image": "",
+          "value": "authenticate_providers"
+        },
+        {
+          "name": "Quản Lý Lịch Hẹn",
+          "image": "",
+          "value": "appointments"
+        }
+      ],
+      "tab_dashboard_content": {
+
+      },
+      "tab_users_content": {
+        "total_users_system": "Số Người Dùng",
+        "total_users_patient": "Số Bệnh Nhân",
+        "total_users_doctor": "Số Bác Sĩ",
+        "total_users_manager": "Số Quản Lý",
+        "table": {
+          "id": "ID",
+          "userId": "ID Người Dùng",
+          "first_name": "Tên",
+          "last_name": "Họ",
+          "user_name": "Tên Tài Khoản",
+          "email": "Địa Chỉ Mail",
+          "phone": "Số Điện Thoại",
+          "role": "Chức Vụ",
+          "status": "Trạng Thái Tài Khoản",
+          "action": "Hành Động",
+          "btn_delete": "Xoá",
+          "btn_view_detail": "Xem Chi Tiết"
+        }
+      },
+      "tab_appointments_content": {
+
+      }
+    }
+  }
+}
