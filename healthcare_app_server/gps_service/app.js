@@ -43,6 +43,18 @@ client.start((error) => {
     console.log(error || "Eureka started!")
 })
 
+// Websocket server
+const io = new Server(server, {
+    path: "/gps"
+})
+io.on("connection", (socket) => {
+    console.log("A user connected to the websocket server")
+
+    socket.on("send_doctor_connect", (data) => {
+        io.emit("get_doctor_connect", data);
+    })
+})
+
 // Server listening
 server.listen(3000, () => {
     console.log("The server running port 3000")
