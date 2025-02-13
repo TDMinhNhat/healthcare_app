@@ -1,8 +1,7 @@
 import {useEffect, useState} from "react";
-import {Container, Box, Typography} from "@mui/material";
+import {Box, Typography} from "@mui/material";
 import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import {array} from "yup";
 
 export default function GPSMapComponent({language}: { language: object }) {
 
