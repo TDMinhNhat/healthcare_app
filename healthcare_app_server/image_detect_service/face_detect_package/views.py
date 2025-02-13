@@ -23,14 +23,12 @@ def send_image(request: HttpRequest) -> JsonResponse:
             response = Response(400, "Can't detect who is this", None)
             serializer = ResponseSerializer(response)
             return JsonResponse(serializer.data, safe = False)
-        elif result == "Exist User":
-            response = Response(200, "This user has existed in database", "Exist")
-            serializer = ResponseSerializer(response)
-            return JsonResponse(serializer.data, safe = False)
-        else:
+        elif isinstance(result, str):
             response = Response(200, "New User", result)
             serializer = ResponseSerializer(response)
             return JsonResponse(serializer.data, safe = False)
+        else:
+            return JsonResponse(result, safe = False)
 
     except RuntimeError as e:
         response = Response(500, "Can't decoded the image", None)

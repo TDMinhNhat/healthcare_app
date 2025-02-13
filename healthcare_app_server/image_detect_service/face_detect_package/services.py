@@ -53,8 +53,9 @@ class FaceDetectService:
             vector = self.descriptor_model.forward().flatten()
             vector_str = ",".join(map(str, vector.tolist()))
 
-            if self.__check_user__(vector):
-                return "Exist User"
+            result = self.__check_user__(vector)
+            if result is not None:
+                return result
             else:
                 return vector_str
 
@@ -66,6 +67,10 @@ class FaceDetectService:
         for user in users:
             vector_check = np.array(list(map(float, user.face_detect_data.split(","))))
             similarity = 1 - cosine(vector_check, vector)
-            if similarity >= 0.8:
-                return True
-        return False
+            if similarity >= 0.5:
+                return self.__get_user_by_userid__(user.user_id)
+        return None
+
+    def __get_user_by_userid__(self, user_id):
+        response = requests.get(f"http://localhost:9000/authenticate/api/v1/user/user_id/{user_id.split('#')[1]}")
+        return response.json()
