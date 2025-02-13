@@ -22,7 +22,7 @@ export default function GPSMapComponent({ language }:{ language: object }) {
     }, []);
 
     return (
-        <Container className={"w-100 d-flex flex-row align-items-center justify-content-center"}>
+        <Container className={"w-100 d-flex flex-row flex-1 align-items-center justify-content-center"}>
             <Box style={{ height: "800px", width: "100%" }}>
                 { latitude != undefined && longitude != undefined && (
                     <Box className={"w-100 h-100"}>

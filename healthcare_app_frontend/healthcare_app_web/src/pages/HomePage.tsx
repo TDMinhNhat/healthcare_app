@@ -15,7 +15,7 @@ function HomePage({ language, setLanguage, languageType } : { language: object, 
         <Container maxWidth={false} disableGutters={true}>
             <HeaderComponent language={language.header} tab={tab} setTab={setTab} />
 
-            <Container disableGutters={true} sx={{marginTop: 10, width: "100%", height: "100%"}}>
+            <Container disableGutters={true} className={"container-fluid w-100 h-100 ms-0 me-0 flex-1"}>
                 { tab === "home" && <HomeComponent language={language.body.home} />}
                 { tab === "our_services" && <OurServiceComponent language={language.body.our_services} />}
                 { tab === "find_doctors" && <FindDoctorComponent language={language.body.find_doctors} />}
