@@ -5,6 +5,7 @@ spring:
     web-application-type: reactive
 server:
   port: 8081
+  address: 0.0.0.0
 eureka:
   client:
     fetch-registry: true
