@@ -2,12 +2,33 @@ import {useEffect, useState} from "react";
 import {Box, Typography} from "@mui/material";
 import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { io } from "socket.io-client";
 
-export default function GPSMapComponent({language}: { language: object }) {
+const socket = io("ws://localhost:8081", {
+    path: "/gps",
+    transports: ["websocket", "polling"],
+});
+
+socket.on("connect", () => {
+    console.log("Success connect socket to the server");
+    socket.emit("send_doctor_connect", {
+        latitude: 10.822029 + Math.random() * 0.0001,
+        longitude: 106.687045 + Math.random() * 0.0001,
+        name: "Doctor " + Math.floor(Math.random() * 1000),
+    })
+})
+
+export default function GPSMapComponent({ language }: { language: object }) {
 
     const [successDetectGPS, setSuccessDetectGPS] = useState(false);
     const [latitude, setLatitude] = useState<number | null>();
     const [longitude, setLongitude] = useState<number | null>();
+    const [listDoctor, setListDoctor] = useState<[]>([]);
+
+    socket.on("get_doctor_connect", (data) => {
+        console.log("A doctor is connected to the server", data);
+        setListDoctor([...listDoctor, data]);
+    })
 
     useEffect(() => {
         if ("geolocation" in navigator) {
@@ -49,6 +70,17 @@ export default function GPSMapComponent({language}: { language: object }) {
                                 <Typography>You're here</Typography>
                             </Popup>
                         </Marker>
+                    }
+
+                    {listDoctor.map((doctor, index) => {
+                            return (
+                                <Marker key={index.toString()} position={[doctor.latitude, doctor.longitude]}>
+                                    <Popup>
+                                        <Typography>{doctor.name}</Typography>
+                                    </Popup>
+                                </Marker>
+                            )
+                        })
                     }
                 </MapContainer>
             )}
