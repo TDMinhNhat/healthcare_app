@@ -1,4 +1,4 @@
-import {useEffect, useLayoutEffect, useState} from "react";
+import {useLayoutEffect, useState} from "react";
 import {Box, Typography} from "@mui/material";
 import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet";
 import DoctorLocationComponent from "./gps/DoctorLocationComponent.tsx";
