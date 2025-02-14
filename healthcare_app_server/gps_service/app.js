@@ -51,7 +51,13 @@ io.on("connection", (socket) => {
     console.log("A user connected to the websocket server")
 
     socket.on("send_doctor_connect", (data) => {
+        console.log(data);
         io.emit("get_doctor_connect", data);
+    })
+
+    socket.on("send_doctor_disconnect", (data) => {
+        console.log("Disconnect: ", data);
+        io.emit("get_doctor_disconnect", data);
     })
 })
 
