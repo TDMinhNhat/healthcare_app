@@ -1,8 +1,9 @@
-import { createClient, RedisClient } from "node-redis"
+const { createClient } = require("redis")
 
 const client = createClient();
 
-client.on("error", err => console.log("Redis Error: ", err))
-await client.connect();
+(async () => {
+    await client.connect()
+})().catch(error => console.log(error))
 
 module.exports = client;

@@ -6,6 +6,8 @@ var app = express();
 var {Server} = require("socket.io")
 var {Eureka} = require("eureka-js-client")
 const server = require('http').createServer(app);
+const Doctor = require("./models/doctor.js");
+const DoctorRepository = require("./repositories/doctor-repository.js");
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -50,8 +52,17 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
     console.log("A user connected to the websocket server")
 
+    io.emit("get_all_doctors_connect", new DoctorRepository().getAll());
+
     socket.on("send_doctor_connect", (data) => {
-        console.log(data);
+        const doctor = new Doctor(
+            data.userId,
+            data.latitude,
+            data.longitude
+        )
+
+        const result = new DoctorRepository().add(doctor);
+        console.log(result);
         io.emit("get_doctor_connect", data);
     })
 
