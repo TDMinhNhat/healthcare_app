@@ -4,7 +4,7 @@ const PORT: number = 8081;
 const URL: string = `http://localhost:${PORT}/authenticate/api/v1/register`;
 
 const userModel = {
-    addUser: async (firstName: string, lastName: string, sex: boolean, phone: string, dob: string, username: string, email: string, password: string, address: object) => {
+    addUser: async (firstName: string, lastName: string, sex: boolean, phone: string, dob: string, username: string, email: string, password: string, address: object, imageDetect: string) => {
         return await axios({
             method: "post",
             url: URL,
@@ -17,7 +17,8 @@ const userModel = {
                 username: username,
                 email: email,
                 password: password,
-                address: address
+                imageDetect: imageDetect,
+                address: address,
             }
         })
     },

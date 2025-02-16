@@ -6,6 +6,7 @@ import OurServiceComponent from "../components/OurServiceComponent.tsx";
 import FindDoctorComponent from "../components/FindDoctorComponent.tsx";
 import ReviewsComponent from "../components/ReviewsComponent.tsx";
 import FooterComponent from "../components/FooterComponent.tsx";
+import UserSettingComponent from "../components/UserSettingComponent.tsx"
 
 function HomePage({ language, setLanguage, languageType } : { language: object, setLanguage: void, languageType: string }) {
 
@@ -15,12 +16,11 @@ function HomePage({ language, setLanguage, languageType } : { language: object, 
         <Container maxWidth={false} disableGutters={true}>
             <HeaderComponent language={language.header} tab={tab} setTab={setTab} />
 
-            <Container maxWidth={false} disableGutters={true} sx={{marginTop: 10}}>
-                { tab === "home" && <HomeComponent language={language.body.home} />}
-                { tab === "our_services" && <OurServiceComponent language={language.body.our_services} />}
-                { tab === "find_doctors" && <FindDoctorComponent language={language.body.find_doctors} />}
-                { tab === "reviews" && <ReviewsComponent language={language.body.reviews} />}
-            </Container>
+            { tab === "home" && <HomeComponent language={language.body.home} />}
+            { tab === "our_services" && <OurServiceComponent language={language.body.our_services} />}
+            { tab === "find_doctors" && <FindDoctorComponent language={language.body.find_doctors} />}
+            { tab === "reviews" && <ReviewsComponent language={language.body.reviews} />}
+            { tab === "users" && <UserSettingComponent language={language.body.users} />}
 
             <FooterComponent footer={language.footer} setLanguage={setLanguage} languageType={languageType} />
         </Container>

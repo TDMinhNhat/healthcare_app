@@ -1,4 +1,4 @@
-import {Box, Button, Stack, Typography} from "@mui/material";
+import {Box, Button, Stack} from "@mui/material";
 
 function FaceDetectComponent({ registerLanguage, handleNext, activeStep }:{ registerLanguage: object, handleNext: void, activeStep: number}) {
     return (

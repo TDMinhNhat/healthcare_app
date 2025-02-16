@@ -1,7 +1,7 @@
 import {Box, Stack, Tab, Tabs, Typography} from "@mui/material";
 import "../styles/tab-admin.scss"
 import {Link} from "react-router";
-function TabAdminComponent({ tab, setTab, tabsLanguage }:{ tab: string, setTab: void, tabsLanguage: object }) {
+function TabAdminComponent({ setTab, tabsLanguage }:{ tab: string, setTab: void, tabsLanguage: object }) {
 
     const list = tabsLanguage.list;
 

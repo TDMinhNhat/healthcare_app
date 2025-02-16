@@ -10,7 +10,6 @@ import {
     TableRow,
     Typography
 } from "@mui/material";
-import { useState, useEffect } from "react";
 import "../../styles/tab-users-admin.scss"
 
 function UsersAdminComponent({ tabUserContentLanguage }:{ tabUserContentLanguage: object }) {
