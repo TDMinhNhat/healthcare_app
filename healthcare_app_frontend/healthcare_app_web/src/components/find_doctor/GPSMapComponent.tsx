@@ -1,4 +1,5 @@
 import {useLayoutEffect, useState} from "react";
+import {useSelector} from "react-redux";
 import {Box, Typography} from "@mui/material";
 import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet";
 import DoctorLocationComponent from "./gps/DoctorLocationComponent.tsx";
@@ -20,6 +21,7 @@ export default function GPSMapComponent({ language }: { language: object }) {
     const [successDetectGPS, setSuccessDetectGPS] = useState(false);
     const [latitude, setLatitude] = useState<number | null>();
     const [longitude, setLongitude] = useState<number | null>();
+    const user = useSelector((state) => state.user);
 
     useLayoutEffect(() => {
         if ("geolocation" in navigator) {
@@ -27,7 +29,7 @@ export default function GPSMapComponent({ language }: { language: object }) {
                 (position) => {
                     const getLatitude: number = position.coords.latitude;
                     const getLongitude: number = position.coords.longitude;
-                    socket.emit("send_doctor_connect", {latitude: getLatitude, longitude: getLongitude, name: "Doctor 1"});
+                    socket.emit("send_doctor_connect", {latitude: getLatitude, longitude: getLongitude, userId: user.userId});
                     setLatitude(getLatitude);
                     setLongitude(getLongitude);
                     setSuccessDetectGPS(true);
@@ -43,7 +45,8 @@ export default function GPSMapComponent({ language }: { language: object }) {
         }
 
         window.addEventListener("beforeunload", () => {
-            socket.emit("send_doctor_disconnect", {latitude: latitude, longitude: longitude, name: "Doctor 1"});
+            console.log("User disconnect: ", user.userId + " at " + latitude + " " + longitude);
+            socket.emit("send_doctor_disconnect", {latitude: latitude, longitude: longitude, userId: user.userId});
             socket.close();
         })
     }, []);
@@ -51,7 +54,7 @@ export default function GPSMapComponent({ language }: { language: object }) {
 
 
     const position = () => {
-        if (latitude != undefined && longitude != undefined) {
+        if (latitude !== undefined && longitude !== undefined) {
             return [latitude, longitude];
         } else {
             return [10.822107, 106.686959];

@@ -8,13 +8,18 @@ export default function DoctorLocationComponent({ latitude, longitude, socket }:
     const [listDoctor, setListDoctor] = useState<[]>([]);
 
     useEffect(() => {
-        socket.on("get_doctor_connect", (data) => {
-            console.log(data);
-            if((data.latitude === latitude && data.longitude === longitude) || data.latitude === null || data.longitude === null) {
-                console.log("A same as location or latitude or longitude is null");
-            } else {
-                return setListDoctor([...listDoctor, data]);
+        socket.on("get_all_doctors_connect", (data: []) => {
+            if(data.length === 0) {
+                setListDoctor([]);
             }
+
+            data.map((doctor: object) => {
+                if((doctor.latitude === latitude && doctor.longitude === longitude) || doctor.latitude === null || doctor.longitude === null) {
+                    console.log("A same as location or latitude or longitude is null");
+                } else {
+                    setListDoctor([...listDoctor, doctor]);
+                }
+            })
         })
     }, [])
 
@@ -24,7 +29,7 @@ export default function DoctorLocationComponent({ latitude, longitude, socket }:
                 return (
                     <Marker key={index.toString()} position={[doctor.latitude, doctor.longitude]}>
                         <Popup>
-                            <Typography>{doctor.name}</Typography>
+                            <Typography>{doctor.doctorId}</Typography>
                         </Popup>
                     </Marker>
                 )
