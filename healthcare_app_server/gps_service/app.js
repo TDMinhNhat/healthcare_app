@@ -7,7 +7,7 @@ var {Server} = require("socket.io")
 var {Eureka} = require("eureka-js-client")
 const server = require('http').createServer(app);
 const Doctor = require("./models/doctor.js");
-const DoctorRepository = require("./repositories/doctor-repository.js");
+const DoctorRepository = require("./repositories/doctor.repository.js");
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -49,26 +49,25 @@ client.start((error) => {
 const io = new Server(server, {
     path: "/gps"
 })
-io.on("connection", (socket) => {
-    console.log("A user connected to the websocket server")
-
-    io.emit("get_all_doctors_connect", new DoctorRepository().getAll());
-
-    socket.on("send_doctor_connect", (data) => {
+io.on("connection", async (socket) => {
+    socket.on("send_doctor_connect", async (data) => {
         const doctor = new Doctor(
             data.userId,
             data.latitude,
             data.longitude
         )
 
-        const result = new DoctorRepository().add(doctor);
-        console.log(result);
-        io.emit("get_doctor_connect", data);
+        const result = await new DoctorRepository().add(doctor);
+        const getListDoctorConnect = await new DoctorRepository().getAll();
+        // io.emit("get_doctor_connect", data);
+        io.emit("get_all_doctors_connect", getListDoctorConnect);
     })
 
-    socket.on("send_doctor_disconnect", (data) => {
-        console.log("Disconnect: ", data);
-        io.emit("get_doctor_disconnect", data);
+    socket.on("send_doctor_disconnect", async (data) => {
+        /*io.emit("get_doctor_disconnect", data);*/
+        await new DoctorRepository().delete(data)
+        const getListDoctorConnect = await new DoctorRepository().getAll();
+        io.emit("get_all_doctors_connect", getListDoctorConnect)
     })
 })
 
