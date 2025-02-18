@@ -5,7 +5,7 @@ var logger = require('morgan');
 var app = express();
 var { Eureka } = require("eureka-js-client");
 var server = require("http").createServer(app);
-var database = require("./database.config");
+var database = require("./databases/mongodb.config");
 
 app.use(logger('dev'));
 app.use(express.json());
