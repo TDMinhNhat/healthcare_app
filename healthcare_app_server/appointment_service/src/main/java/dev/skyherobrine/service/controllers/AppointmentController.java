@@ -1,6 +1,7 @@
 package dev.skyherobrine.service.controllers;
 
 import dev.skyherobrine.service.dtos.BookAppointmentDTO;
+import dev.skyherobrine.service.enums.AppointmentStatus;
 import dev.skyherobrine.service.models.Appointment;
 import dev.skyherobrine.service.models.Response;
 import dev.skyherobrine.service.repositories.AppointmentRepository;
@@ -103,6 +104,18 @@ public class AppointmentController {
                     "Server return an error",
                     e
             ));
+        }
+    }
+
+    @PutMapping("solve/{id}")
+    public synchronized ResponseEntity<Response> solveAppointment(@PathVariable("id") String appointmentId) {
+        try {
+            log.info("Call solve the appointment method");
+            Long getId = Long.parseLong(appointmentId);
+            Appointment appointment = ar.findById(getId).get();
+            appointment.setStatus(AppointmentStatus.SOLVED);
+        } catch (Exception e) {
+
         }
     }
 }

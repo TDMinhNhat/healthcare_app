@@ -14,7 +14,11 @@ import java.time.LocalDateTime;
 @Getter @Setter
 @NoArgsConstructor @RequiredArgsConstructor
 public class Appointment {
-    @MongoId @Field(name = "created_at")
+    @MongoId @NonNull
+    private Long id;
+    @Field(name = "appointment_id") @NonNull
+    private String appointmentId;
+    @Field(name = "created_at")
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss") @NonNull
     private LocalDateTime createdAt;
     @Field(name = "user_id") @NonNull
