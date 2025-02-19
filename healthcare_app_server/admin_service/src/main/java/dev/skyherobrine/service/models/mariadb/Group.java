@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class Group {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "group_id", length = 15, nullable = false, unique = true)
+    @Column(name = "group_id", length = 15, nullable = false, unique = true) @NonNull
     private String groupId;
     @Column(name = "group_name", length = 100, nullable = false) @NonNull
     private String groupName;
