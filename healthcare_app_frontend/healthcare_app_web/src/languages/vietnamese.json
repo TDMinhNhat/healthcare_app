@@ -70,22 +70,18 @@
     "tabs": [
       {
         "name": "Điền thông tin cá nhân",
-        "isOptional": false,
-        "optional": "Bắt buộc"
-      },
-      {
-        "name": "Xác nhận Email",
-        "isOptional": false,
         "optional": "Bắt buộc"
       },
       {
         "name": "Quét khuôn mặt",
-        "isOptional": true,
         "optional": "Có thể bỏ qua"
       },
       {
+        "name": "Xác nhận Email",
+        "optional": "Bắt buộc"
+      },
+      {
         "name": "Hoàn tất",
-        "isOptional": false,
         "optional": "Bắt buộc"
       }
     ],

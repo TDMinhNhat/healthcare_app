@@ -119,12 +119,20 @@ function InputInfoComponent({ registerLanguage, handleNext, activeStep, setRegis
     }
 
     const solveRegisterAccount: void = async () => {
-        const result = await registerAccount.addUser(firstName, lastName, sex, phone, dob, username, email, password, address).then(response => response.data).catch(error => error);
-        console.log(result);
-        if(result.code === 200) {
-            setRegisterUserData(result.data);
-            handleNext();
+        const registerData = {
+            "firstName": firstName,
+            "lastName": lastName,
+            "sex": sex,
+            "phone": phone,
+            "dob": dob,
+            "username": username,
+            "email": email,
+            "password": password,
+            "address": address
         }
+        sessionStorage.setItem("registerData", JSON.stringify(registerData));
+        setRegisterUserData(registerData);
+        handleNext();
     }
 
     return (

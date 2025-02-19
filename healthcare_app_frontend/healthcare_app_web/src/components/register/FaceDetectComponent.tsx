@@ -1,4 +1,4 @@
-import {Box, Button, Stack} from "@mui/material";
+import {Box, Stack} from "@mui/material";
 
 function FaceDetectComponent({ registerLanguage, handleNext, activeStep }:{ registerLanguage: object, handleNext: void, activeStep: number}) {
     return (
@@ -7,13 +7,7 @@ function FaceDetectComponent({ registerLanguage, handleNext, activeStep }:{ regi
 
             </Box>
             <Stack direction={"row"} className={"d-flex justify-content-end mb-4"}>
-                <Box>
-                    {activeStep !== 4 &&
-                        <Button color="success" variant={"contained"} onClick={handleNext}>
-                            {registerLanguage.button_next}
-                        </Button>
-                    }
-                </Box>
+
             </Stack>
         </Stack>
     )

@@ -70,22 +70,18 @@
     "tabs": [
       {
         "name": "Input personal information",
-        "isOptional": false,
-        "optional": "Bắt buộc"
-      },
-      {
-        "name": "Verify Email",
-        "isOptional": false,
         "optional": "Bắt buộc"
       },
       {
         "name": "Face detection",
-        "isOptional": true,
         "optional": "You can skip"
       },
       {
+        "name": "Verify Email",
+        "optional": "Bắt buộc"
+      },
+      {
         "name": "Complete Registration",
-        "isOptional": false,
         "optional": "Bắt buộc"
       }
     ],
