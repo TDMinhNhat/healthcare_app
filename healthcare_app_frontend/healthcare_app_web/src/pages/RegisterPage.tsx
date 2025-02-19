@@ -60,10 +60,9 @@ function RegisterPage({registerLanguage}: { registerLanguage: object }) {
                         })}
                     </Stepper>
                     <Box className={"mt-3"}></Box>
-                    {activeStep === 0 && <InputInfoComponent registerLanguage={registerLanguage} handleNext={handleNext} handleBack={handleBack} activeStep={activeStep} setRegisterUserData={setRegisterUserData} />}
-                    {activeStep === 1 && <FaceDetectComponent registerLanguage={registerLanguage} handleNext={handleNext} activeStep={activeStep} registerUserData={registerUserData}/>}
-                    {activeStep === 2 && <EmailVerifyComponent registerLanguage={registerLanguage} handleNext={handleNext} handleBack={handleBack} activeStep={activeStep} registerUserData={registerUserData}/>}
-                    {activeStep === 3 && <CompleteRegisterComponent registerLanguage={registerLanguage}/>}
+                    {activeStep === 0 && <InputInfoComponent registerLanguage={registerLanguage} handleNext={handleNext} activeStep={activeStep} setRegisterUserData={setRegisterUserData} />}
+                    {activeStep === 1 && <FaceDetectComponent registerLanguage={registerLanguage} handleNext={handleNext} registerUserData={registerUserData}/>}
+                    {activeStep === 2 && <EmailVerifyComponent registerLanguage={registerLanguage} handleNext={handleNext} registerUserData={registerUserData}/>}
                 </Box>
             </Box>
         </Container>

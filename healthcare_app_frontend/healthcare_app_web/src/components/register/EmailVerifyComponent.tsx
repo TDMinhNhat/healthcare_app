@@ -15,11 +15,14 @@ function EmailVerifyComponent({ registerLanguage, handleNext, activeStep, regist
     }, [])
 
     const solveHandleNext = async () => {
-        console.log(inputOtpMessage)
-        const result = await registerAccount.verifyOtpMessage(registerUserData.id, inputOtpMessage).then(response => response.data).catch(error => error);
-        console.log(result)
-        if(result.code === 200) {
-            handleNext();
+        const getRegisterUserId: number = sessionStorage.getItem("register_user_id");
+        if(getRegisterUserId !== null && getRegisterUserId !== undefined) {
+            const result = await registerAccount.verifyOtpMessage(getRegisterUserId, inputOtpMessage).then(response => response.data).catch(error => error);
+            console.log(result)
+            if(result.code === 200) {
+                sessionStorage.removeItem("register_user_id");
+                handleNext();
+            }
         }
     }
 

@@ -69,20 +69,13 @@
   "register": {
     "tabs": [
       {
-        "name": "Điền thông tin cá nhân",
-        "optional": "Bắt buộc"
+        "name": "Điền thông tin cá nhân"
       },
       {
-        "name": "Quét khuôn mặt",
-        "optional": "Có thể bỏ qua"
+        "name": "Quét khuôn mặt"
       },
       {
-        "name": "Xác nhận Email",
-        "optional": "Bắt buộc"
-      },
-      {
-        "name": "Hoàn tất",
-        "optional": "Bắt buộc"
+        "name": "Xác nhận Email"
       }
     ],
     "button_next": "Tiếp theo",

@@ -69,20 +69,13 @@
   "register": {
     "tabs": [
       {
-        "name": "Input personal information",
-        "optional": "Bắt buộc"
+        "name": "Input personal information"
       },
       {
-        "name": "Face detection",
-        "optional": "You can skip"
+        "name": "Face detection"
       },
       {
-        "name": "Verify Email",
-        "optional": "Bắt buộc"
-      },
-      {
-        "name": "Complete Registration",
-        "optional": "Bắt buộc"
+        "name": "Verify Email"
       }
     ],
     "button_next": "Next",

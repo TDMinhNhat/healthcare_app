@@ -130,7 +130,6 @@ function InputInfoComponent({ registerLanguage, handleNext, activeStep, setRegis
             "password": password,
             "address": address
         }
-        sessionStorage.setItem("registerData", JSON.stringify(registerData));
         setRegisterUserData(registerData);
         handleNext();
     }
