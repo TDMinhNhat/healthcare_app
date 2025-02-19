@@ -1,6 +1,6 @@
 import {Box, Button, Stack, TextField, Typography} from "@mui/material";
 import { useState, useEffect } from "react";
-import registerAccount from "../../controllers/register-account.controller.ts";
+import registerAccount from "../../controllers/register.controller.ts";
 
 function EmailVerifyComponent({ registerLanguage, activeStep, registerUserData }:{ registerLanguage: object, activeStep: number, registerUserData: object }) {
 

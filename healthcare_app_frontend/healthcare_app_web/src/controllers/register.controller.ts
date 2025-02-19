@@ -1,7 +1,7 @@
 import userModel from "../models/user-model.ts";
 import {Dayjs} from "dayjs";
 
-const registerAccountController = {
+const registerController = {
 
     addUser: (firstName: string, lastName: string, sex: boolean, phone: string, dob: Dayjs, username: string, email: string, password: string, address: object, imageDetect: string) => {
         const getDob: string = dob.format("DD-MM-YYYY");
@@ -17,4 +17,4 @@ const registerAccountController = {
     }
 }
 
-export default registerAccountController;
+export default registerController;

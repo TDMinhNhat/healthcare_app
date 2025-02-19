@@ -4,7 +4,7 @@ import "../styles/headers.scss"
 import {Link} from "react-router";
 import {Avatar, Box, Stack, Typography} from "@mui/material";
 import {useSelector,useDispatch} from "react-redux";
-import {setUser} from "../stores/slices/user-slice.ts";
+import {setUser} from "../stores/slices/user.slice.ts";
 import {useLayoutEffect} from "react";
 
 function HeaderComponent({language, tab, setTab}: { language: object, tab: string, setTab: void }) {

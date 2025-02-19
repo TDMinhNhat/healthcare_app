@@ -3,7 +3,7 @@ import WebCam from "react-webcam";
 import {useEffect, useRef} from "react";
 import axios from "axios";
 import {useSelector, useDispatch} from "react-redux";
-import { setUser } from "../../stores/slices/user-slice.ts";
+import { setUser } from "../../stores/slices/user.slice.ts";
 
 export default function FaceDetectComponent({language, setStep}: { language: object, setStep: void }) {
 
