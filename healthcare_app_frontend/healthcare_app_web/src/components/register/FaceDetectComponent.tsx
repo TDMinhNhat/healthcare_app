@@ -2,7 +2,7 @@ import {Stack} from "@mui/material";
 import WebCam, {Webcam} from "react-webcam";
 import {useEffect, useRef} from "react";
 import axios from "axios";
-import registerAccount from "../../controllers/register-account.ts";
+import registerAccount from "../../controllers/register-account.controller.ts";
 
 function FaceDetectComponent({ registerLanguage, handleNext, registerUserData }:{ registerLanguage: object, handleNext: void, registerUserData: object }) {
 

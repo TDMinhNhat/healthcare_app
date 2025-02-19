@@ -13,7 +13,7 @@ import {useState} from "react";
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import {Dayjs} from "dayjs";
-import registerAccount from "../../controllers/register-account.ts"
+import registerAccount from "../../controllers/register-account.controller.ts"
 
 function InputInfoComponent({ registerLanguage, handleNext, activeStep, setRegisterUserData }:{ registerLanguage: object, handleNext: void, activeStep: number, setRegisterUserData: void }) {
 
