@@ -3,7 +3,6 @@ import React, {useState} from "react";
 import InputInfoComponent from "../components/register/InputInfoComponent";
 import FaceDetectComponent from "../components/register/FaceDetectComponent.tsx";
 import EmailVerifyComponent from "../components/register/EmailVerifyComponent.tsx";
-import CompleteRegisterComponent from "../components/register/CompleteRegisterComponent.tsx";
 
 function RegisterPage({registerLanguage}: { registerLanguage: object }) {
 

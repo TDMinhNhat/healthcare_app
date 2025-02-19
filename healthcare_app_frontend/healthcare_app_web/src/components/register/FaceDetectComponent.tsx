@@ -1,4 +1,4 @@
-import {Box, Stack} from "@mui/material";
+import {Stack} from "@mui/material";
 import WebCam, {Webcam} from "react-webcam";
 import {useEffect, useRef} from "react";
 import axios from "axios";
@@ -17,6 +17,16 @@ function FaceDetectComponent({ registerLanguage, handleNext, registerUserData }:
         } catch (error) {
             console.log("Camera is not access: ", error);
             return false;
+        }
+    }
+
+    const stopCamera = () => {
+        if (webcamRef.current && webcamRef.current.video) {
+            const stream = webcamRef.current.video.srcObject;
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                webcamRef.current.video.srcObject = null;
+            }
         }
     }
 
@@ -65,13 +75,16 @@ function FaceDetectComponent({ registerLanguage, handleNext, registerUserData }:
                 ).then(response => response.data).catch(error => console.log(error));
 
                 if(resultAddUser.code === 200) {
-                    clearInterval(intervalId.current);
                     sessionStorage.setItem("register_user_id", resultAddUser.data.id);
+                    stopCamera();
                     handleNext();
                 }
             }
-
         }, 1000);
+
+        return () => {
+            clearInterval(intervalId.current);
+        }
     }, []);
 
     return (
