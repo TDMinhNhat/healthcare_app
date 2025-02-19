@@ -3,11 +3,18 @@ import "../../node_modules/bootstrap/dist/js/bootstrap.js";
 import "../styles/headers.scss"
 import {Link} from "react-router";
 import {Avatar, Box, Stack, Typography} from "@mui/material";
-import {useSelector} from "react-redux";
+import {useSelector,useDispatch} from "react-redux";
+import {setUser} from "../stores/slices/user-slice.ts";
+import {useLayoutEffect} from "react";
 
 function HeaderComponent({language, tab, setTab}: { language: object, tab: string, setTab: void }) {
 
     const user = useSelector((state) => state.user);
+    const dispatch = useDispatch();
+
+    useLayoutEffect(() => {
+        dispatch(setUser(JSON.parse(sessionStorage.getItem("user") as string)));
+    }, []);
 
     function checkTabEnable(value: string, type: string) {
         if (tab === value) {
@@ -51,7 +58,7 @@ function HeaderComponent({language, tab, setTab}: { language: object, tab: strin
                     </Box>
                 </Stack>
                 <Box>
-                    {user == null ?
+                    {user === null || user === undefined ?
                         <Link to={"/login"} className={"d-flex align-items-center"}
                               style={{textDecorationLine: "none", color: "purple"}}>
                             <Avatar>G</Avatar>

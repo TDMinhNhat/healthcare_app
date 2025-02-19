@@ -3,14 +3,25 @@ import EmailIcon from "@mui/icons-material/Email";
 import KeyIcon from "@mui/icons-material/Key";
 import {Link} from "react-router";
 import {useState} from "react";
+import AuthenticateController from "../../controllers/authenticate.controller.ts";
 
 function LoginStandard({ loginLanguage } : { loginLanguage: object}) {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const solveLogin = () => {
+    const solveLogin = async () => {
+        const result: object | null = await new AuthenticateController().loginStandard(email, password).then((response: object) => response).catch((error: object) => {
+            console.log(error);
+            return null;
+        })
 
+        if(result != null && result.code === 200) {
+            sessionStorage.setItem("user", JSON.stringify(result.data));
+            window.location.href = "/";
+        } else {
+            alert("Login failed!");
+        }
     }
 
     return (
