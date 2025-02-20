@@ -1,5 +1,8 @@
 import { useLayoutEffect } from "react";
 import {io} from "socket.io-client";
+import {Box, Stack} from "@mui/material";
+import ChatAreaComponent from "../components/chat/ChatAreaComponent.tsx";
+import TabChatComponent from "../components/chat/TabChatComponent.tsx";
 
 const socket = io("ws://localhost:8081", {
     path: "/chat",
@@ -9,7 +12,7 @@ const socket = io("ws://localhost:8081", {
     autoConnect: false
 });
 socket.on("connect", () => {
-    console.log("Success connect to the server");
+
 })
 
 export default function ChatPage({ chatLanguage }:{ chatLanguage: object }) {
@@ -18,6 +21,13 @@ export default function ChatPage({ chatLanguage }:{ chatLanguage: object }) {
     }, [])
 
     return (
-        <h1>Chat Page</h1>
+        <Stack direction={"row"} className={"w-100 h-100 d-flex flex-row position-fixed"}>
+            <Box className={"col-3 bg-black"}>
+                <TabChatComponent />
+            </Box>
+            <Box className={"col-9 bg-info"}>
+                <ChatAreaComponent />
+            </Box>
+        </Stack>
     )
 }
