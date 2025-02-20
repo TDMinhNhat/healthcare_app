@@ -6,6 +6,7 @@ var app = express();
 var { Eureka } = require("eureka-js-client");
 var server = require("http").createServer(app);
 var database = require("./configs/mongodb.config");
+var socketRun = require("./configs/socket.config.js");
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -13,7 +14,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Connect to eureka server
 const client = new Eureka({
     instance: {
         app: "CHAT_SERVICE",
@@ -45,6 +45,7 @@ client.start((error) => {
 
 server.listen(4000, () => {
     console.log("The server is running the port 4000");
+    socketRun(server);
 })
 
 module.exports = app;
