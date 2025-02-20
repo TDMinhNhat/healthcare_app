@@ -3,8 +3,19 @@ import {Box, Fab, List, Stack, TextField} from "@mui/material";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import SearchIcon from '@mui/icons-material/Search';
+import {useState, useLayoutEffect} from "react";
 
 export default function TabChatComponent({socket}: { socket: Socket }) {
+
+    const [inputSearchUser, setInputSearchUser] = useState("");
+
+    useLayoutEffect(() => {
+        
+    }, [inputSearchUser]);
+
+    const changeInputSearch = (event) => {
+        setInputSearchUser(event.target.value);
+    }
 
     const addFriend = () => {
         console.log("Click add friend");
@@ -22,7 +33,7 @@ export default function TabChatComponent({socket}: { socket: Socket }) {
                         input: {
                             startAdornment: <SearchIcon />
                         }
-                    }} fullWidth/>
+                    }} onChange={changeInputSearch} fullWidth/>
                 </Box>
                 <Stack direction={"row"}>
                     <Fab color={"primary"} size={"small"} className={"me-2"}>
@@ -33,6 +44,9 @@ export default function TabChatComponent({socket}: { socket: Socket }) {
                     </Fab>
                 </Stack>
             </Stack>
+            <List className={"w-100 h-100"}>
+
+            </List>
         </Stack>
     )
 }
