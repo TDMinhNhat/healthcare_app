@@ -10,7 +10,8 @@ const socket = io("ws://localhost:8081", {
     path: "/gps",
     transports: ["websocket", "polling"],
     reconnection: true,
-    reconnectionAttempts: 10
+    reconnectionAttempts: 10,
+    autoConnect: false
 });
 socket.on("connect", () => {
     console.log("Success connect socket to the server");
@@ -24,6 +25,7 @@ export default function GPSMapComponent({ language }: { language: object }) {
     const user = useSelector((state) => state.user);
 
     useLayoutEffect(() => {
+        socket.connect();
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
