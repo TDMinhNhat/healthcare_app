@@ -23,10 +23,10 @@ export default function ChatPage({ chatLanguage }:{ chatLanguage: object }) {
     return (
         <Stack direction={"row"} className={"w-100 h-100 d-flex flex-row position-fixed"}>
             <Box className={"col-3"}>
-                <TabChatComponent socket={socket} />
+                <TabChatComponent tabLanguage={chatLanguage.tab} socket={socket} />
             </Box>
             <Box className={"col-9 bg-info"}>
-                <ChatAreaComponent socket={socket} />
+                <ChatAreaComponent areaChatLanguage={chatLanguage.area_chat} socket={socket} />
             </Box>
         </Stack>
     )

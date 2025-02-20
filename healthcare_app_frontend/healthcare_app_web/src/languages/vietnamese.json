@@ -122,6 +122,16 @@
     "complete_register": {
     }
   },
+  "chat": {
+    "tab": {
+      "search": {
+        "title": "Tìm kiếm bạn bè"
+      }
+    },
+    "area_chat": {
+
+    }
+  },
   "admin": {
     "tabs": {
       "list": [

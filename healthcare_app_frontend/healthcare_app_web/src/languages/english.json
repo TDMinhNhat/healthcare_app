@@ -121,5 +121,15 @@
     },
     "complete_register": {
     }
+  },
+  "chat": {
+    "tab": {
+      "search": {
+        "title": "Search friends"
+      }
+    },
+    "area_chat": {
+
+    }
   }
 }
