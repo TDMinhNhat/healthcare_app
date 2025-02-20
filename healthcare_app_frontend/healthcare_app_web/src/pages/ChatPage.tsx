@@ -22,11 +22,11 @@ export default function ChatPage({ chatLanguage }:{ chatLanguage: object }) {
 
     return (
         <Stack direction={"row"} className={"w-100 h-100 d-flex flex-row position-fixed"}>
-            <Box className={"col-3 bg-black"}>
-                <TabChatComponent />
+            <Box className={"col-3"}>
+                <TabChatComponent socket={socket} />
             </Box>
             <Box className={"col-9 bg-info"}>
-                <ChatAreaComponent />
+                <ChatAreaComponent socket={socket} />
             </Box>
         </Stack>
     )
