@@ -125,7 +125,11 @@
   "chat": {
     "tab": {
       "search": {
-        "title": "Search friends"
+        "placeholder": "Search friend"
+      },
+      "tabs": {
+        "private_chat": "Private Message",
+        "group_chat": "Group Message"
       }
     },
     "area_chat": {

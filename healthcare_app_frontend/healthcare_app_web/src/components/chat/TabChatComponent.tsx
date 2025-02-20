@@ -1,15 +1,35 @@
 import {Socket} from "socket.io-client";
-import {Box, Fab, List, Stack, TextField} from "@mui/material";
+import {Box, Fab, List, Stack, Tab, Tabs, TextField} from "@mui/material";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import SearchIcon from '@mui/icons-material/Search';
-import {useState, useLayoutEffect} from "react";
+import {useState, useLayoutEffect, useEffect} from "react";
 
 export default function TabChatComponent({socket, tabLanguage}: { socket: Socket, tabLanguage: object }) {
 
+    const [tabChat, setTabChat] = useState("private");
+    const [listUser, setListUser] = useState([]);
     const [inputSearchUser, setInputSearchUser] = useState("");
 
+    useEffect(() => {
+        socket.on("receive_result_search_user", (data) => {
+
+        })
+
+        socket.emit("send_request_get_users_has_chatted")
+
+        socket.on("get_users_has_chatted", (data) => {
+            setListUser(data);
+        })
+    }, []);
+
+    useEffect(() => {
+
+    }, [tabChat]);
+
     useLayoutEffect(() => {
+        socket.emit("send_request_search_user", { "inputSearch": inputSearchUser });
+
 
     }, [inputSearchUser]);
 
@@ -26,14 +46,14 @@ export default function TabChatComponent({socket, tabLanguage}: { socket: Socket
     }
 
     return (
-        <Stack direction={"column"}>
-            <Stack direction={"row"} className={"w-100 p-3 d-flex flex-row justify-content-between align-items-center"}>
+        <Stack direction={"column"} className={"p-3"}>
+            <Stack direction={"row"} className={"w-100 d-flex flex-row justify-content-between align-items-center"}>
                 <Box className={"mt-3 col-8"}>
-                    <TextField variant={"standard"} label={tabLanguage.search.title} slotProps={{
+                    <TextField variant={"standard"} slotProps={{
                         input: {
                             startAdornment: <SearchIcon />
                         }
-                    }} onChange={changeInputSearch} fullWidth/>
+                    }} placeholder={tabLanguage.search.placeholder} onChange={(e) => changeInputSearch(e)} fullWidth/>
                 </Box>
                 <Stack direction={"row"}>
                     <Fab color={"primary"} size={"small"} className={"me-2"}>
@@ -44,6 +64,12 @@ export default function TabChatComponent({socket, tabLanguage}: { socket: Socket
                     </Fab>
                 </Stack>
             </Stack>
+            <Box className={"w-100 mt-3"}>
+                <Tabs value={tabChat} onChange={(_e, newValue) => setTabChat(newValue)}>
+                    <Tab label={tabLanguage.tabs.private_chat} value={"private"} className={"col-6"}/>
+                    <Tab label={tabLanguage.tabs.group_chat} value={"group"} className={"col-6"}/>
+                </Tabs>
+            </Box>
             <List className={"w-100 h-100"}>
 
             </List>

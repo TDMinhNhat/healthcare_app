@@ -125,7 +125,11 @@
   "chat": {
     "tab": {
       "search": {
-        "title": "Tìm kiếm bạn bè"
+        "placeholder": "Tìm kiếm bạn bè"
+      },
+      "tabs": {
+        "private_chat": "TIN NHẮN RIÊNG TƯ",
+        "group_chat": "TIN NHẮN CỘNG ĐỒNG"
       }
     },
     "area_chat": {
