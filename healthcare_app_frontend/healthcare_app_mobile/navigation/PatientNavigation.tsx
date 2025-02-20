@@ -16,88 +16,89 @@ import SearchScreen from "../screens/search/SearchSreen";
 import CameraScreen from "../screens/appointment/CameraScreen";
 import MapScreen from "../screens/appointment/MapScreen";
 import SavedAddressesScreen from "../screens/address/SavedAddressesScreen";
+import { SCREENS } from "../constants/constants";
 
 const PatientStack = createNativeStackNavigator({
   screens: {
-    Login: {
+    [SCREENS.LOGIN]: {
       screen: LoginScreen,
       options: {
         headerShown: false,
       },
     },
-    SignUp: {
+    [SCREENS.SIGN_UP]: {
       screen: SignUpScreen,
       options: {
         headerShown: false,
       },
     },
-    EnterMail: {
+    [SCREENS.ENTER_MAIL]: {
       screen: EnterMail,
       options: {
         headerShown: false,
       },
     },
-    EnterOTP: {
+    [SCREENS.ENTER_OTP]: {
       screen: EnterOTP,
       options: {
         headerShown: false,
       },
     },
-    ResetPassword: {
+    [SCREENS.RESET_PASSWORD]: {
       screen: ResetPassword,
       options: {
         headerShown: false,
       },
     },
-    Main: {
+    [SCREENS.MAIN]: {
       screen: BottomTabNavigator,
       options: {
         headerShown: false,
       },
     },
-    TopDoctors: {
+    [SCREENS.TOP_DOCTORS]: {
       screen: TopDoctorsScreen,
       options: {
         headerShown: false,
       },
     },
-    FavoriteDoctors: {
+    [SCREENS.FAVORITE_DOCTORS]: {
       screen: FavouriteDoctorsScreen,
       options: {
         headerShown: false,
       },
     },
-    DoctorDetail: {
+    [SCREENS.DOCTOR_DETAIL]: {
       screen: DoctorDetailsScreen,
       options: {
         headerShown: false,
       },
     },
-    EditProfile: {
+    [SCREENS.EDIT_PROFILE]: {
       screen: EditProfileScreen,
       options: {
         headerShown: false,
       },
     },
-    SearchScreen: {
+    [SCREENS.SEARCH]: {
       screen: SearchScreen,
       options: {
         headerShown: false,
       },
     },
-    Map: {
+    [SCREENS.MAP]: {
       screen: MapScreen,
       options: {
         headerShown: false,
       },
     },
-    CameraDetect: {
+    [SCREENS.CAMERA_DETECT]: {
       screen: CameraScreen,
       options: {
         headerShown: false,
       },
     },
-    SavedAddresses: {
+    [SCREENS.SAVED_ADDRESSES]: {
       screen: SavedAddressesScreen,
       options: {
         headerShown: false,

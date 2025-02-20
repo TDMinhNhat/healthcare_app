@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { ScrollView, StatusBar, StyleSheet, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ScrollView, StatusBar, StyleSheet, View, Alert } from "react-native";
 import { useDispatch } from "react-redux";
 import Geolocation from "@react-native-community/geolocation";
 import { setCurrentLocation } from "../../store/userSlice";
@@ -59,33 +59,67 @@ const categories: {
 ];
 export const HomeScreen = () => {
   const dispatch = useDispatch();
+  const [locationError, setLocationError] = useState<string | null>(null);
+
+  const getLocation = () => {
+    Geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const address = await getAddressFromCoordinates(
+            position.coords.latitude,
+            position.coords.longitude
+          );
+
+          dispatch(
+            setCurrentLocation({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+              address: address,
+            })
+          );
+          setLocationError(null);
+        } catch (error) {
+          console.error("Error getting address:", error);
+          setLocationError("Không thể lấy được địa chỉ");
+        }
+      },
+      (error) => {
+        let errorMessage = "Không thể lấy vị trí";
+        switch (error.code) {
+          case 1:
+            errorMessage = "Vui lòng cấp quyền truy cập vị trí cho ứng dụng";
+            break;
+          case 2:
+            errorMessage = "Không thể xác định vị trí của bạn";
+            break;
+          case 3:
+            errorMessage = "Quá thời gian lấy vị trí, vui lòng thử lại";
+            break;
+          case 4:
+            errorMessage = "Dịch vụ định vị không khả dụng";
+            break;
+        }
+        setLocationError(errorMessage);
+        Alert.alert("Lỗi định vị", errorMessage, [
+          {
+            text: "Thử lại",
+            onPress: () => getLocation(),
+          },
+          {
+            text: "Đóng",
+            style: "cancel",
+          },
+        ]);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 20000,
+        maximumAge: 1000,
+      }
+    );
+  };
 
   useEffect(() => {
-    const getLocation = () => {
-      Geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            const address = await getAddressFromCoordinates(
-              position.coords.latitude,
-              position.coords.longitude
-            );
-
-            dispatch(
-              setCurrentLocation({
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-                address: address,
-              })
-            );
-          } catch (error) {
-            console.error(error);
-          }
-        },
-        (error) => console.log(error),
-        { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
-      );
-    };
-
     getLocation();
   }, []);
 

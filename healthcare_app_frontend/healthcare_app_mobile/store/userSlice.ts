@@ -26,7 +26,8 @@ const userSlice = createSlice({
       state.currentLocation = action.payload;
     },
     logout: (state) => {
-      AsyncStorage.removeItem("accessToken");
+      // AsyncStorage.removeItem("accessToken");
+      AsyncStorage.clear();
       state.user = null;
       state.currentLocation = null;
     },

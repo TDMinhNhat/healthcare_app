@@ -1,22 +1,29 @@
 import React, { useState } from "react";
-import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
-import { useNavigation, useTheme } from "@react-navigation/native";
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Text,
+  Platform,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import TextInput from "../../components/TextInput";
 import Button from "../../components/Button";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import Header from "../../components/Header";
-import { Picker } from "@react-native-picker/picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export const EditProfileScreen = () => {
   const navigation = useNavigation();
   const [gender, setGender] = useState<"Male" | "Female">("Male");
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const validationSchema = Yup.object({
     fullName: Yup.string().required("Required"),
-    dateOfBirth: Yup.string().required("Required"),
+    dateOfBirth: Yup.date().required("Required"),
     email: Yup.string().email("Invalid email").required("Required"),
   });
 
@@ -28,11 +35,9 @@ export const EditProfileScreen = () => {
     console.log("Form values:", formData);
   };
 
-  const currentYear = new Date().getFullYear();
-  // Generate years from 1900 to current year
-  const years = Array.from({ length: currentYear - 1900 + 1 }, (_, i) =>
-    (currentYear - i).toString()
-  );
+  const formatDate = (date: Date) => {
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -41,7 +46,7 @@ export const EditProfileScreen = () => {
       <Formik
         initialValues={{
           fullName: "Jhalok Deb",
-          dateOfBirth: currentYear.toString(),
+          dateOfBirth: new Date(),
           email: "jhalokde@gmail.com",
         }}
         validationSchema={validationSchema}
@@ -59,20 +64,26 @@ export const EditProfileScreen = () => {
               />
 
               <View>
-                <Text style={styles.label}>Year of Birth</Text>
-                <View style={styles.pickerContainer}>
-                  <Picker
-                    selectedValue={values.dateOfBirth}
-                    onValueChange={(itemValue) =>
-                      setFieldValue("dateOfBirth", itemValue)
-                    }
-                    style={styles.picker}
-                  >
-                    {years.map((year) => (
-                      <Picker.Item key={year} label={year} value={year} />
-                    ))}
-                  </Picker>
-                </View>
+                <Text style={styles.label}>Date of Birth</Text>
+                <TouchableOpacity
+                  style={styles.dateButton}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Text>{formatDate(values.dateOfBirth)}</Text>
+                </TouchableOpacity>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={values.dateOfBirth}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={(event, selectedDate) => {
+                      setShowDatePicker(Platform.OS === "ios");
+                      if (selectedDate) {
+                        setFieldValue("dateOfBirth", selectedDate);
+                      }
+                    }}
+                  />
+                )}
               </View>
 
               <View style={styles.genderContainer}>
@@ -173,7 +184,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   dateButton: {
-    padding: 8,
+    padding: 12,
     borderWidth: 1,
     borderColor: "#E5E7EB",
     borderRadius: 8,
@@ -185,7 +196,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   picker: {
-    // height: 50,
     width: "100%",
   },
 });

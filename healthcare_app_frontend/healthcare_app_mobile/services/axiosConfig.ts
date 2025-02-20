@@ -1,12 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-const API_URL = "https://reqres.in/api";
+const API_URL = "http://192.168.1.103:8081";
 const axiosConfig = axios.create({
   baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000,
+  // timeout: 10000,
 });
 const getAccessToken = async () => {
   try {
@@ -19,9 +19,9 @@ const getAccessToken = async () => {
 };
 axiosConfig.interceptors.request.use(
   async (config) => {
-    Promise.resolve(getAccessToken()).then((accessToken) => {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    });
+    // Promise.resolve(getAccessToken()).then((accessToken) => {
+    //   config.headers.Authorization = `Bearer ${accessToken}`;
+    // });
     return config;
   },
   (error) => {

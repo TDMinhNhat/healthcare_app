@@ -11,6 +11,7 @@ import i18n from "../../utils/locales/i18n";
 import FieldOTP from "../../components/FieldOTP";
 import Button from "../../components/Button";
 import { useEffect, useState } from "react";
+import { SCREENS } from "../../constants/constants";
 const EXPIRED_TIME = 10; // PHÚT
 export default function EnterOTP() {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
@@ -50,6 +51,10 @@ export default function EnterOTP() {
     } finally {
       setIsResending(false);
     }
+  };
+
+  const handleNavigateResetPassword = () => {
+    navigation.navigate(SCREENS.RESET_PASSWORD);
   };
 
   return (
@@ -127,7 +132,7 @@ export default function EnterOTP() {
         )}
         <Button
           title={i18n.t("verify")}
-          onPress={() => navigation.navigate("ResetPassword")}
+          onPress={handleNavigateResetPassword}
           style={{ width: "100%" }}
         />
       </View>
