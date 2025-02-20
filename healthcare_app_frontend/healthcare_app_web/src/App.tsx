@@ -6,6 +6,7 @@ import HomePage from "./pages/HomePage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import RegisterPage from "./pages/RegisterPage.tsx";
 import AdminPage from "./pages/AdminPage.tsx";
+import ChatPage from "./pages/ChatPage.tsx";
 import vietnamese from "./languages/vietnamese.json";
 import english from "./languages/english.json";
 
@@ -31,6 +32,7 @@ function App() {
                     <Route path="/login" element={ <LoginPage loginLanguage={languageData.login} /> } />
                     <Route path="/register" element={ <RegisterPage registerLanguage={languageData.register} /> } />
                     <Route path="/admin" element={ <AdminPage adminLanguage={languageData.admin}/> } />
+                    <Route path="/chat" element={ <ChatPage chatLanguage={languageData.chat} />}/>
                 </Routes>
             </BrowserRouter>
         </Provider>
