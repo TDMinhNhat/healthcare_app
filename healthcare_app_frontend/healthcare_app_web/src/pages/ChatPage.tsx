@@ -11,13 +11,17 @@ const socket = io("ws://localhost:8081", {
     reconnectionAttempts: 10,
     autoConnect: false
 });
-socket.on("connect", () => {
-
-})
 
 export default function ChatPage({ chatLanguage }:{ chatLanguage: object }) {
+
+    const user: object = JSON.parse(sessionStorage.getItem("user") as string);
+
     useLayoutEffect(() => {
-        socket.connect();
+        if(user !== null && user !== undefined) {
+            socket.connect();
+        } else {
+            window.location.href = "/login";
+        }
     }, [])
 
     return (
