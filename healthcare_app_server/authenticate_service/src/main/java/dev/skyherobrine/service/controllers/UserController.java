@@ -2,13 +2,11 @@ package dev.skyherobrine.service.controllers;
 
 import dev.skyherobrine.service.models.Response;
 import dev.skyherobrine.service.repositories.UserRepository;
+import dev.skyherobrine.service.utils.EncodeDecodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.core5.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("authenticate/api/v1/user")
@@ -29,6 +27,25 @@ public class UserController {
                     HttpStatus.SC_OK,
                     "User found",
                     userRepository.findByUserId("#" + userId)
+            ));
+        } catch (Exception e) {
+            log.error("Server return an error: {}", e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.SC_SERVER_ERROR,
+                    "The server return an error, please try again",
+                    e
+            ));
+        }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Response> getUsersBySearch(@RequestParam("input") String input) {
+        try {
+            log.info("Call get users by input search");
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.SC_OK,
+                    "Get list of users by search input",
+                    userRepository.findUsersBySearchInput(input, EncodeDecodeUtil.encode(input))
             ));
         } catch (Exception e) {
             log.error("Server return an error: {}", e.getMessage());
