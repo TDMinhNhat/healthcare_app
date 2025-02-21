@@ -9,6 +9,7 @@ export default function TabChatComponent({socket, tabLanguage}: { socket: Socket
 
     const [tabChat, setTabChat] = useState("private");
     const [listUser, setListUser] = useState([]);
+    const [listGroup, setListGroup] = useState([]);
     const [inputSearchUser, setInputSearchUser] = useState("");
 
     useEffect(() => {
@@ -16,15 +17,24 @@ export default function TabChatComponent({socket, tabLanguage}: { socket: Socket
 
         })
 
-        socket.emit("send_request_get_users_has_chatted")
-
-        socket.on("get_users_has_chatted", (data) => {
+        socket.on("get_user_chat_private", (data) => {
+            console.log(data);
             setListUser(data);
         })
+
+        socket.on("get_user_chat_group", (data) => {
+            console.log(data);
+            setListGroup(data);
+        })
+
     }, []);
 
     useEffect(() => {
-
+        if(tabChat === "private") {
+            socket.emit("send_get_user_chat_private")
+        } else {
+            socket.emit("send_get_user_chat_group")
+        }
     }, [tabChat]);
 
     useLayoutEffect(() => {
