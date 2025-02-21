@@ -26,7 +26,7 @@
     "expo-camera": "~16.0.10",
     "expo-checkbox": "~4.0.0",
     "expo-local-authentication": "~15.0.1",
-    "expo-location": "~16.1.0",
+    "expo-location": "~18.0.7",
     "expo-status-bar": "~2.0.0",
     "formik": "^2.4.6",
     "i18n-js": "^4.5.1",
