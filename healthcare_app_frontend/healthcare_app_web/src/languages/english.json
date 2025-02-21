@@ -129,6 +129,7 @@
       },
       "add_friend_modal": {
         "title": "Add Friend",
+        "btn_add": "Add Friend",
         "btn_cancel": "Cancel",
         "input_search_placeholder": "Type identifier, first name, phone number or email to search."
       },

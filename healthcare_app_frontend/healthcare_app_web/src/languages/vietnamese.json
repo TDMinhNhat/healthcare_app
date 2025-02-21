@@ -129,8 +129,15 @@
       },
       "add_friend_modal": {
         "title": "Thêm Bạn",
+        "btn_add": "Thêm Bạn",
         "btn_cancel": "Huỷ Bỏ",
-        "input_search_placeholder": "Nhập mã, tên, số điện thoại hoặc địa chỉ email để tìm kiếm"
+        "input_search_placeholder": "Nhập mã, tên, số điện thoại hoặc địa chỉ email để tìm kiếm",
+        "role": {
+          "title": "Chức Vụ",
+          "user": "Bệnh Nhân",
+          "doctor": "Bác Sĩ",
+          "admin": "Người Quản Trị"
+        }
       },
       "create_group_modal": {
 

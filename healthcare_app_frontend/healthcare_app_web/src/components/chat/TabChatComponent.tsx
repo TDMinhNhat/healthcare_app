@@ -1,5 +1,19 @@
 import {Socket} from "socket.io-client";
-import {Box, Button, Fab, List, Modal, Stack, Tab, Tabs, TextField, Typography} from "@mui/material";
+import {
+    Avatar,
+    Box,
+    Button,
+    Fab,
+    List,
+    ListItem,
+    ListItemAvatar, ListItemText,
+    Modal,
+    Stack,
+    Tab,
+    Tabs,
+    TextField,
+    Typography
+} from "@mui/material";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import SearchIcon from '@mui/icons-material/Search';
@@ -7,15 +21,16 @@ import {useState, useLayoutEffect, useEffect} from "react";
 
 export default function TabChatComponent({socket, tabLanguage}: { socket: Socket, tabLanguage: object }) {
 
-    const [openAddFriend, setOpenAddFriend] = useState(false);
-    const [openCreateGroup, setOpenCreateGroup] = useState(false);
-    const [tabChat, setTabChat] = useState("private");
-    const [listUser, setListUser] = useState([]);
-    const [listGroup, setListGroup] = useState([]);
-    const [listUserAddFriend, setListUserAddFriend] = useState([]);
-    const [inputSearchUser, setInputSearchUser] = useState("");
-    const [inputSearchAddFriend, setInputSearchAddFriend] = useState("")
-    const [inputSearchCreateGroup, setInputSearchCreateGroup] = useState("");
+    const user: object = JSON.parse(sessionStorage.getItem("user") as string)
+    const [openAddFriend, setOpenAddFriend] = useState<boolean>(false);
+    const [openCreateGroup, setOpenCreateGroup] = useState<boolean>(false);
+    const [tabChat, setTabChat] = useState<string>("private");
+    const [listUser, setListUser] = useState<[]>([]);
+    const [listGroup, setListGroup] = useState<[]>([]);
+    const [listUserAddFriend, setListUserAddFriend] = useState<[]>([]);
+    const [inputSearchUser, setInputSearchUser] = useState<string>("");
+    const [inputSearchAddFriend, setInputSearchAddFriend] = useState<string>("")
+    const [inputSearchCreateGroup, setInputSearchCreateGroup] = useState<string>("");
 
     useEffect(() => {
         socket.on("receive_result_search_user", (data) => {
@@ -33,6 +48,7 @@ export default function TabChatComponent({socket, tabLanguage}: { socket: Socket
         })
 
         socket.on("get_search_add_friend", (data) => {
+            data = data.filter((target: object) => target.userId !== user.userId);
             setListUserAddFriend(data);
         })
     }, []);
@@ -57,8 +73,22 @@ export default function TabChatComponent({socket, tabLanguage}: { socket: Socket
 
     }, [inputSearchUser]);
 
+    const solveAddFriend: void = (senderId: string, receiverId: string) => {
+        console.log(senderId, receiverId);
+    }
+
     const changeInputSearch = (event) => {
         setInputSearchUser(event.target.value);
+    }
+
+    const checkRoleUser: string = (role: string) => {
+        if(role === "USER") {
+            return tabLanguage.add_friend_modal.role.user;
+        } else if(role === "DOCTOR") {
+            return tabLanguage.add_friend_modal.role.doctor;
+        } else {
+            return tabLanguage.add_friend_modal.role.admin;
+        }
     }
 
     return (
@@ -95,7 +125,29 @@ export default function TabChatComponent({socket, tabLanguage}: { socket: Socket
                                     />
 
                                     <Box className={"w-100 mt-5"}>
-
+                                        <List>
+                                            {listUserAddFriend.map((target: object, index: number) => {
+                                                return (
+                                                    <ListItem
+                                                        key={index.toString()}
+                                                        alignItems={"center"}
+                                                        secondaryAction={
+                                                            <Button variant={"contained"} color={"success"}
+                                                                    onClick={() => solveAddFriend(user.userId, target.userId)}>{tabLanguage.add_friend_modal.btn_add}
+                                                            </Button>
+                                                        }
+                                                    >
+                                                        <ListItemAvatar>
+                                                            <Avatar alt={target.username} src={target.avatar} />
+                                                        </ListItemAvatar>
+                                                        <ListItemText
+                                                            primary={target.username + " - " + target.userId}
+                                                            secondary={tabLanguage.add_friend_modal.role.title + ": " + checkRoleUser(target.role.roleName)}
+                                                        />
+                                                    </ListItem>
+                                                )
+                                            })}
+                                        </List>
                                     </Box>
                                 </Box>
                             </Box>
