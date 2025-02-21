@@ -127,6 +127,13 @@
       "search": {
         "placeholder": "Search friend"
       },
+      "add_friend_modal": {
+        "title": "Add Friend",
+        "btn_cancel": "Cancel"
+      },
+      "create_group_modal": {
+
+      },
       "tabs": {
         "private_chat": "Private Message",
         "group_chat": "Group Message"

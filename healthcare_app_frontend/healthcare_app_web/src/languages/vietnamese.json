@@ -127,6 +127,14 @@
       "search": {
         "placeholder": "Tìm kiếm bạn bè"
       },
+      "add_friend_modal": {
+        "title": "Thêm Bạn",
+        "btn_cancel": "Huỷ Bỏ",
+        "input_search_placeholder": "Nhập mã, tên, số điện thoại hoặc địa chỉ email để tìm kiếm"
+      },
+      "create_group_modal": {
+
+      },
       "tabs": {
         "private_chat": "TIN NHẮN RIÊNG TƯ",
         "group_chat": "TIN NHẮN CỘNG ĐỒNG"
