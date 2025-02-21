@@ -12,8 +12,10 @@ export default function TabChatComponent({socket, tabLanguage}: { socket: Socket
     const [tabChat, setTabChat] = useState("private");
     const [listUser, setListUser] = useState([]);
     const [listGroup, setListGroup] = useState([]);
+    const [listUserAddFriend, setListUserAddFriend] = useState([]);
     const [inputSearchUser, setInputSearchUser] = useState("");
-    const [inputSearchAddFriend, setInputSearchAddFriend] = useState("");
+    const [inputSearchAddFriend, setInputSearchAddFriend] = useState("")
+    const [inputSearchCreateGroup, setInputSearchCreateGroup] = useState("");
 
     useEffect(() => {
         socket.on("receive_result_search_user", (data) => {
@@ -30,6 +32,9 @@ export default function TabChatComponent({socket, tabLanguage}: { socket: Socket
             setListGroup(data);
         })
 
+        socket.on("get_search_add_friend", (data) => {
+            setListUserAddFriend(data);
+        })
     }, []);
 
     useEffect(() => {
@@ -39,6 +44,12 @@ export default function TabChatComponent({socket, tabLanguage}: { socket: Socket
             socket.emit("send_get_user_chat_group")
         }
     }, [tabChat]);
+
+    useEffect(() => {
+        if(inputSearchAddFriend.length > 0) {
+            socket.emit("send_request_search_add_friend", {"input": inputSearchAddFriend});
+        }
+    }, [inputSearchAddFriend]);
 
     useLayoutEffect(() => {
         socket.emit("send_request_search_user", {"inputSearch": inputSearchUser});
@@ -107,8 +118,9 @@ export default function TabChatComponent({socket, tabLanguage}: { socket: Socket
             </Stack>
             <Box className={"w-100 mt-3"}>
                 <Tabs value={tabChat} onChange={(_e, newValue) => setTabChat(newValue)}>
-                    <Tab label={tabLanguage.tabs.private_chat} value={"private"} className={"col-6"}/>
-                    <Tab label={tabLanguage.tabs.group_chat} value={"group"} className={"col-6"}/>
+                    <Tab label={tabLanguage.tabs.private_chat} value={"private"} className={"col-4"}/>
+                    <Tab label={tabLanguage.tabs.group_chat} value={"group"} className={"col-4"}/>
+                    <Tab label={tabLanguage.tabs.list_friend} value={"friend"} className={"col-4"}/>
                 </Tabs>
             </Box>
             <List className={"w-100 h-100"}>

@@ -136,8 +136,9 @@
 
       },
       "tabs": {
-        "private_chat": "TIN NHẮN RIÊNG TƯ",
-        "group_chat": "TIN NHẮN CỘNG ĐỒNG"
+        "private_chat": "CÁ NHÂN",
+        "group_chat": "NHÓM",
+        "list_friend": "BẠN BÈ"
       }
     },
     "area_chat": {
