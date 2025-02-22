@@ -69,12 +69,10 @@ export default function TabChatComponent({socket, tabLanguage}: { socket: Socket
 
     useLayoutEffect(() => {
         socket.emit("send_request_search_user", {"inputSearch": inputSearchUser});
-
-
     }, [inputSearchUser]);
 
     const solveAddFriend: void = (senderId: string, receiverId: string) => {
-        console.log(senderId, receiverId);
+        socket.emit("send_request_add_friend", { "senderId": senderId, "receiverId": receiverId });
     }
 
     const changeInputSearch = (event) => {
