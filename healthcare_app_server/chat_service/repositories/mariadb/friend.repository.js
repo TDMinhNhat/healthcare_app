@@ -13,6 +13,17 @@ class FriendRepository {
             return null;
         })
     }
+
+    async getFriendBySenderId(senderId) {
+        const conn = (await getPool()).getConnection();
+        return await conn.then(async (conn) => await conn.query(
+            `SELECT * FROM friend WHERE sender_id = ?`,
+            [senderId]).then(result => result)
+        ).catch(error => {
+            console.log(error);
+            return null;
+        })
+    }
 }
 
 module.exports = FriendRepository;

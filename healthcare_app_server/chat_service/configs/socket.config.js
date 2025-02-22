@@ -1,4 +1,4 @@
-const { Server } = require("socket.io");
+const {Server} = require("socket.io");
 const userFeign = require("../feigns/user.feign");
 const FriendRepository = require("../repositories/mariadb/friend.repository");
 
@@ -20,7 +20,7 @@ const run = (server) => {
             io.to(socket.id).emit("get_user_chat_group", "List Group");
         })
 
-        socket.on("send_request_search_add_friend", async(data) => {
+        socket.on("send_request_search_add_friend", async (data) => {
             const result = await userFeign.getListSearchUser(data.input).then(response => response.data).catch(error => {
                 console.log(error);
                 return error;
@@ -35,6 +35,32 @@ const run = (server) => {
 
             const friendRepository = new FriendRepository();
             friendRepository.addFriend(senderId, receiverId);
+        })
+
+        socket.on("send_get_user_friend", async (data) => {
+            console.log(data);
+            const resultFriends = await new FriendRepository().getFriendBySenderId(data.senderId).then(result => result).catch(() => null);
+            const result = await Promise.all(
+                resultFriends.map(async (friend) => {
+                    try {
+                        const response = await userFeign.getUserInfo(friend.receiver_id)
+                        return {
+                            id: response.id,
+                            userId: response.userId,
+                            firstName: response.firstName,
+                            lastName: response.lastName,
+                            phone: response.phone,
+                            avatar: response.avatar,
+                            role: response.role.roleName,
+                            friend_status: friend.status
+                        }
+                    } catch (error) {
+                        console.log(error);
+                        return null;
+                    }
+                })
+            );
+            io.to(socket.id).emit("get_user_friend", result);
         })
     })
 }
