@@ -32,3 +32,5 @@ class Friend {
         return this._updated_at;
     }
 }
+
+module.exports = Friend;

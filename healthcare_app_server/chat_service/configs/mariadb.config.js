@@ -14,8 +14,8 @@ async function checkAndCreateDb() {
 
     await conn.query(`
         CREATE TABLE IF NOT EXISTS friend (
-            sender_id BIGINT NOT NULL,
-            receiver_id BIGINT NOT NULL,
+            sender_id NVARCHAR(50) NOT NULL,
+            receiver_id NVARCHAR(50) NOT NULL,
             status INT NOT NULL,
             created_at DATETIME NOT NULL,
             updated_at DATETIME NOT NULL,
@@ -42,7 +42,7 @@ async function checkAndCreateDb() {
     `)
 }
 
-async function getConnect() {
+async function getPool() {
     await checkAndCreateDb();
 
     return mariadb.createPool({
@@ -54,4 +54,4 @@ async function getConnect() {
     });
 }
 
-module.exports = getConnect;
+module.exports = getPool;
