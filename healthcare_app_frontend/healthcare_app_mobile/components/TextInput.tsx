@@ -4,6 +4,7 @@ import {
   TextInput as RNTextInput,
   View,
   TouchableOpacity,
+  KeyboardTypeOptions,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { useField } from "formik";
@@ -13,9 +14,15 @@ interface TextInputProps {
   name: string;
   label: string;
   placeholder: string;
+  keyboardType?: KeyboardTypeOptions;
 }
 
-const TextInput: React.FC<TextInputProps> = ({ name, label, placeholder }) => {
+const TextInput: React.FC<TextInputProps> = ({
+  name,
+  label,
+  placeholder,
+  keyboardType = "default",
+}) => {
   const { colors } = useTheme();
   const [field, meta, helpers] = useField(name);
   const [isPasswordVisible, setPasswordVisible] = useState(false);
@@ -72,6 +79,7 @@ const TextInput: React.FC<TextInputProps> = ({ name, label, placeholder }) => {
           onBlur={field.onBlur(name)}
           value={field.value}
           secureTextEntry={isPassword && !isPasswordVisible}
+          keyboardType={keyboardType}
         />
         {isPassword && (
           <TouchableOpacity

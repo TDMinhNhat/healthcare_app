@@ -45,5 +45,9 @@
   "search": "Search...",
   "lookingForSpecialistDoctor": "Looking for specialist doctor?",
   "upLoadAPrescription": "Upload a Prescription and Tell Us what you Need. We do the Rest!",
-  "bookNow": "Book now"
+  "bookNow": "Book now",
+  "enterFirstName": "Enter your first name",
+  "enterLastName": "Enter your last name",
+  "enterPhoneNumber": "Enter your phone number",
+  "enterUserName": "Enter your username"
 }

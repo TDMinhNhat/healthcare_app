@@ -44,5 +44,9 @@
   "search": "Tìm kiếm...",
   "lookingForSpecialistDoctor": "Đang tìm bác sĩ chuyên khoa?",
   "upLoadAPrescription": "Tải lên đơn thuốc và cho chúng tôi biết bạn cần gì. Chúng tôi sẽ làm phần còn lại!",
-  "bookNow": "Đặt ngay"
+  "bookNow": "Đặt ngay",
+  "enterFirstName": "Nhập tên của bạn",
+  "enterLastName": "Nhập họ của bạn",
+  "enterPhoneNumber": "Nhập số điện thoại của bạn",
+  "enterUserName": "Nhập tên người dùng của bạn"
 }

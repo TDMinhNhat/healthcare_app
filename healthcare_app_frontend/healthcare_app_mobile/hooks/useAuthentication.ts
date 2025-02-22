@@ -34,6 +34,8 @@ export const useAuthentication = () => {
       password,
       sex,
       dateOfBirth,
+      username,
+      phone,
     }: {
       firstName: string;
       lastName: string;
@@ -41,7 +43,19 @@ export const useAuthentication = () => {
       password: string;
       sex: boolean;
       dateOfBirth: Date;
-    }) => signUp(firstName, lastName, email, password, sex, dateOfBirth),
+      username: string;
+      phone: string;
+    }) =>
+      signUp(
+        firstName,
+        lastName,
+        email,
+        password,
+        sex,
+        dateOfBirth,
+        username,
+        phone
+      ),
     onSuccess: (response) => {
       // You can check response data here
       console.log("Sign up response:", response);

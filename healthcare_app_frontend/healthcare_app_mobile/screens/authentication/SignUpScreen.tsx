@@ -94,6 +94,8 @@ export default function SignUpScreen() {
           email: "",
           password: "",
           dateOfBirth: new Date(),
+          username: "",
+          phone: "", // Add phone initial value
         }}
         validationSchema={Yup.object({
           firstName: Yup.string().required("Required"),
@@ -103,6 +105,11 @@ export default function SignUpScreen() {
             .required("Required")
             .min(8, "Password must be at least 8 characters"),
           dateOfBirth: Yup.date().required("Required"),
+          username: Yup.string().required("Required"),
+          phone: Yup.string()
+            .matches(/^[0-9]+$/, "Phone number must only contain digits")
+            .min(10, "Phone number must be at least 10 digits")
+            .required("Required"),
         })}
         onSubmit={(values) => {
           if (!isChecked) {
@@ -110,7 +117,15 @@ export default function SignUpScreen() {
             return;
           }
           setError(null);
-          const { firstName, lastName, email, password, dateOfBirth } = values;
+          const {
+            firstName,
+            lastName,
+            email,
+            password,
+            dateOfBirth,
+            username,
+            phone,
+          } = values;
           signUpMutation.mutate({
             firstName,
             lastName,
@@ -118,20 +133,27 @@ export default function SignUpScreen() {
             password,
             sex,
             dateOfBirth,
+            username,
+            phone,
           });
         }}
       >
         {({ handleSubmit, values, setFieldValue }) => (
           <View style={{ width: "100%", gap: 20 }}>
             <TextInput
+              name="username"
+              label="Username"
+              placeholder={i18n.t("enterUserName")}
+            />
+            <TextInput
               name="firstName"
               label="First Name"
-              placeholder={i18n.t("enterName")}
+              placeholder={i18n.t("enterFirstName")}
             />
             <TextInput
               name="lastName"
               label="Last Name"
-              placeholder={i18n.t("enterName")}
+              placeholder={i18n.t("enterLastName")}
             />
             <TextInput
               name="email"
@@ -142,6 +164,12 @@ export default function SignUpScreen() {
               name="password"
               label="Password"
               placeholder={i18n.t("enterPassword")}
+            />
+            <TextInput
+              name="phone"
+              label="Phone Number"
+              placeholder="Enter phone number"
+              keyboardType="numeric"
             />
 
             <View>
@@ -203,9 +231,7 @@ export default function SignUpScreen() {
                   }}
                   onPress={() => setSex(false)}
                 >
-                  <Text style={{ color: !sex ? "#fff" : "#666" }}>
-                    Female
-                  </Text>
+                  <Text style={{ color: !sex ? "#fff" : "#666" }}>Female</Text>
                 </TouchableOpacity>
               </View>
             </View>
