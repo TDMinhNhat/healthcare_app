@@ -1,9 +1,20 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
+interface LocationType {
+  latitude: number;
+  longitude: number;
+  address: string;
+}
+
+const initialState: {
+  user: null | any;
+  currentLocation: LocationType | null;
+} = {
   user: null,
+  currentLocation: null,
 };
+
 const userSlice = createSlice({
   name: "user",
   initialState,
@@ -11,12 +22,17 @@ const userSlice = createSlice({
     setUser: (state, action) => {
       state.user = action.payload;
     },
+    setCurrentLocation: (state, action) => {
+      state.currentLocation = action.payload;
+    },
     logout: (state) => {
-      //clear token
-      AsyncStorage.removeItem("accessToken");
+      // AsyncStorage.removeItem("accessToken");
+      AsyncStorage.clear();
       state.user = null;
+      state.currentLocation = null;
     },
   },
 });
-export const { setUser, logout } = userSlice.actions;
+
+export const { setUser, setCurrentLocation, logout } = userSlice.actions;
 export default userSlice.reducer;

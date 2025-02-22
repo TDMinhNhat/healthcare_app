@@ -8,13 +8,19 @@ import {
   useTheme,
 } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useDispatch } from "react-redux";
+import { logout } from "../../store/userSlice";
 export const ProfileScreen = () => {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
-
+  const dispatch = useDispatch();
   const handleEditProfile = () => {
     navigation.navigate("EditProfile");
   };
 
+  const handleLogout = () => {
+    dispatch(logout());
+    navigation.navigate("Login");
+  };
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView style={styles.container}>
@@ -61,7 +67,7 @@ export const ProfileScreen = () => {
           <MenuItem
             icon="log-out-outline"
             title="Log Out"
-            onPress={() => {}}
+            onPress={handleLogout}
             textColor="#FF4444"
           />
         </View>

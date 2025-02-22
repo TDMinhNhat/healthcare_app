@@ -35,6 +35,11 @@ export default function EnterMail() {
   //     setLoading(false);
   //   };
 
+  const handleSubmit = (values: any) => {
+    setEmail(values.email);
+    //   resetPassword();
+    navigation.navigate("EnterOTP");
+  };
   return (
     <Layout
       style={{
@@ -81,9 +86,7 @@ export default function EnterMail() {
           email: Yup.string().email().required("Required"),
         })}
         onSubmit={(values) => {
-          setEmail(values.email);
-          //   resetPassword();
-          navigation.navigate("EnterOTP");
+          handleSubmit(values);
         }}
       >
         {({ handleSubmit }) => (

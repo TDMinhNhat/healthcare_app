@@ -21,8 +21,9 @@ const useUserQuery = (id: string | undefined) => {
   });
 
   useEffect(() => {
+    console.log("at line 24 ", userQuery);
     if (userQuery.data?.data) {
-      console.log(userQuery.data.data);
+      // console.log(userQuery.data.data);
       dispatch(setUser(userQuery.data.data));
       navigation.navigate("Main");
     } else if (userQuery.isError) {

@@ -15,25 +15,24 @@ import { useState } from "react";
 import Checkbox from "expo-checkbox";
 import IconButton from "../../components/IconButton";
 import { useAuthentication } from "../../hooks/useAuthentication";
-import { useUser } from "../../hooks/useUser";
+import { SCREENS } from "../../constants/constants";
+
 export default function LoginScreen() {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const { colors } = useTheme();
   const [isChecked, setChecked] = useState(false);
-
   const { loginMutation } = useAuthentication();
-  useUser.useUserQuery("2");
-  // useUser.useUserQuery(loginMutation.data?.data?.id);
 
   return (
     <Layout
       style={{
-        height: "100%",
+        // height: "100%",
         justifyContent: "center",
         alignItems: "center",
         paddingHorizontal: 20,
         paddingVertical: 10,
         backgroundColor: "#fff",
+        flex: 1,
       }}
     >
       <View
@@ -173,7 +172,7 @@ export default function LoginScreen() {
 
       <View style={{ flexDirection: "row", marginTop: 20, gap: 5 }}>
         <Text>{i18n.t("dontHaveAnAccount")}</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+        <TouchableOpacity onPress={() => navigation.navigate(SCREENS.SIGN_UP)}>
           <Text style={{ color: colors.main.primary }}>
             {i18n.t("register")}
           </Text>
