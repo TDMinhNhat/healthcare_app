@@ -1,14 +1,57 @@
 const mariadb = require("mariadb")
 
-const pool = mariadb.createPool({
-    host: "localhost",
-    user: "root",
-    password: "123456789",
-    connectionLimit: 10
-})
+async function checkAndCreateDb() {
+    const conn = await mariadb.createConnection({
+        host: "localhost",
+        user: "root",
+        password: "123456789",
+        port: 3306
+    })
 
-conn = (async () => {
-    await pool.getConnection()
-})()
+    await conn.query("CREATE DATABASE IF NOT EXISTS chat_service")
 
-module.exports = conn;
+    await conn.query("USE chat_service")
+
+    await conn.query(`
+        CREATE TABLE IF NOT EXISTS friend (
+            sender_id BIGINT NOT NULL,
+            receiver_id BIGINT NOT NULL,
+            status INT NOT NULL,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            PRIMARY KEY (sender_id, receiver_id)
+        )
+    `)
+
+    await conn.query(`
+        CREATE TABLE IF NOT EXISTS \`group\` (
+            id BIGINT NOT NULL AUTO_INCREMENT,
+            group_id NVARCHAR(15) NOT NULL,
+            group_name NVARCHAR(100) NOT NULL,
+            group_description NVARCHAR(1000),
+            allow_join BOOLEAN NOT NULL,
+            allow_invite BOOLEAN NOT NULL,
+            allow_notification BOOLEAN NOT NULL,
+            allow_chat BOOLEAN NOT NULL,
+            wait_for_response BOOLEAN NOT NULL,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            status INT NOT NULL,
+            PRIMARY KEY (id)
+        )
+    `)
+}
+
+async function getConnect() {
+    await checkAndCreateDb();
+
+    return mariadb.createPool({
+        host: "localhost",
+        user: "root",
+        password: "123456789",
+        database: "chat_service",
+        connectionLimit: 10
+    });
+}
+
+module.exports = getConnect;
