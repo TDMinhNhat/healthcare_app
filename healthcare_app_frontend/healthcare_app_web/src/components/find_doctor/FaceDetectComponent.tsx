@@ -54,7 +54,7 @@ export default function FaceDetectComponent({language, setStep}: { language: obj
                 if (result.code === 200) {
                     if (result.message !== "New User") {
                         stopCamera();
-                        sessionStorage.setItem("user", result.data);
+                        sessionStorage.setItem("user", JSON.stringify(result.data));
                         dispatch(setUser(result.data))
                         setStep("gps");
                     } else {
