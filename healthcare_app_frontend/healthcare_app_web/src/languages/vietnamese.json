@@ -69,24 +69,13 @@
   "register": {
     "tabs": [
       {
-        "name": "Điền thông tin cá nhân",
-        "isOptional": false,
-        "optional": "Bắt buộc"
+        "name": "Điền thông tin cá nhân"
       },
       {
-        "name": "Xác nhận Email",
-        "isOptional": false,
-        "optional": "Bắt buộc"
+        "name": "Quét khuôn mặt"
       },
       {
-        "name": "Quét khuôn mặt",
-        "isOptional": true,
-        "optional": "Có thể bỏ qua"
-      },
-      {
-        "name": "Hoàn tất",
-        "isOptional": false,
-        "optional": "Bắt buộc"
+        "name": "Xác nhận Email"
       }
     ],
     "button_next": "Tiếp theo",
@@ -131,6 +120,42 @@
       "button_resend_otp": "Gửi lại mã OTP"
     },
     "complete_register": {
+    }
+  },
+  "chat": {
+    "tab": {
+      "search": {
+        "placeholder": "Tìm kiếm bạn bè"
+      },
+      "add_friend_modal": {
+        "title": "Thêm Bạn",
+        "btn_add": "Thêm Bạn",
+        "btn_cancel": "Huỷ Bỏ",
+        "input_search_placeholder": "Nhập mã, tên, số điện thoại hoặc địa chỉ email để tìm kiếm",
+        "role": {
+          "title": "Chức Vụ",
+          "user": "Bệnh Nhân",
+          "doctor": "Bác Sĩ",
+          "admin": "Người Quản Trị"
+        }
+      },
+      "create_group_modal": {
+
+      },
+      "tabs": {
+        "private_chat": "CÁ NHÂN",
+        "group_chat": "NHÓM",
+        "list_friend": "BẠN BÈ"
+      },
+      "tab_friend": {
+        "status": {
+          "wait": "Đợi Phản Hồi",
+          "friend": "Đã Kết Bạn"
+        }
+      }
+    },
+    "area_chat": {
+
     }
   },
   "admin": {

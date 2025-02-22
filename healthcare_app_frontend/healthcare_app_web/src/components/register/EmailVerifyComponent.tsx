@@ -1,8 +1,8 @@
 import {Box, Button, Stack, TextField, Typography} from "@mui/material";
 import { useState, useEffect } from "react";
-import registerAccount from "../../controllers/register-account.ts";
+import registerAccount from "../../controllers/register.controller.ts";
 
-function EmailVerifyComponent({ registerLanguage, handleNext, activeStep, registerUserData }:{ registerLanguage: object, handleNext: void, activeStep: number, registerUserData: object }) {
+function EmailVerifyComponent({ registerLanguage, activeStep, registerUserData }:{ registerLanguage: object, activeStep: number, registerUserData: object }) {
 
     const [inputOtpMessage, setInputOtpMessage] = useState<string>();
 
@@ -15,11 +15,15 @@ function EmailVerifyComponent({ registerLanguage, handleNext, activeStep, regist
     }, [])
 
     const solveHandleNext = async () => {
-        console.log(inputOtpMessage)
-        const result = await registerAccount.verifyOtpMessage(registerUserData.id, inputOtpMessage).then(response => response.data).catch(error => error);
-        console.log(result)
-        if(result.code === 200) {
-            handleNext();
+        const getRegisterUserId: number = sessionStorage.getItem("register_user_id");
+        if(getRegisterUserId !== null && getRegisterUserId !== undefined) {
+            const result = await registerAccount.verifyOtpMessage(getRegisterUserId, inputOtpMessage).then(response => response.data).catch(error => error);
+            if(result.code === 200) {
+                sessionStorage.removeItem("register_user_id");
+
+                // Direct to home page
+                window.location.href = "/";
+            }
         }
     }
 

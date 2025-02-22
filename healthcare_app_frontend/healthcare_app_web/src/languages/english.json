@@ -69,24 +69,13 @@
   "register": {
     "tabs": [
       {
-        "name": "Input personal information",
-        "isOptional": false,
-        "optional": "Bắt buộc"
+        "name": "Input personal information"
       },
       {
-        "name": "Verify Email",
-        "isOptional": false,
-        "optional": "Bắt buộc"
+        "name": "Face detection"
       },
       {
-        "name": "Face detection",
-        "isOptional": true,
-        "optional": "You can skip"
-      },
-      {
-        "name": "Complete Registration",
-        "isOptional": false,
-        "optional": "Bắt buộc"
+        "name": "Verify Email"
       }
     ],
     "button_next": "Next",
@@ -131,6 +120,34 @@
       "button_resend_otp": "Resend OTP"
     },
     "complete_register": {
+    }
+  },
+  "chat": {
+    "tab": {
+      "search": {
+        "placeholder": "Search friend"
+      },
+      "add_friend_modal": {
+        "title": "Add Friend",
+        "btn_add": "Add Friend",
+        "btn_cancel": "Cancel",
+        "input_search_placeholder": "Type identifier, first name, phone number or email to search."
+      },
+      "create_group_modal": {
+      },
+      "tabs": {
+        "private_chat": "Private Message",
+        "group_chat": "Group Message",
+        "list_friend": "List Friend"
+      },
+      "tab_friend": {
+        "status": {
+          "wait": "Waiting Response",
+          "friend": "Added Friend"
+        }
+      }
+    },
+    "area_chat": {
     }
   }
 }

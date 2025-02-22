@@ -1,9 +1,8 @@
-import {Container, Box, Stack, Typography, Step, Stepper, StepLabel, Button} from "@mui/material";
+import {Container, Box, Typography, Step, Stepper, StepLabel} from "@mui/material";
 import React, {useState} from "react";
 import InputInfoComponent from "../components/register/InputInfoComponent";
 import FaceDetectComponent from "../components/register/FaceDetectComponent.tsx";
 import EmailVerifyComponent from "../components/register/EmailVerifyComponent.tsx";
-import CompleteRegisterComponent from "../components/register/CompleteRegisterComponent.tsx";
 
 function RegisterPage({registerLanguage}: { registerLanguage: object }) {
 
@@ -47,11 +46,6 @@ function RegisterPage({registerLanguage}: { registerLanguage: object }) {
                             const labelProps: {
                                 optional?: React.ReactNode;
                             } = {};
-                            if (item.isOptional) {
-                                labelProps.optional = (
-                                    <Typography variant="caption">{item.optional}</Typography>
-                                );
-                            }
                             if (isStepSkipped(index)) {
                                 stepProps.completed = false;
                             }
@@ -65,10 +59,9 @@ function RegisterPage({registerLanguage}: { registerLanguage: object }) {
                         })}
                     </Stepper>
                     <Box className={"mt-3"}></Box>
-                    {activeStep === 0 && <InputInfoComponent registerLanguage={registerLanguage} handleNext={handleNext} handleBack={handleBack} activeStep={activeStep} setRegisterUserData={setRegisterUserData} />}
-                    {activeStep === 1 && <EmailVerifyComponent registerLanguage={registerLanguage} handleNext={handleNext} handleBack={handleBack} activeStep={activeStep} registerUserData={registerUserData}/>}
-                    {activeStep === 2 && <FaceDetectComponent registerLanguage={registerLanguage} handleNext={handleNext} activeStep={activeStep} registerUserData={registerUserData}/>}
-                    {activeStep === 3 && <CompleteRegisterComponent registerLanguage={registerLanguage}/>}
+                    {activeStep === 0 && <InputInfoComponent registerLanguage={registerLanguage} handleNext={handleNext} activeStep={activeStep} setRegisterUserData={setRegisterUserData} />}
+                    {activeStep === 1 && <FaceDetectComponent registerLanguage={registerLanguage} handleNext={handleNext} registerUserData={registerUserData}/>}
+                    {activeStep === 2 && <EmailVerifyComponent registerLanguage={registerLanguage} handleNext={handleNext} registerUserData={registerUserData}/>}
                 </Box>
             </Box>
         </Container>

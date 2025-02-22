@@ -3,7 +3,7 @@ import {Dayjs} from "dayjs";
 import { useState } from "react";
 import {DateTimeField, LocalizationProvider} from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import registerAccount from "../../controllers/register-account.ts";
+import registerAccount from "../../controllers/register.controller.ts";
 
 export default function InputInfoComponent({ language, setStep }:{ language: object, setStep: void }) {
 
