@@ -38,7 +38,6 @@ const run = (server) => {
         })
 
         socket.on("send_get_user_friend", async (data) => {
-            console.log(data);
             const resultFriends = await new FriendRepository().getFriendBySenderId(data.senderId).then(result => result).catch(() => null);
             const result = await Promise.all(
                 resultFriends.map(async (friend) => {
