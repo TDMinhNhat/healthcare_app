@@ -134,16 +134,20 @@
         "input_search_placeholder": "Type identifier, first name, phone number or email to search."
       },
       "create_group_modal": {
-
       },
       "tabs": {
         "private_chat": "Private Message",
         "group_chat": "Group Message",
         "list_friend": "List Friend"
+      },
+      "tab_friend": {
+        "status": {
+          "wait": "Waiting Response",
+          "friend": "Added Friend"
+        }
       }
     },
     "area_chat": {
-
     }
   }
 }

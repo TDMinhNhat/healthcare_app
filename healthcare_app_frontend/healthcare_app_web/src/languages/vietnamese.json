@@ -146,6 +146,12 @@
         "private_chat": "CÁ NHÂN",
         "group_chat": "NHÓM",
         "list_friend": "BẠN BÈ"
+      },
+      "tab_friend": {
+        "status": {
+          "wait": "Đợi Phản Hồi",
+          "friend": "Đã Kết Bạn"
+        }
       }
     },
     "area_chat": {

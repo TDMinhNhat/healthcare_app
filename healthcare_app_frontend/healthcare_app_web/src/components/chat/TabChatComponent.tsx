@@ -44,7 +44,6 @@ export default function TabChatComponent({socket, tabLanguage}: { socket: Socket
         })
 
         socket.on("get_user_chat_group", (data) => {
-            console.log(data);
             setListGroup(data);
         })
 
@@ -55,6 +54,7 @@ export default function TabChatComponent({socket, tabLanguage}: { socket: Socket
 
         socket.on("get_user_friend", (data) => {
             console.log(data);
+            setListFriend(data);
         })
     }, []);
 
@@ -93,6 +93,14 @@ export default function TabChatComponent({socket, tabLanguage}: { socket: Socket
             return tabLanguage.add_friend_modal.role.doctor;
         } else {
             return tabLanguage.add_friend_modal.role.admin;
+        }
+    }
+
+    const checkFriendStatus = (status: number) => {
+        if(status === 0) {
+            return tabLanguage.tab_friend.status.wait;
+        } else {
+            return tabLanguage.tab_friend.status.friend;
         }
     }
 
@@ -181,7 +189,22 @@ export default function TabChatComponent({socket, tabLanguage}: { socket: Socket
                 </Tabs>
             </Box>
             <List className={"w-100 h-100"}>
-
+                { tabChat === "friend" && listFriend.map((friend: object, index: number) => {
+                    return (
+                        <ListItem
+                            key={index.toString()}
+                            alignItems={"center"}
+                        >
+                            <ListItemAvatar>
+                                <Avatar alt={friend.username} src={friend.avatar} />
+                            </ListItemAvatar>
+                            <ListItemText
+                                primary={friend.firstName + " " + friend.lastName}
+                                secondary={tabLanguage.add_friend_modal.role.title + ": " + checkRoleUser(friend.role) + " - " + checkFriendStatus(friend.friend_status)}
+                            />
+                        </ListItem>
+                    )
+                })}
             </List>
         </Stack>
     )
