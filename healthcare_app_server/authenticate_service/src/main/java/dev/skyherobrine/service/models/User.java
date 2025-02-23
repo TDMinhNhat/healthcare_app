@@ -57,10 +57,6 @@ public class User {
     @JoinColumn(name = "authed_provider_id", nullable = false)
     private AuthenticateProvider authedProvider;
 
-    @ManyToOne
-    @JoinColumn(name = "role_id", nullable = false)
-    private UserRole role;
-
     @Column(name = "email_verified", nullable = false)
     private boolean emailVerified;
 

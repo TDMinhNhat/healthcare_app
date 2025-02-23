@@ -20,13 +20,11 @@ public class RegisterService {
     private final AddressRepository ar;
     private final UserRepository ur;
     private final AuthenticateProviderRepository apr;
-    private final UserRoleRepository urr;
     private final KafkaTemplate<String,String> kafkaTemplate;
 
-    public RegisterService(UserRepository ur, AuthenticateProviderRepository apr, UserRoleRepository urr, AddressRepository ar, KafkaTemplate<String,String> kafkaTemplate) {
+    public RegisterService(UserRepository ur, AuthenticateProviderRepository apr, AddressRepository ar, KafkaTemplate<String,String> kafkaTemplate) {
         this.ur = ur;
         this.apr = apr;
-        this.urr = urr;
         this.ar = ar;
         this.kafkaTemplate = kafkaTemplate;
     }
@@ -53,7 +51,6 @@ public class RegisterService {
         }
 
         user.setAuthedProvider(apr.findAuthenticateProviderByAuthenName("APPLICATION").get());
-        user.setRole(urr.findUserRoleByRoleName("USER").get());
 
         if(ur.findByUserId(user.getUserId()).isPresent()) return null;
 
