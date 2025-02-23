@@ -2,15 +2,12 @@ package dev.skyherobrine.service.services;
 
 import dev.skyherobrine.service.dtos.UserRegisterDTO;
 import dev.skyherobrine.service.models.Address;
-import dev.skyherobrine.service.models.AuthenticateProvider;
 import dev.skyherobrine.service.models.User;
 import dev.skyherobrine.service.repositories.AddressRepository;
 import dev.skyherobrine.service.repositories.AuthenticateProviderRepository;
 import dev.skyherobrine.service.repositories.UserRepository;
-import dev.skyherobrine.service.repositories.UserRoleRepository;
 import dev.skyherobrine.service.utils.EncodeDecodeUtil;
 import dev.skyherobrine.service.utils.ObjectParser;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
