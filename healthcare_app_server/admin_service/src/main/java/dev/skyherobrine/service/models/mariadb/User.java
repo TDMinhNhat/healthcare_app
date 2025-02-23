@@ -57,10 +57,6 @@ public class User {
     @Column(name = "face_image_encode", length = 60000, nullable = false) @NonNull
     private String faceImageEncode;
 
-    @ManyToOne
-    @JoinColumn(name = "role_id", nullable = false)
-    private UserRole role;
-
     @Column(name = "email_verified", nullable = false)
     private boolean emailVerified;
 
