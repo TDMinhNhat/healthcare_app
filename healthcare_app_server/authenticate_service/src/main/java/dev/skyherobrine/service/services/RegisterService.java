@@ -38,7 +38,6 @@ public class RegisterService {
                 userRegisterDTO.getSex(),
                 userRegisterDTO.getDobLocalDate(),
                 userRegisterDTO.getPhone(),
-                userRegisterDTO.getUsername(),
                 EncodeDecodeUtil.encode(userRegisterDTO.getEmail()),
                 EncodeDecodeUtil.encode(userRegisterDTO.getPassword())
         );
