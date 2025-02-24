@@ -1,51 +1,179 @@
 import { useState } from "react";
-import {Box, Container, Stack, Tab, Tabs} from "@mui/material";
-import LoginStandard from "../components/login/LoginStandard.tsx";
-import LoginFace from "../components/login/LoginFace.tsx";
-import LoginOthersApp from "../components/login/LoginOthersApp.tsx"
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { Grid2 } from "@mui/material";
+import {
+  Box,
+  Container,
+  TextField,
+  Button,
+  Typography,
+  Link,
+  IconButton,
+  InputAdornment,
+  Divider,
+} from "@mui/material";
+import {
+  Visibility,
+  VisibilityOff,
+  Google,
+  Facebook,
+  Apple,
+  Face,
+} from "@mui/icons-material";
 
-function LoginPage({ loginLanguage } : { loginLanguage:object }) {
+const validationSchema = Yup.object({
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required"),
+  password: Yup.string().required("Password is required"),
+});
 
-    const [tab, setTab] = useState("standard");
+export default function LoginPage() {
+  const [showPassword, setShowPassword] = useState(false);
 
-    return (
-        <Container maxWidth={false} disableGutters={true}>
-            <Box className={"z-0 fixed-top"}>
-                <img
-                    alt={"background_login"}
-                    src={"background_login.png"}
-                    width={"100%"}
-                />
-            </Box>
-            <Box className={"d-flex align-items-center justify-content-center bg-white position-absolute top-50 start-50 translate-middle p-5 shadow-lg rounded"}
-            style={{width: "45%"}}>
-                <Stack direction={"column"}>
-                    <Stack direction={"column"} className={"d-flex flex-column align-items-center"}>
-                        <Box className={"d-flex justify-content-center"}>
-                            <img
-                                alt={"logo"}
-                                src={"logo.png"}
-                                width={"50%"}
-                            />
-                        </Box>
-                    </Stack>
-                    <Box className={"w-100 mt-5"}>
-                        <Tabs className={"d-flex justify-content-between"} value={tab} onChange={(e, newValue) => setTab(newValue)}>
-                            <Tab label={loginLanguage.login_standard} value={"standard"}/>
-                            <Tab label={loginLanguage.login_face} value={"face"}/>
-                            <Tab label={loginLanguage.login_others_app} value={"others_app"}/>
-                        </Tabs>
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: validationSchema,
+    onSubmit: (values) => {
+      console.log(values);
+      // Handle login submission
+    },
+  });
 
-                        <Box className={"mt-3"}>
-                            {tab === "standard" && <LoginStandard loginLanguage={loginLanguage}/>}
-                            {tab === "face" && <LoginFace loginLanguage={loginLanguage}/>}
-                            {tab === "others_app" && <LoginOthersApp loginLanguage={loginLanguage}/>}
-                        </Box>
-                    </Box>
-                </Stack>
-            </Box>
-        </Container>
-    )
+  const handleFaceLogin = () => {
+    console.log("Face detection login");
+    // Handle face detection login
+  };
+
+  return (
+    <Container maxWidth="sm">
+      <Box
+        sx={{
+          p: 3,
+          mt: 8,
+          boxShadow: 3,
+          borderRadius: 2,
+          backgroundColor: "background.paper",
+        }}
+      >
+        <Typography variant="h5" align="center" gutterBottom>
+          Welcome Back
+        </Typography>
+        <Typography variant="body2" align="center" sx={{ mb: 3 }}>
+          New to our platform? <Link href="/register">Create an account</Link>
+        </Typography>
+
+        <form onSubmit={formik.handleSubmit}>
+          <Grid2 container spacing={2}>
+            <Grid2 size={{ xs: 12 }}>
+              <TextField
+                fullWidth
+                id="email"
+                name="email"
+                label="Email Address"
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                error={formik.touched.email && Boolean(formik.errors.email)}
+                helperText={formik.touched.email && formik.errors.email}
+              />
+            </Grid2>
+            <Grid2 size={{ xs: 12 }}>
+              <TextField
+                fullWidth
+                id="password"
+                name="password"
+                label="Password"
+                type={showPassword ? "text" : "password"}
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                error={
+                  formik.touched.password && Boolean(formik.errors.password)
+                }
+                helperText={formik.touched.password && formik.errors.password}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid2>
+
+            <Grid2 size={{ xs: 12 }}>
+              <Link
+                href="/forgot-password"
+                sx={{
+                  display: "block",
+                  textAlign: "right",
+                  mb: 1,
+                }}
+              >
+                Forgot password?
+              </Link>
+            </Grid2>
+
+            <Grid2 size={{ xs: 12 }}>
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                type="submit"
+                size="large"
+              >
+                Sign In
+              </Button>
+            </Grid2>
+
+            <Grid2 size={{ xs: 12 }}>
+              <Button
+                fullWidth
+                variant="outlined"
+                color="primary"
+                size="large"
+                startIcon={<Face />}
+                onClick={handleFaceLogin}
+                sx={{ mt: 1 }}
+              >
+                Sign in with Face ID
+              </Button>
+            </Grid2>
+          </Grid2>
+        </form>
+
+        <Divider sx={{ mt: 3, mb: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            Or continue with
+          </Typography>
+        </Divider>
+
+        <Grid2 container spacing={2}>
+          <Grid2 size={{ xs: 4 }}>
+            <Button fullWidth variant="outlined" startIcon={<Google />}>
+              Google
+            </Button>
+          </Grid2>
+          <Grid2 size={{ xs: 4 }}>
+            <Button fullWidth variant="outlined" startIcon={<Facebook />}>
+              Facebook
+            </Button>
+          </Grid2>
+          <Grid2 size={{ xs: 4 }}>
+            <Button fullWidth variant="outlined" startIcon={<Apple />}>
+              Apple
+            </Button>
+          </Grid2>
+        </Grid2>
+      </Box>
+    </Container>
+  );
 }
-
-export default LoginPage;
