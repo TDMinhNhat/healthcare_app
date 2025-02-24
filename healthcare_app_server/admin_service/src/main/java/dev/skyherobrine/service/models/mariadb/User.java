@@ -38,9 +38,6 @@ public class User {
     @Column(length = 20, nullable = false) @NonNull
     private String phone;
 
-    @Column(length = 50, unique = true, nullable = false) @NonNull
-    private String username;
-
     @Column(length = 200, unique = true, nullable = false) @NonNull
     private String email;
 
