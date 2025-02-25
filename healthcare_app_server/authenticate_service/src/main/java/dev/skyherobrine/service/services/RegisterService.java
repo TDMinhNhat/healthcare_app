@@ -2,6 +2,7 @@ package dev.skyherobrine.service.services;
 
 import dev.skyherobrine.service.dtos.UserRegisterDTO;
 import dev.skyherobrine.service.models.Address;
+import dev.skyherobrine.service.models.Patient;
 import dev.skyherobrine.service.models.User;
 import dev.skyherobrine.service.repositories.AddressRepository;
 import dev.skyherobrine.service.repositories.AuthenticateProviderRepository;
@@ -31,7 +32,7 @@ public class RegisterService {
 
     public User registerAccount(UserRegisterDTO userRegisterDTO) throws Exception {
         String getUserId = generateUserId(userRegisterDTO);
-        User user = new User(
+        User user = new Patient(
                 getUserId,
                 userRegisterDTO.getFirstName(),
                 userRegisterDTO.getLastName(),

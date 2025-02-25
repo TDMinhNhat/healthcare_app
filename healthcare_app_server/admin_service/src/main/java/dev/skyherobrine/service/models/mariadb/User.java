@@ -7,10 +7,10 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity @Table(name = "users")
+@MappedSuperclass
 @Getter @Setter
 @NoArgsConstructor @RequiredArgsConstructor
-public class User {
+public abstract class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

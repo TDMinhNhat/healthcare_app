@@ -1,6 +1,7 @@
 package dev.skyherobrine.service.messages.consumes;
 
 import dev.skyherobrine.service.models.mariadb.Address;
+import dev.skyherobrine.service.models.mariadb.Patient;
 import dev.skyherobrine.service.models.mariadb.User;
 import dev.skyherobrine.service.repositories.mariadb.AddressRepository;
 import dev.skyherobrine.service.repositories.mariadb.UserRepository;
@@ -25,7 +26,7 @@ public class UserConsumers {
     public void insertUser(String message) throws Exception {
         log.info("Listen insert user message: {}", message);
         User user = ObjectParser.convertJsonToObject(message, User.class);
-        User newUser = new User(
+        User newUser = new Patient(
                 user.getUserId(),
                 user.getFirstName(),
                 user.getLastName(),
