@@ -1,16 +1,17 @@
 package dev.skyherobrine.service.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import dev.skyherobrine.service.models.mariadb.Address;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity @Table(name = "users")
+@MappedSuperclass
 @Getter @Setter
 @NoArgsConstructor @RequiredArgsConstructor
-public class User {
+public abstract class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -64,6 +65,19 @@ public class User {
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public User(@NonNull String userId, @NonNull String firstName, @NonNull String lastName, @NonNull Boolean sex, @NonNull LocalDate dob, @NonNull String phone, @NonNull String email, @NonNull String password, AuthenticateProvider authedProvider) {
+        this.userId = userId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.sex = sex;
+        this.dob = dob;
+        this.phone = phone;
+        this.email = email;
+        this.password = password;
+        this.authedProvider = authedProvider;
+        this.address = new Address();
+    }
 
     @PrePersist
     public void prePersist() {
