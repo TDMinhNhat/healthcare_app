@@ -32,14 +32,11 @@ public class UserConsumers {
                 user.getSex(),
                 user.getDob(),
                 user.getPhone(),
-                user.getUsername(),
                 user.getEmail(),
-                user.getPassword(),
-                user.getFaceImageEncode()
+                user.getPassword()
         );
 
         newUser.setAuthedProvider(user.getAuthedProvider());
-        newUser.setRole(user.getRole());
         User target = ur.save(newUser);
 
         Address address = ar.findById(user.getAddress().getId()).orElse(null);

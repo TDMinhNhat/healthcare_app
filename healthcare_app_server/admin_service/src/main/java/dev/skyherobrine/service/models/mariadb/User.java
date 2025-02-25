@@ -65,6 +65,19 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    public User(@NonNull String userId, @NonNull String firstName, @NonNull String lastName, @NonNull Boolean sex, @NonNull LocalDate dob, @NonNull String phone, @NonNull String email, @NonNull String password, AuthenticateProvider authedProvider) {
+        this.userId = userId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.sex = sex;
+        this.dob = dob;
+        this.phone = phone;
+        this.email = email;
+        this.password = password;
+        this.authedProvider = authedProvider;
+        this.address = new Address();
+    }
+
     @PrePersist
     public void prePersist() {
         this.status = true;
