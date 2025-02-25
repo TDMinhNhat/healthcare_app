@@ -1,6 +1,6 @@
 package dev.skyherobrine.service.repositories;
 
-import dev.skyherobrine.service.models.mariadb.Address;
+import dev.skyherobrine.service.models.Address;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
