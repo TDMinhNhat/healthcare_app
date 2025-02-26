@@ -1,15 +1,13 @@
 package dev.skyherobrine.service.controllers;
 
+import dev.skyherobrine.service.dtos.PatientRegisterDTO;
 import dev.skyherobrine.service.models.Response;
 import dev.skyherobrine.service.models.User;
 import dev.skyherobrine.service.services.AuthenticateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("authenticate/api/v1/authenticate")
@@ -47,9 +45,41 @@ public class AuthenticateController {
             ));
         } catch (Exception e) {
             log.error("Authenticate: The api return an error");
+            log.error(e.getMessage());
             return ResponseEntity.ok(new Response(
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "The api check login return an error",
+                    e
+            ));
+        }
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<Response> registerAccount(@RequestBody PatientRegisterDTO patientRegisterDTO) {
+        try {
+            log.info("Authenticate: Call the api create a new account");
+            User result = as.registerAccount(patientRegisterDTO);
+
+            if(result != null) {
+                log.info("Authenticate: Create a new account successfully");
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.OK.value(),
+                        "Create a new account successfully",
+                        result
+                ));
+            }
+            log.warn("Authenticate: Create a new account failed");
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Create a new account failed",
+                    null
+            ));
+        } catch (Exception e) {
+            log.error("Authenticate: The api return an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api create a new account return an error",
                     e
             ));
         }
