@@ -33,4 +33,12 @@ public class Appointment {
     public void onPersist() {
         createdAt = LocalDateTime.now();
     }
+
+    public Appointment(@NonNull String patient, @NonNull String doctor, String note, @NonNull LocalDateTime start, @NonNull LocalDateTime end) {
+        this.patient = patient;
+        this.doctor = doctor;
+        this.note = note;
+        this.start = start;
+        this.end = end;
+    }
 }
