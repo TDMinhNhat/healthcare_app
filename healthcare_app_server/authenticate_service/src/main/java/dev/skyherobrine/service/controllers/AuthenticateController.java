@@ -49,7 +49,7 @@ public class AuthenticateController {
             return ResponseEntity.ok(new Response(
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "The api check login return an error",
-                    e
+                    e.getMessage()
             ));
         }
     }
@@ -80,7 +80,39 @@ public class AuthenticateController {
             return ResponseEntity.ok(new Response(
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "The api create a new account return an error",
-                    e
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<Response> resetPassword(
+            @RequestParam String email
+    ) {
+        try {
+            log.info("Authenticate: Call the api reset the password");
+            boolean result = as.resetPassword(email);
+            if(result) {
+                log.info("Authenticate: Reset the password successfully. Send a message to the email");
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.OK.value(),
+                        "Reset the password successfully. Send a message to the email",
+                        true
+                ));
+            }
+            log.warn("Authenticate: Reset the password failed");
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Reset the password failed",
+                    false
+            ));
+        } catch (Exception e) {
+            log.error("Authenticate: The api return an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api reset the password return an error",
+                    e.getMessage()
             ));
         }
     }
