@@ -85,7 +85,7 @@ public class AuthenticateController {
         }
     }
 
-    @PostMapping
+    @PostMapping("/reset_password")
     public ResponseEntity<Response> resetPassword(
             @RequestParam String email
     ) {
