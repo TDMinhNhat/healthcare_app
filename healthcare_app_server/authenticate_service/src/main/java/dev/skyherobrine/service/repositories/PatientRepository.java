@@ -20,4 +20,10 @@ public interface PatientRepository extends JpaRepository<Patient,Long> {
     @Query("update Patient p set p.password = ?1 where p.email = ?2")
     int updatePassword(String password, String email);
 
+    @Transactional
+    @Modifying
+    @Query("update Patient p set p.emailVerified = true where p.email = ?1")
+    int updateVerifyEmail(String email);
+
+
 }
