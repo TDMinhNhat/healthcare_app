@@ -15,3 +15,12 @@ eureka:
   instance:
     hostname: localhost
     prefer-ip-address: true
+springdoc:
+  swagger-ui:
+    urls:
+      - url: /swagger/admin-service
+        name: Admin Service
+      - url: /swagger/authenticate-service
+        name: Authenticate Service
+      - url: /swagger/appointment-service
+        name: Appointment Service

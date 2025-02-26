@@ -1,47 +1,36 @@
 package dev.skyherobrine.service.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import dev.skyherobrine.service.enums.AppointmentStatus;
 import lombok.*;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.FieldType;
-import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.time.LocalDateTime;
+import jakarta.persistence.*;
 
-@Document(collection = "appointments")
+@Entity @Table(name = "appointments")
 @Getter @Setter
 @NoArgsConstructor @RequiredArgsConstructor
 public class Appointment {
-    @MongoId @NonNull
-    private Long id;
-    @Field(name = "appointment_id") @NonNull
-    private String appointmentId;
-    @Field(name = "created_at")
-    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss") @NonNull
-    private LocalDateTime createdAt;
-    @Field(name = "user_id") @NonNull
-    private Long userId;
-    @Field(name = "doctor_id") @NonNull
-    private Long doctorId;
-    private String description;
-    @NonNull
-    private String address;
-    @Field(name = "appointment_date")
-    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
-    @NonNull
-    private LocalDateTime appointmentDate;
-    @Field(targetType = FieldType.STRING) @NonNull
-    private AppointmentStatus status;
 
-    public Appointment(@NonNull LocalDateTime createdAt, @NonNull Long userId, @NonNull Long doctorId, String description, @NonNull String address, @NonNull LocalDateTime appointmentDate, @NonNull AppointmentStatus status) {
-        this.createdAt = createdAt;
-        this.userId = userId;
-        this.doctorId = doctorId;
-        this.description = description;
-        this.address = address;
-        this.appointmentDate = appointmentDate;
-        this.status = status;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(name = "patient_id", length = 50, nullable = false) @NonNull
+    private String patient;
+    @Column(name = "doctor_id", length = 50, nullable = false) @NonNull
+    private String doctor;
+    @Column(length = 500)
+    private String note;
+    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
+    @Column(nullable = false) @NonNull
+    private LocalDateTime start;
+    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
+    @Column(nullable = false) @NonNull
+    private LocalDateTime end;
+    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    public void onPersist() {
+        createdAt = LocalDateTime.now();
     }
 }

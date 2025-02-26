@@ -1,0 +1,30 @@
+package dev.skyherobrine.service.models;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import jakarta.persistence.*;
+
+@Entity @Table(name = "drugs")
+@Getter @Setter
+@NoArgsConstructor @RequiredArgsConstructor
+public class Drug {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "drug_name", length = 150, nullable = false) @NonNull
+    private String drugName;
+
+    @Column(length = 50, nullable = false) @NonNull
+    private String unit;
+
+    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    public void onPersist() {
+        createdAt = LocalDateTime.now();
+    }
+}
