@@ -1,5 +1,6 @@
 package dev.skyherobrine.service.controllers;
 
+import dev.skyherobrine.service.dtos.AppointmentDTO;
 import dev.skyherobrine.service.models.Appointment;
 import dev.skyherobrine.service.models.Response;
 import dev.skyherobrine.service.repositories.AppointmentRepository;
@@ -25,9 +26,17 @@ public class AppointmentController {
     }
 
     @PostMapping("/book")
-    public ResponseEntity<Response> bookingAppointment() {
+    public ResponseEntity<Response> bookingAppointment(@RequestBody AppointmentDTO appointmentDTO) {
         try {
             log.info("Appointment: Call the api booking appointment");
+            Appointment appointment = appointmentDTO.toObject();
+            ar.save(appointment);
+            log.info("Appointment: Booking appointment successfully");
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Booking appointment successfully",
+                    appointment
+            ));
 
         } catch (Exception e) {
             log.error("Appointment: The api return an error");
