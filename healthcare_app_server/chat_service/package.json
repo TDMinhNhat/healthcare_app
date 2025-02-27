@@ -13,7 +13,6 @@
     "eureka-js-client": "^4.5.0",
     "express": "^4.21.2",
     "kafkajs": "^2.2.4",
-    "mariadb": "^3.4.0",
     "mongodb": "^6.13.0",
     "morgan": "~1.9.1",
     "socket.io": "^4.8.1"
