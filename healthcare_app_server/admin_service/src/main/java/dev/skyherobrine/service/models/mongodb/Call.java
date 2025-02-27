@@ -1,5 +1,6 @@
 package dev.skyherobrine.service.models.mongodb;
 
+import dev.skyherobrine.service.models.mariadb.Appointment;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 public class Call {
     @MongoId
     private Long id;
-    private Room room;
+    private Appointment appointment;
     @Field(targetType = FieldType.DATE_TIME)
     private LocalDateTime start;
     @Field(targetType = FieldType.DATE_TIME)
