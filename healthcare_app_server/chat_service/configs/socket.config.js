@@ -1,6 +1,4 @@
 const {Server} = require("socket.io");
-const userFeign = require("../feigns/user.feign");
-const FriendRepository = require("../repositories/mariadb/friend.repository");
 
 const run = (server) => {
     const io = new Server(server, {
@@ -8,7 +6,7 @@ const run = (server) => {
     });
 
     io.on("connection", async (socket) => {
-
+        console.log("A user has connected to the server");
     })
 }
 
