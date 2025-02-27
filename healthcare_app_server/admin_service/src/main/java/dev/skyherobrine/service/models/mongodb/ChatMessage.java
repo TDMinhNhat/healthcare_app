@@ -20,12 +20,11 @@ public class ChatMessage {
 
     @MongoId
     private Long id;
-    private Patient patient;
-    private Doctor doctor;
+    private Room room;
     private String message;
     @Field(name = "is_recall")
     private Boolean isRecall;
-    private ChatMessage response;
+    private ChatMessage reply;
     @Field(name = "created_at", targetType = FieldType.DATE_TIME)
     private LocalDateTime createdAt;
     @Field(name = "updated-at", targetType = FieldType.DATE_TIME)
