@@ -51,3 +51,9 @@ eureka:
     instance:
         hostname: localhost
         preferIpAddress: true
+springdoc:
+  api-docs:
+    enabled: true
+    path: /authenticate/v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

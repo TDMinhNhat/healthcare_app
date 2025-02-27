@@ -29,6 +29,8 @@ spring:
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  main:
+    web-application-type: servlet
 server:
   port: 10000
 eureka:
@@ -39,4 +41,9 @@ eureka:
   instance:
     hostname: localhost
     preferIpAddress: true
-
+springdoc:
+  api-docs:
+    enabled: true
+    path: /admin/v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

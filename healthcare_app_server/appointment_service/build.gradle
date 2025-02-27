@@ -28,8 +28,7 @@ ext {
 }
 
 dependencies {
-    // https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webflux-ui
-    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.5'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'

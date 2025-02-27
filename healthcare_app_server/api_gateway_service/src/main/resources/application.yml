@@ -6,6 +6,8 @@ spring:
 server:
   port: 8081
   address: 0.0.0.0
+  servlet:
+    context-path: /
 eureka:
   client:
     fetch-registry: true
@@ -16,11 +18,17 @@ eureka:
     hostname: localhost
     prefer-ip-address: true
 springdoc:
+  api-docs:
+    enabled: true
+    groups:
+      enabled: true
+    version: openapi_3_1
   swagger-ui:
+    path: /swagger-ui.html
     urls:
-      - url: /swagger/admin-service
-        name: Admin Service
-      - url: /swagger/authenticate-service
-        name: Authenticate Service
-      - url: /swagger/appointment-service
-        name: Appointment Service
+      - name: Authenticate Service API
+        url: /authenticate/v3/api-docs
+      - name: Admin Service API
+        url: /admin/v3/api-docs
+      - name: Appointment Service API
+        url: /appointment/v3/api-docs
