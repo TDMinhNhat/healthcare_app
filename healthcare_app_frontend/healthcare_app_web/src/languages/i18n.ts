@@ -12,8 +12,8 @@ i18n.use(initReactI18next).init({
       translation: english,
     },
   },
-  lng: "en", // default language
-  fallbackLng: "en",
+  lng: "vi", // default language
+  fallbackLng: "vi",
   // debug: process.env.NODE_ENV === 'development',
   interpolation: {
     // escape chuyển kí tự thành dạng an toàn để hiển thị

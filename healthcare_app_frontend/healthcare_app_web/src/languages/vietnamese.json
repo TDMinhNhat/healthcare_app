@@ -3,23 +3,21 @@
     "home": "Trang Chủ",
     "our_services": "Dịch Vụ",
     "find_doctors": "Tìm Bác Sĩ",
-    "reviews": "Xem Nhận Xét",
+    "reviews": "Đánh Giá",
     "login": "Đăng Nhập"
   },
   "body": {
-    "home": {
-    },
-    "our_services": {
-    },
+    "home": {},
+    "our_services": {},
     "find_doctors": {
       "face_detect": {
-        "title": "Quét Khuôn Mặt",
-        "description": "Quét khuôn mặt để có thể nhận diện bạn là ai trong hệ thống của chúng tôi từ đó chúng tôi có thể định vị các bác sĩ gần nhất để hỗ trợ bạn",
-        "notice": "Hãy đảm bảo rằng thiết bị của bạn cho phép ứng dụng chúng tôi truy cập vào camera để có thể nhận diện khuôn mặt của bạn"
+        "title": "Nhận Diện Khuôn Mặt",
+        "description": "Nhận diện khuôn mặt để xác định danh tính của bạn trong hệ thống, từ đó chúng tôi có thể tìm bác sĩ gần nhất để hỗ trợ bạn",
+        "notice": "Vui lòng đảm bảo thiết bị của bạn cho phép ứng dụng truy cập camera để nhận diện khuôn mặt"
       },
       "input_info": {
-        "title": "Điền Thông Tin Cá Nhân",
-        "subtitle": "Vui lòng điền các thông tin cá nhân của bạn để có thể sử dụng dịch vụ của chúng tôi, một số thông tin có thể cung cấp cho bác sĩ để hỗ trợ.",
+        "title": "Thông Tin Cá Nhân",
+        "subtitle": "Vui lòng cung cấp thông tin cá nhân để sử dụng dịch vụ của chúng tôi. Một số thông tin sẽ được chia sẻ với bác sĩ để hỗ trợ điều trị.",
         "first_name": "Tên",
         "last_name": "Họ",
         "sex": {
@@ -29,7 +27,7 @@
         },
         "dob": "Ngày Sinh",
         "phone": "Số Điện Thoại",
-        "username": "Tên Tài Khoản",
+        "username": "Tên Đăng Nhập",
         "email": "Địa Chỉ Email",
         "password": "Mật Khẩu",
         "repeat_password": "Nhập Lại Mật Khẩu",
@@ -42,23 +40,22 @@
           "city": "Thành Phố",
           "country": "Quốc Gia"
         },
-        "btn_clear": "Xoá Trắng",
+        "btn_clear": "Xóa Trắng",
         "btn_submit": "Đăng Ký"
       }
     },
-    "reviews": {
-    }
+    "reviews": {}
   },
   "footer": {
     "select_language": "Chọn Ngôn Ngữ",
-    "description": "Sản phẩm bản quyền thuộc về KLTN_IUH, yêu cầu không sao chép hoặc bán sản phẩm mà không có sự đồng ý của các tác giả dưới mọi hình thức.",
+    "description": "Sản phẩm bản quyền thuộc về KLTN_IUH. Nghiêm cấm sao chép hoặc kinh doanh sản phẩm khi chưa được sự đồng ý của tác giả.",
     "copyright": "© 2025 SolarHealth"
   },
   "login": {
     "title": "Đăng Nhập",
     "login_standard": "Đăng nhập bằng tài khoản",
     "login_face": "Đăng nhập bằng khuôn mặt",
-    "login_others_app": "Đăng nhập bằng ứng dụng khác",
+    "login_others_app": "Đăng nhập qua ứng dụng khác",
     "email": "Email",
     "password": "Mật Khẩu",
     "button_login": "Đăng Nhập",
@@ -69,18 +66,18 @@
   "register": {
     "tabs": [
       {
-        "name": "Điền thông tin cá nhân"
+        "name": "Thông tin cá nhân"
       },
       {
-        "name": "Quét khuôn mặt"
+        "name": "Nhận diện khuôn mặt"
       },
       {
         "name": "Xác nhận Email"
       }
     ],
-    "button_next": "Tiếp theo",
-    "button_skip": "Bỏ qua",
-    "button_back": "Quay lại",
+    "button_next": "Tiếp Theo",
+    "button_skip": "Bỏ Qua",
+    "button_back": "Quay Lại",
     "input_info": {
       "first_name": "Tên",
       "last_name": "Họ",
@@ -89,8 +86,8 @@
       "sex_female": "Nữ",
       "date_of_birth": "Ngày sinh",
       "phone": "Số điện thoại",
-      "username": "Tên tài khoản",
-      "email": "Tài khoản email",
+      "username": "Tên đăng nhập",
+      "email": "Địa chỉ email",
       "password": "Mật khẩu",
       "repeat_password": "Nhập lại mật khẩu",
       "address": {
@@ -109,18 +106,16 @@
         "contains_special_character": "Không được chứa ký tự đặc biệt",
         "start_number": "Không được bắt đầu bằng số",
         "invalid_email": "Email không hợp lệ",
-        "not_match_password": "Mật khẩu không trùng khớp"
+        "not_match_password": "Mật khẩu không khớp"
       }
     },
-    "face_detect": {
-    },
+    "face_detect": {},
     "verify_email": {
-      "message_info": "Chúng tôi đã gửi một mã xác nhận đến email của bạn đã đăng ký. Nếu chưa nhận được vui lòng nhấn vào đây: ",
+      "message_info": "Chúng tôi đã gửi một mã xác nhận đến email đã đăng ký. Nếu chưa nhận được, vui lòng nhấn vào đây: ",
       "label_input_otp": "Nhập mã xác nhận để kích hoạt tài khoản",
       "button_resend_otp": "Gửi lại mã OTP"
     },
-    "complete_register": {
-    }
+    "complete_register": {}
   },
   "chat": {
     "tab": {
@@ -130,18 +125,16 @@
       "add_friend_modal": {
         "title": "Thêm Bạn",
         "btn_add": "Thêm Bạn",
-        "btn_cancel": "Huỷ Bỏ",
-        "input_search_placeholder": "Nhập mã, tên, số điện thoại hoặc địa chỉ email để tìm kiếm",
+        "btn_cancel": "Hủy",
+        "input_search_placeholder": "Nhập mã, tên, số điện thoại hoặc email để tìm kiếm",
         "role": {
-          "title": "Chức Vụ",
+          "title": "Vai Trò",
           "user": "Bệnh Nhân",
           "doctor": "Bác Sĩ",
-          "admin": "Người Quản Trị"
+          "admin": "Quản Trị Viên"
         }
       },
-      "create_group_modal": {
-
-      },
+      "create_group_modal": {},
       "tabs": {
         "private_chat": "CÁ NHÂN",
         "group_chat": "NHÓM",
@@ -149,14 +142,12 @@
       },
       "tab_friend": {
         "status": {
-          "wait": "Đợi Phản Hồi",
+          "wait": "Chờ Phản Hồi",
           "friend": "Đã Kết Bạn"
         }
       }
     },
-    "area_chat": {
-
-    }
+    "area_chat": {}
   },
   "admin": {
     "tabs": {
@@ -172,7 +163,7 @@
           "value": "users"
         },
         {
-          "name": "Quản Lý Chức Vụ",
+          "name": "Quản Lý Vai Trò",
           "image": "",
           "value": "roles"
         },
@@ -187,32 +178,72 @@
           "value": "appointments"
         }
       ],
-      "tab_dashboard_content": {
-
-      },
+      "tab_dashboard_content": {},
       "tab_users_content": {
-        "total_users_system": "Số Người Dùng",
-        "total_users_patient": "Số Bệnh Nhân",
-        "total_users_doctor": "Số Bác Sĩ",
-        "total_users_manager": "Số Quản Lý",
+        "total_users_system": "Tổng Người Dùng",
+        "total_users_patient": "Tổng Bệnh Nhân",
+        "total_users_doctor": "Tổng Bác Sĩ",
+        "total_users_manager": "Tổng Quản Lý",
         "table": {
           "id": "ID",
           "userId": "ID Người Dùng",
           "first_name": "Tên",
           "last_name": "Họ",
-          "user_name": "Tên Tài Khoản",
-          "email": "Địa Chỉ Mail",
+          "user_name": "Tên Đăng Nhập",
+          "email": "Địa Chỉ Email",
           "phone": "Số Điện Thoại",
-          "role": "Chức Vụ",
-          "status": "Trạng Thái Tài Khoản",
-          "action": "Hành Động",
-          "btn_delete": "Xoá",
+          "role": "Vai Trò",
+          "status": "Trạng Thái",
+          "action": "Thao Tác",
+          "btn_delete": "Xóa",
           "btn_view_detail": "Xem Chi Tiết"
         }
       },
-      "tab_appointments_content": {
-
-      }
+      "tab_appointments_content": {}
     }
+  },
+  "patient": {
+    "profile": {
+      "title": "Hồ Sơ Bệnh Nhân",
+      "edit_profile": "Chỉnh Sửa Hồ Sơ",
+      "personal_info": "Thông Tin Cá Nhân",
+      "medical_records": "Hồ Sơ Y Tế",
+      "appointments": "Lịch Hẹn"
+    },
+    "dashboard": {
+      "welcome": "Xin chào,",
+      "next_appointment": "Lịch Hẹn Tới",
+      "view_details": "Xem Chi Tiết",
+      "recent_appointments": "Lịch Hẹn Gần Đây",
+      "medications": "Thuốc",
+      "recent_medical_records": "Hồ Sơ Y Tế Gần Đây"
+    }
+  },
+  "doctor": {
+    "profile": {
+      "title": "Hồ Sơ Bác Sĩ",
+      "edit_profile": "Chỉnh Sửa Hồ Sơ",
+      "personal_info": "Thông Tin Cá Nhân",
+      "experience": "Kinh Nghiệm",
+      "education": "Học Vấn",
+      "certificates": "Chứng Chỉ"
+    },
+    "dashboard": {
+      "title": "Bảng Điều Khiển Bác Sĩ",
+      "todays_appointments": "Lịch Hẹn Hôm Nay",
+      "total_patients": "Tổng Số Bệnh Nhân",
+      "upcoming_appointments": "Lịch Hẹn Sắp Tới",
+      "recent_patient_updates": "Cập Nhật Bệnh Nhân Gần Đây"
+    }
+  },
+  "common": {
+    "loading": "Đang tải...",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "view": "Xem",
+    "search": "Tìm kiếm",
+    "filter": "Lọc"
   }
 }

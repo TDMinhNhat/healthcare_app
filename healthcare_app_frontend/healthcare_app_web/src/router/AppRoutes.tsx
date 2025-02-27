@@ -2,48 +2,80 @@ import { lazy, Suspense } from "react";
 import { Loading } from "../components/global/Loading/Loading";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { ROUTING } from "../constants/routing";
+import PatientProfilePage from "../pages/patient/PatientProfilePage";
+import DoctorProfilePage from "../pages/doctor/DoctorProfilePage";
 
-const HomePage = lazy(() => import("../pages/HomePage"));
-const LoginPage = lazy(() => import("../pages/LoginPage"));
-const RegisterPage = lazy(() => import("../pages/RegisterPage"));
-const VerifyEmailPage = lazy(() => import("../pages/VerifyEmailPage"));
-const AdminPage = lazy(() => import("../pages/AdminPage"));
-const ChatPage = lazy(() => import("../pages/ChatPage"));
+// Import layout components
+import AdminLayout from "../layouts/AdminLayout";
+import DoctorLayout from "../layouts/DoctorLayout";
+import PatientLayout from "../layouts/PatientLayout";
+import HomePage from "../pages/HomePage";
+import LoginPage from "../pages/LoginPage";
+import VerifyEmailPage from "../pages/VerifyEmailPage";
+import RegisterPage from "../pages/RegisterPage";
+import DoctorDashboard from "../pages/doctor/DoctorDashboard";
+import PatientDashboard from "../pages/patient/PatientDashboard";
+import AppointmentPage from "../pages/patient/AppointmentPage";
+
+// const ChatPage = lazy(() => import("../pages/ChatPage"));
 
 export const AppRoutes = () => {
   return (
     <Suspense fallback={<Loading />}>
       <BrowserRouter>
         <Routes>
-          <Route
-            path={ROUTING.HOME}
-            element={
-              <HomePage
-              // language={languageData}
-              // setLanguage={setLanguage}
-              // languageType={language}
-              />
-            }
-          />
+          {/* Public routes */}
+          <Route path={ROUTING.HOME} element={<HomePage />} />
           <Route path={ROUTING.REGISTER} element={<RegisterPage />} />
           <Route path={ROUTING.LOGIN} element={<LoginPage />} />
           <Route path={ROUTING.VERIFY_EMAIL} element={<VerifyEmailPage />} />
-          {/* <Route
-            path={ROUTING.LOGIN}
-            element={<LoginPage loginLanguage={languageData.login} />}
-          />
-          <Route
-            path={ROUTING.REGISTER}
-            element={<RegisterPage registerLanguage={languageData.register} />}
-          />
-          <Route
-            path={ROUTING.ADMIN}
-            element={<AdminPage adminLanguage={languageData.admin} />}
-          />
-          <Route
-            path={ROUTING.CHAT}
-            element={<ChatPage chatLanguage={languageData.chat} />}
-          /> */}
+
+          {/* Admin routes */}
+          {/* <Route path={ROUTING.ADMIN} element={<AdminLayout />}>
+            <Route path={ROUTING.DASHBOARD} element={<AdminDashboard />} />
+            <Route index element={<AdminDashboard />} />
+            {/* Add other admin routes as needed */}
+          {/* <Route path={ROUTING.USERS} element={<div>Users Management</div>} />
+            <Route
+              path={ROUTING.DOCTORS}
+              element={<div>Doctors Management</div>}
+            />
+            <Route path={ROUTING.SETTINGS} element={<div>Settings</div>} />
+          </Route> */}
+
+          {/* Doctor routes */}
+          <Route path={ROUTING.DOCTOR} element={<DoctorLayout />}>
+            <Route path={ROUTING.DASHBOARD} element={<DoctorDashboard />} />
+            <Route index element={<DoctorDashboard />} />
+            <Route path={ROUTING.PROFILE} element={<DoctorProfilePage />} />
+            <Route
+              path={ROUTING.APPOINTMENTS}
+              element={<div>Appointments</div>}
+            />
+            <Route path={ROUTING.PATIENTS} element={<div>Patients</div>} />
+            <Route
+              path={ROUTING.PRESCRIPTIONS}
+              element={<div>Prescriptions</div>}
+            />
+            <Route path={ROUTING.CHAT} element={<div>Chat</div>} />
+          </Route>
+
+          {/* Patient routes */}
+          <Route path={ROUTING.PATIENT} element={<PatientLayout />}>
+            <Route path={ROUTING.DASHBOARD} element={<PatientDashboard />} />
+            <Route index element={<PatientDashboard />} />
+            <Route path={ROUTING.PROFILE} element={<PatientProfilePage />} />
+            <Route path={ROUTING.APPOINTMENTS} element={<AppointmentPage />} />
+            <Route
+              path={ROUTING.FIND_DOCTOR}
+              element={<div>Find Doctor</div>}
+            />
+            <Route
+              path={ROUTING.MEDICAL_RECORDS}
+              element={<div>Medical Records</div>}
+            />
+            <Route path={ROUTING.CHAT} element={<div>Chat</div>} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </Suspense>

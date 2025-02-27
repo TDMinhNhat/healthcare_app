@@ -1,28 +1,29 @@
 export const ROUTING = {
-  // Main
+  // Public routes
   HOME: "/",
-
-  DASHBOARD: "/dashboard",
-  PROFILE: "/profile",
-  ADMIN: "/admin",
-  CHAT: "/chat",
-  SETTINGS: "/settings",
-  NOT_FOUND: "/404",
-
-  // AUTHENTICATION
   LOGIN: "/login",
   REGISTER: "/register",
-  FORGOT_PASSWORD: "/forgot-password",
-  RESET_PASSWORD: "/reset-password",
   VERIFY_EMAIL: "/verify-email",
-  VERIFY_FACE: "/verify-face",
-  VERIFY_ADDRESS: "/verify-address",
-  VERIFY_SOCIAL: "/verify-social",
-  VERIFY_BIO: "/verify-bio",
-  VERIFY_2FA: "/verify-2fa",
-  VERIFY_IP: "/verify-ip",
-  VERIFY_LOCATION: "/verify-location",
-  VERIFY_ACTIVITY: "/verify-activity",
-  VERIFY_HISTORY: "/verify-history",
-  VERIFY_CREDIT: "/verify-credit",
+
+  // Role root paths
+  ADMIN: "/admin",
+  DOCTOR: "/doctor",
+  PATIENT: "/patient",
+
+  // Admin routes (nested under /admin)
+  DASHBOARD: "dashboard",
+  USERS: "users",
+  DOCTORS: "doctors",
+  SETTINGS: "settings",
+
+  // Doctor routes (nested under /doctor)
+  APPOINTMENTS: "appointments",
+  PATIENTS: "patients",
+  PRESCRIPTIONS: "prescriptions",
+  CHAT: "chat",
+  PROFILE: "profile",
+
+  // Patient routes (nested under /patient)
+  FIND_DOCTOR: "find-doctor",
+  MEDICAL_RECORDS: "medical-records", // Added patient appointments route
 };

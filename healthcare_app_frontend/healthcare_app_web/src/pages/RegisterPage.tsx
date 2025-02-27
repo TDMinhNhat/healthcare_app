@@ -50,7 +50,7 @@ const validationSchema = Yup.object({
   rememberMe: Yup.boolean(),
 });
 
-export default function RegisterForm() {
+export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   const formik = useFormik({
