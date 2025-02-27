@@ -1,16 +1,15 @@
 const Room = require("./room");
 
 class ChatMessage {
-    constructor(id, message, room, reply, isRecall, createdAt, updatedAt) {
+    constructor(id, appointment, room, reply, isRecall, createdAt, updatedAt) {
         this._id = id;
-        this._message = message;
         this._room = room;
         this._reply = reply;
         this._isRecall = isRecall;
         this._createdAt = createdAt;
         this._updatedAt = updatedAt;
+        this._appointment = appointment;
     }
-
 
     get id() {
         return this._id;
@@ -20,12 +19,12 @@ class ChatMessage {
         this._id = value;
     }
 
-    get message() {
-        return this._message;
+    get appointment() {
+        return this._appointment;
     }
 
-    set message(value) {
-        this._message = value;
+    set appointment(value) {
+        this._appointment = value;
     }
 
     get room() {
