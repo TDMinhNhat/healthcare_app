@@ -17,4 +17,7 @@ public class MedicalRecordDrug {
 
     @Column(nullable = false) @NonNull
     private Double quantity;
+
+    @Column(name = "how_use", length = 5000, nullable = false) @NonNull
+    private String howUse;
 }
