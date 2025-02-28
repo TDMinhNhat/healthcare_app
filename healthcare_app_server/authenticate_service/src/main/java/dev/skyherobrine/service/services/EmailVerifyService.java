@@ -23,7 +23,7 @@ public class EmailVerifyService {
     public boolean sendOtp(String email) {
         try {
             // Generate a number
-            int otp = ThreadLocalRandom.current().nextInt(111111,999999);
+            String otp = String.valueOf(ThreadLocalRandom.current().nextInt(111111,999999));
             log.info("Email Verify Service: The otp is {}", otp);
 
             // Save the otp to redis with duration is 5 minutes

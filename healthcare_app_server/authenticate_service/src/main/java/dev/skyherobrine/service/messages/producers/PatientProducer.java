@@ -12,4 +12,9 @@ public class PatientProducer {
     public NewTopic insertPatient() {
         return TopicBuilder.name("insert_patient").build();
     }
+
+    @Bean
+    public NewTopic updateVerifyEmail() {
+        return TopicBuilder.name("update_verify_email").build();
+    }
 }

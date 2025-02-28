@@ -3,11 +3,13 @@ package dev.skyherobrine.service.controllers;
 import dev.skyherobrine.service.models.Response;
 import dev.skyherobrine.service.repositories.PatientRepository;
 import dev.skyherobrine.service.services.EmailVerifyService;
+import dev.skyherobrine.service.utils.ObjectParser;
 import dev.skyherobrine.service.utils.SendMailUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -20,11 +22,13 @@ public class EmailVerifyController {
     private final RedisOperations<String,Object> redisOperations;
     private final EmailVerifyService evs;
     private final PatientRepository pr;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public EmailVerifyController(RedisOperations<String, Object> redisOperations, EmailVerifyService evs, PatientRepository pr) {
+    public EmailVerifyController(RedisOperations<String, Object> redisOperations, EmailVerifyService evs, PatientRepository pr, KafkaTemplate<String, String> kafkaTemplate) {
         this.redisOperations = redisOperations;
         this.evs = evs;
         this.pr = pr;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @GetMapping("/send")
@@ -71,6 +75,8 @@ public class EmailVerifyController {
                 int result = pr.updateVerifyEmail(email);
                 if(result == 1) {
                     log.info("Email Verify: The email is verified");
+                    log.info("Email Verify: Sending the message to kafka");
+                    kafkaTemplate.send("update_verify_email", ObjectParser.convertObjectToJson(email));
                     return ResponseEntity.ok(new Response(
                             HttpStatus.OK.value(),
                             "The email is verified",
