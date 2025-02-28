@@ -33,6 +33,9 @@ const validationSchema = Yup.object({
   lastName: Yup.string()
     .required("Last name is required")
     .min(2, "Last name must be at least 2 characters"),
+  username: Yup.string()
+    .required("Username is required")
+    .min(3, "Username must be at least 3 characters"),
   email: Yup.string()
     .email("Invalid email address")
     .required("Email is required"),
@@ -57,6 +60,7 @@ export default function RegisterPage() {
     initialValues: {
       firstName: "",
       lastName: "",
+      username: "",
       email: "",
       phone: "",
       password: "",
@@ -117,6 +121,20 @@ export default function RegisterPage() {
                   formik.touched.lastName && Boolean(formik.errors.lastName)
                 }
                 helperText={formik.touched.lastName && formik.errors.lastName}
+              />
+            </Grid2>
+            <Grid2 size={{ xs: 12 }}>
+              <TextField
+                fullWidth
+                id="username"
+                name="username"
+                label="Username"
+                value={formik.values.username}
+                onChange={formik.handleChange}
+                error={
+                  formik.touched.username && Boolean(formik.errors.username)
+                }
+                helperText={formik.touched.username && formik.errors.username}
               />
             </Grid2>
             <Grid2 size={{ xs: 12 }}>
