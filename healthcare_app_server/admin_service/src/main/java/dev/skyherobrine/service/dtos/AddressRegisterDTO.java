@@ -1,5 +1,6 @@
 package dev.skyherobrine.service.dtos;
 
+import dev.skyherobrine.service.models.mariadb.Address;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -12,4 +13,8 @@ public class AddressRegisterDTO {
     private String district;
     private String city;
     private String country;
+
+    public Address toObject() {
+        return new Address(number, street, ward, district, city, country);
+    }
 }

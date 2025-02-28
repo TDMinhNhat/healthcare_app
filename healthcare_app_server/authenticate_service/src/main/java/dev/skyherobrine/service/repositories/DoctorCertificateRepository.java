@@ -1,9 +1,10 @@
 package dev.skyherobrine.service.repositories;
 
 import dev.skyherobrine.service.models.DoctorCertificate;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface DoctorCertificateRepository extends PagingAndSortingRepository<DoctorCertificate,Long> {
+public interface DoctorCertificateRepository extends JpaRepository<DoctorCertificate,Long> {
 }

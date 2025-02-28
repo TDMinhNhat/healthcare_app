@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class Address {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Integer number;
+    private String number;
     @Column(length = 100)
     private String street;
     @Column(length = 100)
@@ -32,7 +32,7 @@ public class Address {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Address(Integer number, String street, String ward, String district, String city, String country) {
+    public Address(String number, String street, String ward, String district, String city, String country) {
         this.number = number;
         this.street = street;
         this.ward = ward;
