@@ -3,10 +3,14 @@ package dev.skyherobrine.service.services;
 import dev.skyherobrine.service.dtos.PatientRegisterDTO;
 import dev.skyherobrine.service.models.Patient;
 import dev.skyherobrine.service.models.User;
+import dev.skyherobrine.service.repositories.AuthenticateProviderRepository;
 import dev.skyherobrine.service.repositories.DoctorRepository;
 import dev.skyherobrine.service.repositories.PatientRepository;
+import dev.skyherobrine.service.utils.ObjectParser;
 import dev.skyherobrine.service.utils.SendMailUtil;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -21,11 +25,15 @@ public class AuthenticateService {
     private final PatientRepository pr;
     private final DoctorRepository dr;
     private final SendMailUtil sendMail;
+    private final AuthenticateProviderRepository apr;
+    private final KafkaTemplate<String,String> kafkaTemplate;
 
-    public AuthenticateService(PatientRepository pr, DoctorRepository dr, SendMailUtil sendMail) {
+    public AuthenticateService(PatientRepository pr, DoctorRepository dr, SendMailUtil sendMail, AuthenticateProviderRepository apr, KafkaTemplate<String, String> kafkaTemplate) {
         this.pr = pr;
         this.dr = dr;
         this.sendMail = sendMail;
+        this.apr = apr;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     public User checkLogin(String email, String password) {
@@ -56,8 +64,12 @@ public class AuthenticateService {
 
             Patient target = patientRegisterDTO.toObject();
             target.setUserId(generateUserId(patientRegisterDTO.getDobLocalDate()));
-            Patient result = pr.save(target);
+            target.setAuthedProvider(apr.findByAuthenName("APPLICATION").orElseThrow(() -> new EntityNotFoundException("Can't found the APPLICATION authenticate provider")));
 
+            log.info("Authenticate Service: sending the message to kafka");
+            kafkaTemplate.send("insert_patient", ObjectParser.convertObjectToJson(target));
+
+            Patient result = pr.save(target);
             log.info("Authenticate Service: Account created successfully");
             return result;
         } catch (Exception e) {
