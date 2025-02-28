@@ -25,7 +25,7 @@ public class PatientRegisterDTO {
 
     public Patient toObject() {
         return new Patient(
-            null, firstName, lastName, sex, getDobLocalDate(), phone, email, password
+            "123", firstName, lastName, sex, getDobLocalDate(), phone, email, password
         );
     }
 }
