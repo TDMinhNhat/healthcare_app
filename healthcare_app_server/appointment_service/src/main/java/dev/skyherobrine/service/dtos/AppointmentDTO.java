@@ -24,7 +24,7 @@ public class AppointmentDTO {
             doctorId,
             note,
             LocalDateTime.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")),
-            LocalDateTime.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")).plusHours(1)
+            LocalDateTime.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")).plusMinutes(30)
         );
     }
 }
