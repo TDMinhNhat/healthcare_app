@@ -47,6 +47,7 @@ public class AppointmentConsumer {
                     pr.findPatientByUserId(getPatient).orElseThrow(() -> new EntityNotFoundException("Patient not found")),
                     dr.findDoctorByUserId(getDoctor).orElseThrow(() -> new EntityNotFoundException("Doctor not found")),
                     getNote,
+                    getRoomId,
                     LocalDateTime.parse(getStartTime, DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")),
                     LocalDateTime.parse(getStartTime, DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")).plusHours(1)
             );
