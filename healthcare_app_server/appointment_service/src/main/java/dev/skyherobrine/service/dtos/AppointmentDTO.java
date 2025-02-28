@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
@@ -15,16 +16,15 @@ public class AppointmentDTO {
     private String patientId;
     private String doctorId;
     private String note;
-    private LocalDateTime start;
-    private LocalDateTime end;
+    private String start;
 
     public Appointment toObject() {
         return new Appointment(
             patientId,
             doctorId,
             note,
-            start,
-            end
+            LocalDateTime.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")),
+            LocalDateTime.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")).plusHours(1)
         );
     }
 }

@@ -25,32 +25,8 @@ public class AppointmentController {
         this.as = as;
     }
 
-    @PostMapping("/book")
-    public ResponseEntity<Response> bookingAppointment(@RequestBody AppointmentDTO appointmentDTO) {
-        try {
-            log.info("Appointment: Call the api booking appointment");
-            Appointment appointment = appointmentDTO.toObject();
-            ar.save(appointment);
-            log.info("Appointment: Booking appointment successfully");
-            return ResponseEntity.ok(new Response(
-                    HttpStatus.OK.value(),
-                    "Booking appointment successfully",
-                    appointment
-            ));
-
-        } catch (Exception e) {
-            log.error("Appointment: The api return an error");
-            log.error(e.getMessage());
-            return ResponseEntity.ok(new Response(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "The api booking appointment was return an error",
-                    e.getMessage()
-            ));
-        }
-    }
-
-    @GetMapping("/patient/{id}")
-    public ResponseEntity<Response> getAllAppointmentsByPatient(@PathVariable("id") String patientId) {
+    @GetMapping("/patient")
+    public ResponseEntity<Response> getAllAppointmentsByPatient(@RequestParam("userId") String patientId) {
         try {
             log.info("Appointment: Call the api get all appointments by patient");
             List<Appointment> appointments = as.getAppointmentsByPatient(patientId);
@@ -78,8 +54,8 @@ public class AppointmentController {
         }
     }
 
-    @GetMapping("/doctor/{id}")
-    public ResponseEntity<Response> getAllAppointmentsByDoctor(@PathVariable("id") String doctorId) {
+    @GetMapping("/doctor")
+    public ResponseEntity<Response> getAllAppointmentsByDoctor(@RequestParam("userId") String doctorId) {
         try {
             log.info("Appointment: Call the api get all appointments by doctor");
             List<Appointment> appointments = as.getAppointmentsByDoctor(doctorId);

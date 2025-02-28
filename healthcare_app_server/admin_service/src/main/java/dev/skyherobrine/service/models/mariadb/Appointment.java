@@ -19,15 +19,23 @@ public class Appointment {
     private Doctor doctor;
     @Column(length = 500)
     private String note;
-    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
+    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss") @NonNull
     @Column(nullable = false)
     private LocalDateTime start;
-    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
+    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss") @NonNull
     @Column(nullable = false)
     private LocalDateTime end;
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    public Appointment(@NonNull Patient patient, @NonNull Doctor doctor, String note, @NonNull LocalDateTime start, @NonNull LocalDateTime end) {
+        this.patient = patient;
+        this.doctor = doctor;
+        this.note = note;
+        this.start = start;
+        this.end = end;
+    }
 
     @PrePersist
     public void onPersist() {

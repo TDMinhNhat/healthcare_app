@@ -19,6 +19,8 @@ public class Appointment {
     private String doctor;
     @Column(length = 500)
     private String note;
+    @Column(name = "room_id", nullable = false)
+    private String roomId;
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
     @Column(nullable = false) @NonNull
     private LocalDateTime start;
