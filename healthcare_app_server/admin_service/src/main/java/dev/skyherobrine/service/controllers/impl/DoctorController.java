@@ -4,29 +4,37 @@ import dev.skyherobrine.service.controllers.IManagement;
 import dev.skyherobrine.service.dtos.DoctorDTO;
 import dev.skyherobrine.service.models.mariadb.Doctor;
 import dev.skyherobrine.service.models.mariadb.Response;
+import dev.skyherobrine.service.repositories.mariadb.DoctorRepository;
 import dev.skyherobrine.service.services.DoctorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin/api/v1/doctors")
 @Slf4j
 public class DoctorController implements IManagement<DoctorDTO, Long> {
 
+    private final DoctorRepository doctorRepository;
     private final DoctorService doctorService;
 
-    public DoctorController(DoctorService doctorService) {
+    public DoctorController(DoctorRepository doctorRepository, DoctorService doctorService) {
+        this.doctorRepository = doctorRepository;
         this.doctorService = doctorService;
     }
 
+    @GetMapping
     @Override
     public ResponseEntity<Response> getAll() {
-        return null;
+        log.info("Doctor: Call the api get all doctors");
+        return ResponseEntity.ok(new Response(
+                HttpStatus.OK.value(),
+                "Get all doctors successfully",
+                doctorRepository.findAll()
+        ));
     }
 
     @Override
@@ -64,5 +72,16 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
     @Override
     public ResponseEntity<Response> delete(Long aLong) {
         return null;
+    }
+
+    @PostMapping("/doctor_not_in_list")
+    public ResponseEntity<Response> getDoctorNotInList(@RequestBody List<String> listDoctorId) {
+        log.info("Doctor: Call the api get doctors not in list");
+        List<Doctor> result = doctorRepository.findAll().stream().filter(doctor -> !listDoctorId.contains(doctor.getUserId())).toList();
+        return ResponseEntity.ok(new Response(
+                HttpStatus.OK.value(),
+                "Get doctors not in list successfully",
+                result
+        ));
     }
 }
