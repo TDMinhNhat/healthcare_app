@@ -1,10 +1,7 @@
 package dev.skyherobrine.service.services;
 
 import dev.skyherobrine.service.dtos.DoctorDTO;
-import dev.skyherobrine.service.models.mariadb.Doctor;
-import dev.skyherobrine.service.models.mariadb.DoctorCertificate;
-import dev.skyherobrine.service.models.mariadb.DoctorEducation;
-import dev.skyherobrine.service.models.mariadb.DoctorExperience;
+import dev.skyherobrine.service.models.mariadb.*;
 import dev.skyherobrine.service.repositories.mariadb.*;
 import dev.skyherobrine.service.utils.ObjectParser;
 import jakarta.persistence.EntityNotFoundException;
@@ -21,6 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @Slf4j
 public class DoctorService {
 
+    private final AddressRepository addressRepository;
     private final DoctorRepository doctorRepository;
     private final DoctorCertificateRepository doctorCertificateRepository;
     private final DoctorEducationRepository doctorEducationRepository;
@@ -28,7 +26,8 @@ public class DoctorService {
     private final AuthenticateProviderRepository authenticateProviderRepository;
     private final KafkaTemplate<String,String> kafkaTemplate;
 
-    public DoctorService(DoctorRepository doctorRepository, DoctorCertificateRepository doctorCertificateRepository, DoctorEducationRepository doctorEducationRepository, DoctorExperienceRepository doctorExperienceRepository, AuthenticateProviderRepository authenticateProviderRepository, KafkaTemplate<String, String> kafkaTemplate) {
+    public DoctorService(AddressRepository addressRepository, DoctorRepository doctorRepository, DoctorCertificateRepository doctorCertificateRepository, DoctorEducationRepository doctorEducationRepository, DoctorExperienceRepository doctorExperienceRepository, AuthenticateProviderRepository authenticateProviderRepository, KafkaTemplate<String, String> kafkaTemplate) {
+        this.addressRepository = addressRepository;
         this.doctorRepository = doctorRepository;
         this.doctorCertificateRepository = doctorCertificateRepository;
         this.doctorEducationRepository = doctorEducationRepository;
@@ -67,6 +66,8 @@ public class DoctorService {
 
         log.info("Doctor Service: sending insert doctor experience message to kafka");
         for(DoctorExperience doctorExperience : doctorDTO.experiences(doctor)) {
+            Address getAddress = doctorExperience.getCompAddress();
+            addressRepository.save(getAddress);
             kafkaTemplate.send("insert_doctor_experience", ObjectParser.convertObjectToJson(doctorExperience));
         }
         log.info("Doctor Service: saving doctor experiences into database");

@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.*;
 public class AuthenticateProviderController implements IManagement<String, Long> {
 
     private AuthenticateProviderRepository apr;
-    private KafkaTemplate template;
+    private KafkaTemplate<String,String> template;
 
-    public AuthenticateProviderController(AuthenticateProviderRepository apr, KafkaTemplate template) {
+    public AuthenticateProviderController(AuthenticateProviderRepository apr, KafkaTemplate<String,String> template) {
         this.apr = apr;
         this.template = template;
     }

@@ -1,13 +1,7 @@
 package dev.skyherobrine.service.messages.consumers;
 
-import dev.skyherobrine.service.models.Doctor;
-import dev.skyherobrine.service.models.DoctorCertificate;
-import dev.skyherobrine.service.models.DoctorEducation;
-import dev.skyherobrine.service.models.DoctorExperience;
-import dev.skyherobrine.service.repositories.DoctorCertificateRepository;
-import dev.skyherobrine.service.repositories.DoctorEducationRepository;
-import dev.skyherobrine.service.repositories.DoctorExperienceRepository;
-import dev.skyherobrine.service.repositories.DoctorRepository;
+import dev.skyherobrine.service.models.*;
+import dev.skyherobrine.service.repositories.*;
 import dev.skyherobrine.service.utils.ObjectParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -17,12 +11,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class DoctorConsumer {
 
+    private final AddressRepository addressRepository;
     private final DoctorRepository doctorRepository;
     private final DoctorCertificateRepository doctorCertificateRepository;
     private final DoctorEducationRepository doctorEducationRepository;
     private final DoctorExperienceRepository doctorExperienceRepository;
 
-    public DoctorConsumer(DoctorRepository doctorRepository, DoctorCertificateRepository doctorCertificateRepository, DoctorEducationRepository doctorEducationRepository, DoctorExperienceRepository doctorExperienceRepository) {
+    public DoctorConsumer(AddressRepository addressRepository, DoctorRepository doctorRepository, DoctorCertificateRepository doctorCertificateRepository, DoctorEducationRepository doctorEducationRepository, DoctorExperienceRepository doctorExperienceRepository) {
+        this.addressRepository = addressRepository;
         this.doctorRepository = doctorRepository;
         this.doctorCertificateRepository = doctorCertificateRepository;
         this.doctorEducationRepository = doctorEducationRepository;
@@ -77,6 +73,8 @@ public class DoctorConsumer {
             log.info("Doctor Consumer: listen insert doctor experience message");
             log.info("Doctor Consumer: {}", message);
             DoctorExperience doctorExperience = ObjectParser.convertJsonToObject(message, DoctorExperience.class);
+            Address address = doctorExperience.getCompAddress();
+            addressRepository.save(address);
             doctorExperienceRepository.save(doctorExperience);
             log.info("Doctor Consumer: insert doctor experience successfully");
         } catch (Exception e) {
