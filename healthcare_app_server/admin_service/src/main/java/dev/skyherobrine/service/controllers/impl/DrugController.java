@@ -10,10 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/admin/api/v1/drug")
@@ -28,9 +25,15 @@ public class DrugController implements IManagement<DrugDTO,Long> {
         this.kafkaTemplate = kafkaTemplate;
     }
 
+    @GetMapping
     @Override
     public ResponseEntity<Response> getAll() {
-        return null;
+        log.info("Drug: Call api for getting all drugs");
+        return ResponseEntity.ok(new Response(
+                HttpStatus.OK.value(),
+                "Get all drugs",
+                drugRepository.findAll()
+        ));
     }
 
     @Override
