@@ -82,4 +82,32 @@ public class AppointmentController {
             ));
         }
     }
+
+    @GetMapping("/roomId")
+    public ResponseEntity<Response> getAppointmentByRoomId(@RequestParam String roomId) {
+        try {
+            log.info("Appointment: Call the api get appointment by room id");
+            Appointment appointment = ar.findAppointmentByRoomId(roomId).orElse(null);
+            if(appointment != null) {
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.OK.value(),
+                        "Get appointment by room id successfully",
+                        appointment
+                ));
+            }
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.NOT_FOUND.value(),
+                    "There are no any appointments for this room id",
+                    null
+            ));
+        } catch (Exception e) {
+            log.error("Appointment: The api return an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api get appointment by room id return an error",
+                    e.getMessage()
+            ));
+        }
+    }
 }
