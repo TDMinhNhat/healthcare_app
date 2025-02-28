@@ -1,0 +1,70 @@
+package dev.skyherobrine.service.services;
+
+import dev.skyherobrine.service.dtos.MedicalRecordDTO;
+import dev.skyherobrine.service.keys.MedicalRecordDrugKey;
+import dev.skyherobrine.service.models.Appointment;
+import dev.skyherobrine.service.models.MedicalRecord;
+import dev.skyherobrine.service.models.MedicalRecordDrug;
+import dev.skyherobrine.service.repositories.AppointmentRepository;
+import dev.skyherobrine.service.repositories.DrugRepository;
+import dev.skyherobrine.service.repositories.MedicalRecordDrugRepository;
+import dev.skyherobrine.service.repositories.MedicalRecordRepository;
+import dev.skyherobrine.service.utils.ObjectParser;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+
+@Service
+@Slf4j
+public class MedicalRecordService {
+
+    private final DrugRepository drugRepository;
+    private final MedicalRecordDrugRepository medicalRecordDrugRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final MedicalRecordRepository medicalRecordRepository;
+    private final KafkaTemplate<String,String> kafkaTemplate;
+
+    public MedicalRecordService(DrugRepository drugRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, AppointmentRepository appointmentRepository, MedicalRecordRepository medicalRecordRepository, KafkaTemplate<String, String> kafkaTemplate) {
+        this.drugRepository = drugRepository;
+        this.medicalRecordDrugRepository = medicalRecordDrugRepository;
+        this.appointmentRepository = appointmentRepository;
+        this.medicalRecordRepository = medicalRecordRepository;
+        this.kafkaTemplate = kafkaTemplate;
+    }
+
+    public MedicalRecord addMedicalRecord(MedicalRecordDTO medicalRecordDTO) throws Exception {
+        log.info("Medical Record Service: add medical record");
+        log.info("Medical Record Service: sending insert medical record message to kafka");
+        kafkaTemplate.send("insert_medical_record", ObjectParser.convertObjectToJson(medicalRecordDTO));
+
+        Appointment appointment = appointmentRepository.findAppointmentByRoomId(medicalRecordDTO.getRoomId()).orElseThrow(() -> new EntityNotFoundException("Appointment not found!"));
+        MedicalRecord medicalRecord = new MedicalRecord(appointment, medicalRecordDTO.getDiagnosisDisease(), LocalDate.parse(medicalRecordDTO.getReExaminationDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        MedicalRecord target = medicalRecordRepository.save(medicalRecord);
+        log.info("Medical Record Service: medical record saved into database");
+
+        Thread.sleep(1000);
+
+        log.info("Medical Record Service: sending insert medical record drug message to kafka");
+        for(MedicalRecordDTO.MedicalRecordDrugDTO item : medicalRecordDTO.getDrugs()) {
+            Map<String,Object> data = new HashMap<>();
+            data.put("medicalRecordId", target.getId());
+            data.put("medicalRecordDrug", item);
+            kafkaTemplate.send("insert_medical_record_drug", ObjectParser.convertObjectToJson(data));
+
+            MedicalRecordDrug medicalRecordDrug = new MedicalRecordDrug(
+                    new MedicalRecordDrugKey(target, drugRepository.findById(item.getDrugId()).orElseThrow(() -> new EntityNotFoundException("Drug not found!"))),
+                    item.getQuantity(),
+                    item.getHowUse()
+            );
+            medicalRecordDrugRepository.save(medicalRecordDrug);
+        }
+        log.info("Medical Record Service: medical record drugs saved into database");
+        return target;
+    }
+}

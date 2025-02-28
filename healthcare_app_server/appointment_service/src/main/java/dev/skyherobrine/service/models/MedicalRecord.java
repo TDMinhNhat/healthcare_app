@@ -30,6 +30,18 @@ public class MedicalRecord {
     private LocalDate reExaminationDate;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
-    @Column(name = "created_at", nullable = false) @NonNull
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    public MedicalRecord(@NonNull Appointment appointment, @NonNull String diagnosisDisease, String note, @NonNull LocalDate reExaminationDate) {
+        this.appointment = appointment;
+        this.diagnosisDisease = diagnosisDisease;
+        this.note = note;
+        this.reExaminationDate = reExaminationDate;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        createdAt = LocalDateTime.now();
+    }
 }
