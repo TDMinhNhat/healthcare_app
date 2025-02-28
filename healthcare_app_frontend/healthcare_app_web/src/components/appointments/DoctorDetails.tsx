@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -14,11 +14,13 @@ import {
   ListItemText,
   ListItemIcon,
   Paper,
+  CircularProgress,
 } from "@mui/material";
 import SchoolIcon from "@mui/icons-material/School";
 import WorkIcon from "@mui/icons-material/Work";
 import StarIcon from "@mui/icons-material/Star";
 import { useTranslation } from "react-i18next";
+import { getDoctorInfo } from "../../services/user_service";
 
 interface DoctorDetailsProps {
   doctor: any;
@@ -26,42 +28,44 @@ interface DoctorDetailsProps {
 
 const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
   const { t } = useTranslation();
+  const [loading, setLoading] = useState(true);
+  const [doctorDetails, setDoctorDetails] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock additional data
-  const education = [
-    {
-      id: 1,
-      degree: "MD",
-      institution: "Hanoi Medical University",
-      year: "2005-2011",
-    },
-    {
-      id: 2,
-      degree: "Residency",
-      institution: "Cho Ray Hospital",
-      year: "2011-2014",
-    },
-  ];
+  useEffect(() => {
+    const fetchDoctorDetails = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        console.log("Fetching doctor details for:", doctor);
+        const response = await getDoctorInfo(doctor.userId);
+        setDoctorDetails(response.data || doctor);
+      } catch (err) {
+        console.error("Failed to fetch doctor details:", err);
+        setError(
+          "Failed to load doctor details. Using basic information instead."
+        );
+        setDoctorDetails(doctor);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const experience = [
-    {
-      id: 1,
-      position: "Specialist",
-      hospital: "Bach Mai Hospital",
-      year: "2014-2018",
-    },
-    {
-      id: 2,
-      position: "Senior Specialist",
-      hospital: "Vinmec Hospital",
-      year: "2018-Present",
-    },
-  ];
+    fetchDoctorDetails();
+  }, [doctor]);
 
-  const certifications = [
-    "Board Certified in Internal Medicine",
-    "Advanced Cardiac Life Support",
-  ];
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  const details = doctorDetails || doctor;
+  const education = details.education || [];
+  const experience = details.experience || [];
+  const certifications = details.certifications || [];
 
   return (
     <Box>
@@ -69,33 +73,42 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
         {t("patient.appointments.doctor_details")}
       </Typography>
 
+      {error && (
+        <Typography color="error" sx={{ mb: 2 }}>
+          {error}
+        </Typography>
+      )}
+
       <Paper sx={{ p: 2, mb: 3 }}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={3}>
             <CardMedia
               component="img"
               sx={{ width: "100%", borderRadius: 1 }}
-              image={doctor.image}
-              alt={doctor.name}
+              image={
+                details.avatar ||
+                "https://via.placeholder.com/120x160?text=Doctor"
+              }
+              alt={details.lastName || "Doctor"}
             />
           </Grid>
           <Grid item xs={12} sm={9}>
             <Typography variant="h5" component="div">
-              {doctor.name}
+              {details.firstName + " " + details.lastName || "Doctor"}
             </Typography>
             <Chip
-              label={doctor.specialty}
+              label={details.specialty}
               color="primary"
               sx={{ mt: 1, mb: 1 }}
             />
             <Typography variant="body1" color="text.secondary">
-              {t("doctor.profile.experience")}: {doctor.experience}{" "}
+              {t("doctor.profile.experience")}: {details.experience}{" "}
               {t("doctor.profile.years")}
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
-              <Rating value={doctor.rating} precision={0.1} readOnly />
+              <Rating value={details.rating || 0} precision={0.1} readOnly />
               <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                ({doctor.reviews} {t("doctor.profile.reviews")})
+                ({details.reviews || 0} {t("doctor.profile.reviews")})
               </Typography>
             </Box>
           </Grid>
@@ -113,14 +126,22 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
             </Box>
             <Divider sx={{ mb: 2 }} />
             <List>
-              {education.map((item) => (
-                <ListItem key={item.id} sx={{ px: 0 }}>
+              {education.length > 0 ? (
+                education.map((item: any, index: number) => (
+                  <ListItem key={item.id || index} sx={{ px: 0 }}>
+                    <ListItemText
+                      primary={item.degree}
+                      secondary={`${item.institution} (${item.year})`}
+                    />
+                  </ListItem>
+                ))
+              ) : (
+                <ListItem sx={{ px: 0 }}>
                   <ListItemText
-                    primary={item.degree}
-                    secondary={`${item.institution} (${item.year})`}
+                    primary={t("doctor.profile.no_education_data")}
                   />
                 </ListItem>
-              ))}
+              )}
             </List>
           </Paper>
         </Grid>
@@ -135,14 +156,22 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
             </Box>
             <Divider sx={{ mb: 2 }} />
             <List>
-              {experience.map((item) => (
-                <ListItem key={item.id} sx={{ px: 0 }}>
+              {experience.length > 0 ? (
+                experience.map((item: any, index: number) => (
+                  <ListItem key={item.id || index} sx={{ px: 0 }}>
+                    <ListItemText
+                      primary={item.position}
+                      secondary={`${item.hospital} (${item.year})`}
+                    />
+                  </ListItem>
+                ))
+              ) : (
+                <ListItem sx={{ px: 0 }}>
                   <ListItemText
-                    primary={item.position}
-                    secondary={`${item.hospital} (${item.year})`}
+                    primary={t("doctor.profile.no_experience_data")}
                   />
                 </ListItem>
-              ))}
+              )}
             </List>
           </Paper>
         </Grid>
@@ -157,11 +186,19 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
             </Box>
             <Divider sx={{ mb: 2 }} />
             <List>
-              {certifications.map((cert, index) => (
-                <ListItem key={index} sx={{ px: 0 }}>
-                  <ListItemText primary={cert} />
+              {certifications.length > 0 ? (
+                certifications.map((cert: string, index: number) => (
+                  <ListItem key={index} sx={{ px: 0 }}>
+                    <ListItemText primary={cert} />
+                  </ListItem>
+                ))
+              ) : (
+                <ListItem sx={{ px: 0 }}>
+                  <ListItemText
+                    primary={t("doctor.profile.no_certificates_data")}
+                  />
                 </ListItem>
-              ))}
+              )}
             </List>
           </Paper>
         </Grid>

@@ -8,13 +8,13 @@ export interface User {
   lastName: string;
   sex: boolean;
   dob: string; // Using Date for LocalDate
-  address: Address;
+  address?: Address;
   phone: string;
-  avatar: string;
+  avatar?: string;
   email: string;
-  emailVerify: boolean;
+  emailVerify?: boolean;
   password: string;
-  authProvider: AuthenticateProvider;
+  authProvider?: AuthenticateProvider;
   status: boolean;
 }
 

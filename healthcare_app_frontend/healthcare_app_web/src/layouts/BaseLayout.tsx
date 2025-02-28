@@ -16,6 +16,8 @@ import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import { useNavigate } from "react-router";
 import { ROUTING } from "../constants/routing";
+import { useDispatch } from "react-redux";
+import { logOut } from "../stores/slices/user.slice";
 
 const drawerWidth = 240;
 
@@ -52,6 +54,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
   const [open, setOpen] = useState(true);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleDrawerToggle = () => {
     setOpen(!open);
@@ -68,6 +71,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
   const handleLogout = () => {
     setAnchorEl(null);
     // Add logout logic here
+    dispatch(logOut());
     navigate(ROUTING.LOGIN);
   };
 

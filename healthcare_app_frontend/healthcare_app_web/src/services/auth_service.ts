@@ -1,10 +1,12 @@
 import axiosConfig from "./axiosConfig";
 
-const prefix = "/authenticate/api/v1";
+const prefix = "/authenticate/api/v1/authenticate";
 export const login = async (email: string, password: string) => {
-  const response = await axiosConfig.post(prefix + "/login", {
-    email,
-    password,
+  const response = await axiosConfig.post(prefix + "/login", null, {
+    params: {
+      email: email,
+      password: password,
+    },
   });
   return response;
 };
@@ -22,18 +24,27 @@ export const signUp = async (
   lastName: string,
   email: string,
   password: string,
+  username: string,
   sex: boolean,
-  dateOfBirth: Date,
+  dob: string,
   phone: string
 ) => {
-  const response = await axiosConfig.post(prefix + "/register/", {
+  const response = await axiosConfig.post(prefix + "/register", {
     firstName,
     lastName,
     email,
     password,
+    username,
     sex,
-    dateOfBirth,
+    dob,
     phone,
+  });
+  return response;
+};
+
+export const resetPassword = async (email: string) => {
+  const response = await axiosConfig.post(prefix + "/reset_password", null, {
+    params: { email },
   });
   return response;
 };

@@ -25,6 +25,11 @@ import {
   Facebook,
   Apple,
 } from "@mui/icons-material";
+import { signUp } from "../services/auth_service";
+import { useNavigate } from "react-router";
+import { formatDateToString } from "../utils/dateUtils";
+import { toast } from "react-toastify";
+import { ROUTING } from "../constants/routing";
 
 const validationSchema = Yup.object({
   firstName: Yup.string()
@@ -55,6 +60,7 @@ const validationSchema = Yup.object({
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: {
@@ -69,9 +75,33 @@ export default function RegisterPage() {
       rememberMe: false,
     },
     validationSchema: validationSchema,
-    onSubmit: (values) => {
-      console.log(values);
-      // Handle form submission
+    onSubmit: async (values) => {
+      try {
+        // Convert gender to boolean (male = true, female = false)
+        const isMale = values.gender === "male";
+        const birthDate = new Date(values.birthDate);
+
+        const response = await signUp(
+          values.firstName,
+          values.lastName,
+          values.email,
+          values.password,
+          values.username,
+          isMale,
+          formatDateToString(birthDate),
+          values.phone
+        );
+
+        if (response.status === 200 && response.data.code === 200) {
+          toast.success("Account created successfully!");
+          setTimeout(() => navigate(ROUTING.LOGIN), 2000);
+        } else {
+          toast.error(response.data.message || "Registration failed");
+        }
+      } catch (error) {
+        console.error("Registration error:", error);
+        toast.error("An error occurred during registration");
+      }
     },
   });
 

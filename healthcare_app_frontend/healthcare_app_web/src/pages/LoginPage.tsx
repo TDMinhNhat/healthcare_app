@@ -12,6 +12,7 @@ import {
   IconButton,
   InputAdornment,
   Divider,
+  CircularProgress,
 } from "@mui/material";
 import {
   Visibility,
@@ -21,6 +22,12 @@ import {
   Apple,
   Face,
 } from "@mui/icons-material";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router";
+import { login } from "../services/auth_service";
+import { setUser } from "../stores/slices/user.slice";
+import { toast } from "react-toastify";
+import { ROUTING } from "../constants/routing";
 
 const validationSchema = Yup.object({
   email: Yup.string()
@@ -31,6 +38,10 @@ const validationSchema = Yup.object({
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: {
@@ -38,9 +49,34 @@ export default function LoginPage() {
       password: "",
     },
     validationSchema: validationSchema,
-    onSubmit: (values) => {
-      console.log(values);
-      // Handle login submission
+    onSubmit: async (values) => {
+      try {
+        setIsLoading(true);
+        const response = await login(values.email, values.password);
+
+        if (response.status === 200 && response.data.code === 200) {
+          const userData = response.data.data;
+          if (userData) {
+            dispatch(setUser({ user: userData }));
+            // lưu thông tin user vào localStorage
+            localStorage.setItem("user", JSON.stringify(userData));
+            toast.success("Login successful!");
+            setTimeout(() => navigate(ROUTING.PATIENT), 1500); // Redirect after showing toast
+          } else {
+            toast.error(
+              response.data.message ||
+                "Login failed. Please check your credentials."
+            );
+          }
+        } else {
+          toast.error("Login failed. Please check your credentials.");
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        toast.error("Login failed. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
     },
   });
 
@@ -79,6 +115,7 @@ export default function LoginPage() {
                 onChange={formik.handleChange}
                 error={formik.touched.email && Boolean(formik.errors.email)}
                 helperText={formik.touched.email && formik.errors.email}
+                disabled={isLoading}
               />
             </Grid2>
             <Grid2 size={{ xs: 12 }}>
@@ -94,12 +131,14 @@ export default function LoginPage() {
                   formik.touched.password && Boolean(formik.errors.password)
                 }
                 helperText={formik.touched.password && formik.errors.password}
+                disabled={isLoading}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
                         onClick={() => setShowPassword(!showPassword)}
                         edge="end"
+                        disabled={isLoading}
                       >
                         {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
@@ -129,8 +168,12 @@ export default function LoginPage() {
                 color="primary"
                 type="submit"
                 size="large"
+                disabled={isLoading}
+                startIcon={
+                  isLoading && <CircularProgress size={24} color="inherit" />
+                }
               >
-                Sign In
+                {isLoading ? "Signing In..." : "Sign In"}
               </Button>
             </Grid2>
 

@@ -20,6 +20,6 @@ export interface MedicalRecord {
   note: string;
   createdAt: string;
   reExaminationDate: string;
+  roomId: string;
   drugs?: MedicalRecordDrug[]; // Based on relationship with MedicalRecordDrug
-  doctor?: Doctor; // Based on the join relationship
 }

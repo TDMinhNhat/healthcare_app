@@ -216,7 +216,55 @@
       "view_details": "Xem Chi Tiết",
       "recent_appointments": "Lịch Hẹn Gần Đây",
       "medications": "Thuốc",
-      "recent_medical_records": "Hồ Sơ Y Tế Gần Đây"
+      "recent_medical_records": "Hồ Sơ Y Tế Gần Đây",
+      "no_upcoming_appointments": "Không có lịch hẹn sắp tới nào",
+      "no_recent_appointments": "Không có lịch hẹn gần đây nào",
+      "no_medications": "Không có thuốc nào được kê toa",
+      "no_medical_records": "Không có hồ sơ y tế nào",
+      "refills_remaining": "Số lần tái toa còn lại"
+    },
+    "appointments": {
+      "title": "Lịch Hẹn Khám Bệnh",
+      "book_new": "Đặt Lịch Hẹn Mới",
+      "upcoming": "Sắp Tới",
+      "past": "Đã Qua",
+      "cancelled": "Đã Hủy",
+      "no_appointments": "Không có lịch hẹn nào",
+      "cancel_appointment": "Hủy Lịch Hẹn",
+      "reschedule": "Đổi Lịch Hẹn",
+      "select_date_time": "Chọn Ngày Giờ",
+      "select_date": "Chọn Ngày",
+      "select_time": "Chọn Giờ",
+      "morning": "Buổi Sáng",
+      "afternoon": "Buổi Chiều",
+      "evening": "Buổi Tối",
+      "available_doctors": "Bác Sĩ Khả Dụng",
+      "no_doctors_available": "Không có bác sĩ nào khả dụng trong thời gian này",
+      "try_different_time": "Vui lòng thử chọn một thời gian khác",
+      "select_different_time": "Chọn thời gian khác",
+      "select": "Chọn",
+      "doctor": "Bác Sĩ",
+      "date": "Ngày",
+      "time": "Giờ",
+      "booking_successful": "Đặt Lịch Hẹn Thành Công",
+      "booking_confirmation_message": "Lịch hẹn của bạn đã được đặt thành công. Chúng tôi đã gửi thông tin chi tiết vào email của bạn.",
+      "appointment_details": "Thông Tin Lịch Hẹn",
+      "back_to_appointments": "Quay Lại Danh Sách Lịch Hẹn",
+      "doctor_details": "Thông Tin Bác Sĩ",
+      "appointment_status": "Trạng Thái Lịch Hẹn",
+      "confirm": "Xác Nhận",
+      "steps": {
+        "select_date_time": "Chọn Ngày Giờ",
+        "select_doctor": "Chọn Bác Sĩ",
+        "review": "Xem Lại",
+        "confirm": "Xác Nhận"
+      },
+      "status": {
+        "confirmed": "Đã Xác Nhận",
+        "pending": "Đang Chờ Xác Nhận",
+        "cancelled": "Đã Hủy",
+        "completed": "Đã Hoàn Thành"
+      }
     }
   },
   "doctor": {
@@ -226,7 +274,9 @@
       "personal_info": "Thông Tin Cá Nhân",
       "experience": "Kinh Nghiệm",
       "education": "Học Vấn",
-      "certificates": "Chứng Chỉ"
+      "certificates": "Chứng Chỉ",
+      "years": "năm",
+      "reviews": "đánh giá"
     },
     "dashboard": {
       "title": "Bảng Điều Khiển Bác Sĩ",
@@ -243,7 +293,11 @@
     "delete": "Xóa",
     "edit": "Sửa",
     "view": "Xem",
+    "view_details": "Xem Chi Tiết",
     "search": "Tìm kiếm",
-    "filter": "Lọc"
+    "filter": "Lọc",
+    "no_data": "Không có dữ liệu",
+    "back": "Quay Lại",
+    "continue": "Tiếp Tục"
   }
 }

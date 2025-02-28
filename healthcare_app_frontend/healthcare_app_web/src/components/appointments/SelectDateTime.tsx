@@ -4,7 +4,7 @@ import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useTranslation } from "react-i18next";
-import { format } from "date-fns";
+import { format, addDays, isBefore, isToday } from "date-fns";
 
 interface SelectDateTimeProps {
   onSelect: (date: Date, time: string) => void;
@@ -15,10 +15,30 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({ onSelect }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>("");
 
-  // Mock time slots
-  const morningSlots = ["08:00", "09:00", "10:00", "11:00"];
-  const afternoonSlots = ["13:00", "14:00", "15:00", "16:00"];
-  const eveningSlots = ["17:00", "18:00", "19:00"];
+  // Create time slots with 30-minute intervals
+  const morningSlots = [
+    "07:00",
+    "07:30",
+    "08:00",
+    "08:30",
+    "09:00",
+    "09:30",
+    "10:00",
+    "10:30",
+    "11:00",
+    "11:30",
+  ];
+  const afternoonSlots = [
+    "13:00",
+    "13:30",
+    "14:00",
+    "14:30",
+    "15:00",
+    "15:30",
+    "16:00",
+    "16:30",
+  ];
+  const eveningSlots = ["17:00", "17:30", "18:00", "18:30", "19:00", "19:30"];
 
   const handleDateChange = (date: Date | null) => {
     setSelectedDate(date);
@@ -40,6 +60,30 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({ onSelect }) => {
     return day === 0 || day === 6;
   };
 
+  const shouldDisableDate = (date: Date) => {
+    // Disable past days, weekends, and dates more than 30 days in the future
+    const today = new Date();
+    const maxDate = addDays(today, 30);
+
+    return (
+      (isBefore(date, today) && !isToday(date)) ||
+      isWeekend(date) ||
+      isBefore(maxDate, date)
+    );
+  };
+
+  // Disable time slots that are in the past for today
+  const isTimeSlotDisabled = (time: string) => {
+    if (!selectedDate || !isToday(selectedDate)) return false;
+
+    const now = new Date();
+    const [hours, minutes] = time.split(":").map(Number);
+    return (
+      now.getHours() > hours ||
+      (now.getHours() === hours && now.getMinutes() >= minutes)
+    );
+  };
+
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
@@ -57,7 +101,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({ onSelect }) => {
                 value={selectedDate}
                 onChange={handleDateChange}
                 disablePast
-                shouldDisableDate={isWeekend}
+                shouldDisableDate={shouldDisableDate}
               />
             </LocalizationProvider>
           </Paper>
@@ -89,6 +133,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({ onSelect }) => {
                       variant={selectedTime === time ? "contained" : "outlined"}
                       size="small"
                       onClick={() => handleTimeSelect(time)}
+                      disabled={isTimeSlotDisabled(time)}
                     >
                       {time}
                     </Button>
@@ -105,6 +150,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({ onSelect }) => {
                       variant={selectedTime === time ? "contained" : "outlined"}
                       size="small"
                       onClick={() => handleTimeSelect(time)}
+                      disabled={isTimeSlotDisabled(time)}
                     >
                       {time}
                     </Button>
@@ -121,6 +167,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({ onSelect }) => {
                       variant={selectedTime === time ? "contained" : "outlined"}
                       size="small"
                       onClick={() => handleTimeSelect(time)}
+                      disabled={isTimeSlotDisabled(time)}
                     >
                       {time}
                     </Button>

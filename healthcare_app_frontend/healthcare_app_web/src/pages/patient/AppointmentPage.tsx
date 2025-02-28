@@ -12,6 +12,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { useTranslation } from "react-i18next";
 import BookAppointment from "../../components/appointments/BookAppointment";
 import AppointmentList from "../../components/appointments/AppointmentList";
+import { useSelector } from "react-redux";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -39,6 +40,7 @@ const AppointmentPage = () => {
   const { t } = useTranslation();
   const [tabValue, setTabValue] = useState(0);
   const [showBooking, setShowBooking] = useState(false);
+  const user = useSelector((state: any) => state.user.user);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -77,7 +79,10 @@ const AppointmentPage = () => {
 
       {showBooking ? (
         <Paper sx={{ p: 3, mb: 3 }}>
-          <BookAppointment onClose={handleBookingClose} />
+          <BookAppointment
+            onClose={handleBookingClose}
+            patientId={user.userId}
+          />
         </Paper>
       ) : (
         <>

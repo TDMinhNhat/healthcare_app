@@ -20,11 +20,11 @@ export default function PatientLayout() {
   const [currentTitle, setCurrentTitle] = useState("Dashboard");
 
   const titleMap: Record<string, string> = {
-    "/patient/dashboard": "Dashboard",
-    "/patient/appointments": "My Appointments",
-    "/patient/find-doctor": "Find Doctor",
-    "/patient/medical-records": "Medical Records",
-    "/patient/chat": "Messages",
+    dashboard: "Dashboard",
+    appointments: "My Appointments",
+    "find-doctor": "Find Doctor",
+    "medical-records": "Medical Records",
+    chat: "Messages",
   };
 
   const handleNavigation = (path: string) => {
@@ -75,10 +75,7 @@ export default function PatientLayout() {
   );
 
   return (
-    <BaseLayout
-      title={`Patient ${currentTitle}`}
-      sidebarContent={sidebarContent}
-    >
+    <BaseLayout title={`${currentTitle}`} sidebarContent={sidebarContent}>
       <Outlet />
     </BaseLayout>
   );

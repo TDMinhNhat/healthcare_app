@@ -212,11 +212,16 @@
     },
     "dashboard": {
       "welcome": "Welcome,",
-      "next_appointment": "Upcoming Appointment",
+      "next_appointment": "Next Appointment",
       "view_details": "View Details",
       "recent_appointments": "Recent Appointments",
       "medications": "Medications",
-      "recent_medical_records": "Recent Medical Records"
+      "recent_medical_records": "Recent Medical Records",
+      "no_upcoming_appointments": "No upcoming appointments",
+      "no_recent_appointments": "No recent appointments",
+      "no_medications": "No medications prescribed",
+      "no_medical_records": "No medical records available",
+      "refills_remaining": "Refills remaining"
     },
     "appointments": {
       "title": "My Appointments",
@@ -288,6 +293,7 @@
     "search": "Search",
     "filter": "Filter",
     "continue": "Continue",
-    "back": "Back"
+    "back": "Back",
+    "no_data": "No data available"
   }
 }

@@ -1,5 +1,4 @@
-import React from "react";
-import { PatientLayout } from "../layouts/PatientLayout";
+import React, { useState, useEffect } from "react";
 import {
   Typography,
   Paper,
@@ -11,16 +10,87 @@ import {
   ListItem,
   ListItemText,
   Divider,
+  CircularProgress,
+  Box,
+  Alert,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
+import EmptyState from "../../components/EmptyState";
+import { getPatientDashboardData } from "../../services/patient_service";
 
 const PatientDashboard: React.FC = () => {
+  const user = useSelector((state: any) => state.user.user);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [patientData, setPatientData] = useState<any | null>(null);
   const { t } = useTranslation();
+
+  useEffect(() => {
+    console.log("user", user);
+    const fetchPatientData = async () => {
+      if (!user?.id) {
+        setError("User not found");
+        setLoading(false);
+        return;
+      }
+
+      // try {
+      //   setLoading(true);
+      //   const data = await getPatientDashboardData(user.id);
+      //   setPatientData(data);
+      //   setError(null);
+      // } catch (err) {
+      //   setError("Failed to load patient data");
+      //   console.error(err);
+      // } finally {
+      //   setLoading(false);
+      // }
+    };
+
+    fetchPatientData();
+  }, [user]);
+
+  // const handleViewMedicalRecord = async (recordId: string, title: string) => {
+  //   try {
+  //     const fileBlob = await getMedicalRecordFile(recordId);
+  //     const url = window.URL.createObjectURL(fileBlob);
+  //     const a = document.createElement('a');
+  //     a.href = url;
+  //     a.download = `${title}.pdf`;
+  //     document.body.appendChild(a);
+  //     a.click();
+  //     window.URL.revokeObjectURL(url);
+  //     document.body.removeChild(a);
+  //   } catch (error) {
+  //     console.error("Error downloading medical record:", error);
+  //   }
+  // };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return <Alert severity="error">{error}</Alert>;
+  }
+
+  if (!patientData) {
+    return <Alert severity="info">{t("common.loading")}</Alert>;
+  }
+
+  const { nextAppointment, recentAppointments, medications, medicalRecords } =
+    patientData;
+  const fullName = user ? `${user.firstName} ${user.lastName}` : "";
 
   return (
     <>
       <Typography variant="h4" gutterBottom>
-        {t("patient.dashboard.welcome")} Patient Name
+        {t("patient.dashboard.welcome")} {fullName}
       </Typography>
       <Grid container spacing={3}>
         <Grid item xs={12}>
@@ -30,17 +100,28 @@ const PatientDashboard: React.FC = () => {
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
+                flexWrap: "wrap",
+                gap: 2,
               }}
             >
               <Typography variant="h5" component="div">
                 {t("patient.dashboard.next_appointment")}
               </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Dr. Smith - General Checkup - June 15, 2023 at 10:00 AM
-              </Typography>
-              <Button variant="contained" color="primary">
-                {t("patient.dashboard.view_details")}
-              </Button>
+              {nextAppointment ? (
+                <>
+                  <Typography variant="body1" color="text.secondary">
+                    Dr. {nextAppointment.doctorName} - {nextAppointment.purpose}{" "}
+                    - {nextAppointment.date} at {nextAppointment.time}
+                  </Typography>
+                  <Button variant="contained" color="primary">
+                    {t("patient.dashboard.view_details")}
+                  </Button>
+                </>
+              ) : (
+                <Typography variant="body1" color="text.secondary">
+                  {t("patient.dashboard.no_upcoming_appointments")}
+                </Typography>
+              )}
             </CardContent>
           </Card>
         </Grid>
@@ -50,28 +131,25 @@ const PatientDashboard: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               {t("patient.dashboard.recent_appointments")}
             </Typography>
-            <List>
-              <ListItem>
-                <ListItemText
-                  primary="Dr. Johnson - Cardiology"
-                  secondary="May 2, 2023 - Follow-up consultation"
-                />
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <ListItemText
-                  primary="Dr. Williams - General Practice"
-                  secondary="April 15, 2023 - Annual physical"
-                />
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <ListItemText
-                  primary="Dr. Davis - Dermatology"
-                  secondary="March 28, 2023 - Skin assessment"
-                />
-              </ListItem>
-            </List>
+            {recentAppointments && recentAppointments.length > 0 ? (
+              <List>
+                {recentAppointments.map((appointment, index) => (
+                  <React.Fragment key={appointment.id}>
+                    <ListItem>
+                      <ListItemText
+                        primary={`Dr. ${appointment.doctorName} - ${appointment.specialty}`}
+                        secondary={`${appointment.date} - ${appointment.purpose}`}
+                      />
+                    </ListItem>
+                    {index < recentAppointments.length - 1 && <Divider />}
+                  </React.Fragment>
+                ))}
+              </List>
+            ) : (
+              <EmptyState
+                message={t("patient.dashboard.no_recent_appointments")}
+              />
+            )}
           </Paper>
         </Grid>
 
@@ -80,28 +158,25 @@ const PatientDashboard: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               {t("patient.dashboard.medications")}
             </Typography>
-            <List>
-              <ListItem>
-                <ListItemText
-                  primary="Lisinopril 10mg"
-                  secondary="Take 1 tablet daily - Refills remaining: 2"
-                />
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <ListItemText
-                  primary="Metformin 500mg"
-                  secondary="Take 1 tablet twice daily - Refills remaining: 3"
-                />
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <ListItemText
-                  primary="Atorvastatin 20mg"
-                  secondary="Take 1 tablet at bedtime - Refills remaining: 5"
-                />
-              </ListItem>
-            </List>
+            {medications && medications.length > 0 ? (
+              <List>
+                {medications.map((medication, index) => (
+                  <React.Fragment key={medication.id}>
+                    <ListItem>
+                      <ListItemText
+                        primary={`${medication.name} ${medication.dosage}`}
+                        secondary={`${medication.instructions} - ${t(
+                          "patient.dashboard.refills_remaining"
+                        )}: ${medication.refillsRemaining}`}
+                      />
+                    </ListItem>
+                    {index < medications.length - 1 && <Divider />}
+                  </React.Fragment>
+                ))}
+              </List>
+            ) : (
+              <EmptyState message={t("patient.dashboard.no_medications")} />
+            )}
           </Paper>
         </Grid>
 
@@ -110,23 +185,31 @@ const PatientDashboard: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               {t("patient.dashboard.recent_medical_records")}
             </Typography>
-            <List>
-              <ListItem>
-                <ListItemText
-                  primary="Blood Test Results"
-                  secondary="May 5, 2023 - Complete Blood Count"
-                />
-                <Button variant="outlined">{t("common.view")}</Button>
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <ListItemText
-                  primary="X-Ray Report"
-                  secondary="April 18, 2023 - Chest X-Ray"
-                />
-                <Button variant="outlined">{t("common.view")}</Button>
-              </ListItem>
-            </List>
+            {medicalRecords && medicalRecords.length > 0 ? (
+              <List>
+                {medicalRecords.map((record, index) => (
+                  <React.Fragment key={record.id}>
+                    <ListItem>
+                      <ListItemText
+                        primary={record.title}
+                        secondary={`${record.date} - ${record.description}`}
+                      />
+                      <Button
+                        variant="outlined"
+                        onClick={() =>
+                          handleViewMedicalRecord(record.id, record.title)
+                        }
+                      >
+                        {t("common.view")}
+                      </Button>
+                    </ListItem>
+                    {index < medicalRecords.length - 1 && <Divider />}
+                  </React.Fragment>
+                ))}
+              </List>
+            ) : (
+              <EmptyState message={t("patient.dashboard.no_medical_records")} />
+            )}
           </Paper>
         </Grid>
       </Grid>
