@@ -16,6 +16,9 @@ public class Drug {
     @Column(name = "drug_name", length = 150, nullable = false) @NonNull
     private String drugName;
 
+    @Column(name = "drug_type", length = 300, nullable = false) @NonNull
+    private String drugType;
+
     @Column(length = 50, nullable = false) @NonNull
     private String unit;
 
