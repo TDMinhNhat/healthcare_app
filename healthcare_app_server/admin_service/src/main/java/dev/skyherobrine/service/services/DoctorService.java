@@ -50,28 +50,37 @@ public class DoctorService {
         log.info("Doctor Service: saving doctor into database");
         Doctor doctor = doctorRepository.save(target);
 
+        Thread.sleep(2000);
+
         log.info("Doctor Service: sending insert doctor certificate message to kafka");
         for(DoctorCertificate doctorCertificate : doctorDTO.certificates(doctor)) {
             kafkaTemplate.send("insert_doctor_certificate", ObjectParser.convertObjectToJson(doctorCertificate));
+            doctorCertificateRepository.save(doctorCertificate);
         }
         log.info("Doctor Service: saving doctor certificates into database");
-        doctorCertificateRepository.saveAll(doctorDTO.certificates(doctor));
+
+        Thread.sleep(2000);
 
         log.info("Doctor Service: sending insert doctor education message to kafka");
         for(DoctorEducation doctorEducation : doctorDTO.educations(doctor)) {
             kafkaTemplate.send("insert_doctor_education", ObjectParser.convertObjectToJson(doctorEducation));
+            doctorEducationRepository.save(doctorEducation);
         }
         log.info("Doctor Service: saving doctor educations into database");
-        doctorEducationRepository.saveAll(doctorDTO.educations(doctor));
+
+        Thread.sleep(2000);
 
         log.info("Doctor Service: sending insert doctor experience message to kafka");
         for(DoctorExperience doctorExperience : doctorDTO.experiences(doctor)) {
-            Address getAddress = doctorExperience.getCompAddress();
-            addressRepository.save(getAddress);
             kafkaTemplate.send("insert_doctor_experience", ObjectParser.convertObjectToJson(doctorExperience));
+            Address getAddress = doctorExperience.getCompAddress();
+            Address addressResult = addressRepository.save(getAddress);
+            Address address = addressRepository.findByid(addressResult.getId());
+            doctorExperience.setCompAddress(address);
+            doctorExperienceRepository.save(doctorExperience);
         }
         log.info("Doctor Service: saving doctor experiences into database");
-        doctorExperienceRepository.saveAll(doctorDTO.experiences(doctor));
+
         return doctor;
     }
 

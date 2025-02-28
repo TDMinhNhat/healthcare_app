@@ -74,7 +74,9 @@ public class DoctorConsumer {
             log.info("Doctor Consumer: {}", message);
             DoctorExperience doctorExperience = ObjectParser.convertJsonToObject(message, DoctorExperience.class);
             Address address = doctorExperience.getCompAddress();
-            addressRepository.save(address);
+            Address result = addressRepository.save(address);
+            log.info("Doctor Consumer: insert address successfully");
+            doctorExperience.setCompAddress(result);
             doctorExperienceRepository.save(doctorExperience);
             log.info("Doctor Consumer: insert doctor experience successfully");
         } catch (Exception e) {
