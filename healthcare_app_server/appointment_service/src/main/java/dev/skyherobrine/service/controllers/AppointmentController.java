@@ -35,8 +35,12 @@ public class AppointmentController {
     public ResponseEntity<Response> getAllAppointmentsByPatient(@RequestParam("userId") String patientId) {
         try {
             log.info("Appointment: Call the api get all appointments by patient");
+            Map<String,Object> data = new HashMap<>();
             List<Appointment> appointments = as.getAppointmentsByPatient(patientId);
-
+            appointments.forEach(appointment -> {
+                data.put("appointment", appointment);
+                data.put("doctor", doctorFeign.getDoctorInformation(appointment.getDoctor()).getBody().getData());
+            });
             if(appointments != null) {
                 return ResponseEntity.ok(new Response(
                         HttpStatus.OK.value(),
@@ -64,13 +68,17 @@ public class AppointmentController {
     public ResponseEntity<Response> getAllAppointmentsByDoctor(@RequestParam("userId") String doctorId) {
         try {
             log.info("Appointment: Call the api get all appointments by doctor");
+            Map<String,Object> data = new HashMap<>();
             List<Appointment> appointments = as.getAppointmentsByDoctor(doctorId);
-
+            appointments.forEach(appointment -> {
+                data.put("appointment", appointment);
+                data.put("doctor", doctorFeign.getDoctorInformation(appointment.getDoctor()).getBody().getData());
+            });
             if(appointments != null) {
                 return ResponseEntity.ok(new Response(
                         HttpStatus.OK.value(),
                         "Get all appointments by doctor successfully",
-                        appointments
+                        data
                 ));
             }
             return ResponseEntity.ok(new Response(
