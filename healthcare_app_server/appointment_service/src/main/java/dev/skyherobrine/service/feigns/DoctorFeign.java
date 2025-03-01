@@ -12,4 +12,7 @@ public interface DoctorFeign {
 
     @RequestMapping(method = RequestMethod.POST, value = "/doctor_not_in_list")
     ResponseEntity<Response> getAllDoctor(@RequestBody List<String> listDoctorsId);
+
+    @RequestMapping(method = RequestMethod.GET, value = "/userId")
+    ResponseEntity<Response> getDoctorInformation(@RequestParam("userId") String doctorId);
 }

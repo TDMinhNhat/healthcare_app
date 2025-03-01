@@ -1,5 +1,6 @@
 package dev.skyherobrine.service.repositories;
 
+import dev.skyherobrine.service.enums.AppointmentStatus;
 import dev.skyherobrine.service.models.Appointment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +20,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment,Long> {
     List<String> findDoctorFreeStartTime(LocalDateTime start);
 
     Optional<Appointment> findAppointmentByRoomId(String roomId);
+
+    List<Appointment> findByStatus(AppointmentStatus status);
+
+    List<Appointment> findByPatientAndStatus(String patient, AppointmentStatus status);
+
+
 }

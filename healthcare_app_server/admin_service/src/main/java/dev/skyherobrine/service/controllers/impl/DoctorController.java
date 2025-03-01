@@ -84,4 +84,32 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
                 result
         ));
     }
+
+    @GetMapping("/userId")
+    public ResponseEntity<Response> getDoctorByUserId(@RequestParam("userId") String userId) {
+        try {
+            log.info("Doctor: Call the api get doctor by user id");
+            Doctor doctor = doctorRepository.findDoctorByUserId(userId).orElse(null);
+            if(doctor != null) {
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.OK.value(),
+                        "Get doctor by user id successfully",
+                        doctor
+                ));
+            }
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.NOT_FOUND.value(),
+                    "There are no any doctor for this user id",
+                    null
+            ));
+        } catch (Exception e) {
+            log.error("Doctor: The api return an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api get doctor by user id return an error",
+                    e.getMessage()
+            ));
+        }
+    }
 }
