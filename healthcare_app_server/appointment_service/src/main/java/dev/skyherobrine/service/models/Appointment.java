@@ -1,6 +1,7 @@
 package dev.skyherobrine.service.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import dev.skyherobrine.service.enums.AppointmentStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -30,6 +31,9 @@ public class Appointment {
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+    @Enumerated(EnumType.ORDINAL)
+    @Column(nullable = false)
+    private AppointmentStatus status;
 
     @PrePersist
     public void onPersist() {
@@ -42,5 +46,6 @@ public class Appointment {
         this.note = note;
         this.start = start;
         this.end = end;
+        this.status = AppointmentStatus.PENDING;
     }
 }

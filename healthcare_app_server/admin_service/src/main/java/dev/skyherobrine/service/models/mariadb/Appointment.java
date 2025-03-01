@@ -1,6 +1,7 @@
 package dev.skyherobrine.service.models.mariadb;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import dev.skyherobrine.service.enums.AppointmentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,6 +31,9 @@ public class Appointment {
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+    @Enumerated(EnumType.ORDINAL)
+    @Column(nullable = false)
+    private AppointmentStatus status;
 
     public Appointment(@NonNull Patient patient, @NonNull Doctor doctor, String note, @NonNull LocalDateTime start, @NonNull LocalDateTime end) {
         this.patient = patient;
@@ -51,5 +55,6 @@ public class Appointment {
     @PrePersist
     public void onPersist() {
         createdAt = LocalDateTime.now();
+        status = AppointmentStatus.PENDING;
     }
 }
