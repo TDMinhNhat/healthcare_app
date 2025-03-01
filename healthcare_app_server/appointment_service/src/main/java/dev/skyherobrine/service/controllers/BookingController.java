@@ -59,6 +59,7 @@ public class BookingController {
     ) {
         try {
             log.info("Booking: Call the api get doctors appointment free the start time");
+            log.info("Booking: Time for check is {}", start);
             List<String> listDoctorsId = ar.findDoctorFreeStartTime(LocalDateTime.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")));
             log.info("Booking: Found {} doctors", listDoctorsId.size());
             return doctorFeign.getAllDoctor(listDoctorsId);
