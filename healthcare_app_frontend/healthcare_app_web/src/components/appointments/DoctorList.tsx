@@ -126,7 +126,7 @@ const DoctorList: React.FC<DoctorListProps> = ({
                         sx={{ width: 120, objectFit: "cover" }}
                         image={
                           doctor.image ||
-                          "https://via.placeholder.com/120x160?text=Doctor"
+                          "https://picsum.photos/120/160?random=1"
                         }
                         alt={doctor.name || "Doctor"}
                       />
@@ -139,11 +139,12 @@ const DoctorList: React.FC<DoctorListProps> = ({
                       >
                         <CardContent sx={{ flex: "1 0 auto" }}>
                           <Typography component="div" variant="h6">
-                            {doctor.name || "Unknown Doctor"}
+                            {doctor.firstName + " " + doctor.lastName ||
+                              "Unknown Doctor"}
                           </Typography>
-                          {doctor.specialty && (
+                          {doctor.specialization && (
                             <Chip
-                              label={doctor.specialty}
+                              label={doctor.specialization}
                               size="small"
                               color="primary"
                               sx={{ mt: 1, mb: 1 }}

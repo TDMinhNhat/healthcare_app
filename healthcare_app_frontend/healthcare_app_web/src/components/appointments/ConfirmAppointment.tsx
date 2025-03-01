@@ -79,13 +79,13 @@ const ConfirmAppointment: React.FC<ConfirmAppointmentProps> = ({
 
           <ListItem>
             <ListItemAvatar>
-              <Avatar src={doctor.image}>
+              <Avatar src={doctor.avatar ?? ""}>
                 <PersonIcon />
               </Avatar>
             </ListItemAvatar>
             <ListItemText
               primary={t("patient.appointments.doctor")}
-              secondary={`${doctor.name} - ${doctor.specialty}`}
+              secondary={`${doctor.firstName} + ' ' ${doctor.lastName} - ${doctor.specialization}`}
             />
           </ListItem>
         </List>

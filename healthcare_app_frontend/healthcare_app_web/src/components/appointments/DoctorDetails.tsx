@@ -39,7 +39,8 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
         setError(null);
         console.log("Fetching doctor details for:", doctor);
         const response = await getDoctorInfo(doctor.userId);
-        setDoctorDetails(response.data || doctor);
+        console.log("Doctor details response:", response.data.data);
+        setDoctorDetails(response.data.data || doctor);
       } catch (err) {
         console.error("Failed to fetch doctor details:", err);
         setError(
@@ -63,9 +64,10 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
   }
 
   const details = doctorDetails || doctor;
-  const education = details.education || [];
-  const experience = details.experience || [];
-  const certifications = details.certifications || [];
+  const infoBasic = details.doctor || {};
+  const education = details.educations || [];
+  const experience = details.experiences || [];
+  const certifications = details.certificates || [];
 
   return (
     <Box>
@@ -86,18 +88,17 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
               component="img"
               sx={{ width: "100%", borderRadius: 1 }}
               image={
-                details.avatar ||
-                "https://via.placeholder.com/120x160?text=Doctor"
+                infoBasic.avatar || "https://picsum.photos/120/160?random=1" // Random avatar image
               }
-              alt={details.lastName || "Doctor"}
+              alt={infoBasic.lastName || "Doctor"}
             />
           </Grid>
           <Grid item xs={12} sm={9}>
             <Typography variant="h5" component="div">
-              {details.firstName + " " + details.lastName || "Doctor"}
+              {infoBasic.firstName + " " + infoBasic.lastName || "Doctor"}
             </Typography>
             <Chip
-              label={details.specialty}
+              label={infoBasic.specialization}
               color="primary"
               sx={{ mt: 1, mb: 1 }}
             />
@@ -130,8 +131,8 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
                 education.map((item: any, index: number) => (
                   <ListItem key={item.id || index} sx={{ px: 0 }}>
                     <ListItemText
-                      primary={item.degree}
-                      secondary={`${item.institution} (${item.year})`}
+                      primary={item.schoolName}
+                      // secondary={`${item.institution} (${item.year})`}
                     />
                   </ListItem>
                 ))
@@ -160,8 +161,8 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
                 experience.map((item: any, index: number) => (
                   <ListItem key={item.id || index} sx={{ px: 0 }}>
                     <ListItemText
-                      primary={item.position}
-                      secondary={`${item.hospital} (${item.year})`}
+                      primary={item.position ?? ""}
+                      secondary={`${item.companyName} (${item.startDate} - ${item.endDate})`}
                     />
                   </ListItem>
                 ))
@@ -189,7 +190,7 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
               {certifications.length > 0 ? (
                 certifications.map((cert: string, index: number) => (
                   <ListItem key={index} sx={{ px: 0 }}>
-                    <ListItemText primary={cert} />
+                    <ListItemText primary={cert?.certName} />
                   </ListItem>
                 ))
               ) : (

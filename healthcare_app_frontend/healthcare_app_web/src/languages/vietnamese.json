@@ -276,7 +276,10 @@
       "education": "Học Vấn",
       "certificates": "Chứng Chỉ",
       "years": "năm",
-      "reviews": "đánh giá"
+      "reviews": "đánh giá",
+      "no_education_data": "Không có thông tin học vấn",
+      "no_experience_data": "Không có thông tin kinh nghiệm",
+      "no_certificates_data": "Không có thông tin chứng chỉ"
     },
     "dashboard": {
       "title": "Bảng Điều Khiển Bác Sĩ",
