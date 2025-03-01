@@ -15,37 +15,44 @@ import {
   Alert,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import EmptyState from "../../components/EmptyState";
-import { getPatientDashboardData } from "../../services/patient_service";
+import { getAppointmentPatient } from "../../services/appoinment_service";
+import { setUser } from "../../stores/slices/user.slice";
 
 const PatientDashboard: React.FC = () => {
-  const user = useSelector((state: any) => state.user.user);
+  const user = useSelector((state: any) => state.user).user;
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [patientData, setPatientData] = useState<any | null>(null);
   const { t } = useTranslation();
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    console.log("user", user);
+    // console.log("user from redux:", user);
+    // console.log("user type:", typeof user);
+    // console.log("user keys:", user ? Object.keys(user) : null);
+
     const fetchPatientData = async () => {
-      if (!user?.id) {
+      // console.log("user line 35 in dashboard", user);
+      if (!user?.userId) {
         setError("User not found");
         setLoading(false);
         return;
       }
 
-      // try {
-      //   setLoading(true);
-      //   const data = await getPatientDashboardData(user.id);
-      //   setPatientData(data);
-      //   setError(null);
-      // } catch (err) {
-      //   setError("Failed to load patient data");
-      //   console.error(err);
-      // } finally {
-      //   setLoading(false);
-      // }
+      try {
+        setLoading(true);
+        console.log("user.userId", user.userId);
+        const data = await getAppointmentPatient(user.userId);
+        setPatientData(data);
+        setError(null);
+      } catch (err) {
+        setError("Failed to load patient data");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchPatientData();
@@ -137,7 +144,7 @@ const PatientDashboard: React.FC = () => {
                   <React.Fragment key={appointment.id}>
                     <ListItem>
                       <ListItemText
-                        primary={`Dr. ${appointment.doctorName} - ${appointment.specialty}`}
+                        primary={`Dr. ${appointment} - ${appointment.specialty}`}
                         secondary={`${appointment.date} - ${appointment.purpose}`}
                       />
                     </ListItem>

@@ -57,11 +57,16 @@ export default function LoginPage() {
         if (response.status === 200 && response.data.code === 200) {
           const userData = response.data.data;
           if (userData) {
-            dispatch(setUser({ user: userData }));
+            dispatch(setUser(userData)); // Remove the nested object structure
             // lưu thông tin user vào localStorage
             localStorage.setItem("user", JSON.stringify(userData));
             toast.success("Login successful!");
-            setTimeout(() => navigate(ROUTING.PATIENT), 1500); // Redirect after showing toast
+            // console.log("userData", userData);
+            if (userData.specialization) {
+              setTimeout(() => navigate(ROUTING.DOCTOR), 1500); // Redirect after showing toast
+            } else {
+              setTimeout(() => navigate(ROUTING.PATIENT), 1500); // Redirect after showing toast
+            }
           } else {
             toast.error(
               response.data.message ||

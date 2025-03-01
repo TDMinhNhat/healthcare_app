@@ -1,9 +1,9 @@
 import axiosConfig from "./axiosConfig";
 
-const prefix = "/appointments/api/v1/appointments";
+const prefix = "/appointment/api/v1/appointments";
 
 export const getAppointmentPatient = async (userId: string) => {
-  const response = await axiosConfig.get(`${prefix}/patient/`, {
+  const response = await axiosConfig.get(`${prefix}/patient`, {
     params: {
       userId: userId,
     },
@@ -12,7 +12,7 @@ export const getAppointmentPatient = async (userId: string) => {
 };
 
 export const getAppointmentDoctor = async (userId: string) => {
-  const response = await axiosConfig.get(`${prefix}/doctor/`, {
+  const response = await axiosConfig.get(`${prefix}/doctor`, {
     params: {
       userId: userId,
     },
