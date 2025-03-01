@@ -12,4 +12,9 @@ public class AppointmentProducer {
     public NewTopic bookingAppointment() {
         return TopicBuilder.name("insert_appointment").build();
     }
+
+    @Bean
+    public NewTopic updateCancelAppointment() {
+        return TopicBuilder.name("update_cancel_appointment").build();
+    }
 }

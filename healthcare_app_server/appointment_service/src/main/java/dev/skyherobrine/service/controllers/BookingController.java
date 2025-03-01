@@ -25,11 +25,13 @@ public class BookingController {
     private final BookingService bookingService;
     private final AppointmentRepository ar;
     private final DoctorFeign doctorFeign;
+    private final KafkaTemplate<String,String> kafkaTemplate;
 
-    public BookingController(BookingService bookingService, AppointmentRepository ar, DoctorFeign doctorFeign) {
+    public BookingController(BookingService bookingService, AppointmentRepository ar, DoctorFeign doctorFeign, KafkaTemplate<String, String> kafkaTemplate) {
         this.bookingService = bookingService;
         this.ar = ar;
         this.doctorFeign = doctorFeign;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @PostMapping
@@ -71,6 +73,38 @@ public class BookingController {
                     "The api get doctors appointment free the start time return an error",
                     e.getMessage()
             ));
+        }
+    }
+
+    @PutMapping("/cancel")
+    public ResponseEntity<Response> cancelAppointment(
+            @RequestParam("roomId") String roomId
+    ) {
+        try {
+            log.info("Booking: Call the api cancel appointment");
+            kafkaTemplate.send("cancel_appointment", roomId);
+            int result = ar.updateStatusByRoomId(roomId);
+            if (result == 0) {
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.NOT_FOUND.value(),
+                        "The appointment not found",
+                        null
+                ));
+            }
+            log.info("Booking: The appointment was canceled");
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Cancel appointment successfully",
+                    null
+            ));
+        } catch (Exception e) {
+            log.error("Booking: The api return an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api cancel appointment was return an error",
+                    e.getMessage()
+                ));
         }
     }
 }

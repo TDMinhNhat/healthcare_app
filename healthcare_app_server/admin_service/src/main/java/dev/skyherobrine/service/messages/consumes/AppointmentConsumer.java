@@ -6,6 +6,7 @@ import dev.skyherobrine.service.models.mariadb.Appointment;
 import dev.skyherobrine.service.repositories.mariadb.AppointmentRepository;
 import dev.skyherobrine.service.repositories.mariadb.DoctorRepository;
 import dev.skyherobrine.service.repositories.mariadb.PatientRepository;
+import dev.skyherobrine.service.utils.ObjectParser;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -54,6 +55,20 @@ public class AppointmentConsumer {
             ar.save(appointment);
         } catch (Exception e) {
             log.error("Appointment Consumer: Can't add the book appointment");
+            log.error(e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "update_cancel_appointment", groupId = "admin_update_cancel_appointment")
+    public void updateCancelAppointment(String message) {
+        try {
+            log.info("Appointment Consumer: receive update cancel appointment message from kafka");
+            log.info("Appointment Consumer: {}", message);
+            String getRoomId = ObjectParser.convertJsonToObject(message, String.class);
+            int result = ar.updateStatusByRoomId(getRoomId);
+            log.info("Appointment Consumer: update {} appointment", result);
+        } catch (Exception e) {
+            log.error("Appointment Consumer: Can't update the cancel appointment");
             log.error(e.getMessage());
         }
     }
