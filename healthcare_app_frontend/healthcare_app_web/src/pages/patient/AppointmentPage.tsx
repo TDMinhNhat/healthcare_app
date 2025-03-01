@@ -54,6 +54,20 @@ const AppointmentPage = () => {
     setShowBooking(false);
   };
 
+  // Define status mapping for each tab
+  const getStatusForTab = (tabIndex: number) => {
+    switch (tabIndex) {
+      case 0: // Upcoming - includes WAITING and IN_PROGRESS
+        return ["WAITING", "IN_PROGRESS"];
+      case 1: // Completed - DONE
+        return "DONE";
+      case 2: // Cancelled - CANCELLED
+        return "CANCELLED";
+      default:
+        return ["WAITING", "IN_PROGRESS"];
+    }
+  };
+
   return (
     <Box sx={{ width: "100%" }}>
       <Box
@@ -93,19 +107,31 @@ const AppointmentPage = () => {
               aria-label="appointment tabs"
             >
               <Tab label={t("patient.appointments.upcoming")} />
-              <Tab label={t("patient.appointments.past")} />
+              <Tab label={t("patient.appointments.completed")} />
               <Tab label={t("patient.appointments.cancelled")} />
             </Tabs>
             <Divider />
 
             <TabPanel value={tabValue} index={0}>
-              <AppointmentList type="upcoming" />
+              <AppointmentList
+                type="upcoming"
+                status={getStatusForTab(0)}
+                patientId={user.userId}
+              />
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
-              <AppointmentList type="past" />
+              <AppointmentList
+                type="completed"
+                status={getStatusForTab(1)}
+                patientId={user.userId}
+              />
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
-              <AppointmentList type="cancelled" />
+              <AppointmentList
+                type="cancelled"
+                status={getStatusForTab(2)}
+                patientId={user.userId}
+              />
             </TabPanel>
           </Paper>
         </>

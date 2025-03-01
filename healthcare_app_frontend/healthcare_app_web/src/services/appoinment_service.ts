@@ -19,3 +19,16 @@ export const getAppointmentDoctor = async (userId: string) => {
   });
   return response;
 };
+
+export const getAppoinmentStatusWithPatientId = async (
+  patientId: string,
+  status: string
+) => {
+  const response = await axiosConfig.get(`${prefix}/status_with_patient`, {
+    params: {
+      status: status,
+      patientId: patientId,
+    },
+  });
+  return response;
+};
