@@ -46,6 +46,6 @@ public class Appointment {
         this.note = note;
         this.start = start;
         this.end = end;
-        this.status = AppointmentStatus.PENDING;
+        this.status = AppointmentStatus.WAITING;
     }
 }

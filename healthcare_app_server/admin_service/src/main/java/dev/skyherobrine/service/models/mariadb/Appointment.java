@@ -55,6 +55,6 @@ public class Appointment {
     @PrePersist
     public void onPersist() {
         createdAt = LocalDateTime.now();
-        status = AppointmentStatus.PENDING;
+        status = AppointmentStatus.WAITING;
     }
 }
