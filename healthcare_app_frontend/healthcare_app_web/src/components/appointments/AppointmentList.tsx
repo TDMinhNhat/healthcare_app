@@ -188,7 +188,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
                     >
                       <Box sx={{ display: "flex", alignItems: "center" }}>
                         <Avatar
-                          src={doctor.avatar || ""}
+                          src={doctor.avatar || "https://picsum.photos/56/56"}
                           sx={{ width: 56, height: 56, mr: 2 }}
                         >
                           {doctor.firstName.charAt(0) +
