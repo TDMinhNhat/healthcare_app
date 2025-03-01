@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,17 +36,19 @@ public class AppointmentController {
     public ResponseEntity<Response> getAllAppointmentsByPatient(@RequestParam("userId") String patientId) {
         try {
             log.info("Appointment: Call the api get all appointments by patient");
-            Map<String,Object> data = new HashMap<>();
+            List<Map<String,Object>> result = new ArrayList<>();
             List<Appointment> appointments = as.getAppointmentsByPatient(patientId);
             appointments.forEach(appointment -> {
+                Map<String,Object> data = new HashMap<>();
                 data.put("appointment", appointment);
                 data.put("doctor", doctorFeign.getDoctorInformation(appointment.getDoctor()).getBody().getData());
+                result.add(data);
             });
             if(appointments != null) {
                 return ResponseEntity.ok(new Response(
                         HttpStatus.OK.value(),
                         "Get all appointments by patient successfully",
-                        appointments
+                        result
                 ));
             }
             return ResponseEntity.ok(new Response(
@@ -68,17 +71,19 @@ public class AppointmentController {
     public ResponseEntity<Response> getAllAppointmentsByDoctor(@RequestParam("userId") String doctorId) {
         try {
             log.info("Appointment: Call the api get all appointments by doctor");
-            Map<String,Object> data = new HashMap<>();
+            List<Map<String,Object>> result = new ArrayList<>();
             List<Appointment> appointments = as.getAppointmentsByDoctor(doctorId);
             appointments.forEach(appointment -> {
+                Map<String,Object> data = new HashMap<>();
                 data.put("appointment", appointment);
                 data.put("doctor", doctorFeign.getDoctorInformation(appointment.getDoctor()).getBody().getData());
+                result.add(data);
             });
             if(appointments != null) {
                 return ResponseEntity.ok(new Response(
                         HttpStatus.OK.value(),
                         "Get all appointments by doctor successfully",
-                        data
+                        result
                 ));
             }
             return ResponseEntity.ok(new Response(
@@ -129,16 +134,18 @@ public class AppointmentController {
     public ResponseEntity<Response> getAppointmentByStatus(@RequestParam AppointmentStatus status) {
         try {
             log.info("Appointment: Call the api get appointment by status");
-            Map<String,Object> data = new HashMap<>();
+            List<Map<String,Object>> result = new ArrayList<>();
             List<Appointment> appointments = ar.findByStatus(status);
             appointments.forEach(appointment -> {
+                Map<String,Object> data = new HashMap<>();
                 data.put("appointment", appointment);
                 data.put("doctor", doctorFeign.getDoctorInformation(appointment.getDoctor()).getBody().getData());
+                result.add(data);
             });
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "Get appointment by status successfully",
-                    data
+                    result
             ));
         } catch (Exception e) {
             log.error("Appointment: The api return an error");
@@ -158,16 +165,18 @@ public class AppointmentController {
     ) {
         try {
             log.info("Appointment: Call the api get appointment by status (need patient)");
-            Map<String,Object> data = new HashMap<>();
+            List<Map<String,Object>> result = new ArrayList<>();
             List<Appointment> appointments = ar.findByPatientAndStatus(patientId, status);
             appointments.forEach(appointment -> {
+                Map<String,Object> data = new HashMap<>();
                 data.put("appointment", appointment);
                 data.put("doctor", doctorFeign.getDoctorInformation(appointment.getDoctor()).getBody().getData());
+                result.add(data);
             });
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "Get appointment by patient and status successfully",
-                    data
+                    result
             ));
         } catch (Exception e) {
             log.error("Appointment: The api return an error");
