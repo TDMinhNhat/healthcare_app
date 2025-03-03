@@ -233,6 +233,7 @@
       "no_appointments": "Không có lịch hẹn nào",
       "cancel_appointment": "Hủy Lịch Hẹn",
       "reschedule": "Đổi Lịch Hẹn",
+      "select_specialty": "Chọn Chuyên Khoa",
       "select_date_time": "Chọn Ngày Giờ",
       "select_date": "Chọn Ngày",
       "select_time": "Chọn Giờ",
@@ -250,11 +251,13 @@
       "booking_successful": "Đặt Lịch Hẹn Thành Công",
       "booking_confirmation_message": "Lịch hẹn của bạn đã được đặt thành công. Chúng tôi đã gửi thông tin chi tiết vào email của bạn.",
       "appointment_details": "Thông Tin Lịch Hẹn",
+      "no_available_slots": "Không có lịch hẹn khả dụng",
       "back_to_appointments": "Quay Lại Danh Sách Lịch Hẹn",
       "doctor_details": "Thông Tin Bác Sĩ",
       "appointment_status": "Trạng Thái Lịch Hẹn",
       "confirm": "Xác Nhận",
       "steps": {
+        "select_service": "Chọn Dịch Vụ",
         "select_date_time": "Chọn Ngày Giờ",
         "select_doctor": "Chọn Bác Sĩ",
         "review": "Xem Lại",
@@ -265,7 +268,12 @@
         "pending": "Đang Chờ Xác Nhận",
         "cancelled": "Đã Hủy",
         "completed": "Đã Hoàn Thành"
-      }
+      },
+      "select_service": "Chọn Dịch Vụ",
+      "no_services": "Không có dịch vụ nào khả dụng",
+      "try_different_service": "Vui lòng thử chọn một dịch vụ khác",
+      "select_different_service": "Chọn dịch vụ khác",
+      "service": "Dịch Vụ"
     }
   },
   "doctor": {
@@ -288,6 +296,103 @@
       "total_patients": "Tổng Số Bệnh Nhân",
       "upcoming_appointments": "Lịch Hẹn Sắp Tới",
       "recent_patient_updates": "Cập Nhật Bệnh Nhân Gần Đây"
+    },
+    "schedule": {
+      "title": "Lịch Làm Việc",
+      "select_date": "Chọn Ngày",
+      "add_time_slot": "Thêm Khung Giờ",
+      "start_time": "Giờ Bắt Đầu",
+      "end_time": "Giờ Kết Thúc",
+      "mark_unavailable": "Đánh Dấu Không Khả Dụng",
+      "mark_available": "Đánh Dấu Khả Dụng",
+      "no_time_slots": "Không có khung giờ nào cho ngày này",
+      "click_add": "Nhấn vào nút 'Thêm Khung Giờ' để thêm thời gian làm việc",
+      "add": "Thêm",
+      "save": "Lưu",
+      "save_schedule": "Lưu Lịch Làm Việc",
+      "success_added": "Thêm khung giờ làm việc thành công",
+      "success_saved": "Lưu lịch làm việc thành công",
+      "error_select_times": "Vui lòng chọn giờ bắt đầu và giờ kết thúc",
+      "error_invalid_time_range": "Giờ kết thúc phải sau giờ bắt đầu",
+      "error_time_slot_overlap": "Khung giờ này bị trùng lặp với khung giờ hiện có",
+      "error_select_start_time": "Vui lòng chọn giờ bắt đầu",
+      "error_select_end_time": "Vui lòng chọn giờ kết thúc",
+      "no_edits_allowed": "Chỉ có thể đánh dấu khả dụng hoặc xóa",
+      "slot_info": "Mỗi khung giờ kéo dài 30 phút. Giờ kết thúc sẽ được tính tự động.",
+      "auto_calculated": "tự động tính",
+      "select_all": "Chọn Tất Cả",
+      "clear_all": "Xóa Tất Cả",
+      "selection_info": "Chọn các khung giờ làm việc bằng cách nhấp vào từng ô. Mỗi khung giờ kéo dài 30 phút. Sau khi chọn xong, nhấn 'Lưu' để lưu lịch làm việc của bạn.",
+      "matrix_info": "Chọn khung giờ làm việc của bạn cho từng ngày bằng cách nhấp vào các ô tương ứng. Mỗi khung giờ kéo dài 30 phút. Sau khi chọn xong, nhấn 'Lưu Lịch Làm Việc' để lưu lịch làm việc của bạn.",
+      "time": "Giờ",
+      "select_all_for_time": "Chọn tất cả các ngày cho khung giờ này",
+      "clear_all_for_time": "Xóa tất cả các ngày cho khung giờ này",
+      "select_all_for_day": "Chọn tất cả các khung giờ cho ngày này",
+      "clear_all_for_day": "Xóa tất cả các khung giờ cho ngày này"
+    },
+    "appointments": {
+      "title": "Lịch Hẹn Khám Bệnh",
+      "subtitle": "Xem và quản lý lịch hẹn khám bệnh với bệnh nhân",
+      "tabs": {
+        "upcoming": "Sắp Tới",
+        "completed": "Đã Hoàn Thành",
+        "cancelled": "Đã Hủy"
+      },
+      "no_appointments": "Không có lịch hẹn nào",
+      "patient_id": "Mã BN",
+      "status": {
+        "WAITING": "Đang Chờ",
+        "IN_PROGRESS": "Đang Khám",
+        "DONE": "Đã Hoàn Thành",
+        "CANCELLED": "Đã Hủy"
+      },
+      "start_appointment": "Bắt Đầu Khám",
+      "complete_appointment": "Hoàn Thành Khám",
+      "cancel": "Hủy Lịch Hẹn",
+      "add_notes": "Thêm Ghi Chú",
+      "view_edit_notes": "Xem/Sửa Ghi Chú",
+      "view_patient_details": "Xem Thông Tin Bệnh Nhân",
+      "appointment_notes": "Ghi Chú Lịch Hẹn",
+      "notes_placeholder": "Nhập ghi chú về tình trạng, chẩn đoán hoặc kế hoạch điều trị của bệnh nhân..."
+    },
+    "medical_records": {
+      "title": "Hồ Sơ Bệnh Án",
+      "edit_record": "Cập Nhật Hồ Sơ Bệnh Án",
+      "save_success": "Lưu hồ sơ bệnh án thành công",
+      "record_not_found": "Không tìm thấy hồ sơ bệnh án",
+      "tabs": {
+        "patient_info": "Thông Tin Bệnh Nhân",
+        "diagnosis": "Chẩn Đoán",
+        "medications": "Thuốc Điều Trị"
+      },
+      "patient_details": "Chi Tiết Bệnh Nhân",
+      "patient_name": "Tên Bệnh Nhân",
+      "patient_id": "Mã Bệnh Nhân",
+      "date_of_birth": "Ngày Sinh",
+      "gender": "Giới Tính",
+      "appointment_details": "Chi Tiết Cuộc Hẹn",
+      "appointment_date": "Ngày Khám",
+      "doctor_name": "Bác Sĩ Khám",
+      "room": "Phòng Khám",
+      "status": "Trạng Thái",
+      "diagnosis": "Chẩn Đoán",
+      "diagnosis_disease": "Bệnh Được Chẩn Đoán",
+      "diagnosis_placeholder": "Nhập chẩn đoán của bác sĩ về tình trạng bệnh nhân...",
+      "follow_up": "Tái Khám",
+      "reexamination_date": "Ngày Tái Khám",
+      "notes": "Ghi Chú",
+      "notes_placeholder": "Nhập ghi chú bổ sung về tình trạng bệnh nhân, chế độ ăn uống, sinh hoạt...",
+      "add_medication": "Thêm Thuốc",
+      "medication_name": "Tên Thuốc",
+      "search_medication": "Tìm kiếm thuốc...",
+      "unit": "Đơn Vị",
+      "quantity": "Số Lượng",
+      "add": "Thêm",
+      "medications_list": "Danh Sách Thuốc",
+      "no_medications": "Không có thuốc nào được kê toa",
+      "common": {
+        "saving": "Đang lưu..."
+      }
     }
   },
   "common": {
@@ -302,6 +407,7 @@
     "filter": "Lọc",
     "no_data": "Không có dữ liệu",
     "back": "Quay Lại",
-    "continue": "Tiếp Tục"
+    "continue": "Tiếp Tục",
+    "saving": "Đang lưu..."
   }
 }

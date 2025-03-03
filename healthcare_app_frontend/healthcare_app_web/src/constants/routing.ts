@@ -22,6 +22,7 @@ export const ROUTING = {
   PRESCRIPTIONS: "prescriptions",
   CHAT: "chat",
   PROFILE: "profile",
+  SCHEDULE: "schedule",
 
   // Patient routes (nested under /patient)
   FIND_DOCTOR: "find-doctor",

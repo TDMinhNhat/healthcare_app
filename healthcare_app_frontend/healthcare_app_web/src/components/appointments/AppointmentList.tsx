@@ -18,8 +18,136 @@ import EventIcon from "@mui/icons-material/Event";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import { getAppoinmentStatusWithPatientId } from "../../services/appoinment_service";
+import MenuItem from "@mui/material/Menu";
+
+// Mock data for patient appointments
+const MOCK_PATIENT_APPOINTMENTS: {
+  doctor: {
+    id: number;
+    userId: string;
+    firstName: string;
+    lastName: string;
+    specialization: string;
+    avatar: string | null;
+  };
+  appointment: {
+    id: number;
+    patient: string;
+    doctor: string;
+    note: string | null;
+    roomId: string;
+    start: string;
+    end: string;
+    createdAt: string;
+    status: string;
+  };
+}[] = [
+  {
+    doctor: {
+      id: 1,
+      userId: "doctor-001",
+      firstName: "Thành",
+      lastName: "Nguyễn Bá",
+      specialization: "Tim Mạch",
+      avatar: null,
+    },
+    appointment: {
+      id: 101,
+      patient: "patient-001",
+      doctor: "doctor-001",
+      note: "Khám sức khỏe tim mạch định kỳ",
+      roomId: "room-001",
+      start: "20-07-2023-09-00-00",
+      end: "20-07-2023-09-30-00",
+      createdAt: "15-07-2023",
+      status: "WAITING",
+    },
+  },
+  {
+    doctor: {
+      id: 2,
+      userId: "doctor-002",
+      firstName: "Mai",
+      lastName: "Trần Thị",
+      specialization: "Da Liễu",
+      avatar: null,
+    },
+    appointment: {
+      id: 102,
+      patient: "patient-001",
+      doctor: "doctor-002",
+      note: "Tái khám về vấn đề dị ứng da",
+      roomId: "room-002",
+      start: "21-07-2023-10-00-00",
+      end: "21-07-2023-10-30-00",
+      createdAt: "16-07-2023",
+      status: "IN_PROGRESS",
+    },
+  },
+  {
+    doctor: {
+      id: 3,
+      userId: "doctor-003",
+      firstName: "Tuấn",
+      lastName: "Vũ Văn",
+      specialization: "Thần Kinh",
+      avatar: null,
+    },
+    appointment: {
+      id: 103,
+      patient: "patient-001",
+      doctor: "doctor-003",
+      note: "Tư vấn về chứng đau đầu mãn tính",
+      roomId: "room-003",
+      start: "15-07-2023-14-00-00",
+      end: "15-07-2023-14-30-00",
+      createdAt: "10-07-2023",
+      status: "DONE",
+    },
+  },
+  {
+    doctor: {
+      id: 4,
+      userId: "doctor-004",
+      firstName: "Hà",
+      lastName: "Lê Thị",
+      specialization: "Chấn Thương Chỉnh Hình",
+      avatar: null,
+    },
+    appointment: {
+      id: 104,
+      patient: "patient-001",
+      doctor: "doctor-004",
+      note: "Khám và điều trị đau đầu gối",
+      roomId: "room-004",
+      start: "10-07-2023-11-00-00",
+      end: "10-07-2023-11-30-00",
+      createdAt: "05-07-2023",
+      status: "CANCELLED",
+    },
+  },
+  {
+    doctor: {
+      id: 5,
+      userId: "doctor-005",
+      firstName: "Quang",
+      lastName: "Phạm Văn",
+      specialization: "Tai Mũi Họng",
+      avatar: null,
+    },
+    appointment: {
+      id: 105,
+      patient: "patient-001",
+      doctor: "doctor-005",
+      note: "Thăm khám triệu chứng viêm họng",
+      roomId: "room-005",
+      start: "25-07-2023-13-00-00",
+      end: "25-07-2023-13-30-00",
+      createdAt: "20-07-2023",
+      status: "WAITING",
+    },
+  },
+];
 
 interface AppointmentListProps {
   type: "upcoming" | "completed" | "cancelled";
@@ -114,40 +242,32 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
   useEffect(() => {
     const fetchAppointments = async () => {
       setLoading(true);
+
       try {
         let allAppointments: Appointment[] = [];
 
-        // If status is an array, fetch appointments for each status
+        // Sử dụng mock data và lọc theo status
         if (Array.isArray(status)) {
-          for (const singleStatus of status) {
-            const response = await getAppoinmentStatusWithPatientId(
-              patientId,
-              singleStatus
-            );
-            if (response.data.data) {
-              allAppointments = [...allAppointments, ...response.data.data];
-            }
-          }
-        } else {
-          // Single status
-          const response = await getAppoinmentStatusWithPatientId(
-            patientId,
-            status
+          allAppointments = MOCK_PATIENT_APPOINTMENTS.filter((appointment) =>
+            status.includes(appointment.appointment.status)
           );
-          if (response.data.data) {
-            allAppointments = response.data.data;
-          }
+        } else {
+          allAppointments = MOCK_PATIENT_APPOINTMENTS.filter(
+            (appointment) => appointment.appointment.status === status
+          );
         }
 
+        // Bỏ setTimeout để tránh vấn đề load mãi không dừng
         setAppointments(allAppointments);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching appointments:", error);
         setAppointments([]);
-      } finally {
         setLoading(false);
       }
     };
 
+    // Gọi hàm fetch ngay lập tức
     fetchAppointments();
   }, [status, patientId]);
 
@@ -188,26 +308,26 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
                     >
                       <Box sx={{ display: "flex", alignItems: "center" }}>
                         <Avatar
-                          src={doctor.avatar || "https://picsum.photos/56/56"}
+                          src={doctor?.avatar || "https://picsum.photos/56/56"}
                           sx={{ width: 56, height: 56, mr: 2 }}
                         >
-                          {doctor.firstName.charAt(0) +
-                            doctor.lastName.charAt(0)}
+                          {doctor?.firstName.charAt(0) +
+                            doctor?.lastName.charAt(0)}
                         </Avatar>
                         <Box>
                           <Typography component="h6" variant="h6">
-                            Dr. {doctor.firstName} {doctor.lastName}
+                            Dr. {doctor?.firstName} {doctor?.lastName}
                           </Typography>
                           <Typography
                             variant="subtitle2"
                             color="text.secondary"
                             gutterBottom
                           >
-                            {doctor.specialization}
+                            {doctor?.specialization}
                           </Typography>
                           <Chip
                             label={t(
-                              `patient.appointments.status.${appointment.status}`,
+                              `patient.appointments.status.${appointment?.status}`,
                               appointment.status
                             )}
                             size="small"

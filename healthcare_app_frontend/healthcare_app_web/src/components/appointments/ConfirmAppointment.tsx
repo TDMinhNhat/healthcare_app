@@ -16,6 +16,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import EventIcon from "@mui/icons-material/Event";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PersonIcon from "@mui/icons-material/Person";
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 
@@ -23,6 +24,7 @@ interface ConfirmAppointmentProps {
   date: Date;
   time: string;
   doctor: any;
+  specialty?: any; // Now represents a service
   onDone: () => void;
 }
 
@@ -30,6 +32,7 @@ const ConfirmAppointment: React.FC<ConfirmAppointmentProps> = ({
   date,
   time,
   doctor,
+  specialty, // Now represents a service
   onDone,
 }) => {
   const { t } = useTranslation();
@@ -88,6 +91,20 @@ const ConfirmAppointment: React.FC<ConfirmAppointmentProps> = ({
               secondary={`${doctor.firstName} + ' ' ${doctor.lastName} - ${doctor.specialization}`}
             />
           </ListItem>
+
+          {specialty && (
+            <ListItem>
+              <ListItemAvatar>
+                <Avatar>
+                  <LocalHospitalIcon />
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary={t("patient.appointments.service")}
+                secondary={specialty.name}
+              />
+            </ListItem>
+          )}
         </List>
       </Paper>
 

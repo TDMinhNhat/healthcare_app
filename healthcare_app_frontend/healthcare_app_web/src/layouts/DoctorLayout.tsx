@@ -12,6 +12,7 @@ import EventNoteIcon from "@mui/icons-material/EventNote";
 import PersonIcon from "@mui/icons-material/Person";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import ChatIcon from "@mui/icons-material/Chat";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { Outlet, useNavigate } from "react-router";
 
 interface DoctorLayoutProps {
@@ -25,6 +26,7 @@ export default function DoctorLayout() {
   const titleMap: Record<string, string> = {
     "/doctor/dashboard": "Dashboard",
     "/doctor/appointments": "Appointments",
+    "/doctor/schedule": "Schedule",
     "/doctor/patients": "My Patients",
     "/doctor/prescriptions": "Prescriptions",
     "/doctor/chat": "Messages",
@@ -51,6 +53,12 @@ export default function DoctorLayout() {
             <EventNoteIcon />
           </ListItemIcon>
           <ListItemText primary="Appointments" />
+        </ListItemButton>
+        <ListItemButton onClick={() => handleNavigation("/doctor/schedule")}>
+          <ListItemIcon>
+            <CalendarMonthIcon />
+          </ListItemIcon>
+          <ListItemText primary="My Schedule" />
         </ListItemButton>
         <ListItemButton onClick={() => handleNavigation("/doctor/patients")}>
           <ListItemIcon>

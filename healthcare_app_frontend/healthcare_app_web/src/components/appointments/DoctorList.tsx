@@ -14,23 +14,160 @@ import {
   Divider,
   Paper,
   Alert,
+  Pagination,
+  TablePagination,
+  Stack,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { format } from "date-fns";
-import { getDoctorsFreeStartTime } from "../../services/booking_service";
+// import { getDoctorsBySpecialty } from "../../services/doctor_service";
 import MedicationIcon from "@mui/icons-material/Medication";
-import { formatDateTimeToString } from "../../utils/dateUtils";
 
 interface DoctorListProps {
-  selectedDate: Date;
-  selectedTime: string;
+  specialty: any; // Now represents a service
   onSelect: (doctor: any) => void;
   onBack: () => void;
 }
 
+// Mock data for doctors by specialty
+const mockDoctorsBySpecialty = {
+  "1": [
+    // Cardiology
+    {
+      id: "101",
+      userId: "d101",
+      firstName: "John",
+      lastName: "Smith",
+      specialization: "Cardiology",
+      experience: 12,
+      rating: 4.8,
+      reviews: 124,
+      image:
+        "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=1470&auto=format&fit=crop",
+    },
+    {
+      id: "102",
+      userId: "d102",
+      firstName: "Sarah",
+      lastName: "Johnson",
+      specialization: "Cardiology",
+      experience: 9,
+      rating: 4.6,
+      reviews: 98,
+      image:
+        "https://images.unsplash.com/photo-1594824476967-48c8b964273f?q=80&w=1470&auto=format&fit=crop",
+    },
+  ],
+  "2": [
+    // Dermatology
+    {
+      id: "201",
+      userId: "d201",
+      firstName: "Michael",
+      lastName: "Brown",
+      specialization: "Dermatology",
+      experience: 15,
+      rating: 4.9,
+      reviews: 152,
+      image:
+        "https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=1528&auto=format&fit=crop",
+    },
+  ],
+  "3": [
+    // Neurology
+    {
+      id: "301",
+      userId: "d301",
+      firstName: "Jessica",
+      lastName: "Williams",
+      specialization: "Neurology",
+      experience: 11,
+      rating: 4.7,
+      reviews: 134,
+      image:
+        "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=1470&auto=format&fit=crop",
+    },
+    {
+      id: "302",
+      userId: "d302",
+      firstName: "David",
+      lastName: "Miller",
+      specialization: "Neurology",
+      experience: 8,
+      rating: 4.5,
+      reviews: 89,
+      image:
+        "https://images.unsplash.com/photo-1537368910025-700350fe46c7?q=80&w=1470&auto=format&fit=crop",
+    },
+  ],
+  "4": [
+    // Orthopedics
+    {
+      id: "401",
+      userId: "d401",
+      firstName: "Robert",
+      lastName: "Davis",
+      specialization: "Orthopedics",
+      experience: 14,
+      rating: 4.8,
+      reviews: 142,
+      image:
+        "https://images.unsplash.com/photo-1622902046580-2b47f47f5471?q=80&w=1374&auto=format&fit=crop",
+    },
+  ],
+  "5": [
+    // Pediatrics
+    {
+      id: "501",
+      userId: "d501",
+      firstName: "Jennifer",
+      lastName: "Taylor",
+      specialization: "Pediatrics",
+      experience: 10,
+      rating: 4.9,
+      reviews: 168,
+      image:
+        "https://images.unsplash.com/photo-1651008376811-b90baee60c1f?q=80&w=1374&auto=format&fit=crop",
+    },
+    {
+      id: "502",
+      userId: "d502",
+      firstName: "William",
+      lastName: "Anderson",
+      specialization: "Pediatrics",
+      experience: 7,
+      rating: 4.6,
+      reviews: 92,
+      image:
+        "https://images.unsplash.com/photo-1612531386530-97286d97c2d2?q=80&w=1470&auto=format&fit=crop",
+    },
+  ],
+  "6": [
+    // Psychiatry
+    {
+      id: "601",
+      userId: "d601",
+      firstName: "Karen",
+      lastName: "Martinez",
+      specialization: "Psychiatry",
+      experience: 13,
+      rating: 4.7,
+      reviews: 115,
+      image:
+        "https://images.unsplash.com/photo-1527613426441-4da17471b66d?q=80&w=1470&auto=format&fit=crop",
+    },
+  ],
+};
+
+// Added state variables for pagination:
+// page (current page, 0-indexed)
+// rowsPerPage (doctors per page)
+// Added pagination logic:
+// handleChangePage to update the current page
+// handleChangeRowsPerPage to update rows per page
+// Logic to slice the doctors array for the current pag
+
 const DoctorList: React.FC<DoctorListProps> = ({
-  selectedDate,
-  selectedTime,
+  specialty, // Now represents a service
   onSelect,
   onBack,
 }) => {
@@ -39,24 +176,29 @@ const DoctorList: React.FC<DoctorListProps> = ({
   const [doctors, setDoctors] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  // Pagination states
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(4);
+
   useEffect(() => {
-    const fetchAvailableDoctors = async () => {
+    const fetchDoctorsByService = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Create a combined date object and format it using the utility function
-        const [hours, minutes] = selectedTime.split(":").map(Number);
-        const dateObj = new Date(selectedDate);
-        dateObj.setHours(hours, minutes, 0, 0);
+        // Simulate network delay
+        await new Promise((resolve) => setTimeout(resolve, 800));
 
-        const formattedDateTime = formatDateTimeToString(dateObj);
-        // console.log("Formatted date time:", formattedDateTime);
-
-        const response = await getDoctorsFreeStartTime(formattedDateTime);
-        setDoctors(response.data.data || []);
+        // Use mock data instead of API call
+        // const response = await getDoctorsBySpecialty(specialty.id);
+        // setDoctors(response.data.data || []);
+        setDoctors(
+          mockDoctorsBySpecialty[
+            specialty.id as keyof typeof mockDoctorsBySpecialty
+          ] || []
+        );
       } catch (err) {
-        console.error("Failed to fetch available doctors:", err);
+        console.error("Failed to fetch doctors by service:", err);
         setError("Failed to load available doctors. Please try again.");
         setDoctors([]);
       } finally {
@@ -64,8 +206,31 @@ const DoctorList: React.FC<DoctorListProps> = ({
       }
     };
 
-    fetchAvailableDoctors();
-  }, [selectedDate, selectedTime]);
+    fetchDoctorsByService();
+    // Reset to first page when specialty changes
+    setPage(0);
+  }, [specialty]);
+
+  // Handle page change
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    setPage(newPage);
+  };
+
+  // Handle rows per page change
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  // Calculate pagination
+  const startIndex = page * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedDoctors = doctors.slice(startIndex, endIndex);
 
   return (
     <Box>
@@ -74,7 +239,7 @@ const DoctorList: React.FC<DoctorListProps> = ({
       </Typography>
 
       <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
-        {format(selectedDate, "EEEE, MMMM d, yyyy")} at {selectedTime}
+        {specialty.name} {/* Service name */}
       </Typography>
 
       {loading ? (
@@ -104,16 +269,16 @@ const DoctorList: React.FC<DoctorListProps> = ({
                 {t("patient.appointments.no_doctors_available")}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                {t("patient.appointments.try_different_time")}
+                {t("patient.appointments.try_different_service")}
               </Typography>
               <Button variant="outlined" onClick={onBack} sx={{ mt: 2 }}>
-                {t("patient.appointments.select_different_time")}
+                {t("patient.appointments.select_different_service")}
               </Button>
             </Paper>
           ) : (
-            <Grid container spacing={3}>
-              {doctors && doctors.length > 0 ? (
-                doctors.map((doctor, index) => (
+            <>
+              <Grid container spacing={3}>
+                {paginatedDoctors.map((doctor, index) => (
                   <Grid
                     item
                     xs={12}
@@ -128,7 +293,9 @@ const DoctorList: React.FC<DoctorListProps> = ({
                           doctor.image ||
                           "https://picsum.photos/120/160?random=1"
                         }
-                        alt={doctor.name || "Doctor"}
+                        alt={
+                          doctor.firstName + " " + doctor.lastName || "Doctor"
+                        }
                       />
                       <Box
                         sx={{
@@ -202,17 +369,23 @@ const DoctorList: React.FC<DoctorListProps> = ({
                       </Box>
                     </Card>
                   </Grid>
-                ))
-              ) : (
-                <Typography
-                  variant="body1"
-                  color="text.secondary"
-                  sx={{ width: "100%", textAlign: "center", py: 2 }}
-                >
-                  {t("patient.appointments.no_doctors_available")}
-                </Typography>
-              )}
-            </Grid>
+                ))}
+              </Grid>
+
+              {/* Pagination controls */}
+              <Box
+                sx={{ display: "flex", justifyContent: "center", mt: 3, mb: 2 }}
+              >
+                <Stack spacing={2}>
+                  <Pagination
+                    count={Math.ceil(doctors.length / rowsPerPage)}
+                    page={page + 1}
+                    onChange={(e, value) => setPage(value - 1)}
+                    color="primary"
+                  />
+                </Stack>
+              </Box>
+            </>
           )}
         </>
       )}

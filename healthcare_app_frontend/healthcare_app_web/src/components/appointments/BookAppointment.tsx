@@ -6,15 +6,13 @@ import {
   Stepper,
   Step,
   StepLabel,
-  Grid,
-  Paper,
   Snackbar,
   Alert,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { format } from "date-fns";
-import SelectDateTime from "./SelectDateTime";
+import SelectService from "./SelectService";
 import DoctorList from "./DoctorList";
+import SelectDateTime from "./SelectDateTime";
 import DoctorDetails from "./DoctorDetails";
 import ConfirmAppointment from "./ConfirmAppointment";
 import { createAppointment } from "../../services/booking_service";
@@ -31,16 +29,18 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
 }) => {
   const { t } = useTranslation();
   const [activeStep, setActiveStep] = useState(0);
+  const [selectedService, setSelectedService] = useState<any>(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>("");
-  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string>("");
 
   const steps = [
-    t("patient.appointments.steps.select_date_time"),
+    t("patient.appointments.steps.select_service"),
     t("patient.appointments.steps.select_doctor"),
+    t("patient.appointments.steps.select_date_time"),
     t("patient.appointments.steps.review"),
     t("patient.appointments.steps.confirm"),
   ];
@@ -53,9 +53,8 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const handleDateTimeSelect = (date: Date, time: string) => {
-    setSelectedDate(date);
-    setSelectedTime(time);
+  const handleServiceSelect = (service: any) => {
+    setSelectedService(service);
     handleNext();
   };
 
@@ -64,9 +63,13 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
     handleNext();
   };
 
+  const handleDateTimeSelect = (date: Date, time: string) => {
+    setSelectedDate(date);
+    setSelectedTime(time);
+    handleNext();
+  };
+
   const handleConfirm = async () => {
-    console.log("doctorId:", selectedDoctor.userId);
-    console.log("patientId:", patientId);
     if (!selectedDate || !selectedTime || !selectedDoctor || !patientId) {
       setError("Missing required information for booking");
       return;
@@ -82,8 +85,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
       dateObj.setHours(hours, minutes, 0, 0);
 
       const formattedDateTime = formatDateTimeToString(dateObj);
-      console.log("doctorId:", selectedDoctor.id);
-      console.log("patientId:", patientId);
+
       await createAppointment(
         selectedDoctor.userId,
         patientId,
@@ -102,9 +104,10 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
 
   const handleReset = () => {
     setActiveStep(0);
+    setSelectedService(null);
+    setSelectedDoctor(null);
     setSelectedDate(null);
     setSelectedTime("");
-    setSelectedDoctor(null);
     setNote("");
     onClose();
   };
@@ -119,7 +122,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
         {t("patient.appointments.book_new")}
       </Typography>
 
-      <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+      <Stepper activeStep={activeStep} sx={{ mb: 4 }} alternativeLabel>
         {steps.map((label) => (
           <Step key={label}>
             <StepLabel>{label}</StepLabel>
@@ -127,20 +130,42 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
         ))}
       </Stepper>
 
-      {activeStep === 0 && <SelectDateTime onSelect={handleDateTimeSelect} />}
+      {activeStep === 0 && <SelectService onSelect={handleServiceSelect} />}
 
       {activeStep === 1 && (
         <DoctorList
-          selectedDate={selectedDate!}
-          selectedTime={selectedTime}
+          specialty={selectedService}
           onSelect={handleDoctorSelect}
           onBack={handleBack}
         />
       )}
 
       {activeStep === 2 && (
+        <SelectDateTime
+          doctor={selectedDoctor}
+          onSelect={handleDateTimeSelect}
+          onBack={handleBack}
+        />
+      )}
+
+      {activeStep === 3 && (
         <Box>
           <DoctorDetails doctor={selectedDoctor} />
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              {t("patient.appointments.appointment_details")}
+            </Typography>
+            <Typography variant="body1">
+              {t("patient.appointments.date")}:{" "}
+              {selectedDate ? selectedDate.toLocaleDateString() : ""}
+            </Typography>
+            <Typography variant="body1">
+              {t("patient.appointments.time")}: {selectedTime}
+            </Typography>
+            <Typography variant="body1">
+              {t("patient.appointments.service")}: {selectedService.name}
+            </Typography>
+          </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
             <Button onClick={handleBack} disabled={loading}>
               {t("common.back")}
@@ -159,16 +184,17 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
         </Box>
       )}
 
-      {activeStep === 3 && (
+      {activeStep === 4 && (
         <ConfirmAppointment
           date={selectedDate!}
           time={selectedTime}
           doctor={selectedDoctor}
+          specialty={selectedService}
           onDone={handleReset}
         />
       )}
 
-      {activeStep !== 0 && activeStep !== 3 && activeStep !== steps.length && (
+      {activeStep !== 0 && activeStep !== 4 && activeStep !== steps.length && (
         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           <Button onClick={onClose} sx={{ mr: 1 }} disabled={loading}>
             {t("common.cancel")}

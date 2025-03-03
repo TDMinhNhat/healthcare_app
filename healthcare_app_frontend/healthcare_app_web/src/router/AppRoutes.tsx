@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
 import { Loading } from "../components/global/Loading/Loading";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { ROUTING } from "../constants/routing";
@@ -16,6 +16,8 @@ import RegisterPage from "../pages/RegisterPage";
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
 import PatientDashboard from "../pages/patient/PatientDashboard";
 import AppointmentPage from "../pages/patient/AppointmentPage";
+import DoctorSchedulePage from "../pages/doctor/DoctorSchedulePage";
+import DoctorAppointmentPage from "../pages/doctor/DoctorAppointmentPage";
 
 // const ChatPage = lazy(() => import("../pages/ChatPage"));
 
@@ -50,9 +52,11 @@ export const AppRoutes = () => {
             <Route path={ROUTING.PROFILE} element={<DoctorProfilePage />} />
             <Route
               path={ROUTING.APPOINTMENTS}
-              element={<div>Appointments</div>}
+              element={<DoctorAppointmentPage />}
             />
+            <Route path={ROUTING.SCHEDULE} element={<DoctorSchedulePage />} />
             <Route path={ROUTING.PATIENTS} element={<div>Patients</div>} />
+
             <Route
               path={ROUTING.PRESCRIPTIONS}
               element={<div>Prescriptions</div>}
