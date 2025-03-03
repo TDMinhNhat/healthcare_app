@@ -299,6 +299,8 @@
     },
     "schedule": {
       "title": "Lịch Làm Việc",
+      "current_schedule": "Lịch Làm Việc Hiện Tại",
+      "view_only_info": "Đây là lịch làm việc hiện tại của bạn. Bạn có thể xem nhưng không thể chỉnh sửa trực tiếp tại đây.",
       "select_date": "Chọn Ngày",
       "add_time_slot": "Thêm Khung Giờ",
       "start_time": "Giờ Bắt Đầu",
@@ -306,6 +308,7 @@
       "mark_unavailable": "Đánh Dấu Không Khả Dụng",
       "mark_available": "Đánh Dấu Khả Dụng",
       "no_time_slots": "Không có khung giờ nào cho ngày này",
+      "no_schedule_for_date": "Không có lịch làm việc cho ngày này",
       "click_add": "Nhấn vào nút 'Thêm Khung Giờ' để thêm thời gian làm việc",
       "add": "Thêm",
       "save": "Lưu",
@@ -328,7 +331,9 @@
       "select_all_for_time": "Chọn tất cả các ngày cho khung giờ này",
       "clear_all_for_time": "Xóa tất cả các ngày cho khung giờ này",
       "select_all_for_day": "Chọn tất cả các khung giờ cho ngày này",
-      "clear_all_for_day": "Xóa tất cả các khung giờ cho ngày này"
+      "clear_all_for_day": "Xóa tất cả các khung giờ cho ngày này",
+      "available": "Khả Dụng",
+      "booked": "Đã Đặt"
     },
     "appointments": {
       "title": "Lịch Hẹn Khám Bệnh",
@@ -392,7 +397,15 @@
       "no_medications": "Không có thuốc nào được kê toa",
       "common": {
         "saving": "Đang lưu..."
-      }
+      },
+      "medical_history": "Lịch Sử Bệnh",
+      "condition": "Tình Trạng",
+      "diagnosed_year": "Năm Chẩn Đoán",
+      "currently_treated": "Đang Điều Trị",
+      "allergies": "Dị Ứng",
+      "no_medical_history": "Không có dữ liệu về lịch sử bệnh",
+      "no_allergies": "Không có dị ứng đã biết",
+      "no_patient_data": "Không có dữ liệu bệnh nhân"
     }
   },
   "common": {
@@ -408,6 +421,8 @@
     "no_data": "Không có dữ liệu",
     "back": "Quay Lại",
     "continue": "Tiếp Tục",
-    "saving": "Đang lưu..."
+    "saving": "Đang lưu...",
+    "yes": "Có",
+    "no": "Không"
   }
 }

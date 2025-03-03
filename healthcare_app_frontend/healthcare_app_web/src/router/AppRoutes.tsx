@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import { ROUTING } from "../constants/routing";
 import PatientProfilePage from "../pages/patient/PatientProfilePage";
 import DoctorProfilePage from "../pages/doctor/DoctorProfilePage";
+import MedicalRecordPage from "../pages/doctor/MedicalRecordPage";
 
 // Import layout components
 import AdminLayout from "../layouts/AdminLayout";
@@ -18,6 +19,7 @@ import PatientDashboard from "../pages/patient/PatientDashboard";
 import AppointmentPage from "../pages/patient/AppointmentPage";
 import DoctorSchedulePage from "../pages/doctor/DoctorSchedulePage";
 import DoctorAppointmentPage from "../pages/doctor/DoctorAppointmentPage";
+import DoctorCurrentSchedulePage from "../pages/doctor/DoctorCurrentSchedulePage";
 
 // const ChatPage = lazy(() => import("../pages/ChatPage"));
 
@@ -55,8 +57,15 @@ export const AppRoutes = () => {
               element={<DoctorAppointmentPage />}
             />
             <Route path={ROUTING.SCHEDULE} element={<DoctorSchedulePage />} />
+            <Route
+              path={ROUTING.CURRENT_SCHEDULE}
+              element={<DoctorCurrentSchedulePage />}
+            />
             <Route path={ROUTING.PATIENTS} element={<div>Patients</div>} />
-
+            <Route
+              path={`${ROUTING.MEDICAL_RECORDS}/:appointmentId`}
+              element={<MedicalRecordPage />}
+            />
             <Route
               path={ROUTING.PRESCRIPTIONS}
               element={<div>Prescriptions</div>}

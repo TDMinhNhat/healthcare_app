@@ -10,6 +10,7 @@ export interface Drug {
 export interface MedicalRecordDrug {
   medicalRecord: MedicalRecord;
   drug: Drug;
+  howUse: string;
   quantity: number;
 }
 

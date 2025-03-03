@@ -27,6 +27,8 @@ import NoteAltIcon from "@mui/icons-material/NoteAlt";
 import PersonIcon from "@mui/icons-material/Person";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
+import { useNavigate } from "react-router";
+import { ROUTING } from "../../constants/routing";
 // import { getAppointmentStatusWithDoctorId } from "../../services/appointment_service";
 
 // Mock data for doctor appointments
@@ -199,6 +201,7 @@ const DoctorAppointmentList: React.FC<DoctorAppointmentListProps> = ({
   doctorId,
 }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -362,6 +365,15 @@ const DoctorAppointmentList: React.FC<DoctorAppointmentListProps> = ({
     // Gọi hàm fetch ngay lập tức
     fetchAppointments();
   }, [status, doctorId]);
+
+  const handleViewPatientDetails = () => {
+    if (currentAppointment) {
+      navigate(
+        `/doctor/${ROUTING.MEDICAL_RECORDS}/${currentAppointment.appointment.id}`
+      );
+      handleMenuClose();
+    }
+  };
 
   if (loading) {
     return (
@@ -561,7 +573,7 @@ const DoctorAppointmentList: React.FC<DoctorAppointmentListProps> = ({
         <MenuItem onClick={handleOpenNotesDialog}>
           {t("doctor.appointments.view_edit_notes", "View/Edit Notes")}
         </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
+        <MenuItem onClick={handleViewPatientDetails}>
           {t(
             "doctor.appointments.view_patient_details",
             "View Patient Details"

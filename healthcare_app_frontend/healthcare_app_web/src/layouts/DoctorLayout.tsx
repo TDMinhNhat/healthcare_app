@@ -13,6 +13,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import ChatIcon from "@mui/icons-material/Chat";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import { Outlet, useNavigate } from "react-router";
 
 interface DoctorLayoutProps {
@@ -27,9 +28,8 @@ export default function DoctorLayout() {
     "/doctor/dashboard": "Dashboard",
     "/doctor/appointments": "Appointments",
     "/doctor/schedule": "Schedule",
-    "/doctor/patients": "My Patients",
+    "/doctor/current-schedule": "Current Schedule",
     "/doctor/prescriptions": "Prescriptions",
-    "/doctor/chat": "Messages",
   };
 
   const handleNavigation = (path: string) => {
@@ -58,14 +58,22 @@ export default function DoctorLayout() {
           <ListItemIcon>
             <CalendarMonthIcon />
           </ListItemIcon>
-          <ListItemText primary="My Schedule" />
+          <ListItemText primary="Manage Schedule" />
         </ListItemButton>
-        <ListItemButton onClick={() => handleNavigation("/doctor/patients")}>
+        <ListItemButton
+          onClick={() => handleNavigation("/doctor/current-schedule")}
+        >
+          <ListItemIcon>
+            <EventAvailableIcon />
+          </ListItemIcon>
+          <ListItemText primary="View Schedule" />
+        </ListItemButton>
+        {/* <ListItemButton onClick={() => handleNavigation("/doctor/patients")}>
           <ListItemIcon>
             <PersonIcon />
           </ListItemIcon>
           <ListItemText primary="My Patients" />
-        </ListItemButton>
+        </ListItemButton> */}
       </List>
       <Divider />
       <List>
@@ -77,12 +85,12 @@ export default function DoctorLayout() {
           </ListItemIcon>
           <ListItemText primary="Prescriptions" />
         </ListItemButton>
-        <ListItemButton onClick={() => handleNavigation("/doctor/chat")}>
+        {/* <ListItemButton onClick={() => handleNavigation("/doctor/chat")}>
           <ListItemIcon>
             <ChatIcon />
           </ListItemIcon>
           <ListItemText primary="Messages" />
-        </ListItemButton>
+        </ListItemButton> */}
       </List>
     </>
   );
