@@ -274,6 +274,30 @@
       "try_different_service": "Vui lòng thử chọn một dịch vụ khác",
       "select_different_service": "Chọn dịch vụ khác",
       "service": "Dịch Vụ"
+    },
+    "medical_records": {
+      "title": "Hồ Sơ Bệnh Án",
+      "no_records": "Bạn chưa có hồ sơ bệnh án nào",
+      "appointment_details": "Chi Tiết Cuộc Hẹn",
+      "doctor": "Bác Sĩ",
+      "date": "Ngày Khám",
+      "room": "Phòng Khám",
+      "status": "Trạng Thái",
+      "diagnosis": "Chẩn Đoán",
+      "diagnosis_disease": "Bệnh Được Chẩn Đoán",
+      "follow_up": "Tái Khám",
+      "notes": "Ghi Chú Bổ Sung",
+      "medications": "Thuốc Điều Trị",
+      "medications_list": "Danh Sách Thuốc",
+      "medication_name": "Tên Thuốc",
+      "how_to_use": "Cách Dùng",
+      "quantity": "Số Lượng",
+      "unit": "Đơn Vị",
+      "no_diagnosis": "Không có chẩn đoán",
+      "no_notes": "Không có ghi chú bổ sung",
+      "no_medications": "Không có thuốc nào được kê đơn",
+      "record_not_found": "Không tìm thấy hồ sơ bệnh án",
+      "patient_information": "Thông Tin Bệnh Nhân"
     }
   },
   "doctor": {

@@ -23,7 +23,7 @@ export default function PatientLayout() {
     dashboard: "Dashboard",
     appointments: "My Appointments",
     "find-doctor": "Find Doctor",
-    "medical-records": "Medical Records",
+    "medical-records": "Hồ sơ bệnh án của tôi",
     chat: "Messages",
   };
 
@@ -47,12 +47,12 @@ export default function PatientLayout() {
           </ListItemIcon>
           <ListItemText primary="My Appointments" />
         </ListItemButton>
-        <ListItemButton onClick={() => handleNavigation(ROUTING.FIND_DOCTOR)}>
+        {/* <ListItemButton onClick={() => handleNavigation(ROUTING.FIND_DOCTOR)}>
           <ListItemIcon>
             <LocalHospitalIcon />
           </ListItemIcon>
           <ListItemText primary="Find Doctor" />
-        </ListItemButton>
+        </ListItemButton> */}
       </List>
       <Divider />
       <List>
@@ -62,14 +62,14 @@ export default function PatientLayout() {
           <ListItemIcon>
             <DescriptionIcon />
           </ListItemIcon>
-          <ListItemText primary="Medical Records" />
+          <ListItemText primary="My Medical Records" />
         </ListItemButton>
-        <ListItemButton onClick={() => handleNavigation(ROUTING.CHAT)}>
+        {/* <ListItemButton onClick={() => handleNavigation(ROUTING.CHAT)}>
           <ListItemIcon>
             <ChatIcon />
           </ListItemIcon>
           <ListItemText primary="Messages" />
-        </ListItemButton>
+        </ListItemButton> */}
       </List>
     </>
   );

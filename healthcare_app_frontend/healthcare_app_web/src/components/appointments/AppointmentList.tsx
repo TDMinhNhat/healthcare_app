@@ -11,14 +11,16 @@ import {
   CircularProgress,
   Divider,
   IconButton,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
+import { useNavigate } from "react-router";
 import EventIcon from "@mui/icons-material/Event";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/Menu";
+import AssignmentIcon from "@mui/icons-material/Assignment";
 
 // Mock data for patient appointments
 const MOCK_PATIENT_APPOINTMENTS: {
@@ -183,6 +185,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
   patientId,
 }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -201,6 +204,14 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
   const handleMenuClose = () => {
     setAnchorEl(null);
     setSelectedAppointment(null);
+  };
+
+  const handleViewMedicalRecord = () => {
+    if (selectedAppointment) {
+      // Navigate to the medical record page with the selected appointment ID
+      navigate(`/patient/medical-records/${selectedAppointment}`);
+      handleMenuClose();
+    }
   };
 
   // Function to get status chip color
@@ -370,29 +381,53 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
                       </Grid>
                     </Grid>
 
-                    {appointment.note && (
-                      <Box sx={{ mt: 1 }}>
-                        <Typography variant="body2" color="text.secondary">
-                          <strong>Note:</strong> {appointment.note}
-                        </Typography>
-                      </Box>
-                    )}
+                    {/* Note section removed */}
                   </CardContent>
 
+                  {/* Add a direct access button for completed appointments */}
+                  {appointment.status === "DONE" && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "flex-start", // Changed from flex-end to flex-start
+                        pl: 1,
+                        pb: 1,
+                      }}
+                    >
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<AssignmentIcon />}
+                        onClick={() => {
+                          console.log(
+                            `Navigating to medical record: ${appointment.id}`
+                          );
+                          navigate(
+                            `/patient/medical-records/${appointment.id}`
+                          );
+                        }}
+                      >
+                        {t("patient.appointments.view_medical_record")}
+                      </Button>
+                    </Box>
+                  )}
+
+                  {/* Action buttons for upcoming appointments */}
                   {(appointment.status === "WAITING" ||
                     appointment.status === "IN_PROGRESS") && (
                     <Box
                       sx={{
                         display: "flex",
                         alignItems: "center",
+                        justifyContent: "flex-start", // Changed from flex-end to flex-start
                         pl: 1,
                         pb: 1,
                       }}
                     >
-                      <Button size="small" color="error" sx={{ ml: 1 }}>
+                      <Button size="small" color="error" sx={{ mr: 1 }}>
                         {t("patient.appointments.cancel_appointment")}
                       </Button>
-                      <Button size="small" color="primary" sx={{ ml: 1 }}>
+                      <Button size="small" color="primary">
                         {t("patient.appointments.reschedule")}
                       </Button>
                     </Box>
@@ -413,17 +448,25 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
           "aria-labelledby": "basic-button",
         }}
       >
-        <MenuItem onClick={handleMenuClose}>{t("common.view")}</MenuItem>
+        <MenuItem onClick={handleViewMedicalRecord}>
+          {t("common.view_details", "View Details")}
+        </MenuItem>
+        <MenuItem onClick={handleViewMedicalRecord}>
+          {t("patient.appointments.view_medical_record", "View Medical Record")}
+        </MenuItem>
         {(appointments.find((a) => a.appointment.id === selectedAppointment)
           ?.appointment.status === "WAITING" ||
           appointments.find((a) => a.appointment.id === selectedAppointment)
             ?.appointment.status === "IN_PROGRESS") && (
           <>
             <MenuItem onClick={handleMenuClose}>
-              {t("patient.appointments.reschedule")}
+              {t("patient.appointments.reschedule", "Reschedule")}
             </MenuItem>
             <MenuItem onClick={handleMenuClose}>
-              {t("patient.appointments.cancel_appointment")}
+              {t(
+                "patient.appointments.cancel_appointment",
+                "Cancel Appointment"
+              )}
             </MenuItem>
           </>
         )}

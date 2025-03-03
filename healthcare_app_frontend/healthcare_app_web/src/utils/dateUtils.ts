@@ -60,3 +60,23 @@ export const getCurrentDateString = (): string => {
 export const getCurrentDateTimeString = (): string => {
   return formatDateTimeToString(new Date());
 };
+
+export const formatCreatedAtDate = (dateString: string): string => {
+  try {
+    // For date format like: "20-07-2023-09-30-00"
+    const parts = dateString.split("-");
+    if (parts.length >= 3) {
+      // Extract day, month, year
+      const day = parts[0];
+      const month = parts[1];
+      const year = parts[2];
+
+      // Convert to a standard date format
+      return `${day}/${month}/${year}`;
+    }
+    return dateString; // Return as is if format doesn't match
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return dateString;
+  }
+};
