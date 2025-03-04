@@ -22,11 +22,11 @@ public class Appointment {
     private String note;
     @Column(name = "room_id", nullable = false)
     private String roomId;
-    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
-    @Column(nullable = false) @NonNull
+    @JsonFormat(pattern = "HH-mm") @NonNull
+    @Column(nullable = false)
     private LocalDateTime start;
-    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
-    @Column(nullable = false) @NonNull
+    @JsonFormat(pattern = "HH-mm") @NonNull
+    @Column(nullable = false)
     private LocalDateTime end;
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
     @Column(name = "created_at", nullable = false)

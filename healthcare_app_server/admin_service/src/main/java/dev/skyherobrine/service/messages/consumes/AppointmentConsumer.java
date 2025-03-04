@@ -6,6 +6,7 @@ import dev.skyherobrine.service.models.mariadb.Appointment;
 import dev.skyherobrine.service.repositories.mariadb.AppointmentRepository;
 import dev.skyherobrine.service.repositories.mariadb.DoctorRepository;
 import dev.skyherobrine.service.repositories.mariadb.PatientRepository;
+import dev.skyherobrine.service.repositories.mariadb.WorkScheduleRepository;
 import dev.skyherobrine.service.utils.ObjectParser;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -23,11 +24,13 @@ public class AppointmentConsumer {
     private final AppointmentRepository ar;
     private final PatientRepository pr;
     private final DoctorRepository dr;
+    private final WorkScheduleRepository workScheduleRepository;
 
-    public AppointmentConsumer(AppointmentRepository ar, PatientRepository pr, DoctorRepository dr) {
+    public AppointmentConsumer(AppointmentRepository ar, PatientRepository pr, DoctorRepository dr, WorkScheduleRepository workScheduleRepository) {
         this.ar = ar;
         this.pr = pr;
         this.dr = dr;
+        this.workScheduleRepository = workScheduleRepository;
     }
 
     @KafkaListener(topics = "insert_appointment", groupId = "admin_insert_appointment")
@@ -38,19 +41,15 @@ public class AppointmentConsumer {
 
             JsonNode node = new ObjectMapper().readTree(message);
             String getPatient = node.get("appointment").get("patientId").asText();
-            String getDoctor = node.get("appointment").get("doctorId").asText();
+            String getWorkSchedule = node.get("appointment").get("workScheduleId").asText();
             String getNote = node.get("appointment").get("note").asText();
-            String getStartTime = node.get("appointment").get("start").asText();
             String getRoomId = node.get("roomId").asText();
 
-            log.info("Appointment Consumer: {}", (getPatient + " - " + getDoctor + " - " + getNote + " - " + getStartTime + " - " + getRoomId));
             Appointment appointment = new Appointment(
                     pr.findPatientByUserId(getPatient).orElseThrow(() -> new EntityNotFoundException("Patient not found")),
-                    dr.findDoctorByUserId(getDoctor).orElseThrow(() -> new EntityNotFoundException("Doctor not found")),
+                    workScheduleRepository.findById(Long.parseLong(getWorkSchedule)).orElseThrow(() -> new EntityNotFoundException("Work schedule not found")),
                     getNote,
-                    getRoomId,
-                    LocalDateTime.parse(getStartTime, DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")),
-                    LocalDateTime.parse(getStartTime, DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")).plusHours(1)
+                    getRoomId
             );
             ar.save(appointment);
         } catch (Exception e) {

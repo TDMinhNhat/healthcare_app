@@ -16,18 +16,12 @@ public class Appointment {
     private Long id;
     @ManyToOne @JoinColumn(nullable = false) @NonNull
     private Patient patient;
-    @ManyToOne @JoinColumn(nullable = false) @NonNull
-    private Doctor doctor;
+    @ManyToOne @JoinColumn(name = "work_schedule_id", nullable = false) @NonNull
+    private WorkSchedule workSchedule;
     @Column(length = 500)
     private String note;
     @Column(name = "room_id", length = 50, nullable = false)
     private String roomId;
-    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss") @NonNull
-    @Column(nullable = false)
-    private LocalDateTime start;
-    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss") @NonNull
-    @Column(nullable = false)
-    private LocalDateTime end;
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -35,21 +29,11 @@ public class Appointment {
     @Column(nullable = false)
     private AppointmentStatus status;
 
-    public Appointment(@NonNull Patient patient, @NonNull Doctor doctor, String note, @NonNull LocalDateTime start, @NonNull LocalDateTime end) {
+    public Appointment(@NonNull Patient patient, @NonNull WorkSchedule workSchedule, String note, String roomId) {
         this.patient = patient;
-        this.doctor = doctor;
-        this.note = note;
-        this.start = start;
-        this.end = end;
-    }
-
-    public Appointment(@NonNull Patient patient, @NonNull Doctor doctor, String note, String roomId, @NonNull LocalDateTime start, @NonNull LocalDateTime end) {
-        this.patient = patient;
-        this.doctor = doctor;
+        this.workSchedule = workSchedule;
         this.note = note;
         this.roomId = roomId;
-        this.start = start;
-        this.end = end;
     }
 
     @PrePersist
