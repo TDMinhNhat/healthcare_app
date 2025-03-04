@@ -55,27 +55,6 @@ public class BookingController {
         }
     }
 
-    @GetMapping("/doctor")
-    public ResponseEntity<Response> getDoctorAppointmentAvoidStartTime(
-            @RequestParam("start") String start
-    ) {
-        try {
-            log.info("Booking: Call the api get doctors appointment free the start time");
-            log.info("Booking: Time for check is {}", start);
-            List<String> listDoctorsId = ar.findDoctorFreeStartTime(LocalDateTime.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")));
-            log.info("Booking: Found {} doctors", listDoctorsId.size());
-            return doctorFeign.getAllDoctor(listDoctorsId);
-        } catch (Exception e) {
-            log.error("Booking: Can't get the doctors appointment free the start time");
-            log.error(e.getMessage());
-            return ResponseEntity.ok(new Response(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "The api get doctors appointment free the start time return an error",
-                    e.getMessage()
-            ));
-        }
-    }
-
     @PutMapping("/cancel")
     public ResponseEntity<Response> cancelAppointment(
             @RequestParam("roomId") String roomId
