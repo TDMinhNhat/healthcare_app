@@ -16,18 +16,12 @@ public class Appointment {
     private Long id;
     @Column(name = "patient_id", length = 50, nullable = false) @NonNull
     private String patient;
-    @Column(name = "doctor_id", length = 50, nullable = false) @NonNull
-    private String doctor;
+    @Column(name = "work_schedule_id", nullable = false) @NonNull
+    private Long workSchedule;
     @Column(length = 500)
     private String note;
     @Column(name = "room_id", nullable = false)
     private String roomId;
-    @JsonFormat(pattern = "HH-mm") @NonNull
-    @Column(nullable = false)
-    private LocalDateTime start;
-    @JsonFormat(pattern = "HH-mm") @NonNull
-    @Column(nullable = false)
-    private LocalDateTime end;
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -40,12 +34,9 @@ public class Appointment {
         createdAt = LocalDateTime.now();
     }
 
-    public Appointment(@NonNull String patient, @NonNull String doctor, String note, @NonNull LocalDateTime start, @NonNull LocalDateTime end) {
+    public Appointment(@NonNull String patient, @NonNull Long workSchedule, String note) {
         this.patient = patient;
-        this.doctor = doctor;
+        this.workSchedule = workSchedule;
         this.note = note;
-        this.start = start;
-        this.end = end;
-        this.status = AppointmentStatus.WAITING;
     }
 }

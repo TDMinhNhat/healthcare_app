@@ -14,17 +14,14 @@ import java.time.format.DateTimeFormatter;
 public class AppointmentDTO {
 
     private String patientId;
-    private String doctorId;
+    private Long workSchedule;
     private String note;
-    private String start;
 
     public Appointment toObject() {
         return new Appointment(
             patientId,
-            doctorId,
-            note,
-            LocalDateTime.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")),
-            LocalDateTime.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")).plusMinutes(30)
+            workSchedule,
+            note
         );
     }
 }

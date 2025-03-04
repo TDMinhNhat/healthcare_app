@@ -3,6 +3,7 @@ package dev.skyherobrine.service.controllers;
 import dev.skyherobrine.service.dtos.AppointmentDTO;
 import dev.skyherobrine.service.enums.AppointmentStatus;
 import dev.skyherobrine.service.feigns.DoctorFeign;
+import dev.skyherobrine.service.feigns.WorkScheduleFeign;
 import dev.skyherobrine.service.models.Appointment;
 import dev.skyherobrine.service.models.Response;
 import dev.skyherobrine.service.repositories.AppointmentRepository;
@@ -24,12 +25,12 @@ public class AppointmentController {
 
     private final AppointmentRepository ar;
     private final AppointmentService as;
-    private final DoctorFeign doctorFeign;
+    private final WorkScheduleFeign wsf;
 
-    public AppointmentController(AppointmentRepository ar, AppointmentService as, DoctorFeign doctorFeign) {
+    public AppointmentController(AppointmentRepository ar, AppointmentService as, WorkScheduleFeign wsf) {
         this.ar = ar;
         this.as = as;
-        this.doctorFeign = doctorFeign;
+        this.wsf = wsf;
     }
 
     @GetMapping("/patient")
@@ -41,7 +42,7 @@ public class AppointmentController {
             appointments.forEach(appointment -> {
                 Map<String,Object> data = new HashMap<>();
                 data.put("appointment", appointment);
-                data.put("doctor", doctorFeign.getDoctorInformation(appointment.getDoctor()).getBody().getData());
+                data.put("work_schedule", wsf.getById(appointment.getWorkSchedule()).getBody().getData());
                 result.add(data);
             });
             if(appointments != null) {
@@ -76,7 +77,7 @@ public class AppointmentController {
             appointments.forEach(appointment -> {
                 Map<String,Object> data = new HashMap<>();
                 data.put("appointment", appointment);
-                data.put("doctor", doctorFeign.getDoctorInformation(appointment.getDoctor()).getBody().getData());
+                data.put("work_schedule", wsf.getById(appointment.getWorkSchedule()).getBody().getData());
                 result.add(data);
             });
             if(appointments != null) {
@@ -139,7 +140,7 @@ public class AppointmentController {
             appointments.forEach(appointment -> {
                 Map<String,Object> data = new HashMap<>();
                 data.put("appointment", appointment);
-                data.put("doctor", doctorFeign.getDoctorInformation(appointment.getDoctor()).getBody().getData());
+                data.put("work_schedule", wsf.getById(appointment.getWorkSchedule()).getBody().getData());
                 result.add(data);
             });
             return ResponseEntity.ok(new Response(
@@ -170,7 +171,7 @@ public class AppointmentController {
             appointments.forEach(appointment -> {
                 Map<String,Object> data = new HashMap<>();
                 data.put("appointment", appointment);
-                data.put("doctor", doctorFeign.getDoctorInformation(appointment.getDoctor()).getBody().getData());
+                data.put("work_schedule", wsf.getById(appointment.getWorkSchedule()).getBody().getData());
                 result.add(data);
             });
             return ResponseEntity.ok(new Response(
