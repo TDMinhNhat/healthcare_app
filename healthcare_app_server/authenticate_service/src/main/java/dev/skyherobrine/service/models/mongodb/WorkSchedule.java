@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Document(collection = "work_schedules")
 @Getter @Setter
-@NoArgsConstructor @RequiredArgsConstructor
+@NoArgsConstructor @RequiredArgsConstructor @AllArgsConstructor
 public class WorkSchedule {
     @MongoId
     private Long id;

@@ -41,10 +41,13 @@ public class WorkScheduleController {
             log.info("Work Schedule: Call the api add work schedule of the doctor");
             Doctor doctor = doctorRepository.findDoctorByUserId(workScheduleDTO.getDoctorId()).orElseThrow(() -> new EntityNotFoundException("The doctor wasn't found!"));
             WorkSchedule workSchedule = new WorkSchedule(
+                    workScheduleRepository.findTopByOrderByIdDesc().orElseThrow(() -> new EntityNotFoundException("The work schedule wasn't found!")).getId(),
                     doctor,
                     workScheduleDTO.getTypeDay(),
                     LocalDateTime.parse(workScheduleDTO.getTimeStart(), DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")),
-                    LocalDateTime.parse(workScheduleDTO.getTimeEnd(), DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss"))
+                    LocalDateTime.parse(workScheduleDTO.getTimeEnd(), DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")),
+                    LocalDateTime.now(),
+                    LocalDateTime.now()
             );
             kafkaTemplate.send("insert_work_schedule", ObjectParser.convertObjectToJson(workSchedule));
 
