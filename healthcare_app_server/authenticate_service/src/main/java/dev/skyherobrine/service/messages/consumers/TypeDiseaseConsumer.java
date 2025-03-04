@@ -5,6 +5,7 @@ import dev.skyherobrine.service.repositories.TypeDiseaseRepository;
 import dev.skyherobrine.service.utils.ObjectParser;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,6 +18,7 @@ public class TypeDiseaseConsumer {
         this.typeDiseaseRepository = typeDiseaseRepository;
     }
 
+    @KafkaListener(topics = "insert_type_disease", groupId = "authenticate_insert_type_disease")
     public void insertTypeDisease(String message) {
         try {
             log.info("Type Disease Consumer: listen the message insert type disease");
@@ -29,6 +31,7 @@ public class TypeDiseaseConsumer {
         }
     }
 
+    @KafkaListener(topics = "delete_type_disease", groupId = "authenticate_delete_type_disease")
     public void deleteTypeDisease(String message) {
         try {
             log.info("Type Disease Consumer: listen the message delete type disease");
