@@ -2,6 +2,7 @@ package dev.skyherobrine.service.models.mariadb;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import dev.skyherobrine.service.enums.AppointmentStatus;
+import dev.skyherobrine.service.models.mongodb.WorkSchedule;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,8 +17,8 @@ public class Appointment {
     private Long id;
     @ManyToOne @JoinColumn(nullable = false) @NonNull
     private Patient patient;
-    @ManyToOne @JoinColumn(name = "work_schedule_id", nullable = false) @NonNull
-    private WorkSchedule workSchedule;
+    @Column(name = "work_schedule_id", nullable = false) @NonNull
+    private Long workScheduleId;
     @Column(length = 500)
     private String note;
     @Column(name = "room_id", length = 50, nullable = false)
@@ -29,9 +30,9 @@ public class Appointment {
     @Column(nullable = false)
     private AppointmentStatus status;
 
-    public Appointment(@NonNull Patient patient, @NonNull WorkSchedule workSchedule, String note, String roomId) {
+    public Appointment(@NonNull Patient patient, @NonNull Long workScheduleId, String note, String roomId) {
         this.patient = patient;
-        this.workSchedule = workSchedule;
+        this.workScheduleId = workScheduleId;
         this.note = note;
         this.roomId = roomId;
     }

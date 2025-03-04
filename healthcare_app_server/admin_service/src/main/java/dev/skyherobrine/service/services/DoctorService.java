@@ -3,6 +3,7 @@ package dev.skyherobrine.service.services;
 import dev.skyherobrine.service.dtos.DoctorDTO;
 import dev.skyherobrine.service.models.mariadb.*;
 import dev.skyherobrine.service.repositories.mariadb.*;
+import dev.skyherobrine.service.repositories.mongodb.WorkScheduleRepository;
 import dev.skyherobrine.service.utils.ObjectParser;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;

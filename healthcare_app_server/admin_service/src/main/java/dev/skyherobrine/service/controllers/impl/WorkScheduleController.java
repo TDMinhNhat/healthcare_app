@@ -2,8 +2,8 @@ package dev.skyherobrine.service.controllers.impl;
 
 import dev.skyherobrine.service.controllers.IManagement;
 import dev.skyherobrine.service.models.mariadb.Response;
-import dev.skyherobrine.service.models.mariadb.WorkSchedule;
-import dev.skyherobrine.service.repositories.mariadb.WorkScheduleRepository;
+import dev.skyherobrine.service.models.mongodb.WorkSchedule;
+import dev.skyherobrine.service.repositories.mongodb.WorkScheduleRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

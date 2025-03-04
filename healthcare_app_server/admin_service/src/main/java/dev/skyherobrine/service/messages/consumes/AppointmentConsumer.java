@@ -6,16 +6,12 @@ import dev.skyherobrine.service.models.mariadb.Appointment;
 import dev.skyherobrine.service.repositories.mariadb.AppointmentRepository;
 import dev.skyherobrine.service.repositories.mariadb.DoctorRepository;
 import dev.skyherobrine.service.repositories.mariadb.PatientRepository;
-import dev.skyherobrine.service.repositories.mariadb.WorkScheduleRepository;
+import dev.skyherobrine.service.repositories.mongodb.WorkScheduleRepository;
 import dev.skyherobrine.service.utils.ObjectParser;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-
-import java.io.StringReader;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Component
 @Slf4j
@@ -41,13 +37,13 @@ public class AppointmentConsumer {
 
             JsonNode node = new ObjectMapper().readTree(message);
             String getPatient = node.get("appointment").get("patientId").asText();
-            String getWorkSchedule = node.get("appointment").get("workSchedule").asText();
+            Long getWorkSchedule = node.get("appointment").get("workScheduleId").asLong();
             String getNote = node.get("appointment").get("note").asText();
             String getRoomId = node.get("roomId").asText();
 
             Appointment appointment = new Appointment(
                     pr.findPatientByUserId(getPatient).orElseThrow(() -> new EntityNotFoundException("Patient not found")),
-                    workScheduleRepository.findById(Long.parseLong(getWorkSchedule)).orElseThrow(() -> new EntityNotFoundException("Work schedule not found")),
+                    workScheduleRepository.findById(getWorkSchedule).orElseThrow(() -> new EntityNotFoundException("Work schedule not found")).getId(),
                     getNote,
                     getRoomId
             );
