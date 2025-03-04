@@ -64,6 +64,16 @@ export const AppRoutes = () => {
               element={<DoctorCurrentSchedulePage />}
             />
             <Route path={ROUTING.PATIENTS} element={<div>Patients</div>} />
+            {/* Update medical records routes to support view and edit modes */}
+            <Route
+              path={`${ROUTING.MEDICAL_RECORDS}/:appointmentId/view`}
+              element={<MedicalRecordPage mode="view" />}
+            />
+            <Route
+              path={`${ROUTING.MEDICAL_RECORDS}/:appointmentId/edit`}
+              element={<MedicalRecordPage mode="edit" />}
+            />
+            {/* Keep the original route for backward compatibility */}
             <Route
               path={`${ROUTING.MEDICAL_RECORDS}/:appointmentId`}
               element={<MedicalRecordPage />}

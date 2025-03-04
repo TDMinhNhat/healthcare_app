@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams, useNavigate, useLocation } from "react-router";
 import {
   Box,
   Typography,
@@ -148,10 +148,22 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(3),
 }));
 
-const MedicalRecordPage: React.FC = () => {
+interface MedicalRecordPageProps {
+  mode?: "view" | "edit";
+}
+
+const MedicalRecordPage: React.FC<MedicalRecordPageProps> = ({
+  mode = "view",
+}) => {
   const { t } = useTranslation();
   const { appointmentId } = useParams<{ appointmentId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Determine mode from props or URL if not provided
+  const currentMode =
+    mode || (location.pathname.includes("/edit") ? "edit" : "view");
+  const isEditMode = currentMode === "edit";
 
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
@@ -173,6 +185,7 @@ const MedicalRecordPage: React.FC = () => {
   const [drugQuantity, setDrugQuantity] = useState<number>(1);
 
   const [patient, setPatient] = useState<User | null>(null);
+  const [readOnly, setReadOnly] = useState<boolean>(!isEditMode);
 
   useEffect(() => {
     const fetchMedicalRecord = async () => {
@@ -210,10 +223,13 @@ const MedicalRecordPage: React.FC = () => {
       } finally {
         setLoading(false);
       }
+
+      // Update readOnly state based on mode
+      setReadOnly(!isEditMode);
     };
 
     fetchMedicalRecord();
-  }, [appointmentId, t]);
+  }, [appointmentId, t, isEditMode]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -287,6 +303,11 @@ const MedicalRecordPage: React.FC = () => {
     navigate("/doctor/appointments");
   };
 
+  // Function to switch between view and edit modes
+  const handleSwitchToEditMode = () => {
+    navigate(`/doctor/medical-records/${appointmentId}/edit`);
+  };
+
   if (loading) {
     return (
       <Box
@@ -337,13 +358,34 @@ const MedicalRecordPage: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-        <IconButton onClick={handleBackToAppointments} sx={{ mr: 1 }}>
-          <ArrowBackIcon />
-        </IconButton>
-        <Typography variant="h5" component="h1">
-          {t("doctor.medical_records.title", "Medical Record")}
-        </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          mb: 3,
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <IconButton onClick={handleBackToAppointments} sx={{ mr: 1 }}>
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography variant="h5" component="h1">
+            {isEditMode
+              ? t("doctor.medical_records.edit_title", "Edit Medical Record")
+              : t("doctor.medical_records.view_title", "View Medical Record")}
+          </Typography>
+        </Box>
+
+        {!isEditMode && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSwitchToEditMode}
+          >
+            {t("doctor.medical_records.edit_record", "Edit Record")}
+          </Button>
+        )}
       </Box>
 
       {saveSuccess && (
@@ -531,6 +573,7 @@ const MedicalRecordPage: React.FC = () => {
             onChange={(e) => setDiagnosisDisease(e.target.value)}
             fullWidth
             margin="normal"
+            InputProps={{ readOnly: readOnly }}
           />
 
           <TextField
@@ -545,6 +588,7 @@ const MedicalRecordPage: React.FC = () => {
               "doctor.medical_records.notes_placeholder",
               "Enter notes about patient condition, diet, lifestyle..."
             )}
+            InputProps={{ readOnly: readOnly }}
           />
 
           <Box sx={{ mt: 2 }}>
@@ -563,6 +607,7 @@ const MedicalRecordPage: React.FC = () => {
                 shrink: true,
               }}
               fullWidth
+              InputProps={{ readOnly: readOnly }}
             />
           </Box>
         </StyledPaper>
@@ -597,6 +642,7 @@ const MedicalRecordPage: React.FC = () => {
                     )}
                   />
                 )}
+                readOnly={readOnly}
               />
             </Grid>
             <Grid item xs={12} md={4}>
@@ -606,6 +652,7 @@ const MedicalRecordPage: React.FC = () => {
                 value={howUse}
                 onChange={(e) => setHowUse(e.target.value)}
                 placeholder="E.g., Take 1 tablet after breakfast"
+                InputProps={{ readOnly: readOnly }}
               />
             </Grid>
             <Grid item xs={12} md={2}>
@@ -613,7 +660,7 @@ const MedicalRecordPage: React.FC = () => {
                 fullWidth
                 label={t("doctor.medical_records.quantity", "Quantity")}
                 type="number"
-                InputProps={{ inputProps: { min: 1 } }}
+                InputProps={{ inputProps: { min: 1, readOnly: readOnly } }}
                 value={drugQuantity}
                 onChange={(e) => setDrugQuantity(parseInt(e.target.value) || 1)}
               />
@@ -624,7 +671,7 @@ const MedicalRecordPage: React.FC = () => {
                 color="primary"
                 startIcon={<AddIcon />}
                 onClick={handleAddDrug}
-                disabled={!selectedDrug || !howUse.trim()}
+                disabled={!selectedDrug || !howUse.trim() || readOnly}
                 fullWidth
                 sx={{ height: "56px" }}
               >
@@ -671,6 +718,7 @@ const MedicalRecordPage: React.FC = () => {
                         <IconButton
                           color="error"
                           onClick={() => handleRemoveDrug(index)}
+                          disabled={readOnly}
                         >
                           <DeleteIcon />
                         </IconButton>
@@ -684,24 +732,29 @@ const MedicalRecordPage: React.FC = () => {
         </StyledPaper>
       </TabPanel>
 
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
-        <Button
-          variant="outlined"
-          color="inherit"
-          onClick={handleBackToAppointments}
-          sx={{ mr: 2 }}
-        >
-          {t("common.cancel", "Cancel")}
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSaveMedicalRecord}
-          disabled={saving}
-        >
-          {saving ? t("common.saving", "Saving...") : t("common.save", "Save")}
-        </Button>
-      </Box>
+      {/* Only show save/cancel buttons in edit mode */}
+      {isEditMode && (
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
+          <Button
+            variant="outlined"
+            color="inherit"
+            onClick={handleBackToAppointments}
+            sx={{ mr: 2 }}
+          >
+            {t("common.cancel", "Cancel")}
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSaveMedicalRecord}
+            disabled={saving}
+          >
+            {saving
+              ? t("common.saving", "Saving...")
+              : t("common.save", "Save")}
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 };

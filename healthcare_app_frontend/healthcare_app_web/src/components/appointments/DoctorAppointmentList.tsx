@@ -25,10 +25,13 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import NoteAltIcon from "@mui/icons-material/NoteAlt";
 import PersonIcon from "@mui/icons-material/Person";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import EditIcon from "@mui/icons-material/Edit";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { useNavigate } from "react-router";
 import { ROUTING } from "../../constants/routing";
+import MedicalRecordModal from "../medical/MedicalRecordModal";
 // import { getAppointmentStatusWithDoctorId } from "../../services/appointment_service";
 
 // Mock data for doctor appointments
@@ -212,6 +215,10 @@ const DoctorAppointmentList: React.FC<DoctorAppointmentListProps> = ({
   const [appointmentNotes, setAppointmentNotes] = useState("");
   const [currentAppointment, setCurrentAppointment] =
     useState<Appointment | null>(null);
+  const [medicalRecordModalOpen, setMedicalRecordModalOpen] = useState(false);
+  const [selectedMedicalRecordId, setSelectedMedicalRecordId] = useState<
+    number | null
+  >(null);
 
   const handleMenuClick = (
     event: React.MouseEvent<HTMLElement>,
@@ -375,6 +382,19 @@ const DoctorAppointmentList: React.FC<DoctorAppointmentListProps> = ({
     }
   };
 
+  const handleViewMedicalRecord = (appointmentId: number) => {
+    setSelectedMedicalRecordId(appointmentId);
+    setMedicalRecordModalOpen(true);
+  };
+
+  // Modify the existing handleViewMedicalRecord to use the modal
+  const handleViewMedicalRecordMenu = () => {
+    if (currentAppointment) {
+      handleViewMedicalRecord(currentAppointment.appointment.id);
+      handleMenuClose();
+    }
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
@@ -532,13 +552,14 @@ const DoctorAppointmentList: React.FC<DoctorAppointmentListProps> = ({
                       )}
                       <Button
                         size="small"
-                        onClick={() => {
-                          setCurrentAppointment(item);
-                          setAppointmentNotes(appointment.note || "");
-                          setNotesDialogOpen(true);
-                        }}
+                        startIcon={<AssignmentIcon />}
+                        sx={{ ml: 1 }}
+                        onClick={() => handleViewMedicalRecord(appointment.id)}
                       >
-                        {t("doctor.appointments.add_notes", "Add Notes")}
+                        {t(
+                          "doctor.appointments.view_medical_record",
+                          "View Medical Record"
+                        )}
                       </Button>
                       <Button
                         size="small"
@@ -549,6 +570,30 @@ const DoctorAppointmentList: React.FC<DoctorAppointmentListProps> = ({
                         }
                       >
                         {t("doctor.appointments.cancel", "Cancel")}
+                      </Button>
+                    </Box>
+                  )}
+
+                  {(appointment.status === "DONE" ||
+                    appointment.status === "CANCELLED") && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        pl: 1,
+                        pb: 1,
+                      }}
+                    >
+                      <Button
+                        size="small"
+                        startIcon={<AssignmentIcon />}
+                        sx={{ ml: 1 }}
+                        onClick={() => handleViewMedicalRecord(appointment.id)}
+                      >
+                        {t(
+                          "doctor.appointments.view_medical_record",
+                          "View Medical Record"
+                        )}
                       </Button>
                     </Box>
                   )}
@@ -570,6 +615,9 @@ const DoctorAppointmentList: React.FC<DoctorAppointmentListProps> = ({
           autoFocusItem: true, // Tự động focus vào menu item đầu tiên
         }}
       >
+        <MenuItem onClick={handleViewMedicalRecordMenu}>
+          {t("doctor.appointments.view_medical_record", "View Medical Record")}
+        </MenuItem>
         <MenuItem onClick={handleOpenNotesDialog}>
           {t("doctor.appointments.view_edit_notes", "View/Edit Notes")}
         </MenuItem>
@@ -579,47 +627,16 @@ const DoctorAppointmentList: React.FC<DoctorAppointmentListProps> = ({
             "View Patient Details"
           )}
         </MenuItem>
-        {currentAppointment &&
-          currentAppointment.appointment.status === "WAITING" && (
-            <MenuItem
-              onClick={() =>
-                handleStatusChange(
-                  currentAppointment.appointment.id,
-                  "IN_PROGRESS"
-                )
-              }
-            >
-              {t("doctor.appointments.start_appointment", "Start Appointment")}
-            </MenuItem>
-          )}
-        {currentAppointment &&
-          currentAppointment.appointment.status === "IN_PROGRESS" && (
-            <MenuItem
-              onClick={() =>
-                handleStatusChange(currentAppointment.appointment.id, "DONE")
-              }
-            >
-              {t(
-                "doctor.appointments.complete_appointment",
-                "Complete Appointment"
-              )}
-            </MenuItem>
-          )}
-        {currentAppointment &&
-          (currentAppointment.appointment.status === "WAITING" ||
-            currentAppointment.appointment.status === "IN_PROGRESS") && (
-            <MenuItem
-              onClick={() =>
-                handleStatusChange(
-                  currentAppointment.appointment.id,
-                  "CANCELLED"
-                )
-              }
-            >
-              {t("doctor.appointments.cancel", "Cancel Appointment")}
-            </MenuItem>
-          )}
+        {/* ...existing menu items... */}
       </Menu>
+
+      {/* Add the medical record modal */}
+      <MedicalRecordModal
+        open={medicalRecordModalOpen}
+        onClose={() => setMedicalRecordModalOpen(false)}
+        appointmentId={selectedMedicalRecordId}
+        isDoctor={true}
+      />
 
       {/* Dialog for notes */}
       <Dialog
