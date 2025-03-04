@@ -37,7 +37,7 @@ public class AppointmentConsumer {
 
             JsonNode node = new ObjectMapper().readTree(message);
             String getPatient = node.get("appointment").get("patientId").asText();
-            Long getWorkSchedule = node.get("appointment").get("workScheduleId").asLong();
+            Long getWorkSchedule = node.get("appointment").get("workSchedule").asLong();
             String getNote = node.get("appointment").get("note").asText();
             String getRoomId = node.get("roomId").asText();
 

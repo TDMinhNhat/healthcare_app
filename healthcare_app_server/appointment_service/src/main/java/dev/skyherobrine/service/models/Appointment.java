@@ -38,5 +38,6 @@ public class Appointment {
         this.patient = patient;
         this.workSchedule = workSchedule;
         this.note = note;
+        this.status = AppointmentStatus.WAITING;
     }
 }
