@@ -1,6 +1,6 @@
 package dev.skyherobrine.service.repositories;
 
-import dev.skyherobrine.service.models.Patient;
+import dev.skyherobrine.service.models.mariadb.Patient;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

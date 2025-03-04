@@ -1,4 +1,4 @@
-package dev.skyherobrine.service.models;
+package dev.skyherobrine.service.models.mariadb;
 
 import jakarta.persistence.*;
 import lombok.*;

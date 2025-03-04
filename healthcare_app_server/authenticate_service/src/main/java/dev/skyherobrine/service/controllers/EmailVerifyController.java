@@ -1,18 +1,15 @@
 package dev.skyherobrine.service.controllers;
 
-import dev.skyherobrine.service.models.Response;
+import dev.skyherobrine.service.models.mariadb.Response;
 import dev.skyherobrine.service.repositories.PatientRepository;
 import dev.skyherobrine.service.services.EmailVerifyService;
 import dev.skyherobrine.service.utils.ObjectParser;
-import dev.skyherobrine.service.utils.SendMailUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.concurrent.ThreadLocalRandom;
 
 @RestController
 @RequestMapping("/authenticate/api/v1/email_verify")

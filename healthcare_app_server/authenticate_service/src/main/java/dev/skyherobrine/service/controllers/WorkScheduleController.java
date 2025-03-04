@@ -1,9 +1,9 @@
 package dev.skyherobrine.service.controllers;
 
 import dev.skyherobrine.service.dtos.WorkScheduleDTO;
-import dev.skyherobrine.service.models.Doctor;
-import dev.skyherobrine.service.models.Response;
-import dev.skyherobrine.service.models.WorkSchedule;
+import dev.skyherobrine.service.models.mariadb.Doctor;
+import dev.skyherobrine.service.models.mariadb.Response;
+import dev.skyherobrine.service.models.mongodb.WorkSchedule;
 import dev.skyherobrine.service.repositories.DoctorRepository;
 import dev.skyherobrine.service.repositories.WorkScheduleRepository;
 import dev.skyherobrine.service.utils.ObjectParser;
@@ -39,12 +39,12 @@ public class WorkScheduleController {
     public ResponseEntity<Response> addWorkSchedule(@RequestBody WorkScheduleDTO workScheduleDTO) {
         try {
             log.info("Work Schedule: Call the api add work schedule of the doctor");
-            Doctor doctor = doctorRepository.findById(Long.parseLong(workScheduleDTO.getDoctorId())).orElseThrow(() -> new EntityNotFoundException("The doctor wasn't found!"));
+            Doctor doctor = doctorRepository.findDoctorByUserId(workScheduleDTO.getDoctorId()).orElseThrow(() -> new EntityNotFoundException("The doctor wasn't found!"));
             WorkSchedule workSchedule = new WorkSchedule(
                     doctor,
                     workScheduleDTO.getTypeDay(),
-                    LocalDateTime.parse(workScheduleDTO.getTimeStart(), DateTimeFormatter.ofPattern("HH-mm")),
-                    LocalDateTime.parse(workScheduleDTO.getTimeEnd(), DateTimeFormatter.ofPattern("HH-mm"))
+                    LocalDateTime.parse(workScheduleDTO.getTimeStart(), DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")),
+                    LocalDateTime.parse(workScheduleDTO.getTimeEnd(), DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss"))
             );
             kafkaTemplate.send("insert_work_schedule", ObjectParser.convertObjectToJson(workSchedule));
 
@@ -56,8 +56,8 @@ public class WorkScheduleController {
             ));
 
         } catch (Exception e) {
-            log.info("Work Schedule: The api thrown an exception");
-            log.info(e.getMessage());
+            log.error("Work Schedule: The api thrown an exception");
+            log.error(e.getMessage());
             return ResponseEntity.ok(new Response(
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "The api thrown an error",

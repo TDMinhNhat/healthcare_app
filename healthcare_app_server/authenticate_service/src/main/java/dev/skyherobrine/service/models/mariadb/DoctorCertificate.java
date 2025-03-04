@@ -1,17 +1,16 @@
-package dev.skyherobrine.service.models;
+package dev.skyherobrine.service.models.mariadb;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import dev.skyherobrine.service.enums.Diploma;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity @Table(name = "doctor_educations")
+@Entity @Table(name = "doctor_certificates")
 @Getter @Setter
 @NoArgsConstructor @RequiredArgsConstructor
-public class DoctorEducation {
+public class DoctorCertificate {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,20 +18,12 @@ public class DoctorEducation {
     @ManyToOne @JoinColumn(nullable = false) @NonNull
     private Doctor doctor;
 
-    @Column(name = "school_name", length = 200, nullable = false) @NonNull
-    private String schoolName;
+    @Column(name = "cert_name", length = 150, nullable = false) @NonNull
+    private String certName;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
-    @Column(name = "join_date", nullable = false) @NonNull
-    private LocalDate joinDate;
-
-    @JsonFormat(pattern = "dd-MM-yyyy")
-    @Column(name = "graduate_date", nullable = false) @NonNull
-    private LocalDate graduateDate;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false) @NonNull
-    private Diploma diploma;
+    @Column(name = "issue_date", nullable = false) @NonNull
+    private LocalDate issueDate;
 
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
     @Column(name = "created_at", nullable = false)

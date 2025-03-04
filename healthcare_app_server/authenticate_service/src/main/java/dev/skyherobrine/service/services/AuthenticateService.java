@@ -1,8 +1,8 @@
 package dev.skyherobrine.service.services;
 
 import dev.skyherobrine.service.dtos.PatientRegisterDTO;
-import dev.skyherobrine.service.models.Patient;
-import dev.skyherobrine.service.models.User;
+import dev.skyherobrine.service.models.mariadb.Patient;
+import dev.skyherobrine.service.models.mariadb.User;
 import dev.skyherobrine.service.repositories.AuthenticateProviderRepository;
 import dev.skyherobrine.service.repositories.DoctorRepository;
 import dev.skyherobrine.service.repositories.PatientRepository;

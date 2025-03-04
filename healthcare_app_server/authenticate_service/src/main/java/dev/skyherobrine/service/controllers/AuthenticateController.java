@@ -1,8 +1,8 @@
 package dev.skyherobrine.service.controllers;
 
 import dev.skyherobrine.service.dtos.PatientRegisterDTO;
-import dev.skyherobrine.service.models.Response;
-import dev.skyherobrine.service.models.User;
+import dev.skyherobrine.service.models.mariadb.Response;
+import dev.skyherobrine.service.models.mariadb.User;
 import dev.skyherobrine.service.services.AuthenticateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

@@ -1,6 +1,6 @@
 package dev.skyherobrine.service.messages.consumers;
 
-import dev.skyherobrine.service.models.AuthenticateProvider;
+import dev.skyherobrine.service.models.mariadb.AuthenticateProvider;
 import dev.skyherobrine.service.repositories.AuthenticateProviderRepository;
 import dev.skyherobrine.service.utils.ObjectParser;
 import jakarta.transaction.Transactional;

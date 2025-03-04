@@ -1,6 +1,6 @@
 package dev.skyherobrine.service.dtos;
 
-import dev.skyherobrine.service.models.Patient;
+import dev.skyherobrine.service.models.mariadb.Patient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

@@ -1,6 +1,6 @@
 package dev.skyherobrine.service.repositories;
 
-import dev.skyherobrine.service.models.TypeDisease;
+import dev.skyherobrine.service.models.mariadb.TypeDisease;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

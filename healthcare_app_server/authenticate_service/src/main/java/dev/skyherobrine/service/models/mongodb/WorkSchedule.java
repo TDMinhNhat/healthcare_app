@@ -1,7 +1,8 @@
-package dev.skyherobrine.service.models;
+package dev.skyherobrine.service.models.mongodb;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import dev.skyherobrine.service.enums.TypeDay;
+import dev.skyherobrine.service.models.mariadb.Doctor;
 import jakarta.persistence.*;
 import lombok.*;
 
