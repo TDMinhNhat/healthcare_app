@@ -15,7 +15,7 @@ public class MedicalRecord {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne @JoinColumn(nullable = false) @NonNull
+    @OneToOne @JoinColumn(nullable = false) @NonNull
     private Appointment appointment;
 
     @Column(name = "diagnosis_disease", length = 300) @NonNull

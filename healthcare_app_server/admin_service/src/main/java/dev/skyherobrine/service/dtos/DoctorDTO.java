@@ -21,15 +21,10 @@ public class DoctorDTO {
     private String email;
     private String password;
     private String specialization;
+    private String typeDisease;
     private List<DoctorCertificateDTO> certificates;
     private List<DoctorEducationDTO> educations;
     private List<DoctorExperienceDTO> experiences;
-
-    public Doctor toObject() {
-        return new Doctor(
-                "123", firstName, lastName, sex, LocalDate.parse(dob, DateTimeFormatter.ofPattern("dd-MM-yyyy")), phone, email, password, specialization
-        );
-    }
 
     public List<DoctorCertificate> certificates(Doctor doctor) {
         return certificates.stream().map(certificate -> new DoctorCertificate(

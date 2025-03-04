@@ -24,26 +24,44 @@ public class DoctorService {
     private final DoctorEducationRepository doctorEducationRepository;
     private final DoctorExperienceRepository doctorExperienceRepository;
     private final AuthenticateProviderRepository authenticateProviderRepository;
+    private final PatientFaceEncodeRepository patientFaceEncodeRepository;
+    private final TypeDiseaseRepository typeDiseaseRepository;
+    private final WorkScheduleRepository workScheduleRepository;
     private final KafkaTemplate<String,String> kafkaTemplate;
 
-    public DoctorService(AddressRepository addressRepository, DoctorRepository doctorRepository, DoctorCertificateRepository doctorCertificateRepository, DoctorEducationRepository doctorEducationRepository, DoctorExperienceRepository doctorExperienceRepository, AuthenticateProviderRepository authenticateProviderRepository, KafkaTemplate<String, String> kafkaTemplate) {
+    public DoctorService(AddressRepository addressRepository, DoctorRepository doctorRepository, DoctorCertificateRepository doctorCertificateRepository, DoctorEducationRepository doctorEducationRepository, DoctorExperienceRepository doctorExperienceRepository, AuthenticateProviderRepository authenticateProviderRepository, PatientFaceEncodeRepository patientFaceEncodeRepository, TypeDiseaseRepository typeDiseaseRepository, WorkScheduleRepository workScheduleRepository, KafkaTemplate<String, String> kafkaTemplate) {
         this.addressRepository = addressRepository;
         this.doctorRepository = doctorRepository;
         this.doctorCertificateRepository = doctorCertificateRepository;
         this.doctorEducationRepository = doctorEducationRepository;
         this.doctorExperienceRepository = doctorExperienceRepository;
         this.authenticateProviderRepository = authenticateProviderRepository;
+        this.patientFaceEncodeRepository = patientFaceEncodeRepository;
+        this.typeDiseaseRepository = typeDiseaseRepository;
+        this.workScheduleRepository = workScheduleRepository;
         this.kafkaTemplate = kafkaTemplate;
     }
 
     public Doctor addDoctor(DoctorDTO doctorDTO) throws Exception {
         log.info("Doctor Service: add doctor");
-        Doctor target = doctorDTO.toObject();
+        TypeDisease typeDisease = typeDiseaseRepository.findByName(doctorDTO.getTypeDisease()).orElseThrow(() -> new EntityNotFoundException("Type Disease wasn't found!"));
 
-        String getUserId = generateUserId(target.getDob());
+        String getUserId = generateUserId(LocalDate.parse(doctorDTO.getDob(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
         log.info("Doctor Service: generated user id is {}", getUserId);
-        target.setUserId(getUserId);
-        target.setAuthedProvider(authenticateProviderRepository.findByAuthenName("APPLICATION").orElseThrow(() -> new EntityNotFoundException("Authenticate Provider not found")));
+        AuthenticateProvider authenticateProvider = authenticateProviderRepository.findByAuthenName("APPLICATION").orElseThrow(() -> new EntityNotFoundException("Authenticate Provider not found"));
+        Doctor target = new Doctor(
+                getUserId,
+                doctorDTO.getFirstName(),
+                doctorDTO.getLastName(),
+                doctorDTO.getSex(),
+                LocalDate.parse(doctorDTO.getDob(), DateTimeFormatter.ofPattern("dd-MM-yyyy")),
+                doctorDTO.getPhone(),
+                doctorDTO.getEmail(),
+                doctorDTO.getPassword(),
+                authenticateProvider,
+                doctorDTO.getSpecialization(),
+                typeDisease
+        );
 
         log.info("Doctor Service: sending insert doctor message to kafka");
         kafkaTemplate.send("insert_doctor", ObjectParser.convertObjectToJson(target));
