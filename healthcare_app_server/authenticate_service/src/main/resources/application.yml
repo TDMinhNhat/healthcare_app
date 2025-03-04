@@ -17,6 +17,10 @@ spring:
     redis:
       host: localhost
       port: 6379
+    mongodb:
+      database: authenticate_service
+      host: localhost
+      port: 27017
   kafka:
     consumer:
       auto-offset-reset: earliest

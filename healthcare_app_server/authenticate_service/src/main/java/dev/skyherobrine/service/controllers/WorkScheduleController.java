@@ -40,8 +40,13 @@ public class WorkScheduleController {
         try {
             log.info("Work Schedule: Call the api add work schedule of the doctor");
             Doctor doctor = doctorRepository.findDoctorByUserId(workScheduleDTO.getDoctorId()).orElseThrow(() -> new EntityNotFoundException("The doctor wasn't found!"));
+
+            Long getMaxId = workScheduleRepository.findAll().stream().sorted(
+                    (a, b) -> Integer.parseInt(String.valueOf(b.getId())) - Integer.parseInt(String.valueOf(a.getId()))
+            ).map(WorkSchedule::getId).findFirst().orElse(1L);
+
             WorkSchedule workSchedule = new WorkSchedule(
-                    workScheduleRepository.findTopByOrderByIdDesc().orElseThrow(() -> new EntityNotFoundException("The work schedule wasn't found!")).getId(),
+                    getMaxId,
                     doctor,
                     workScheduleDTO.getTypeDay(),
                     LocalDateTime.parse(workScheduleDTO.getTimeStart(), DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")),
