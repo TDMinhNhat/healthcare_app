@@ -1,4 +1,4 @@
-package dev.skyherobrine.service.repositories;
+package dev.skyherobrine.service.repositories.mariadb;
 
 import dev.skyherobrine.service.models.mariadb.Patient;
 import org.springframework.data.jpa.repository.JpaRepository;

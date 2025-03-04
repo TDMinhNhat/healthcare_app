@@ -1,4 +1,4 @@
-package dev.skyherobrine.service.repositories;
+package dev.skyherobrine.service.repositories.mariadb;
 
 import dev.skyherobrine.service.models.mariadb.Doctor;
 import dev.skyherobrine.service.models.mariadb.DoctorEducation;

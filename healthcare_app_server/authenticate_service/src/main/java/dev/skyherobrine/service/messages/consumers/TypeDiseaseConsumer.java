@@ -1,7 +1,7 @@
 package dev.skyherobrine.service.messages.consumers;
 
 import dev.skyherobrine.service.models.mariadb.TypeDisease;
-import dev.skyherobrine.service.repositories.TypeDiseaseRepository;
+import dev.skyherobrine.service.repositories.mariadb.TypeDiseaseRepository;
 import dev.skyherobrine.service.utils.ObjectParser;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;

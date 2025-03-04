@@ -3,42 +3,28 @@ package dev.skyherobrine.service.models.mongodb;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import dev.skyherobrine.service.enums.TypeDay;
 import dev.skyherobrine.service.models.mariadb.Doctor;
-import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.time.LocalDateTime;
 
-@Entity @Table(name = "work_schedule")
+@Document(collection = "work_schedules")
 @Getter @Setter
 @NoArgsConstructor @RequiredArgsConstructor
 public class WorkSchedule {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @MongoId
     private Long id;
-    @ManyToOne @JoinColumn(name = "doctor_id", nullable = false) @NonNull
+    @NonNull
     private Doctor doctor;
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type_day", nullable = false) @NonNull
+    @NonNull
     private TypeDay typeDay;
-    @JsonFormat(pattern = "HH:mm") @NonNull
-    @Column(nullable = false)
+    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss") @NonNull
     private LocalDateTime start;
-    @JsonFormat(pattern = "HH:mm") @NonNull
-    @Column(nullable = false)
+    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss") @NonNull
     private LocalDateTime end;
-    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
-    @Column(name = "created_at", nullable = false)
+    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss") @NonNull
     private LocalDateTime createdAt;
-    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
-    @Column(name = "updated_at", nullable = false)
+    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss") @NonNull
     private LocalDateTime updatedAt;
-
-    @PrePersist
-    public void prePersist() {
-        createdAt = updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 }

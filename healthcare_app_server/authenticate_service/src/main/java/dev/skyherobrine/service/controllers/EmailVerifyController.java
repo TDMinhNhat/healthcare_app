@@ -1,7 +1,7 @@
 package dev.skyherobrine.service.controllers;
 
 import dev.skyherobrine.service.models.mariadb.Response;
-import dev.skyherobrine.service.repositories.PatientRepository;
+import dev.skyherobrine.service.repositories.mariadb.PatientRepository;
 import dev.skyherobrine.service.services.EmailVerifyService;
 import dev.skyherobrine.service.utils.ObjectParser;
 import lombok.extern.slf4j.Slf4j;

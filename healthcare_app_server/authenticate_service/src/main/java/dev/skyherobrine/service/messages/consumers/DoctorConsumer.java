@@ -1,7 +1,7 @@
 package dev.skyherobrine.service.messages.consumers;
 
 import dev.skyherobrine.service.models.mariadb.*;
-import dev.skyherobrine.service.repositories.*;
+import dev.skyherobrine.service.repositories.mariadb.*;
 import dev.skyherobrine.service.utils.ObjectParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
