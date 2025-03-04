@@ -4,6 +4,7 @@ import dev.skyherobrine.service.controllers.IManagement;
 import dev.skyherobrine.service.models.mariadb.Response;
 import dev.skyherobrine.service.models.mariadb.TypeDisease;
 import dev.skyherobrine.service.repositories.mariadb.TypeDiseaseRepository;
+import dev.skyherobrine.service.utils.ObjectParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +46,10 @@ public class TypeDiseaseController implements IManagement<String, Long> {
         try {
             log.info("Type Disease: Call the api insert type disease");
             TypeDisease typeDisease = new TypeDisease(name);
+
+            log.info("Type Disease: send the message insert type disease");
+            kafkaTemplate.send("insert_type_disease", ObjectParser.convertObjectToJson(typeDisease));
+
             TypeDisease result = typeDiseaseRepository.save(typeDisease);
             log.info("Type Disease: Insert type disease success");
             return ResponseEntity.ok(new Response(
@@ -76,6 +81,8 @@ public class TypeDiseaseController implements IManagement<String, Long> {
             TypeDisease typeDisease = typeDiseaseRepository.findById(aLong).orElse(null);
             if(typeDisease != null) {
                 log.info("Type Disease: found the object");
+                kafkaTemplate.send("delete_type_disease", ObjectParser.convertObjectToJson(String.valueOf(aLong)));
+
                 typeDisease.setStatus(false);
                 TypeDisease result = typeDiseaseRepository.save(typeDisease);
                 return ResponseEntity.ok(new Response(
