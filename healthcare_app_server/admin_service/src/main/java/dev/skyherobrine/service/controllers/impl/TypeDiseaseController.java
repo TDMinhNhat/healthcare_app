@@ -42,7 +42,7 @@ public class TypeDiseaseController implements IManagement<String, Long> {
 
     @PostMapping
     @Override
-    public ResponseEntity<Response> add(@RequestBody String name) {
+    public ResponseEntity<Response> add(@RequestParam String name) {
         try {
             log.info("Type Disease: Call the api insert type disease");
             TypeDisease typeDisease = new TypeDisease(name);
