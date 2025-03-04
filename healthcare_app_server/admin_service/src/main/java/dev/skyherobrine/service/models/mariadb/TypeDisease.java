@@ -15,7 +15,7 @@ public class TypeDisease {
     @Column(length = 100, nullable = false, unique = true) @NonNull
     private String name;
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
-    @Column(name = "created_at", nullable = false) @NonNull
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     @Column(nullable = false)
     private boolean status;
