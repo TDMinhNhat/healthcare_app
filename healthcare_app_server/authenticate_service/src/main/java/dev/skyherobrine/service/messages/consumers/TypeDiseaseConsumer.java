@@ -3,6 +3,7 @@ package dev.skyherobrine.service.messages.consumers;
 import dev.skyherobrine.service.models.TypeDisease;
 import dev.skyherobrine.service.repositories.TypeDiseaseRepository;
 import dev.skyherobrine.service.utils.ObjectParser;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +32,8 @@ public class TypeDiseaseConsumer {
     public void deleteTypeDisease(String message) {
         try {
             log.info("Type Disease Consumer: listen the message delete type disease");
-            TypeDisease target = typeDiseaseRepository.findById(Long.parseLong(ObjectParser.convertJsonToObject(message,String.class)));
+            Long getId = ObjectParser.convertJsonToObject(message, Long.class);
+            TypeDisease target = typeDiseaseRepository.findById(getId).orElseThrow(() -> new EntityNotFoundException("The type disease id wasn't found!"));
             target.setStatus(false);
             typeDiseaseRepository.save(target);
             log.info("Type Disease Consumer: delete type disease successfully!");

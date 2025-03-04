@@ -12,7 +12,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/admin/api/v1/type-disease")
+@RequestMapping("/admin/api/v1/type_disease")
 @Slf4j
 public class TypeDiseaseController implements IManagement<String, Long> {
 
@@ -42,7 +42,7 @@ public class TypeDiseaseController implements IManagement<String, Long> {
 
     @PostMapping
     @Override
-    public ResponseEntity<Response> add(String name) {
+    public ResponseEntity<Response> add(@RequestBody String name) {
         try {
             log.info("Type Disease: Call the api insert type disease");
             TypeDisease typeDisease = new TypeDisease(name);
@@ -73,15 +73,15 @@ public class TypeDiseaseController implements IManagement<String, Long> {
         return null;
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     @Override
-    public ResponseEntity<Response> delete(Long aLong) {
+    public ResponseEntity<Response> delete(@PathVariable("id") Long id) {
         try {
             log.info("Type Disease: Call the api delete type disease");
-            TypeDisease typeDisease = typeDiseaseRepository.findById(aLong).orElse(null);
+            TypeDisease typeDisease = typeDiseaseRepository.findById(id).orElse(null);
             if(typeDisease != null) {
                 log.info("Type Disease: found the object");
-                kafkaTemplate.send("delete_type_disease", ObjectParser.convertObjectToJson(String.valueOf(aLong)));
+                kafkaTemplate.send("delete_type_disease", ObjectParser.convertObjectToJson(String.valueOf(id)));
 
                 typeDisease.setStatus(false);
                 TypeDisease result = typeDiseaseRepository.save(typeDisease);
