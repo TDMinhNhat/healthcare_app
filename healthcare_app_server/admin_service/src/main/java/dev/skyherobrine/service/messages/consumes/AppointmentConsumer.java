@@ -2,8 +2,9 @@ package dev.skyherobrine.service.messages.consumes;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.skyherobrine.service.models.mariadb.Appointment;
-import dev.skyherobrine.service.repositories.mariadb.AppointmentRepository;
+import dev.skyherobrine.service.enums.AppointmentStatus;
+import dev.skyherobrine.service.models.mongodb.Appointment;
+import dev.skyherobrine.service.repositories.mongodb.AppointmentRepository;
 import dev.skyherobrine.service.repositories.mariadb.DoctorRepository;
 import dev.skyherobrine.service.repositories.mariadb.PatientRepository;
 import dev.skyherobrine.service.repositories.mongodb.WorkScheduleRepository;
@@ -60,8 +61,10 @@ public class AppointmentConsumer {
             log.info("Appointment Consumer: receive update cancel appointment message from kafka");
             log.info("Appointment Consumer: {}", message);
             String getRoomId = ObjectParser.convertJsonToObject(message, String.class);
-            int result = ar.updateStatusByRoomId(getRoomId);
-            log.info("Appointment Consumer: update {} appointment", result);
+            Appointment appointment = ar.findAppointmentByRoomId(getRoomId).orElseThrow(() -> new EntityNotFoundException("The appointment wasn't found!"));
+            appointment.setStatus(AppointmentStatus.CANCELLED);
+            ar.save(appointment);
+            log.info("Appointment Consumer: update the status appointment successfully!");
         } catch (Exception e) {
             log.error("Appointment Consumer: Can't update the cancel appointment");
             log.error(e.getMessage());

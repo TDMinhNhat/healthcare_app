@@ -1,6 +1,5 @@
 package dev.skyherobrine.service.models.mongodb;
 
-import dev.skyherobrine.service.models.mariadb.Appointment;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;

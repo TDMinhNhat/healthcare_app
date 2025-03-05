@@ -1,6 +1,7 @@
 package dev.skyherobrine.service.models.mariadb;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import dev.skyherobrine.service.models.mongodb.Appointment;
 import jakarta.persistence.*;
 import lombok.*;
 

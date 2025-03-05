@@ -1,33 +1,33 @@
-package dev.skyherobrine.service.models.mariadb;
+package dev.skyherobrine.service.models.mongodb;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import dev.skyherobrine.service.enums.AppointmentStatus;
-import dev.skyherobrine.service.models.mongodb.WorkSchedule;
+import dev.skyherobrine.service.models.mariadb.Patient;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.time.LocalDateTime;
 
-@Entity @Table(name = "appointments")
+@Document(collection = "appointments")
 @Getter @Setter
-@NoArgsConstructor @RequiredArgsConstructor
+@NoArgsConstructor @RequiredArgsConstructor @AllArgsConstructor
 public class Appointment {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @MongoId
     private Long id;
-    @ManyToOne @JoinColumn(nullable = false) @NonNull
+    @Field(name = "patient_id")
     private Patient patient;
-    @Column(name = "work_schedule_id", nullable = false) @NonNull
+    @Field(name = "work_schedule_id") @NonNull
     private Long workScheduleId;
-    @Column(length = 500)
     private String note;
-    @Column(name = "room_id", length = 50, nullable = false)
+    @Field(name = "room_id")
     private String roomId;
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
-    @Column(name = "created_at", nullable = false)
+    @Field(name = "created_at")
     private LocalDateTime createdAt;
-    @Enumerated(EnumType.ORDINAL)
-    @Column(nullable = false)
     private AppointmentStatus status;
 
     public Appointment(@NonNull Patient patient, @NonNull Long workScheduleId, String note, String roomId) {
@@ -35,11 +35,7 @@ public class Appointment {
         this.workScheduleId = workScheduleId;
         this.note = note;
         this.roomId = roomId;
-    }
-
-    @PrePersist
-    public void onPersist() {
-        createdAt = LocalDateTime.now();
-        status = AppointmentStatus.WAITING;
+        this.status = AppointmentStatus.WAITING;
+        this.createdAt = LocalDateTime.now();
     }
 }

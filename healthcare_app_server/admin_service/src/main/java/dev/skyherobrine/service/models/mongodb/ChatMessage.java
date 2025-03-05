@@ -1,8 +1,5 @@
 package dev.skyherobrine.service.models.mongodb;
 
-import dev.skyherobrine.service.models.mariadb.Appointment;
-import dev.skyherobrine.service.models.mariadb.Doctor;
-import dev.skyherobrine.service.models.mariadb.Patient;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
