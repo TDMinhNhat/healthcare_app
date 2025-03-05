@@ -6,6 +6,7 @@ import dev.skyherobrine.service.models.mariadb.Response;
 import dev.skyherobrine.service.models.mongodb.WorkSchedule;
 import dev.skyherobrine.service.repositories.mariadb.DoctorRepository;
 import dev.skyherobrine.service.repositories.mongodb.WorkScheduleRepository;
+import dev.skyherobrine.service.services.WorkScheduleService;
 import dev.skyherobrine.service.utils.ObjectParser;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -25,38 +26,19 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 public class WorkScheduleController {
 
-    private final WorkScheduleRepository workScheduleRepository;
-    private final DoctorRepository doctorRepository;
-    private final KafkaTemplate<String,String> kafkaTemplate;
+    private final WorkScheduleService workScheduleService;
 
-    public WorkScheduleController(WorkScheduleRepository workScheduleRepository, DoctorRepository doctorRepository, KafkaTemplate<String, String> kafkaTemplate) {
-        this.workScheduleRepository = workScheduleRepository;
-        this.doctorRepository = doctorRepository;
-        this.kafkaTemplate = kafkaTemplate;
+    public WorkScheduleController(WorkScheduleService workScheduleService) {
+        this.workScheduleService = workScheduleService;
     }
 
     @PostMapping
     public ResponseEntity<Response> addWorkSchedule(@RequestBody WorkScheduleDTO workScheduleDTO) {
         try {
             log.info("Work Schedule: Call the api add work schedule of the doctor");
-            Doctor doctor = doctorRepository.findDoctorByUserId(workScheduleDTO.getDoctorId()).orElseThrow(() -> new EntityNotFoundException("The doctor wasn't found!"));
 
-            Long getMaxId = workScheduleRepository.findAll().stream().sorted(
-                    (a, b) -> Integer.parseInt(String.valueOf(b.getId())) - Integer.parseInt(String.valueOf(a.getId()))
-            ).map(WorkSchedule::getId).findFirst().orElse(1L);
+            WorkSchedule result = workScheduleService.addWorkSchedule(workScheduleDTO);
 
-            WorkSchedule workSchedule = new WorkSchedule(
-                    getMaxId,
-                    doctor,
-                    workScheduleDTO.getTypeDay(),
-                    LocalDateTime.parse(workScheduleDTO.getTimeStart(), DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")),
-                    LocalDateTime.parse(workScheduleDTO.getTimeEnd(), DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")),
-                    LocalDateTime.now(),
-                    LocalDateTime.now()
-            );
-            kafkaTemplate.send("insert_work_schedule", ObjectParser.convertObjectToJson(workSchedule));
-
-            WorkSchedule result = workScheduleRepository.save(workSchedule);
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "Add the work schedule successfully",
