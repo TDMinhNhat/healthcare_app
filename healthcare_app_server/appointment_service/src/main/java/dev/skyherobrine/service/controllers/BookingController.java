@@ -1,11 +1,13 @@
 package dev.skyherobrine.service.controllers;
 
 import dev.skyherobrine.service.dtos.AppointmentDTO;
+import dev.skyherobrine.service.enums.AppointmentStatus;
 import dev.skyherobrine.service.feigns.DoctorFeign;
 import dev.skyherobrine.service.models.mongodb.Appointment;
 import dev.skyherobrine.service.models.Response;
 import dev.skyherobrine.service.repositories.AppointmentRepository;
 import dev.skyherobrine.service.services.BookingService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,19 +59,14 @@ public class BookingController {
         try {
             log.info("Booking: Call the api cancel appointment");
             kafkaTemplate.send("cancel_appointment", roomId);
-            int result = ar.updateStatusByRoomId(roomId);
-            if (result == 0) {
-                return ResponseEntity.ok(new Response(
-                        HttpStatus.NOT_FOUND.value(),
-                        "The appointment not found",
-                        null
-                ));
-            }
+            Appointment appointment = ar.findAppointmentByRoomId(roomId).orElseThrow(() -> new EntityNotFoundException("The appointment wasn't found!"));
+            appointment.setStatus(AppointmentStatus.CANCELLED);
+            Appointment result = ar.save(appointment);
             log.info("Booking: The appointment was canceled");
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "Cancel appointment successfully",
-                    null
+                    result
             ));
         } catch (Exception e) {
             log.error("Booking: The api return an error");
