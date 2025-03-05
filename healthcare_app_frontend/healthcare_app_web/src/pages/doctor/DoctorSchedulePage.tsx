@@ -5,7 +5,6 @@ import {
   Paper,
   Button,
   Alert,
-  Checkbox,
   Table,
   TableBody,
   TableCell,
@@ -15,44 +14,38 @@ import {
   IconButton,
   Tooltip,
   Stack,
-  Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
-import { addDays, format } from "date-fns";
+import { addDays, format, parse } from "date-fns";
+import { vi } from "date-fns/locale"; // Import Vietnamese locale from date-fns
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import SaveIcon from "@mui/icons-material/Save";
-import EventAvailableIcon from "@mui/icons-material/EventAvailable";
-import ClearIcon from "@mui/icons-material/Clear";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useTranslation } from "react-i18next";
 import { formatDateToString, parseDateFromString } from "../../utils/dateUtils";
 
-// Tạo các khung giờ từ 7:00 sáng đến 9:00 tối với khoảng thời gian 30 phút
-const generateTimeSlots = () => {
-  const slots = [];
-  for (let hour = 7; hour <= 21; hour++) {
-    const hourString = hour.toString().padStart(2, "0");
-    slots.push(`${hourString}:00`);
-    if (hour < 21) {
-      slots.push(`${hourString}:30`);
-    }
-  }
-  return slots;
-};
-
-// Mảng chứa tất cả các khung giờ có thể trong ngày
-const timeSlots = generateTimeSlots();
-
-// Tạo mảng các ngày trong 7 ngày tới
+// Tạo mảng các ngày trong 14 ngày tới, trừ ngày hiện tại
 const generateDates = () => {
   const dates = [];
   const today = new Date();
 
-  for (let i = 0; i < 7; i++) {
+  // Bắt đầu từ ngày mai (i = 1)
+  for (let i = 1; i <= 14; i++) {
     const date = addDays(today, i);
     dates.push({
       date, // Đối tượng Date gốc
       formattedDate: formatDateToString(date), // Chuỗi ngày theo định dạng dd-MM-yyyy
-      displayDate: format(date, "EEE dd/MM"), // Chuỗi hiển thị ngắn gọn với thứ và ngày tháng
+      displayDate: format(date, "EEE dd/MM", { locale: vi }), // Hiển thị ngày với định dạng tiếng Việt
     });
   }
 
@@ -60,237 +53,156 @@ const generateDates = () => {
 };
 
 // Định nghĩa kiểu dữ liệu cho một khung giờ làm việc
-interface ScheduleSlot {
-  id: number; // ID khung giờ
-  date: string; // Ngày làm việc (định dạng dd-MM-yyyy)
+interface TimeSlot {
+  id: number;
   startTime: string; // Thời gian bắt đầu (định dạng HH:mm)
   endTime: string; // Thời gian kết thúc (định dạng HH:mm)
-  isAvailable: boolean; // Trạng thái khả dụng của khung giờ
+  isAvailable: boolean;
 }
 
 // Định nghĩa kiểu dữ liệu cho lịch làm việc của một ngày
 interface DateSchedule {
-  id: number; // ID lịch ngày
+  id: number;
   date: string; // Ngày làm việc (định dạng dd-MM-yyyy)
-  timeSlots: {
-    // Mảng các khung giờ trong ngày
-    id: number;
-    startTime: string;
-    endTime: string;
-    isAvailable: boolean;
-  }[];
+  timeSlots: TimeSlot[];
 }
+
+// Format time string to ensure 24h format display
+const formatTimeDisplay = (timeString: string): string => {
+  // Time is already in 24h format, just ensure consistent display
+  return timeString;
+};
 
 const DoctorSchedulePage = () => {
   const { t } = useTranslation();
-  // Lưu trữ lịch làm việc của bác sĩ
-  const [schedule, setSchedule] = useState<DateSchedule[]>([]);
+  const dates = generateDates();
 
-  // Lưu trữ các khung giờ đã chọn theo dạng Map: key là ngày, value là Set các thời gian bắt đầu
-  const [selectedSlots, setSelectedSlots] = useState<Map<string, Set<string>>>(
-    new Map()
+  // State cho ngày đã chọn
+  const [selectedDate, setSelectedDate] = useState<string>(
+    dates[0]?.formattedDate || ""
   );
 
-  const [errorMessage, setErrorMessage] = useState(""); // Thông báo lỗi
-  const [successMessage, setSuccessMessage] = useState(""); // Thông báo thành công
-  const dates = generateDates(); // Tạo mảng 7 ngày tới
+  // State cho các time slots đã thêm
+  const [schedule, setSchedule] = useState<DateSchedule[]>([]);
 
-  // Khởi tạo trạng thái ban đầu khi component được tải
-  useEffect(() => {
-    // Tạo Map rỗng để lưu trữ các slot đã chọn cho mỗi ngày
-    const initialSelectedSlots = new Map<string, Set<string>>();
+  // State cho dialog thêm time slot mới - Sử dụng định dạng 24h
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [startTime, setStartTime] = useState("08:00");
+  const [endTime, setEndTime] = useState("08:30");
 
-    dates.forEach(({ formattedDate }) => {
-      initialSelectedSlots.set(formattedDate, new Set<string>());
-    });
+  // State cho thông báo
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-    // Tải dữ liệu lịch trình từ state hiện tại
-    setSelectedSlots(loadScheduleData());
-  }, []);
-
-  // Tải dữ liệu lịch làm việc từ state schedule hiện tại
-  const loadScheduleData = () => {
-    // Tạo Map mới để lưu trữ dữ liệu đã tải
-    const loadedSlots = new Map<string, Set<string>>();
-
-    // Duyệt qua 7 ngày tới
-    dates.forEach(({ formattedDate }) => {
-      // Khởi tạo Set rỗng cho mỗi ngày
-      loadedSlots.set(formattedDate, new Set<string>());
-
-      // Tìm lịch làm việc cho ngày cụ thể trong state schedule
-      const dateSchedule = schedule.find((s) => s.date === formattedDate);
-      if (dateSchedule) {
-        // Thêm tất cả thời gian bắt đầu vào Set tương ứng
-        dateSchedule.timeSlots.forEach((slot) => {
-          loadedSlots.get(formattedDate)?.add(slot.startTime);
-        });
-      }
-    });
-
-    return loadedSlots;
+  // Lấy các time slots cho ngày đã chọn
+  const getTimeSlotsForSelectedDate = (): TimeSlot[] => {
+    const dateSchedule = schedule.find((s) => s.date === selectedDate);
+    return dateSchedule?.timeSlots || [];
   };
 
-  // Tính toán thời gian kết thúc (sau 30 phút) từ thời gian bắt đầu
-  const calculateEndTime = (startTime: string): string => {
-    const [hours, minutes] = startTime.split(":").map(Number);
-    let newMinutes = minutes + 30;
-    let newHours = hours;
+  // Mở dialog thêm time slot với giờ mặc định theo định dạng 24h
+  const handleOpenAddDialog = () => {
+    setStartTime("08:00");
+    setEndTime("08:30");
+    setOpenAddDialog(true);
+  };
 
-    // Xử lý khi phút vượt quá 59
-    if (newMinutes >= 60) {
-      newHours += 1;
-      newMinutes -= 60;
+  // Đóng dialog thêm time slot
+  const handleCloseAddDialog = () => {
+    setOpenAddDialog(false);
+  };
+
+  // Thêm time slot mới
+  const handleAddTimeSlot = () => {
+    // Validate time input
+    if (!startTime || !endTime) {
+      setErrorMessage(t("doctor.schedule.error_select_times"));
+      return;
     }
 
-    // Định dạng lại thời gian thành chuỗi HH:mm
-    return `${newHours.toString().padStart(2, "0")}:${newMinutes
-      .toString()
-      .padStart(2, "0")}`;
-  };
+    // Check if start time is before end time
+    if (startTime >= endTime) {
+      setErrorMessage(t("doctor.schedule.error_invalid_time_range"));
+      return;
+    }
 
-  // Xử lý việc chọn hoặc bỏ chọn một khung giờ cụ thể
-  const handleToggleSlot = (date: string, time: string) => {
-    setSelectedSlots((prevSelectedSlots) => {
-      // Tạo bản sao của Map hiện tại để không thay đổi trực tiếp state
-      const newSelectedSlots = new Map(prevSelectedSlots);
-      // Lấy Set các khung giờ của ngày cụ thể
-      const dateSlots = new Set(newSelectedSlots.get(date) || []);
+    setSchedule((prevSchedule) => {
+      const newSchedule = [...prevSchedule];
+      const dateIndex = newSchedule.findIndex((s) => s.date === selectedDate);
 
-      // Nếu khung giờ đã tồn tại, xóa nó; ngược lại thêm vào
-      if (dateSlots.has(time)) {
-        dateSlots.delete(time);
-      } else {
-        dateSlots.add(time);
-      }
+      // Create new time slot
+      const newTimeSlot: TimeSlot = {
+        id: Date.now(), // Use timestamp as temporary ID
+        startTime,
+        endTime,
+        isAvailable: true,
+      };
 
-      // Cập nhật lại Map với Set đã được thay đổi
-      newSelectedSlots.set(date, dateSlots);
-      return newSelectedSlots;
-    });
-  };
+      if (dateIndex >= 0) {
+        // Date exists, add new time slot
+        const existingSlots = newSchedule[dateIndex].timeSlots;
 
-  // Chọn tất cả các ngày cho một khung giờ cụ thể
-  const handleSelectAllForTime = (time: string) => {
-    setSelectedSlots((prevSelectedSlots) => {
-      const newSelectedSlots = new Map(prevSelectedSlots);
+        // Check for overlapping slots
+        const hasOverlap = existingSlots.some(
+          (slot) =>
+            (startTime >= slot.startTime && startTime < slot.endTime) ||
+            (endTime > slot.startTime && endTime <= slot.endTime) ||
+            (startTime <= slot.startTime && endTime >= slot.endTime)
+        );
 
-      // Duyệt qua tất cả các ngày
-      dates.forEach(({ formattedDate }) => {
-        const dateSlots = new Set(newSelectedSlots.get(formattedDate) || []);
-        // Thêm khung giờ cụ thể vào tất cả các ngày
-        dateSlots.add(time);
-        newSelectedSlots.set(formattedDate, dateSlots);
-      });
-
-      return newSelectedSlots;
-    });
-  };
-
-  // Xóa một khung giờ cụ thể khỏi tất cả các ngày
-  const handleClearAllForTime = (time: string) => {
-    setSelectedSlots((prevSelectedSlots) => {
-      const newSelectedSlots = new Map(prevSelectedSlots);
-
-      // Duyệt qua tất cả các ngày
-      dates.forEach(({ formattedDate }) => {
-        const dateSlots = new Set(newSelectedSlots.get(formattedDate) || []);
-        // Xóa khung giờ cụ thể khỏi tất cả các ngày
-        dateSlots.delete(time);
-        newSelectedSlots.set(formattedDate, dateSlots);
-      });
-
-      return newSelectedSlots;
-    });
-  };
-
-  // Chọn tất cả các khung giờ cho một ngày cụ thể
-  const handleSelectAllForDate = (date: string) => {
-    setSelectedSlots((prevSelectedSlots) => {
-      const newSelectedSlots = new Map(prevSelectedSlots);
-      // Tạo Set mới để chứa tất cả các khung giờ
-      const dateSlots = new Set<string>();
-
-      // Thêm tất cả các khung giờ vào Set (trừ 21:00 vì không thể bắt đầu khung giờ cuối)
-      timeSlots.forEach((time) => {
-        if (time !== "21:00") {
-          dateSlots.add(time);
+        if (hasOverlap) {
+          setErrorMessage(t("doctor.schedule.error_time_slot_overlap"));
+          return prevSchedule;
         }
-      });
 
-      // Cập nhật Map với tất cả khung giờ cho ngày cụ thể
-      newSelectedSlots.set(date, dateSlots);
-      return newSelectedSlots;
-    });
-  };
-
-  // Xóa tất cả các khung giờ cho một ngày cụ thể
-  const handleClearAllForDate = (date: string) => {
-    setSelectedSlots((prevSelectedSlots) => {
-      const newSelectedSlots = new Map(prevSelectedSlots);
-      // Đặt Set rỗng cho ngày cụ thể
-      newSelectedSlots.set(date, new Set<string>());
-      return newSelectedSlots;
-    });
-  };
-
-  // Lưu lịch làm việc vào state schedule
-  const handleSaveSchedule = () => {
-    // Tạo mảng lịch làm việc mới từ các khung giờ đã chọn
-    const newSchedule: DateSchedule[] = [];
-    let nextId = 1; // ID tăng dần cho mỗi khung giờ
-
-    // Duyệt qua Map các khung giờ đã chọn
-    selectedSlots.forEach((timeSet, date) => {
-      // Chỉ xử lý các ngày có ít nhất một khung giờ
-      if (timeSet.size > 0) {
-        // Tạo mảng các đối tượng khung giờ
-        const timeSlotsArray = Array.from(timeSet).map((startTime) => ({
-          id: nextId++,
-          startTime,
-          endTime: calculateEndTime(startTime), // Tính thời gian kết thúc
-          isAvailable: true, // Mặc định khung giờ khả dụng
-        }));
-
-        // Thêm lịch làm việc cho ngày này vào mảng kết quả
+        newSchedule[dateIndex].timeSlots = [...existingSlots, newTimeSlot].sort(
+          (a, b) => a.startTime.localeCompare(b.startTime)
+        );
+      } else {
+        // Create new date entry
         newSchedule.push({
-          id: newSchedule.length + 1,
-          date,
-          timeSlots: timeSlotsArray,
+          id: Date.now(),
+          date: selectedDate,
+          timeSlots: [newTimeSlot],
         });
       }
-    });
 
-    // Cập nhật state schedule
-    setSchedule(newSchedule);
-    // Hiển thị thông báo thành công
+      setErrorMessage("");
+      setOpenAddDialog(false);
+      setSuccessMessage(t("doctor.schedule.success_added"));
+      setTimeout(() => setSuccessMessage(""), 3000);
+      return newSchedule;
+    });
+  };
+
+  // Xóa time slot
+  const handleDeleteTimeSlot = (slotId: number) => {
+    setSchedule((prevSchedule) => {
+      const newSchedule = [...prevSchedule];
+      const dateIndex = newSchedule.findIndex((s) => s.date === selectedDate);
+
+      if (dateIndex >= 0) {
+        // Filter out the deleted time slot
+        newSchedule[dateIndex].timeSlots = newSchedule[
+          dateIndex
+        ].timeSlots.filter((slot) => slot.id !== slotId);
+
+        // If no time slots left for this date, remove the date entry
+        if (newSchedule[dateIndex].timeSlots.length === 0) {
+          newSchedule.splice(dateIndex, 1);
+        }
+      }
+
+      return newSchedule;
+    });
+  };
+
+  // Lưu lịch làm việc
+  const handleSaveSchedule = () => {
+    // Tại đây có thể thêm code để lưu lịch làm việc vào database
     setSuccessMessage(t("doctor.schedule.success_saved"));
-    // Tự động ẩn thông báo sau 3 giây
     setTimeout(() => setSuccessMessage(""), 3000);
   };
-
-  // Kiểm tra xem một khung giờ cụ thể có được chọn hay không
-  const isSlotSelected = (date: string, time: string) => {
-    return selectedSlots.get(date)?.has(time) || false;
-  };
-
-  // Nhóm các khung giờ thành các hàng để hiển thị UI đẹp hơn
-  const groupTimeSlots = (slots: string[]) => {
-    // Loại bỏ khung giờ 21:00 vì không thể bắt đầu slot cuối
-    const filteredSlots = slots.filter((time) => time !== "21:00");
-    const rows = [];
-    const itemsPerRow = 6; // Số khung giờ trên mỗi hàng
-
-    // Chia mảng thành các nhóm nhỏ
-    for (let i = 0; i < filteredSlots.length; i += itemsPerRow) {
-      rows.push(filteredSlots.slice(i, i + itemsPerRow));
-    }
-
-    return rows;
-  };
-
-  // Mảng các hàng khung giờ đã được nhóm
-  const timeSlotRows = groupTimeSlots(timeSlots);
 
   return (
     <Box sx={{ p: 3 }}>
@@ -318,137 +230,86 @@ const DoctorSchedulePage = () => {
         </Alert>
       )}
 
-      {/* Hướng dẫn sử dụng */}
-      <Box sx={{ mb: 2 }}>
-        <Alert severity="info">{t("doctor.schedule.matrix_info")}</Alert>
-      </Box>
-
-      {/* Hiển thị từng ngày và các khung giờ tương ứng */}
-      {dates.map((dateInfo, dateIndex) => (
-        <Paper key={dateInfo.formattedDate} sx={{ mb: 3, p: 2 }}>
-          {/* Tiêu đề ngày và các nút điều khiển */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 2,
-            }}
+      {/* Dropdown chọn ngày */}
+      <Paper sx={{ mb: 3, p: 2 }}>
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel id="date-select-label">
+            {t("doctor.schedule.select_date")}
+          </InputLabel>
+          <Select
+            labelId="date-select-label"
+            id="date-select"
+            value={selectedDate}
+            label={t("doctor.schedule.select_date")}
+            onChange={(e) => setSelectedDate(e.target.value as string)}
           >
-            <Typography
-              variant="h6"
-              component="h2"
-              sx={{ display: "flex", alignItems: "center" }}
-            >
-              <CalendarMonthIcon sx={{ mr: 1 }} />
-              {dateInfo.displayDate}
-              {/* Hiển thị ngày dạng ngắn */}
-              <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                ({format(dateInfo.date, "EEEE")}){/* Hiển thị tên thứ đầy đủ */}
-              </Typography>
-            </Typography>
+            {dates.map((dateInfo) => (
+              <MenuItem
+                key={dateInfo.formattedDate}
+                value={dateInfo.formattedDate}
+              >
+                {dateInfo.displayDate} (
+                {format(dateInfo.date, "EEEE", { locale: vi })})
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
-            {/* Nút chọn tất cả và xóa tất cả cho ngày này */}
-            <Stack direction="row" spacing={1}>
-              <Tooltip title={t("doctor.schedule.select_all_for_day")}>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  color="primary"
-                  startIcon={<EventAvailableIcon />}
-                  onClick={() => handleSelectAllForDate(dateInfo.formattedDate)}
-                >
-                  {t("doctor.schedule.select_all")}
-                </Button>
-              </Tooltip>
-              <Tooltip title={t("doctor.schedule.clear_all_for_day")}>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  color="error"
-                  startIcon={<ClearIcon />}
-                  onClick={() => handleClearAllForDate(dateInfo.formattedDate)}
-                >
-                  {t("doctor.schedule.clear_all")}
-                </Button>
-              </Tooltip>
-            </Stack>
-          </Box>
+        {/* Nút thêm slot thời gian mới */}
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddCircleIcon />}
+          onClick={handleOpenAddDialog}
+        >
+          {t("doctor.schedule.add_time_slot")}
+        </Button>
 
-          {/* Hiển thị các hàng khung giờ cho ngày này */}
-          {timeSlotRows.map((row, rowIndex) => (
-            <Grid
-              container
-              spacing={1}
-              key={`${dateInfo.formattedDate}-row-${rowIndex}`}
-              sx={{ mb: 2 }}
-            >
-              {/* Hiển thị từng khung giờ trong một hàng */}
-              {row.map((time) => {
-                const isSelected = isSlotSelected(dateInfo.formattedDate, time);
-                const endTime = calculateEndTime(time);
-                return (
-                  <Grid
-                    item
-                    xs={6}
-                    sm={4}
-                    md={2}
-                    key={`${dateInfo.formattedDate}-${time}`}
-                  >
-                    {/* Ô hiển thị một khung giờ */}
-                    <Paper
-                      elevation={isSelected ? 2 : 0}
-                      sx={{
-                        border: isSelected ? "2px solid" : "1px solid",
-                        borderColor: isSelected ? "primary.main" : "divider",
-                        bgcolor: isSelected ? "primary.50" : "background.paper",
-                        p: 1,
-                        textAlign: "center",
-                        cursor: "pointer",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        height: "100%",
-                        transition: "all 0.2s",
-                        "&:hover": {
-                          bgcolor: isSelected ? "primary.100" : "grey.100",
-                          transform: "scale(1.02)",
-                        },
-                      }}
-                      onClick={() =>
-                        handleToggleSlot(dateInfo.formattedDate, time)
-                      }
-                    >
-                      {/* Hiển thị thời gian bắt đầu và kết thúc */}
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          mb: 0.5,
-                        }}
-                      >
-                        <AccessTimeIcon sx={{ fontSize: 16, mr: 0.5 }} />
-                        <Typography variant="body2" fontWeight="medium">
-                          {time} - {endTime}
-                        </Typography>
-                      </Box>
-                      {/* Checkbox thể hiện trạng thái đã chọn */}
-                      <Checkbox
-                        checked={isSelected}
-                        size="small"
-                        color="primary"
-                        sx={{ p: 0 }}
-                      />
-                    </Paper>
-                  </Grid>
-                );
-              })}
-            </Grid>
-          ))}
-        </Paper>
-      ))}
+        {/* Hiển thị các time slot đã thêm */}
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="h6" gutterBottom>
+            {t("doctor.schedule.time_slots") || "Khung Giờ"}
+          </Typography>
+
+          {getTimeSlotsForSelectedDate().length > 0 ? (
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>{t("doctor.schedule.start_time")}</TableCell>
+                    <TableCell>{t("doctor.schedule.end_time")}</TableCell>
+                    <TableCell align="right">
+                      {t("common.actions") || "Thao Tác"}
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {getTimeSlotsForSelectedDate().map((slot) => (
+                    <TableRow key={slot.id}>
+                      <TableCell>{formatTimeDisplay(slot.startTime)}</TableCell>
+                      <TableCell>{formatTimeDisplay(slot.endTime)}</TableCell>
+                      <TableCell align="right">
+                        <IconButton
+                          color="error"
+                          onClick={() => handleDeleteTimeSlot(slot.id)}
+                          size="small"
+                          aria-label={t("common.delete")}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Alert severity="info" sx={{ mt: 1 }}>
+              {t("doctor.schedule.no_time_slots")}
+            </Alert>
+          )}
+        </Box>
+      </Paper>
 
       {/* Nút lưu lịch làm việc */}
       <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
@@ -462,6 +323,54 @@ const DoctorSchedulePage = () => {
           {t("doctor.schedule.save_schedule")}
         </Button>
       </Box>
+
+      {/* Dialog thêm time slot mới với input sử dụng định dạng 24h */}
+      <Dialog open={openAddDialog} onClose={handleCloseAddDialog}>
+        <DialogTitle>{t("doctor.schedule.add_time_slot")}</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1, minWidth: "300px" }}>
+            <TextField
+              label={t("doctor.schedule.start_time")}
+              type="time"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              // Ensure 5 min steps and force 24h format
+              inputProps={{
+                step: 300,
+                form: {
+                  autocomplete: "off", // Disable browser autocomplete which might suggest AM/PM
+                },
+              }}
+              fullWidth
+            />
+            <TextField
+              label={t("doctor.schedule.end_time")}
+              type="time"
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              // Ensure 5 min steps and force 24h format
+              inputProps={{
+                step: 300,
+                form: {
+                  autocomplete: "off", // Disable browser autocomplete which might suggest AM/PM
+                },
+              }}
+              fullWidth
+            />
+            <Typography variant="caption" color="textSecondary">
+              Thời gian sử dụng định dạng 24 giờ (00:00 - 23:59)
+            </Typography>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseAddDialog}>{t("common.cancel")}</Button>
+          <Button onClick={handleAddTimeSlot} variant="contained">
+            {t("common.save")}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

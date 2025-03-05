@@ -336,6 +336,7 @@
       "click_add": "Nhấn vào nút 'Thêm Khung Giờ' để thêm thời gian làm việc",
       "add": "Thêm",
       "save": "Lưu",
+      "time_slots": "Khung Giờ",
       "save_schedule": "Lưu Lịch Làm Việc",
       "success_added": "Thêm khung giờ làm việc thành công",
       "success_saved": "Lưu lịch làm việc thành công",
@@ -447,6 +448,27 @@
     "continue": "Tiếp Tục",
     "saving": "Đang lưu...",
     "yes": "Có",
-    "no": "Không"
+    "no": "Không",
+    "actions": "Thao Tác"
+  },
+  "profile": {
+    "editPersonalInfo": "Chỉnh Sửa Thông Tin Cá Nhân",
+    "firstName": "Tên",
+    "lastName": "Họ",
+    "email": "Địa Chỉ Email",
+    "phone": "Số Điện Thoại",
+    "dob": "Ngày Sinh",
+    "sex": "Giới Tính",
+    "male": "Nam",
+    "female": "Nữ",
+    "address": "Địa Chỉ",
+    "address.number": "Số Nhà",
+    "address.street": "Đường",
+    "address.ward": "Phường/Xã",
+    "address.district": "Quận/Huyện",
+    "address.city": "Thành Phố",
+    "address.country": "Quốc Gia",
+    "saveSuccess": "Lưu thông tin cá nhân thành công!",
+    "saveError": "Có lỗi xảy ra khi lưu thông tin. Vui lòng thử lại sau."
   }
 }

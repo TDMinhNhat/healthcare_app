@@ -422,9 +422,6 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
                             "Cancel Appointment"
                           )}
                         </Button>
-                        <Button size="small" color="primary" sx={{ ml: 1 }}>
-                          {t("patient.appointments.reschedule", "Reschedule")}
-                        </Button>
                       </>
                     )}
                   </Box>
@@ -456,9 +453,6 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
           appointments.find((a) => a.appointment.id === selectedAppointment)
             ?.appointment.status === "IN_PROGRESS") && (
           <>
-            <MenuItem onClick={handleMenuClose}>
-              {t("patient.appointments.reschedule", "Reschedule")}
-            </MenuItem>
             <MenuItem onClick={handleMenuClose}>
               {t(
                 "patient.appointments.cancel_appointment",

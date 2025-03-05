@@ -1,29 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
 import {
   Box,
   Typography,
   Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-  Chip,
-  CircularProgress,
   Grid,
   Card,
   CardContent,
-  Divider,
-  IconButton,
+  Chip,
+  CircularProgress,
+  Button,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EventIcon from "@mui/icons-material/Event";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import { format } from "date-fns";
+import MedicalRecordModal from "../../components/medical/MedicalRecordModal";
 
 // Mock data for medical records
 const MOCK_MEDICAL_RECORDS = [
@@ -55,9 +47,14 @@ const MOCK_MEDICAL_RECORDS = [
 
 const PatientMedicalRecordsListPage: React.FC = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [medicalRecords, setMedicalRecords] = useState<any[]>([]);
+
+  // Add state for modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<
+    number | null
+  >(null);
 
   useEffect(() => {
     // Simulate API call
@@ -77,8 +74,16 @@ const PatientMedicalRecordsListPage: React.FC = () => {
     fetchMedicalRecords();
   }, []);
 
+  // Update handler to open modal instead of navigating
   const handleViewRecord = (recordId: number) => {
-    navigate(`/patient/medical-records/${recordId}`);
+    setSelectedAppointmentId(recordId);
+    setIsModalOpen(true);
+  };
+
+  // Add handler to close modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedAppointmentId(null);
   };
 
   // Format date from string like "20-07-2023-09-30-00"
@@ -188,6 +193,13 @@ const PatientMedicalRecordsListPage: React.FC = () => {
           ))}
         </Grid>
       )}
+
+      {/* Medical Record Modal */}
+      <MedicalRecordModal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        appointmentId={selectedAppointmentId}
+      />
     </Box>
   );
 };

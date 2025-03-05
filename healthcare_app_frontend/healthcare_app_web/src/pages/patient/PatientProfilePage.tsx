@@ -1,9 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Container, Grid, Box, Typography, Button, Paper } from "@mui/material";
+import {
+  Container,
+  Grid,
+  Box,
+  Typography,
+  Button,
+  Paper,
+  IconButton,
+} from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
 
 import { PersonalInfoSection } from "../../components/profile/PersonalInfoSection";
 import { PatientMedicalRecordsSection } from "../../components/patient/PatientMedicalRecordsSection";
 import { PatientAppointmentsSection } from "../../components/patient/PatientAppointmentsSection";
+import { EditProfileModal } from "../../components/profile/EditProfileModal";
+import AvatarUploadModal from "../../components/profile/AvatarUploadModal";
 import { Appointment } from "../../types/appointment";
 import { useTranslation } from "react-i18next";
 import { Patient } from "../../types";
@@ -102,6 +113,8 @@ const PatientProfilePage: React.FC = () => {
   const { t } = useTranslation();
   const [patientData, setPatientData] = useState(mockPatientData);
   const [loading, setLoading] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
 
   useEffect(() => {
     // Here you would fetch the patient data from the API
@@ -112,6 +125,35 @@ const PatientProfilePage: React.FC = () => {
     }, 500);
   }, []);
 
+  const handleOpenEditModal = () => {
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+  };
+
+  const handleOpenAvatarModal = () => {
+    setIsAvatarModalOpen(true);
+  };
+
+  const handleCloseAvatarModal = () => {
+    setIsAvatarModalOpen(false);
+  };
+
+  const handleSaveProfile = (updatedData: any) => {
+    // Here you would make an API call to update the profile
+    setPatientData({ ...patientData, ...updatedData });
+    // For demonstration purposes, we're just updating the local state
+    console.log("Saving updated profile data:", updatedData);
+  };
+
+  const handleSaveAvatar = (newAvatar: string) => {
+    // Here you would make an API call to update the avatar
+    setPatientData({ ...patientData, avatar: newAvatar });
+    console.log("Saving updated avatar:", newAvatar);
+  };
+
   if (loading) {
     return <div>{t("common.loading")}</div>;
   }
@@ -120,22 +162,66 @@ const PatientProfilePage: React.FC = () => {
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
-          <PersonalInfoSection
-            firstName={patientData.firstName}
-            lastName={patientData.lastName}
-            email={patientData.email}
-            phone={patientData.phone}
-            dob={patientData.dob}
-            sex={patientData.sex}
-            address={patientData.address}
-            avatar={patientData.avatar}
-          />
+          <Box sx={{ position: "relative" }}>
+            <PersonalInfoSection
+              firstName={patientData.firstName}
+              lastName={patientData.lastName}
+              email={patientData.email}
+              phone={patientData.phone}
+              dob={patientData.dob}
+              sex={patientData.sex}
+              address={patientData.address}
+              avatar={patientData.avatar}
+              onEditAvatar={handleOpenAvatarModal}
+            />
+            <IconButton
+              color="primary"
+              onClick={handleOpenEditModal}
+              sx={{
+                position: "absolute",
+                top: "12px",
+                right: "12px",
+                bgcolor: "background.paper",
+                "&:hover": {
+                  bgcolor: "action.hover",
+                },
+                boxShadow: 1,
+                zIndex: 1,
+              }}
+              aria-label={t("common.edit")}
+              size="small"
+            >
+              <EditIcon />
+            </IconButton>
+          </Box>
           <PatientAppointmentsSection appointments={patientData.appointments} />
         </Grid>
         <Grid item xs={12} md={6}>
           <PatientMedicalRecordsSection records={patientData.medicalRecords} />
         </Grid>
       </Grid>
+
+      <EditProfileModal
+        open={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        onSave={handleSaveProfile}
+        userData={{
+          firstName: patientData.firstName,
+          lastName: patientData.lastName,
+          email: patientData.email,
+          phone: patientData.phone,
+          dob: patientData.dob,
+          sex: patientData.sex,
+          address: patientData.address,
+        }}
+      />
+
+      <AvatarUploadModal
+        open={isAvatarModalOpen}
+        currentAvatar={patientData.avatar}
+        onClose={handleCloseAvatarModal}
+        onSave={handleSaveAvatar}
+      />
     </Container>
   );
 };
