@@ -3,7 +3,7 @@ package dev.skyherobrine.service.services;
 import dev.skyherobrine.service.dtos.AppointmentDTO;
 import dev.skyherobrine.service.feigns.DoctorFeign;
 import dev.skyherobrine.service.models.mongodb.Appointment;
-import dev.skyherobrine.service.repositories.AppointmentRepository;
+import dev.skyherobrine.service.repositories.mongodb.AppointmentRepository;
 import dev.skyherobrine.service.utils.ObjectParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;

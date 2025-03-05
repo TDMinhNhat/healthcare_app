@@ -1,7 +1,7 @@
 package dev.skyherobrine.service.controllers;
 
 import dev.skyherobrine.service.models.Response;
-import dev.skyherobrine.service.repositories.DrugRepository;
+import dev.skyherobrine.service.repositories.mariadb.DrugRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

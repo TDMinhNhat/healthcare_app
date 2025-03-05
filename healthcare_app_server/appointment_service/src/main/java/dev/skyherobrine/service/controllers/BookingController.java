@@ -5,7 +5,7 @@ import dev.skyherobrine.service.enums.AppointmentStatus;
 import dev.skyherobrine.service.feigns.DoctorFeign;
 import dev.skyherobrine.service.models.mongodb.Appointment;
 import dev.skyherobrine.service.models.Response;
-import dev.skyherobrine.service.repositories.AppointmentRepository;
+import dev.skyherobrine.service.repositories.mongodb.AppointmentRepository;
 import dev.skyherobrine.service.services.BookingService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;

@@ -3,12 +3,12 @@ package dev.skyherobrine.service.services;
 import dev.skyherobrine.service.dtos.MedicalRecordDTO;
 import dev.skyherobrine.service.keys.MedicalRecordDrugKey;
 import dev.skyherobrine.service.models.mongodb.Appointment;
-import dev.skyherobrine.service.models.mariadb.MedicalRecord;
-import dev.skyherobrine.service.models.mariadb.MedicalRecordDrug;
-import dev.skyherobrine.service.repositories.AppointmentRepository;
-import dev.skyherobrine.service.repositories.DrugRepository;
-import dev.skyherobrine.service.repositories.MedicalRecordDrugRepository;
-import dev.skyherobrine.service.repositories.MedicalRecordRepository;
+import dev.skyherobrine.service.models.mongodb.MedicalRecord;
+import dev.skyherobrine.service.models.mongodb.MedicalRecordDrug;
+import dev.skyherobrine.service.repositories.mongodb.AppointmentRepository;
+import dev.skyherobrine.service.repositories.mariadb.DrugRepository;
+import dev.skyherobrine.service.repositories.mongodb.MedicalRecordDrugRepository;
+import dev.skyherobrine.service.repositories.mongodb.MedicalRecordRepository;
 import dev.skyherobrine.service.utils.ObjectParser;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +44,11 @@ public class MedicalRecordService {
         kafkaTemplate.send("insert_medical_record", ObjectParser.convertObjectToJson(medicalRecordDTO));
 
         Appointment appointment = appointmentRepository.findAppointmentByRoomId(medicalRecordDTO.getRoomId()).orElseThrow(() -> new EntityNotFoundException("Appointment not found!"));
-        MedicalRecord medicalRecord = new MedicalRecord(appointment, medicalRecordDTO.getDiagnosisDisease(), LocalDate.parse(medicalRecordDTO.getReExaminationDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        MedicalRecord medicalRecord = new MedicalRecord(
+                appointment,
+                medicalRecordDTO.getDiagnosisDisease(),
+                LocalDate.parse(medicalRecordDTO.getReExaminationDate(),
+                        DateTimeFormatter.ofPattern("dd-MM-yyyy")));
         MedicalRecord target = medicalRecordRepository.save(medicalRecord);
         log.info("Medical Record Service: medical record saved into database");
 

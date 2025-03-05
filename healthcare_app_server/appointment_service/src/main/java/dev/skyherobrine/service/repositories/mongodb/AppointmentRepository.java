@@ -1,4 +1,4 @@
-package dev.skyherobrine.service.repositories;
+package dev.skyherobrine.service.repositories.mongodb;
 
 import dev.skyherobrine.service.enums.AppointmentStatus;
 import dev.skyherobrine.service.models.mongodb.Appointment;

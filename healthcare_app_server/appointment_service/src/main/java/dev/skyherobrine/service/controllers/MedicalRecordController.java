@@ -1,7 +1,7 @@
 package dev.skyherobrine.service.controllers;
 
 import dev.skyherobrine.service.dtos.MedicalRecordDTO;
-import dev.skyherobrine.service.models.mariadb.MedicalRecord;
+import dev.skyherobrine.service.models.mongodb.MedicalRecord;
 import dev.skyherobrine.service.models.Response;
 import dev.skyherobrine.service.services.MedicalRecordService;
 import lombok.extern.slf4j.Slf4j;
