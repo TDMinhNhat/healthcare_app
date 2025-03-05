@@ -1,6 +1,8 @@
 package dev.skyherobrine.service.controllers;
 
 import dev.skyherobrine.service.dtos.PatientRegisterDTO;
+import dev.skyherobrine.service.models.mariadb.Doctor;
+import dev.skyherobrine.service.models.mariadb.Patient;
 import dev.skyherobrine.service.models.mariadb.Response;
 import dev.skyherobrine.service.models.mariadb.User;
 import dev.skyherobrine.service.services.AuthenticateService;
@@ -8,6 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("authenticate/api/v1/authenticate")
@@ -27,13 +32,15 @@ public class AuthenticateController {
     ) {
         try {
             log.info("Authenticate: Call the api check login");
+            Map<String,Object> result = new HashMap<>();
             User user = as.checkLogin(email, password);
-
             if(user != null) {
+                result.put("user", user);
+                result.put("role", user instanceof Patient ? "patient" : (user instanceof Doctor ? "doctor" : "admin"));
                 return ResponseEntity.ok(new Response(
                         HttpStatus.OK.value(),
                         "Login account successfully",
-                        user
+                        result
                 ));
             }
 
