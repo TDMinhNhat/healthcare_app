@@ -1,36 +1,36 @@
-package dev.skyherobrine.service.models.mariadb;
+package dev.skyherobrine.service.models.mongodb;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import dev.skyherobrine.service.models.mongodb.Appointment;
-import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity @Table(name = "medical_records")
+@Document(collection = "medical_records")
 @Getter @Setter
-@NoArgsConstructor @RequiredArgsConstructor
+@NoArgsConstructor @RequiredArgsConstructor @AllArgsConstructor
 public class MedicalRecord {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @MongoId
     private Long id;
 
-    @OneToOne @JoinColumn(nullable = false) @NonNull
+    @NonNull
     private Appointment appointment;
 
-    @Column(name = "diagnosis_disease", length = 300) @NonNull
+    @Field(name = "diagnosis_disease") @NonNull
     private String diagnosisDisease;
 
-    @Column(length = 500)
     private String note;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
-    @Column(name = "re_examination_date", nullable = false) @NonNull
+    @Field(name = "re_examination_date") @NonNull
     private LocalDate reExaminationDate;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
-    @Column(name = "created_at", nullable = false)
+    @Field(name = "created_at")
     private LocalDateTime createdAt;
 
     public MedicalRecord(@NonNull Appointment appointment, @NonNull String diagnosisDisease, String note, @NonNull LocalDate reExaminationDate) {
@@ -38,10 +38,6 @@ public class MedicalRecord {
         this.diagnosisDisease = diagnosisDisease;
         this.note = note;
         this.reExaminationDate = reExaminationDate;
-    }
-
-    @PrePersist
-    public void prePersist() {
-        createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
 }
