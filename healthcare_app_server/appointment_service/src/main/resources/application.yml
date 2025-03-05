@@ -5,6 +5,10 @@ spring:
     jpa:
       repositories:
         enabled: true
+    mongodb:
+      host: localhost
+      port: 27017
+      database: appointment_service
   datasource:
     url: jdbc:mariadb://localhost:3306/appointment_service
     username: root

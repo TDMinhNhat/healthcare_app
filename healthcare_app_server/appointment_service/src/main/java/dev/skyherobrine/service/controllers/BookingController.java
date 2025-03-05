@@ -2,7 +2,7 @@ package dev.skyherobrine.service.controllers;
 
 import dev.skyherobrine.service.dtos.AppointmentDTO;
 import dev.skyherobrine.service.feigns.DoctorFeign;
-import dev.skyherobrine.service.models.Appointment;
+import dev.skyherobrine.service.models.mongodb.Appointment;
 import dev.skyherobrine.service.models.Response;
 import dev.skyherobrine.service.repositories.AppointmentRepository;
 import dev.skyherobrine.service.services.BookingService;
@@ -11,11 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/appointment/api/v1/booking")

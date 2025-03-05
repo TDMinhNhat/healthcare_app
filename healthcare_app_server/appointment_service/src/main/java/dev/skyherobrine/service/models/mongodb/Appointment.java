@@ -1,43 +1,39 @@
-package dev.skyherobrine.service.models;
+package dev.skyherobrine.service.models.mongodb;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import dev.skyherobrine.service.enums.AppointmentStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import jakarta.persistence.*;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
-@Entity @Table(name = "appointments")
+@Document(collection = "appointments")
 @Getter @Setter
-@NoArgsConstructor @RequiredArgsConstructor
+@NoArgsConstructor @RequiredArgsConstructor @AllArgsConstructor
 public class Appointment {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @MongoId
     private Long id;
-    @Column(name = "patient_id", length = 50, nullable = false) @NonNull
+    @Field(name = "patient_id") @NonNull
     private String patient;
-    @Column(name = "work_schedule_id", nullable = false) @NonNull
+    @Field(name = "work_schedule_id") @NonNull
     private Long workSchedule;
-    @Column(length = 500)
     private String note;
-    @Column(name = "room_id", nullable = false)
+    @Field(name = "room_id")
     private String roomId;
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
-    @Column(name = "created_at", nullable = false)
+    @Field(name = "created_at", targetType = FieldType.DATE_TIME)
     private LocalDateTime createdAt;
-    @Enumerated(EnumType.ORDINAL)
-    @Column(nullable = false)
     private AppointmentStatus status;
-
-    @PrePersist
-    public void onPersist() {
-        createdAt = LocalDateTime.now();
-    }
 
     public Appointment(@NonNull String patient, @NonNull Long workSchedule, String note) {
         this.patient = patient;
         this.workSchedule = workSchedule;
         this.note = note;
         this.status = AppointmentStatus.WAITING;
+        createdAt = LocalDateTime.now();
     }
 }

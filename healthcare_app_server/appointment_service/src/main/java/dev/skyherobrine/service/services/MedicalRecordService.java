@@ -2,9 +2,9 @@ package dev.skyherobrine.service.services;
 
 import dev.skyherobrine.service.dtos.MedicalRecordDTO;
 import dev.skyherobrine.service.keys.MedicalRecordDrugKey;
-import dev.skyherobrine.service.models.Appointment;
-import dev.skyherobrine.service.models.MedicalRecord;
-import dev.skyherobrine.service.models.MedicalRecordDrug;
+import dev.skyherobrine.service.models.mongodb.Appointment;
+import dev.skyherobrine.service.models.mariadb.MedicalRecord;
+import dev.skyherobrine.service.models.mariadb.MedicalRecordDrug;
 import dev.skyherobrine.service.repositories.AppointmentRepository;
 import dev.skyherobrine.service.repositories.DrugRepository;
 import dev.skyherobrine.service.repositories.MedicalRecordDrugRepository;

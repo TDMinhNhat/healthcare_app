@@ -2,22 +2,18 @@ package dev.skyherobrine.service.services;
 
 import dev.skyherobrine.service.dtos.AppointmentDTO;
 import dev.skyherobrine.service.feigns.DoctorFeign;
-import dev.skyherobrine.service.models.Appointment;
-import dev.skyherobrine.service.models.Response;
+import dev.skyherobrine.service.models.mongodb.Appointment;
 import dev.skyherobrine.service.repositories.AppointmentRepository;
 import dev.skyherobrine.service.utils.ObjectParser;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Stream;
 
 @Service
 @Slf4j

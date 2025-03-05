@@ -1,6 +1,6 @@
 package dev.skyherobrine.service.repositories;
 
-import dev.skyherobrine.service.models.Drug;
+import dev.skyherobrine.service.models.mariadb.Drug;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;

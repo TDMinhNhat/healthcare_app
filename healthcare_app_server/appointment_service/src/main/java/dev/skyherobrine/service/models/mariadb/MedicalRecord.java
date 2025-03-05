@@ -1,8 +1,8 @@
-package dev.skyherobrine.service.models;
+package dev.skyherobrine.service.models.mariadb;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import dev.skyherobrine.service.models.Appointment;
+import dev.skyherobrine.service.models.mongodb.Appointment;
 import lombok.*;
 
 import java.time.LocalDate;
