@@ -17,8 +17,6 @@ public class WorkSchedule {
     private Long id;
     @NonNull
     private Doctor doctor;
-    @NonNull
-    private TypeDay typeDay;
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss") @NonNull
     private LocalDateTime start;
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss") @NonNull

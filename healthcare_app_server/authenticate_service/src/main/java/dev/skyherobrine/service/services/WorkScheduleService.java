@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -40,11 +41,10 @@ public class WorkScheduleService {
         WorkSchedule workSchedule = new WorkSchedule(
                 getMaxId + 1,
                 doctor,
-                workScheduleDTO.getTypeDay(),
-                LocalDateTime.parse(workScheduleDTO.getTimeStart(), DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")),
-                LocalDateTime.parse(workScheduleDTO.getTimeEnd(), DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")),
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                ,
+
+                Instant.now(),
+                Instant.now()
         );
         log.info("Work Schedule Service: send the add work schedule to kafka");
         kafkaTemplate.send("insert_work_schedule", ObjectParser.convertObjectToJson(workSchedule));

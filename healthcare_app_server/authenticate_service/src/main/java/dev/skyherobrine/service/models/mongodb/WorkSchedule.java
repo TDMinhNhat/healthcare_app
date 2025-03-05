@@ -1,13 +1,12 @@
 package dev.skyherobrine.service.models.mongodb;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import dev.skyherobrine.service.enums.TypeDay;
 import dev.skyherobrine.service.models.mariadb.Doctor;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Document(collection = "work_schedules")
 @Getter @Setter
@@ -18,13 +17,18 @@ public class WorkSchedule {
     @NonNull
     private Doctor doctor;
     @NonNull
-    private TypeDay typeDay;
-    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss") @NonNull
-    private LocalDateTime start;
-    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss") @NonNull
-    private LocalDateTime end;
-    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss") @NonNull
-    private LocalDateTime createdAt;
-    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss") @NonNull
-    private LocalDateTime updatedAt;
+    private Instant start;
+    @NonNull
+    private Instant end;
+    @NonNull
+    private Instant createdAt;
+    @NonNull
+    private Instant updatedAt;
+
+    public WorkSchedule(@NonNull Doctor doctor, @NonNull Instant start, @NonNull Instant end) {
+        this.doctor = doctor;
+        this.start = start;
+        this.end = end;
+        this.createdAt = this.updatedAt = Instant.now();
+    }
 }
