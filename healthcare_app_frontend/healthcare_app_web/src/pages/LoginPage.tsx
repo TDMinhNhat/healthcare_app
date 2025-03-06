@@ -61,6 +61,9 @@ export default function LoginPage() {
             // lưu thông tin user vào localStorage
             localStorage.setItem("user", JSON.stringify(userData));
             toast.success("Login successful!");
+
+            sessionStorage.setItem("user", JSON.stringify(userData));
+
             // console.log("userData", userData);
             if (userData.role === "doctor") {
               setTimeout(() => navigate(ROUTING.DOCTOR), 1500); // Redirect after showing toast

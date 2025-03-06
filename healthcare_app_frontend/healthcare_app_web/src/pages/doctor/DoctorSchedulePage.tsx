@@ -33,6 +33,7 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTranslation } from "react-i18next";
 import { formatDateToString, parseDateFromString } from "../../utils/dateUtils";
+import { addWorkSchedule } from "../../services/workSchedule_service.ts";
 
 // Tạo mảng các ngày trong 14 ngày tới, trừ ngày hiện tại
 const generateDates = () => {
@@ -200,6 +201,26 @@ const DoctorSchedulePage = () => {
   // Lưu lịch làm việc
   const handleSaveSchedule = () => {
     // Tại đây có thể thêm code để lưu lịch làm việc vào database
+    const user: object = JSON.parse(sessionStorage.getItem("user") as string)
+
+    schedule.map((item) => {
+      const getDate: string = item.date;
+      item.timeSlots.map(time => {
+        const data = {
+          doctorId: user.user.userId,
+          timeStart: getDate + "-" + time.startTime.replace(":", "-") + "-00",
+          timeEnd: getDate + "-" + time.endTime.replace(":", "-") + "-00"
+        }
+
+        const result = addWorkSchedule(data).then(response => response.data).catch(error => {
+          console.log(error);
+          return null;
+        })
+
+
+      })
+    })
+
     setSuccessMessage(t("doctor.schedule.success_saved"));
     setTimeout(() => setSuccessMessage(""), 3000);
   };
