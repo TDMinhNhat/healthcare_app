@@ -39,7 +39,10 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   const { t } = useTranslation();
 
   // Format the address into a readable string
-  const addressString = `${address.number} ${address.street}, ${address.ward}, ${address.district}, ${address.city}, ${address.country}`;
+  const addressString =
+    address != null
+      ? `${address.number} ${address.street}, ${address.ward}, ${address.district}, ${address.city}, ${address.country}`
+      : t("common.noData");
 
   return (
     <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
@@ -75,9 +78,21 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
 
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
-          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-            <EmailIcon color="primary" sx={{ mr: 1 }} />
-            <Typography variant="body1">{email}</Typography>
+          <Box
+            sx={{ display: "flex", alignItems: "center", mb: 1, width: "100%" }}
+          >
+            <EmailIcon color="primary" sx={{ mr: 1, flexShrink: 0 }} />
+            <Typography
+              variant="body1"
+              noWrap
+              sx={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: "calc(100% - 30px)",
+              }}
+            >
+              {email}
+            </Typography>
           </Box>
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -98,8 +113,8 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
             <Typography variant="body1">
               {typeof sex !== "undefined"
                 ? sex
-                  ? t("gender.male")
-                  : t("gender.female")
+                  ? t("profile.male")
+                  : t("profile.female")
                 : gender || ""}
             </Typography>
           </Box>

@@ -27,7 +27,7 @@ interface EditProfileModalProps {
     phone: string;
     dob: string;
     sex: boolean | string;
-    address: Address;
+    address: Address | null;
   };
 }
 
@@ -38,7 +38,25 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   userData,
 }) => {
   const { t } = useTranslation();
-  const [formData, setFormData] = useState(userData);
+
+  // Initialize formData with default values for any null fields
+  const [formData, setFormData] = useState({
+    firstName: userData.firstName || "",
+    lastName: userData.lastName || "",
+    email: userData.email || "",
+    phone: userData.phone || "",
+    dob: userData.dob || "",
+    sex: userData.sex !== undefined ? userData.sex : "",
+    address: userData.address || {
+      id: null,
+      number: "",
+      street: "",
+      ward: "",
+      district: "",
+      city: "",
+      country: "",
+    },
+  });
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
@@ -153,7 +171,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 fullWidth
                 label={t("profile.address.number")}
                 name="address.number"
-                value={formData.address.number}
+                value={formData.address?.number || ""}
                 onChange={handleChange}
                 margin="normal"
               />
@@ -163,7 +181,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 fullWidth
                 label={t("profile.address.street")}
                 name="address.street"
-                value={formData.address.street}
+                value={formData.address?.street || ""}
                 onChange={handleChange}
                 margin="normal"
               />
@@ -173,7 +191,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 fullWidth
                 label={t("profile.address.ward")}
                 name="address.ward"
-                value={formData.address.ward}
+                value={formData.address?.ward || ""}
                 onChange={handleChange}
                 margin="normal"
               />
@@ -183,7 +201,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 fullWidth
                 label={t("profile.address.district")}
                 name="address.district"
-                value={formData.address.district}
+                value={formData.address?.district || ""}
                 onChange={handleChange}
                 margin="normal"
               />
@@ -193,7 +211,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 fullWidth
                 label={t("profile.address.city")}
                 name="address.city"
-                value={formData.address.city}
+                value={formData.address?.city || ""}
                 onChange={handleChange}
                 margin="normal"
               />

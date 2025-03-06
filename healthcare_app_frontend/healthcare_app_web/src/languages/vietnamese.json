@@ -449,7 +449,9 @@
     "saving": "Đang lưu...",
     "yes": "Có",
     "no": "Không",
-    "actions": "Thao Tác"
+    "actions": "Thao Tác",
+    "notAvailable": "Không Khả Dụng",
+    "noData": "Không Có Dữ Liệu"
   },
   "profile": {
     "editPersonalInfo": "Chỉnh Sửa Thông Tin Cá Nhân",
