@@ -13,10 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,9 +24,11 @@ import java.time.format.DateTimeFormatter;
 public class WorkScheduleController {
 
     private final WorkScheduleService workScheduleService;
+    private final WorkScheduleRepository workScheduleRepository;
 
-    public WorkScheduleController(WorkScheduleService workScheduleService) {
+    public WorkScheduleController(WorkScheduleService workScheduleService, WorkScheduleRepository workScheduleRepository) {
         this.workScheduleService = workScheduleService;
+        this.workScheduleRepository = workScheduleRepository;
     }
 
     @PostMapping
@@ -45,6 +44,28 @@ public class WorkScheduleController {
                     result
             ));
 
+        } catch (Exception e) {
+            log.error("Work Schedule: The api thrown an exception");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/doctor")
+    public ResponseEntity<Response> getWorkScheduleByDoctor(@RequestParam String doctorId) {
+        try {
+            log.info("Work Schedule: Call the api get work schedule by doctor");
+            var result = workScheduleRepository.findAllByDoctor_UserId(doctorId);
+
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Get the work schedule by doctor successfully",
+                    result
+            ));
         } catch (Exception e) {
             log.error("Work Schedule: The api thrown an exception");
             log.error(e.getMessage());
