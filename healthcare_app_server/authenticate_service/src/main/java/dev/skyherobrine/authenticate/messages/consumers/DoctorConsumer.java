@@ -1,7 +1,7 @@
 package dev.skyherobrine.authenticate.messages.consumers;
 
-import dev.skyherobrine.admin.models.mariadb.*;
-import dev.skyherobrine.admin.repositories.mariadb.*;
+import dev.skyherobrine.authenticate.models.mariadb.*;
+import dev.skyherobrine.authenticate.repositories.mariadb.*;
 import dev.skyherobrine.authenticate.models.mariadb.*;
 import dev.skyherobrine.authenticate.repositories.mariadb.*;
 import dev.skyherobrine.authenticate.utils.ObjectParser;

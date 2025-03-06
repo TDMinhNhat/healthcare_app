@@ -3,7 +3,7 @@ package dev.skyherobrine.authenticate.controllers;
 import dev.skyherobrine.authenticate.models.mariadb.Doctor;
 import dev.skyherobrine.authenticate.models.mariadb.Patient;
 import dev.skyherobrine.authenticate.models.mariadb.Response;
-import dev.skyherobrine.admin.repositories.mariadb.*;
+import dev.skyherobrine.authenticate.repositories.mariadb.*;
 import dev.skyherobrine.authenticate.repositories.mariadb.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
