@@ -205,19 +205,19 @@ const DoctorSchedulePage = () => {
 
     schedule.map((item) => {
       const getDate: string = item.date;
-      item.timeSlots.map(time => {
+      item.timeSlots.map(async (time: TimeSlot) => {
         const data = {
           doctorId: user.user.userId,
           timeStart: getDate + "-" + time.startTime.replace(":", "-") + "-00",
           timeEnd: getDate + "-" + time.endTime.replace(":", "-") + "-00"
         }
 
-        const result = addWorkSchedule(data).then(response => response.data).catch(error => {
+        const result: object = await addWorkSchedule(data).then(response => response.data).catch(error => {
           console.log(error);
-          return null;
+          return error;
         })
 
-
+        console.log(result);
       })
     })
 
