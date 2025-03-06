@@ -1,4 +1,4 @@
-package dev.skyherobrine.admin.configs;
+package dev.skyherobrine.api_gateway.configs;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;

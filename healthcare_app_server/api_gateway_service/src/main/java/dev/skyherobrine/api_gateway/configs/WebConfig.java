@@ -1,4 +1,4 @@
-package dev.skyherobrine.admin.configs;
+package dev.skyherobrine.api_gateway.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
