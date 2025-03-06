@@ -31,7 +31,7 @@ public class WorkScheduleService {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public WorkSchedule addWorkSchedule(WorkScheduleDTO workScheduleDTO) throws Exception {
+    public synchronized WorkSchedule addWorkSchedule(WorkScheduleDTO workScheduleDTO) throws Exception {
         log.info("Work Schedule Service: Call the service add work schedule");
         Doctor doctor = doctorRepository.findDoctorByUserId(workScheduleDTO.getDoctorId()).orElseThrow(() -> new EntityNotFoundException("The doctor wasn't found!"));
 

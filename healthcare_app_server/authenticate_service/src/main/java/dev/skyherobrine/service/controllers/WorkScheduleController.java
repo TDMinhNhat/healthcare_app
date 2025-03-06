@@ -33,7 +33,7 @@ public class WorkScheduleController {
     }
 
     @PostMapping
-    public ResponseEntity<Response> addWorkSchedule(@RequestBody WorkScheduleDTO workScheduleDTO) {
+    public synchronized ResponseEntity<Response> addWorkSchedule(@RequestBody WorkScheduleDTO workScheduleDTO) {
         try {
             log.info("Work Schedule: Call the api add work schedule of the doctor");
 
