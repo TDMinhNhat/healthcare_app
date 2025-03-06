@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -41,8 +42,8 @@ public class WorkScheduleService {
         WorkSchedule workSchedule = new WorkSchedule(
                 getMaxId + 1,
                 doctor,
-                ,
-
+                LocalDateTime.parse(workScheduleDTO.getTimeStart(), DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")).atZone(ZoneId.systemDefault()).toInstant(),
+                LocalDateTime.parse(workScheduleDTO.getTimeEnd(), DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")).atZone(ZoneId.systemDefault()).toInstant(),
                 Instant.now(),
                 Instant.now()
         );
