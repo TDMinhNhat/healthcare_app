@@ -37,10 +37,11 @@ public class AppointmentConsumer {
             log.info("Appointment Consumer: {}", message);
 
             JsonNode node = new ObjectMapper().readTree(message);
-            String getPatient = node.get("appointment").get("patientId").asText();
-            Long getWorkSchedule = node.get("appointment").get("workSchedule").asLong();
-            String getNote = node.get("appointment").get("note").asText();
+            String getPatient = node.get("patient").asText();
+            Long getWorkSchedule = node.get("workSchedule").asLong();
+            String getNote = node.get("note").asText();
             String getRoomId = node.get("roomId").asText();
+            Long getId = node.get("id").asLong();
 
             Appointment appointment = new Appointment(
                     pr.findPatientByUserId(getPatient).orElseThrow(() -> new EntityNotFoundException("Patient not found")),
@@ -48,6 +49,7 @@ public class AppointmentConsumer {
                     getNote,
                     getRoomId
             );
+            appointment.setId(getId);
             ar.save(appointment);
         } catch (Exception e) {
             log.error("Appointment Consumer: Can't add the book appointment");

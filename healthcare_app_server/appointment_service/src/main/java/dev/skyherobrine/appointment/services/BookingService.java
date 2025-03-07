@@ -35,12 +35,11 @@ public class BookingService {
         log.info("Booking Service: add the book appointment");
         Map<String,Object> dataSend = new HashMap<>();
         Appointment appointment = appointmentDTO.toObject();
+        appointment.setId(getMaxIdAppointment() + 1);
         appointment.setRoomId(generateRoomId());
 
-        dataSend.put("appointment", appointmentDTO);
-        dataSend.put("roomId", appointment.getRoomId());
         log.info("Booking Service: send insert appointment message to kafka");
-        kafkaTemplate.send("insert_appointment", ObjectParser.convertObjectToJson(dataSend));
+        kafkaTemplate.send("insert_appointment", ObjectParser.convertObjectToJson(appointment));
 
         Appointment result = ar.save(appointment);
         log.info("Booking Service: add book appointment successfully");
@@ -52,5 +51,10 @@ public class BookingService {
         String getTimeNow = LocalDateTime.now().format(DateTimeFormatter.ofPattern("ddMMyyyyHHmmss"));
         String getRandomNumber = ThreadLocalRandom.current().nextInt(111111,999999) + "";
         return getRandomNumber + "-" + getTimeNow;
+    }
+
+    private Long getMaxIdAppointment() {
+        Appointment appointment = ar.findFirstByOrderByIdDesc().orElse(null);
+        return appointment == null ? 0 : appointment.getId();
     }
 }

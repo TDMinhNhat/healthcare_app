@@ -19,4 +19,6 @@ public interface AppointmentRepository extends MongoRepository<Appointment,Long>
     List<Appointment> findByPatientAndStatus(String patient, AppointmentStatus status);
 
     Optional<Appointment> findByWorkSchedule(Long workSchedule);
+
+    Optional<Appointment> findFirstByOrderByIdDesc();
 }
