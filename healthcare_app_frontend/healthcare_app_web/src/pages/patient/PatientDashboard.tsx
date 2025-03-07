@@ -6,22 +6,18 @@ import {
   Card,
   CardContent,
   Button,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
   CircularProgress,
   Box,
   Alert,
+  Stack,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import EmptyState from "../../components/EmptyState";
-import { getAppointmentPatient } from "../../services/appointment_service.ts";
-import { setUser } from "../../stores/slices/user.slice";
+import AppointmentList from "../../components/appointments/AppointmentList";
 
 const PatientDashboard: React.FC = () => {
-  const user = useSelector((state: any) => state.user).user;
+  const user = useSelector((state: any) => state.user.user.user);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [patientData, setPatientData] = useState<any | null>(null);
@@ -29,12 +25,7 @@ const PatientDashboard: React.FC = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // console.log("user from redux:", user);
-    // console.log("user type:", typeof user);
-    // console.log("user keys:", user ? Object.keys(user) : null);
-
     const fetchPatientData = async () => {
-      // console.log("user line 35 in dashboard", user);
       if (!user?.userId) {
         setError("User not found");
         setLoading(false);
@@ -44,7 +35,16 @@ const PatientDashboard: React.FC = () => {
       try {
         setLoading(true);
         console.log("user.userId", user.userId);
-        const data = await getAppointmentPatient(user.userId);
+        // Mock data for demonstration
+        const data = {
+          nextAppointment: null,
+          appointmentStats: {
+            total: 12,
+            completed: 10,
+            upcoming: 2,
+            cancelled: 1,
+          },
+        };
         setPatientData(data);
         setError(null);
       } catch (err) {
@@ -57,22 +57,6 @@ const PatientDashboard: React.FC = () => {
 
     fetchPatientData();
   }, [user]);
-
-  // const handleViewMedicalRecord = async (recordId: string, title: string) => {
-  //   try {
-  //     const fileBlob = await getMedicalRecordFile(recordId);
-  //     const url = window.URL.createObjectURL(fileBlob);
-  //     const a = document.createElement('a');
-  //     a.href = url;
-  //     a.download = `${title}.pdf`;
-  //     document.body.appendChild(a);
-  //     a.click();
-  //     window.URL.revokeObjectURL(url);
-  //     document.body.removeChild(a);
-  //   } catch (error) {
-  //     console.error("Error downloading medical record:", error);
-  //   }
-  // };
 
   if (loading) {
     return (
@@ -90,8 +74,7 @@ const PatientDashboard: React.FC = () => {
     return <Alert severity="info">{t("common.loading")}</Alert>;
   }
 
-  const { nextAppointment, recentAppointments, medications, medicalRecords } =
-    patientData;
+  const { appointmentStats } = patientData;
   const fullName = user ? `${user.firstName} ${user.lastName}` : "";
 
   return (
@@ -100,122 +83,89 @@ const PatientDashboard: React.FC = () => {
         {t("patient.dashboard.welcome")} {fullName}
       </Typography>
       <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Card>
-            <CardContent
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                flexWrap: "wrap",
-                gap: 2,
-              }}
-            >
-              <Typography variant="h5" component="div">
-                {t("patient.dashboard.next_appointment")}
-              </Typography>
-              {nextAppointment ? (
-                <>
-                  <Typography variant="body1" color="text.secondary">
-                    Dr. {nextAppointment.doctorName} - {nextAppointment.purpose}{" "}
-                    - {nextAppointment.date} at {nextAppointment.time}
-                  </Typography>
-                  <Button variant="contained" color="primary">
-                    {t("patient.dashboard.view_details")}
-                  </Button>
-                </>
-              ) : (
-                <Typography variant="body1" color="text.secondary">
-                  {t("patient.dashboard.no_upcoming_appointments")}
-                </Typography>
-              )}
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2, height: "100%" }}>
-            <Typography variant="h6" gutterBottom>
-              {t("patient.dashboard.recent_appointments")}
-            </Typography>
-            {recentAppointments && recentAppointments.length > 0 ? (
-              <List>
-                {recentAppointments.map((appointment, index) => (
-                  <React.Fragment key={appointment.id}>
-                    <ListItem>
-                      <ListItemText
-                        primary={`Dr. ${appointment} - ${appointment.specialty}`}
-                        secondary={`${appointment.date} - ${appointment.purpose}`}
-                      />
-                    </ListItem>
-                    {index < recentAppointments.length - 1 && <Divider />}
-                  </React.Fragment>
-                ))}
-              </List>
-            ) : (
-              <EmptyState
-                message={t("patient.dashboard.no_recent_appointments")}
-              />
-            )}
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2, height: "100%" }}>
-            <Typography variant="h6" gutterBottom>
-              {t("patient.dashboard.medications")}
-            </Typography>
-            {medications && medications.length > 0 ? (
-              <List>
-                {medications.map((medication, index) => (
-                  <React.Fragment key={medication.id}>
-                    <ListItem>
-                      <ListItemText
-                        primary={`${medication.name} ${medication.dosage}`}
-                        secondary={`${medication.instructions} - ${t(
-                          "patient.dashboard.refills_remaining"
-                        )}: ${medication.refillsRemaining}`}
-                      />
-                    </ListItem>
-                    {index < medications.length - 1 && <Divider />}
-                  </React.Fragment>
-                ))}
-              </List>
-            ) : (
-              <EmptyState message={t("patient.dashboard.no_medications")} />
-            )}
-          </Paper>
-        </Grid>
-
+        {/* Appointment Statistics */}
         <Grid item xs={12}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
-              {t("patient.dashboard.recent_medical_records")}
+              {t("patient.dashboard.appointment_statistics")}
             </Typography>
-            {medicalRecords && medicalRecords.length > 0 ? (
-              <List>
-                {medicalRecords.map((record, index) => (
-                  <React.Fragment key={record.id}>
-                    <ListItem>
-                      <ListItemText
-                        primary={record.title}
-                        secondary={`${record.date} - ${record.description}`}
-                      />
-                      <Button
-                        variant="outlined"
-                        onClick={() =>
-                            handleViewMedicalRecord(record.id, record.title)
-                        }
+            <Stack spacing={2} mt={2}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Typography variant="h3" align="center" color="primary">
+                    {appointmentStats.total}
+                  </Typography>
+                  <Typography variant="body1" align="center">
+                    {t("patient.dashboard.total_appointments")}
+                  </Typography>
+                </CardContent>
+              </Card>
+              <Grid container spacing={2}>
+                <Grid item xs={4}>
+                  <Card variant="outlined">
+                    <CardContent>
+                      <Typography
+                        variant="h4"
+                        align="center"
+                        color="success.main"
                       >
-                        {t("common.view")}
-                      </Button>
-                    </ListItem>
-                    {index < medicalRecords.length - 1 && <Divider />}
-                  </React.Fragment>
-                ))}
-              </List>
+                        {appointmentStats.completed}
+                      </Typography>
+                      <Typography variant="body2" align="center">
+                        {t("patient.dashboard.completed")}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+                <Grid item xs={4}>
+                  <Card variant="outlined">
+                    <CardContent>
+                      <Typography variant="h4" align="center" color="info.main">
+                        {appointmentStats.upcoming}
+                      </Typography>
+                      <Typography variant="body2" align="center">
+                        {t("patient.dashboard.upcoming")}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+                <Grid item xs={4}>
+                  <Card variant="outlined">
+                    <CardContent>
+                      <Typography
+                        variant="h4"
+                        align="center"
+                        color="error.main"
+                      >
+                        {appointmentStats.cancelled}
+                      </Typography>
+                      <Typography variant="body2" align="center">
+                        {t("patient.dashboard.cancelled")}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
+            </Stack>
+          </Paper>
+        </Grid>
+
+        {/* Combined Upcoming Appointments Section */}
+        <Grid item xs={12}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom mb={2}>
+              {t("patient.dashboard.next_appointment")}
+            </Typography>
+            {user?.userId ? (
+              <AppointmentList
+                type="upcoming"
+                status={["WAITING", "IN_PROGRESS"]}
+                patientId={user.userId}
+              />
             ) : (
-              <EmptyState message={t("patient.dashboard.no_medical_records")} />
+              <EmptyState
+                message={t("patient.dashboard.no_upcoming_appointments")}
+              />
             )}
           </Paper>
         </Grid>

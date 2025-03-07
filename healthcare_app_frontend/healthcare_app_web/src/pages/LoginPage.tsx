@@ -67,7 +67,7 @@ export default function LoginPage() {
             // console.log("userData", userData);
             if (userData.role === "doctor") {
               setTimeout(() => navigate(ROUTING.DOCTOR), 1500); // Redirect after showing toast
-            } else if(userData.role === "patient") {
+            } else if (userData.role === "patient") {
               setTimeout(() => navigate(ROUTING.PATIENT), 1500); // Redirect after showing toast
             } else {
               setTimeout(() => navigate(ROUTING.ADMIN), 1500);

@@ -77,14 +77,14 @@ export default function DoctorLayout() {
       </List>
       <Divider />
       <List>
-        <ListItemButton
+        {/* <ListItemButton
           onClick={() => handleNavigation("/doctor/prescriptions")}
         >
           <ListItemIcon>
             <MedicalServicesIcon />
           </ListItemIcon>
           <ListItemText primary="Prescriptions" />
-        </ListItemButton>
+        </ListItemButton> */}
         {/* <ListItemButton onClick={() => handleNavigation("/doctor/chat")}>
           <ListItemIcon>
             <ChatIcon />

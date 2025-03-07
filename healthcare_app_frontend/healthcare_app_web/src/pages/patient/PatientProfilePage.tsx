@@ -1,87 +1,12 @@
 import React, { useState, useEffect } from "react";
-import {
-  Container,
-  Grid,
-  Box,
-  Typography,
-  Button,
-  Paper,
-  IconButton,
-  Alert,
-} from "@mui/material";
+import { Container, Grid, Box, IconButton, Alert } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 
 import { PersonalInfoSection } from "../../components/profile/PersonalInfoSection";
-import { PatientMedicalRecordsSection } from "../../components/patient/PatientMedicalRecordsSection";
-import { PatientAppointmentsSection } from "../../components/patient/PatientAppointmentsSection";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
 import AvatarUploadModal from "../../components/profile/AvatarUploadModal";
-import { Appointment } from "../../types/appointment";
 import { useTranslation } from "react-i18next";
-import { Patient } from "../../types";
 import { getPatientInfo } from "../../services/user_service";
-
-// Mock data for medical records and appointments as they're not in the API response
-const mockMedicalRecordsAndAppointments = {
-  medicalRecords: [
-    {
-      id: 101,
-      diagnosisDisease: "Hypertension",
-      note: "Patient has elevated blood pressure. Recommended lifestyle changes and prescribed medication.",
-      createdAt: "2023-06-01T14:30:00",
-      doctorName: "Dr. John Smith",
-    },
-    {
-      id: 102,
-      diagnosisDisease: "Seasonal Allergies",
-      note: "Patient experiencing allergic rhinitis. Prescribed antihistamines and nasal spray.",
-      createdAt: "2023-04-12T10:15:00",
-      doctorName: "Dr. Laura Chen",
-    },
-  ],
-  appointments: [
-    {
-      id: 201,
-      patient: {
-        id: 2,
-        firstName: "Emma",
-        lastName: "Johnson",
-        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      },
-      doctor: {
-        id: 101,
-        firstName: "John",
-        lastName: "Smith",
-        specialization: "Cardiologist",
-        avatar: "https://randomuser.me/api/portraits/men/41.jpg",
-      },
-      note: "Follow-up for hypertension",
-      start: "2023-07-15T09:00:00",
-      end: "2023-07-15T09:30:00",
-      status: "upcoming" as const,
-    },
-    {
-      id: 202,
-      patient: {
-        id: 2,
-        firstName: "Emma",
-        lastName: "Johnson",
-        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      },
-      doctor: {
-        id: 102,
-        firstName: "Laura",
-        lastName: "Chen",
-        specialization: "Allergist",
-        avatar: "https://randomuser.me/api/portraits/women/68.jpg",
-      },
-      note: "Seasonal allergies consultation",
-      start: "2023-04-12T10:00:00",
-      end: "2023-04-12T10:30:00",
-      status: "completed" as const,
-    },
-  ],
-};
 
 const PatientProfilePage: React.FC = () => {
   const { t } = useTranslation();
@@ -100,12 +25,7 @@ const PatientProfilePage: React.FC = () => {
         const response = await getPatientInfo(userId);
 
         if (response.data && response.data.code === 200) {
-          // Combine API patient data with mock medical records and appointments
-          setPatientData({
-            ...response.data.data,
-            medicalRecords: mockMedicalRecordsAndAppointments.medicalRecords,
-            appointments: mockMedicalRecordsAndAppointments.appointments,
-          });
+          setPatientData(response.data.data);
         } else {
           setError("Failed to retrieve patient data");
         }
@@ -203,25 +123,6 @@ const PatientProfilePage: React.FC = () => {
               <EditIcon />
             </IconButton>
           </Box>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          {patientData.appointments && patientData.appointments.length > 0 ? (
-            <PatientAppointmentsSection
-              appointments={patientData.appointments}
-            />
-          ) : (
-            <Alert severity="info">{t("appointments.noAppointments")}</Alert>
-          )}
-        </Grid>
-        <Grid item xs={12} md={6}>
-          {patientData.medicalRecords &&
-          patientData.medicalRecords.length > 0 ? (
-            <PatientMedicalRecordsSection
-              records={patientData.medicalRecords}
-            />
-          ) : (
-            <Alert severity="info">{t("medicalRecords.noRecords")}</Alert>
-          )}
         </Grid>
       </Grid>
 

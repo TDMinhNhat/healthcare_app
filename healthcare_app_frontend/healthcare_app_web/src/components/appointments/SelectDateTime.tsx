@@ -209,7 +209,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
                               margin: "4px 0", // Consistent vertical spacing
                             }}
                           >
-                            {time}
+                            {time} - 45 phút
                           </Button>
                         ))
                       ) : (

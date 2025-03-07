@@ -1,16 +1,7 @@
 import React from "react";
-import {
-  Typography,
-  Paper,
-  Grid,
-  Card,
-  CardContent,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
-} from "@mui/material";
+import { Typography, Paper, Grid, Card, CardContent } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import DoctorAppointmentList from "../../components/appointments/DoctorAppointmentList";
 
 const DoctorDashboard: React.FC = () => {
   const { t } = useTranslation();
@@ -51,55 +42,16 @@ const DoctorDashboard: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               {t("doctor.dashboard.upcoming_appointments")}
             </Typography>
-            <List>
-              <ListItem>
-                <ListItemText
-                  primary="John Doe"
-                  secondary="Today, 10:00 AM - Regular Checkup"
-                />
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <ListItemText
-                  primary="Jane Smith"
-                  secondary="Today, 11:30 AM - Follow-up"
-                />
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <ListItemText
-                  primary="Robert Johnson"
-                  secondary="Today, 2:00 PM - Initial Consultation"
-                />
-              </ListItem>
-            </List>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              {t("doctor.dashboard.recent_patient_updates")}
-            </Typography>
-            <List>
-              <ListItem>
-                <ListItemText
-                  primary="Test Results Available"
-                  secondary="For: Mary Williams - Blood work results are ready for review"
-                />
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <ListItemText
-                  primary="Prescription Refill Request"
-                  secondary="From: Thomas Brown - Requesting hypertension medication refill"
-                />
-              </ListItem>
-            </List>
+            <DoctorAppointmentList
+              type="upcoming"
+              status={["WAITING", "IN_PROGRESS"]}
+              doctorId="doctor-001"
+            />
           </Paper>
         </Grid>
       </Grid>
