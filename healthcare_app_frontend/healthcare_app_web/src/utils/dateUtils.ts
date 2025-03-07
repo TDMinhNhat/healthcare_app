@@ -80,3 +80,16 @@ export const formatCreatedAtDate = (dateString: string): string => {
     return dateString;
   }
 };
+
+export const formatTime = (time: string): string => {
+  try {
+    if(time.length <= 1) {
+      return `0${time}`;
+    } else {
+      return time;
+    }
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return time;
+  }
+}
