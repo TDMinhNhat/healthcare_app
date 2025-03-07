@@ -122,4 +122,15 @@ public class WorkScheduleController {
             ));
         }
     }
+
+    @GetMapping("/id/doctor")
+    public ResponseEntity<Response> getWorkScheduleIdByDoctorId(@RequestParam String doctorId) {
+        log.info("Work Schedule: Call the api get work schedule id by doctor id");
+        var result = workScheduleRepository.findAllByDoctor_UserId(doctorId).stream().map(WorkSchedule::getId).toList();
+        return ResponseEntity.ok(new Response(
+                HttpStatus.OK.value(),
+                "Get the work schedule id by doctor id successfully",
+                result
+        ));
+    }
 }
