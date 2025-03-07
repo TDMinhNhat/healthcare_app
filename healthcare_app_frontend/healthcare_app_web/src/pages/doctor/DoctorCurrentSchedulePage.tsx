@@ -5,6 +5,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { format, addDays } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { formatDateToString } from "../../utils/dateUtils";
+import { getWorkSchedule } from "../../services/workSchedule_service.ts";
 
 // Định nghĩa kiểu dữ liệu cho một khung giờ làm việc
 interface ScheduleSlot {
@@ -82,10 +83,29 @@ const DoctorCurrentSchedulePage: React.FC = () => {
   const [schedule, setSchedule] = useState<DateSchedule[]>(mockSavedSchedule);
   // Mảng các ngày để hiển thị (7 ngày tính từ ngày hiện tại)
   const dates = generateDates();
+  const user: object = JSON.parse(sessionStorage.getItem("user") as string || "{}");
 
   useEffect(() => {
     // Trong thực tế, ở đây sẽ gọi API để lấy lịch làm việc của bác sĩ
     // Hiện tại đang sử dụng dữ liệu giả lập mockSavedSchedule
+    async function fetchData() {
+      const result = await getWorkSchedule(user.user.userId).then((response) => response.data.data).catch(error => {
+        console.log(error);
+        return null;
+      })
+
+      console.log(result);
+
+      let dateSchedule: DateSchedule[] = [];
+      result.map((item: object, index: any) => {
+        const [day, month, year, hour, minute, second] = item.workSchedule.start.split("-");
+        const date: Date = new Date(year, month, day);
+
+        console.log(date);
+      })
+    }
+
+    fetchData();
   }, []);
 
   // Nhóm các khung giờ thành các hàng để hiển thị UI đẹp hơn
