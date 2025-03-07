@@ -17,7 +17,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import EmptyState from "../../components/EmptyState";
-import { getAppointmentPatient } from "../../services/appoinment_service";
+import { getAppointmentPatient } from "../../services/appointment_service.ts";
 import { setUser } from "../../stores/slices/user.slice";
 
 const PatientDashboard: React.FC = () => {

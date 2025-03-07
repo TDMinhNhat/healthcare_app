@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
   Box,
   Typography,
@@ -41,6 +41,14 @@ const AppointmentPage = () => {
   const [tabValue, setTabValue] = useState(0);
   const [showBooking, setShowBooking] = useState(false);
   const user = useSelector((state: any) => state.user.user);
+
+  useEffect(() => {
+    (async () => {
+      const getUserId = user.user.userId;
+
+      console.log(getUserId);
+    })()
+  }, [])
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);

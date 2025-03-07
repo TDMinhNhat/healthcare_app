@@ -13,6 +13,7 @@ import {
 import { useTranslation } from "react-i18next";
 // import { getSpecialties } from "../../services/specialty_service";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
+import { getAllTypeDiseases } from "../../services/typeDisease_service.ts";
 
 interface SelectSpecialtyProps {
   onSelect: (specialty: any) => void;
@@ -73,7 +74,7 @@ const mockServices = [
 const SelectService: React.FC<SelectSpecialtyProps> = ({ onSelect }) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
-  const [services, setServices] = useState<any[]>([]);
+  const [services, setServices] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -84,12 +85,15 @@ const SelectService: React.FC<SelectSpecialtyProps> = ({ onSelect }) => {
         setError(null);
 
         // Simulate network delay
-        await new Promise((resolve) => setTimeout(resolve, 800));
+        const result: object = await getAllTypeDiseases().then(response => response.data.data).catch(error => {
+          console.log(error);
+          return null;
+        })
 
         // Use mock data instead of API call
         // const response = await getSpecialties();
         // setServices(response.data.data || []);
-        setServices(mockServices);
+        setServices(result);
       } catch (err) {
         console.error("Failed to fetch services:", err);
         setError("Failed to load services. Please try again.");
