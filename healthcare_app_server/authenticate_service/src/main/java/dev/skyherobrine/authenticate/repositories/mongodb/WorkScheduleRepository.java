@@ -13,4 +13,6 @@ public interface WorkScheduleRepository extends MongoRepository<WorkSchedule,Lon
     Optional<WorkSchedule> findTopByOrderByIdDesc();
 
     List<WorkSchedule> findAllByDoctor_UserId(String doctorId);
+
+
 }

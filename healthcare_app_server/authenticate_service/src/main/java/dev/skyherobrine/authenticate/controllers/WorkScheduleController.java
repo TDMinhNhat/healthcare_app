@@ -63,7 +63,7 @@ public class WorkScheduleController {
             workScheduleRepository.findAllByDoctor_UserId(doctorId).forEach(workSchedule -> {
                 Map<String,Object> data = new HashMap<>();
                 data.put("workSchedule", workSchedule);
-                data.put("isAvailable", appointmentFeign.getAppointmentByWorkSchedule(workSchedule.getId().toString()).getBody().getData() != null);
+                data.put("isAvailable", appointmentFeign.getAppointmentByWorkSchedule(workSchedule.getId().toString()).getBody().getData() == null);
                 result.add(data);
             });
 

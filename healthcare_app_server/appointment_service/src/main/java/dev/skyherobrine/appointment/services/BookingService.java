@@ -6,6 +6,7 @@ import dev.skyherobrine.appointment.models.mongodb.Appointment;
 import dev.skyherobrine.appointment.repositories.mongodb.AppointmentRepository;
 import dev.skyherobrine.appointment.utils.ObjectParser;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ public class BookingService {
     private final KafkaTemplate<String,String> kafkaTemplate;
     private final AppointmentRepository ar;
 
+    @Autowired
     public BookingService(DoctorFeign doctorFeign, KafkaTemplate<String, String> kafkaTemplate, AppointmentRepository ar) {
         this.doctorFeign = doctorFeign;
         this.kafkaTemplate = kafkaTemplate;
