@@ -4,8 +4,9 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { format, addDays } from "date-fns";
 import { useTranslation } from "react-i18next";
-import { formatDateToString } from "../../utils/dateUtils";
+import { formatDateToString, parseDateFromString, parseDateTimeFromString, formatTime } from "../../utils/dateUtils";
 import { getWorkSchedule } from "../../services/workSchedule_service.ts";
+import { data } from "react-router";
 
 // Định nghĩa kiểu dữ liệu cho một khung giờ làm việc
 interface ScheduleSlot {
@@ -21,8 +22,6 @@ interface DateSchedule {
   id: number; // ID lịch ngày
   date: string; // Ngày làm việc (định dạng dd-MM-yyyy)
   timeSlots: {
-    // Mảng các khung giờ trong ngày
-    id: number;
     startTime: string;
     endTime: string;
     isAvailable: boolean;
@@ -35,27 +34,27 @@ const mockSavedSchedule: DateSchedule[] = [
     id: 1,
     date: formatDateToString(new Date()),
     timeSlots: [
-      { id: 1, startTime: "08:00", endTime: "08:30", isAvailable: true },
-      { id: 2, startTime: "09:00", endTime: "09:30", isAvailable: true },
-      { id: 3, startTime: "10:30", endTime: "11:00", isAvailable: false },
-      { id: 4, startTime: "14:00", endTime: "14:30", isAvailable: true },
-      { id: 5, startTime: "15:00", endTime: "15:30", isAvailable: true },
+      { startTime: "08:00", endTime: "08:30", isAvailable: true },
+      { startTime: "09:00", endTime: "09:30", isAvailable: true },
+      { startTime: "10:30", endTime: "11:00", isAvailable: false },
+      { startTime: "14:00", endTime: "14:30", isAvailable: true },
+      { startTime: "15:00", endTime: "15:30", isAvailable: true },
     ],
   },
   {
     id: 2,
     date: formatDateToString(addDays(new Date(), 1)),
     timeSlots: [
-      { id: 4, startTime: "08:00", endTime: "08:30", isAvailable: true },
-      { id: 5, startTime: "09:30", endTime: "10:00", isAvailable: true },
+      { startTime: "08:00", endTime: "08:30", isAvailable: true },
+      { startTime: "09:30", endTime: "10:00", isAvailable: true },
     ],
   },
   {
     id: 3,
     date: formatDateToString(addDays(new Date(), 2)),
     timeSlots: [
-      { id: 6, startTime: "14:00", endTime: "14:30", isAvailable: true },
-      { id: 7, startTime: "15:00", endTime: "15:30", isAvailable: true },
+      { startTime: "14:00", endTime: "14:30", isAvailable: true },
+      { startTime: "15:00", endTime: "15:30", isAvailable: true },
     ],
   },
 ];
@@ -80,7 +79,7 @@ const generateDates = () => {
 const DoctorCurrentSchedulePage: React.FC = () => {
   const { t } = useTranslation(); // Hook dịch ngôn ngữ
   // State lưu trữ lịch làm việc của bác sĩ
-  const [schedule, setSchedule] = useState<DateSchedule[]>(mockSavedSchedule);
+  const [schedule, setSchedule] = useState<DateSchedule[]>([]);
   // Mảng các ngày để hiển thị (7 ngày tính từ ngày hiện tại)
   const dates = generateDates();
   const user: object = JSON.parse(sessionStorage.getItem("user") as string || "{}");
@@ -94,15 +93,40 @@ const DoctorCurrentSchedulePage: React.FC = () => {
         return null;
       })
 
-      console.log(result);
-
-      let dateSchedule: DateSchedule[] = [];
+      var dateSchedule: DateSchedule[] = [];
       result.map((item: object, index: any) => {
         const [day, month, year, hour, minute, second] = item.workSchedule.start.split("-");
-        const date: Date = new Date(year, month, day);
+        const date: Date = new Date(year, month - 1, day);
 
-        console.log(date);
+        const start: Date = parseDateTimeFromString(item.workSchedule.start);
+        const end: Date = parseDateTimeFromString(item.workSchedule.end);
+
+        // Lọc tìm kiếm date ngày làm việc ca đó phù hợp
+        let element = dateSchedule.find(schedule => schedule.date === formatDateToString(date));
+        if(element) {
+          element.timeSlots.push(
+            { 
+              startTime: `${formatTime(start.getHours().toString())}:${formatTime(start.getMinutes().toString())}`,
+              endTime: `${formatTime(end.getHours().toString())}:${formatTime(end.getMinutes().toString())}`, 
+              isAvailable: item.isAvailable 
+            }
+          )
+        } else {
+          dateSchedule.push({
+            id: index,
+            date: formatDateToString(date),
+            timeSlots: [
+              { 
+                startTime: `${formatTime(start.getHours().toString())}:${formatTime(start.getMinutes().toString())}`,
+                endTime: `${formatTime(end.getHours().toString())}:${formatTime(end.getMinutes().toString())}`, 
+                isAvailable: item.isAvailable 
+              }
+            ]
+          })
+        }
       })
+
+      setSchedule(dateSchedule)
     }
 
     fetchData();
