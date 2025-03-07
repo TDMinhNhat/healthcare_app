@@ -103,7 +103,7 @@ const AppointmentPage = () => {
         <Paper sx={{ p: 3, mb: 3 }}>
           <BookAppointment
             onClose={handleBookingClose}
-            patientId={user.userId}
+            patientId={user.user.userId}
           />
         </Paper>
       ) : (

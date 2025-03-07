@@ -65,6 +65,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
 
         return {
           isAvailable: item.isAvailable,
+          workSchedule: item.workSchedule.id,
           time: `${formatTime(getStart.getHours().toString())}:${formatTime(getStart.getMinutes().toString())} - ${formatTime(getEnd.getHours().toString())}:${formatTime(getEnd.getMinutes().toString())}`
         }  
       });

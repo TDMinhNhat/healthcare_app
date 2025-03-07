@@ -76,7 +76,7 @@ const ConfirmAppointment: React.FC<ConfirmAppointmentProps> = ({
             </ListItemAvatar>
             <ListItemText
               primary={t("patient.appointments.time")}
-              secondary={time}
+              secondary={time.time}
             />
           </ListItem>
 
