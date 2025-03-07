@@ -6,6 +6,7 @@ import dev.skyherobrine.authenticate.models.mariadb.Response;
 import dev.skyherobrine.authenticate.models.mongodb.WorkSchedule;
 import dev.skyherobrine.authenticate.repositories.mongodb.WorkScheduleRepository;
 import dev.skyherobrine.authenticate.services.WorkScheduleService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +48,27 @@ public class WorkScheduleController {
                     result
             ));
 
+        } catch (Exception e) {
+            log.error("Work Schedule: The api thrown an exception");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Response> getById(@PathVariable("id") String id) {
+        try {
+            log.info("Work Schedule: Call the api get work schedule by id");
+            WorkSchedule result = workScheduleRepository.findById(Long.parseLong(id)).orElseThrow(() -> new EntityNotFoundException("Work schedule not found"));
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Get the work schedule by id successfully",
+                    result
+            ));
         } catch (Exception e) {
             log.error("Work Schedule: The api thrown an exception");
             log.error(e.getMessage());
