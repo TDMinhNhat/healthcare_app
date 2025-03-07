@@ -13,3 +13,12 @@ export const getWorkSchedule = async (doctorId: string) => {
         }
     });
 }
+
+export const getWorkScheduleTimeSlot = async (doctorId: string, date: string) => {
+    return await axiosConfig.get(`${prefix}/doctor/time_slot`, {
+        params: {
+            doctorId: doctorId,
+            date: date
+        }
+    })
+}
