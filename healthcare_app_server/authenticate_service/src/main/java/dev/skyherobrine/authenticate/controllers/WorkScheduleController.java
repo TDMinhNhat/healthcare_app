@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,6 +80,43 @@ public class WorkScheduleController {
             log.error(e.getMessage());
             return ResponseEntity.ok(new Response(
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/doctor/time_slot")
+    public ResponseEntity<Response> getWorkScheduleTimeSlotByDoctor(
+            @RequestParam String doctorId,
+            @RequestParam String date)
+    {
+        try {
+            log.info("Work Schedule: Call the api get work schedule time slot by doctor");
+            List<Map<String,Object>> result = new ArrayList<>();
+            workScheduleRepository.findAllByDoctor_UserId(doctorId).stream().filter(
+                    schedule -> {
+                        LocalDate getDate = LocalDateTime.parse(schedule.getStart(), DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")).toLocalDate();
+                        LocalDate checkDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                        return getDate.equals(checkDate);
+                    }
+            ).forEach(workSchedule -> {
+                Map<String,Object> data = new HashMap<>();
+                data.put("workSchedule", workSchedule);
+                data.put("isAvailable", appointmentFeign.getAppointmentByWorkSchedule(workSchedule.getId().toString()).getBody().getData() == null);
+                result.add(data);
+            });
+
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Get the work schedule time slot by doctor successfully",
+                    result
+            ));
+        } catch (Exception e) {
+            log.error("Work Schedule: The api thrown an exception");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
                     "The api thrown an error",
                     e.getMessage()
             ));
