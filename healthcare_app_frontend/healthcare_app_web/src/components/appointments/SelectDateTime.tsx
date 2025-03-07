@@ -20,68 +20,6 @@ interface SelectDateTimeProps {
   onBack: () => void;
 }
 
-// Mock data for doctor availability
-const generateMockAvailability = () => {
-  const availability: { [key: string]: string[] } = {};
-  const today = new Date();
-
-  // Generate random availability for the next 30 days
-  for (let i = 0; i < 30; i++) {
-    const date = addDays(today, i);
-    const day = date.getDay();
-
-    // Skip weekends
-    if (day === 0 || day === 6) continue;
-
-    const dateStr = format(date, "yyyy-MM-dd");
-    const timeSlots: string[] = [];
-
-    // Morning slots (with some randomness)
-    if (Math.random() > 0.3) {
-      timeSlots.push(
-        ...["08:00", "08:30", "09:00", "09:30", "10:00"].filter(
-          () => Math.random() > 0.3
-        )
-      );
-    }
-
-    // Afternoon slots (with some randomness)
-    if (Math.random() > 0.3) {
-      timeSlots.push(
-        ...["13:00", "13:30", "14:00", "14:30", "15:00"].filter(
-          () => Math.random() > 0.3
-        )
-      );
-    }
-
-    // Evening slots (with some randomness)
-    if (Math.random() > 0.4) {
-      timeSlots.push(
-        ...["17:00", "17:30", "18:00", "18:30"].filter(
-          () => Math.random() > 0.4
-        )
-      );
-    }
-
-    availability[dateStr] = timeSlots;
-  }
-
-  return availability;
-};
-
-const mockAvailabilityByDoctor: { [key: string]: { [key: string]: string[] } } =
-  {
-    d101: generateMockAvailability(),
-    d102: generateMockAvailability(),
-    d201: generateMockAvailability(),
-    d301: generateMockAvailability(),
-    d302: generateMockAvailability(),
-    d401: generateMockAvailability(),
-    d501: generateMockAvailability(),
-    d502: generateMockAvailability(),
-    d601: generateMockAvailability(),
-  };
-
 const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   doctor,
   onSelect,
@@ -90,13 +28,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>("");
-  const [availableTimes, setAvailableTimes] = useState<{
-    [key: string]: string[];
-  }>({
-    morning: [],
-    afternoon: [],
-    evening: [],
-  });
+  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -111,68 +43,44 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
       setLoading(true);
       setError(null);
 
-      // Format date for mock data lookup
-      const formattedDate = format(date, "yyyy-MM-dd");
-
-      // Simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      // Use mock data instead of API call
+      // Gọi API thật
       // const response = await getDoctorAvailability(doctor.userId);
       // const availableSlots = response.data.data || {};
+      // const dateTimes = availableSlots[formattedDate] || [];
 
-      const availableSlots = mockAvailabilityByDoctor[doctor.userId] || {};
+      // Sắp xếp các khung giờ theo thứ tự tăng dần
+      // const sortedTimes = [...dateTimes].sort();
 
-      // Organize times into morning, afternoon, evening
-      const times: { [key: string]: string[] } = {
-        morning: [],
-        afternoon: [],
-        evening: [],
-      };
+      // setAvailableTimes(sortedTimes);
 
-      // Filter available times for the selected date
-      const dateTimes = availableSlots[formattedDate] || [];
-
-      dateTimes.forEach((time: string) => {
-        const hour = parseInt(time.split(":")[0], 10);
-        if (hour < 12) {
-          times.morning.push(time);
-        } else if (hour < 17) {
-          times.afternoon.push(time);
-        } else {
-          times.evening.push(time);
-        }
-      });
-
-      setAvailableTimes(times);
+      // Tạm thời sử dụng dữ liệu mẫu
+      setAvailableTimes([
+        "08:00",
+        "08:30",
+        "09:00",
+        "09:30",
+        "10:00",
+        "10:30",
+        "11:00",
+        "11:30",
+        "13:00",
+        "13:30",
+        "14:00",
+        "14:30",
+        "15:00",
+        "15:30",
+        "16:00",
+        "16:30",
+        "17:00",
+        "17:30",
+        "18:00",
+        "18:30",
+        "19:00",
+        "19:30",
+      ]);
     } catch (err) {
-      console.error("Failed to fetch doctor availability:", err);
-      setError("Failed to load available times. Please try again.");
-
-      // Fallback to default time slots for demo purposes
-      setAvailableTimes({
-        morning: [
-          "08:00",
-          "08:30",
-          "09:00",
-          "09:30",
-          "10:00",
-          "10:30",
-          "11:00",
-          "11:30",
-        ],
-        afternoon: [
-          "13:00",
-          "13:30",
-          "14:00",
-          "14:30",
-          "15:00",
-          "15:30",
-          "16:00",
-          "16:30",
-        ],
-        evening: ["17:00", "17:30", "18:00", "18:30", "19:00", "19:30"],
-      });
+      console.error("Không thể lấy lịch khám của bác sĩ:", err);
+      setError("Không thể tải các khung giờ khả dụng. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
@@ -193,24 +101,15 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
     }
   };
 
-  const isWeekend = (date: Date) => {
-    const day = date.getDay();
-    return day === 0 || day === 6;
-  };
-
   const shouldDisableDate = (date: Date) => {
-    // Disable past days, weekends, and dates more than 30 days in the future
+    // Vô hiệu hóa các ngày trong quá khứ và các ngày cách hơn 14 ngày (2 tuần) tính từ hiện tại
     const today = new Date();
-    const maxDate = addDays(today, 30);
+    const maxDate = addDays(today, 14);
 
-    return (
-      (isBefore(date, today) && !isToday(date)) ||
-      isWeekend(date) ||
-      isBefore(maxDate, date)
-    );
+    return (isBefore(date, today) && !isToday(date)) || isBefore(maxDate, date);
   };
 
-  // Disable time slots that are in the past for today
+  // Vô hiệu hóa các khung giờ đã qua trong ngày hôm nay
   const isTimeSlotDisabled = (time: string) => {
     if (!selectedDate || !isToday(selectedDate)) return false;
 
@@ -279,106 +178,53 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
                   </Box>
                 ) : (
                   <>
-                    {availableTimes.morning.length > 0 && (
-                      <>
-                        <Typography variant="subtitle2" sx={{ mt: 2 }}>
-                          {t("patient.appointments.morning")}
-                        </Typography>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: 1,
-                            mb: 2,
-                          }}
-                        >
-                          {availableTimes.morning.map((time) => (
-                            <Button
-                              key={time}
-                              variant={
-                                selectedTime === time ? "contained" : "outlined"
-                              }
-                              size="small"
-                              onClick={() => handleTimeSelect(time)}
-                              disabled={isTimeSlotDisabled(time)}
-                            >
-                              {time}
-                            </Button>
-                          ))}
-                        </Box>
-                      </>
-                    )}
-
-                    {availableTimes.afternoon.length > 0 && (
-                      <>
-                        <Typography variant="subtitle2" sx={{ mt: 2 }}>
-                          {t("patient.appointments.afternoon")}
-                        </Typography>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: 1,
-                            mb: 2,
-                          }}
-                        >
-                          {availableTimes.afternoon.map((time) => (
-                            <Button
-                              key={time}
-                              variant={
-                                selectedTime === time ? "contained" : "outlined"
-                              }
-                              size="small"
-                              onClick={() => handleTimeSelect(time)}
-                              disabled={isTimeSlotDisabled(time)}
-                            >
-                              {time}
-                            </Button>
-                          ))}
-                        </Box>
-                      </>
-                    )}
-
-                    {availableTimes.evening.length > 0 && (
-                      <>
-                        <Typography variant="subtitle2" sx={{ mt: 2 }}>
-                          {t("patient.appointments.evening")}
-                        </Typography>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: 1,
-                            mb: 2,
-                          }}
-                        >
-                          {availableTimes.evening.map((time) => (
-                            <Button
-                              key={time}
-                              variant={
-                                selectedTime === time ? "contained" : "outlined"
-                              }
-                              size="small"
-                              onClick={() => handleTimeSelect(time)}
-                              disabled={isTimeSlotDisabled(time)}
-                            >
-                              {time}
-                            </Button>
-                          ))}
-                        </Box>
-                      </>
-                    )}
-
-                    {availableTimes.morning.length === 0 &&
-                      availableTimes.afternoon.length === 0 &&
-                      availableTimes.evening.length === 0 && (
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns:
+                          "repeat(auto-fill, minmax(70px, 1fr))",
+                        gap: 1,
+                        mb: 2,
+                        minHeight: "200px", // Fixed minimum height
+                        maxHeight: "300px", // Maximum height
+                        overflowY: "auto", // Add scrolling if needed
+                        alignContent: "start", // Start from the top
+                        padding: 1,
+                        border: "1px solid #eee",
+                        borderRadius: 1,
+                      }}
+                    >
+                      {availableTimes.length > 0 ? (
+                        availableTimes.map((time) => (
+                          <Button
+                            key={time}
+                            variant={
+                              selectedTime === time ? "contained" : "outlined"
+                            }
+                            size="small"
+                            onClick={() => handleTimeSelect(time)}
+                            disabled={isTimeSlotDisabled(time)}
+                            sx={{
+                              height: "36px", // Fixed height for buttons
+                              margin: "4px 0", // Consistent vertical spacing
+                            }}
+                          >
+                            {time}
+                          </Button>
+                        ))
+                      ) : (
                         <Typography
                           color="text.secondary"
-                          sx={{ py: 3, textAlign: "center" }}
+                          sx={{
+                            py: 3,
+                            textAlign: "center",
+                            gridColumn: "1 / -1",
+                          }}
                         >
                           {t("patient.appointments.no_available_slots")}
                         </Typography>
                       )}
+                    </Box>
                   </>
                 )}
               </Box>
