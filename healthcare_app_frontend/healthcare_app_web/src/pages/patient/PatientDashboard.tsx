@@ -204,7 +204,7 @@ const PatientDashboard: React.FC = () => {
                       <Button
                         variant="outlined"
                         onClick={() =>
-                          handleViewMedicalRecord(record.id, record.title)
+                            handleViewMedicalRecord(record.id, record.title)
                         }
                       >
                         {t("common.view")}

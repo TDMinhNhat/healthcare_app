@@ -61,11 +61,16 @@ export default function LoginPage() {
             // lưu thông tin user vào localStorage
             localStorage.setItem("user", JSON.stringify(userData));
             toast.success("Login successful!");
+
+            sessionStorage.setItem("user", JSON.stringify(userData));
+
             // console.log("userData", userData);
-            if (userData.specialization) {
+            if (userData.role === "doctor") {
               setTimeout(() => navigate(ROUTING.DOCTOR), 1500); // Redirect after showing toast
-            } else {
+            } else if(userData.role === "patient") {
               setTimeout(() => navigate(ROUTING.PATIENT), 1500); // Redirect after showing toast
+            } else {
+              setTimeout(() => navigate(ROUTING.ADMIN), 1500);
             }
           } else {
             toast.error(
