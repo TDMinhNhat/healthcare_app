@@ -1,6 +1,7 @@
 package dev.skyherobrine.authenticate.controllers;
 
 import dev.skyherobrine.authenticate.dtos.WorkScheduleDTO;
+import dev.skyherobrine.authenticate.feigns.AppointmentFeign;
 import dev.skyherobrine.authenticate.models.mariadb.Response;
 import dev.skyherobrine.authenticate.models.mongodb.WorkSchedule;
 import dev.skyherobrine.authenticate.repositories.mongodb.WorkScheduleRepository;
@@ -10,6 +11,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/authenticate/api/v1/work_schedule")
 @Slf4j
@@ -17,10 +23,12 @@ public class WorkScheduleController {
 
     private final WorkScheduleService workScheduleService;
     private final WorkScheduleRepository workScheduleRepository;
+    private final AppointmentFeign appointmentFeign;
 
-    public WorkScheduleController(WorkScheduleService workScheduleService, WorkScheduleRepository workScheduleRepository) {
+    public WorkScheduleController(WorkScheduleService workScheduleService, WorkScheduleRepository workScheduleRepository, AppointmentFeign appointmentFeign) {
         this.workScheduleService = workScheduleService;
         this.workScheduleRepository = workScheduleRepository;
+        this.appointmentFeign = appointmentFeign;
     }
 
     @PostMapping
@@ -51,7 +59,13 @@ public class WorkScheduleController {
     public ResponseEntity<Response> getWorkScheduleByDoctor(@RequestParam String doctorId) {
         try {
             log.info("Work Schedule: Call the api get work schedule by doctor");
-            var result = workScheduleRepository.findAllByDoctor_UserId(doctorId);
+            List<Map<String,Object>> result = new ArrayList<>();
+            workScheduleRepository.findAllByDoctor_UserId(doctorId).forEach(workSchedule -> {
+                Map<String,Object> data = new HashMap<>();
+                data.put("workSchedule", workSchedule);
+                data.put("isAvailable", appointmentFeign.getAppointmentByWorkSchedule(workSchedule.getId().toString()).getBody().getData() != null);
+                result.add(data);
+            });
 
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),

@@ -78,4 +78,33 @@ public class BookingController {
                 ));
         }
     }
+
+    @GetMapping("/work_schedule")
+    public ResponseEntity<Response> getAppointmentByWorkSchedule(@RequestParam String workSchedule) {
+        try {
+            log.info("Booking: Call the api get appointment by work schedule");
+            Appointment result = ar.findByWorkSchedule(Long.parseLong(workSchedule)).orElse(null);
+            if(result != null) {
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.OK.value(),
+                        "Get appointment by work schedule successfully",
+                        result
+                ));
+            } else {
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.NOT_FOUND.value(),
+                        "The appointment wasn't found",
+                        null
+                ));
+            }
+        } catch (Exception e) {
+            log.error("Booking: The api return an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api get appointment by work schedule was return an error",
+                    e.getMessage()
+            ));
+        }
+    }
 }
