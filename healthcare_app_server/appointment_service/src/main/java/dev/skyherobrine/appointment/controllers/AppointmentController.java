@@ -5,6 +5,7 @@ import dev.skyherobrine.appointment.feigns.WorkScheduleFeign;
 import dev.skyherobrine.appointment.models.Response;
 import dev.skyherobrine.appointment.models.mongodb.Appointment;
 import dev.skyherobrine.appointment.repositories.mongodb.AppointmentRepository;
+import dev.skyherobrine.appointment.services.AppointmentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +23,33 @@ public class AppointmentController {
 
     private final AppointmentRepository appointmentRepository;
     private final WorkScheduleFeign workScheduleFeign;
+    private final AppointmentService appointmentService;
 
-    public AppointmentController(AppointmentRepository appointmentRepository, WorkScheduleFeign workScheduleFeign) {
+    public AppointmentController(AppointmentRepository appointmentRepository, WorkScheduleFeign workScheduleFeign, AppointmentService appointmentService) {
         this.appointmentRepository = appointmentRepository;
         this.workScheduleFeign = workScheduleFeign;
+        this.appointmentService = appointmentService;
+    }
+
+    @GetMapping("/doctor")
+    public ResponseEntity<Response> getAppointmentDoctor(@RequestParam String doctorId) {
+        try {
+            log.info("Appointment: Call the api to get doctor's appointments");
+            var result = appointmentService.getAppointmentByDoctor(doctorId);
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Get the appointments by doctor id",
+                    result
+            ));
+        } catch (Exception e) {
+            log.error("Appointment: The api thrown an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
+                    null
+            ));
+        }
     }
 
     @GetMapping("/doctor/status")
