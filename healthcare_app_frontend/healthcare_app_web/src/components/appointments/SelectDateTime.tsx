@@ -12,7 +12,12 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useTranslation } from "react-i18next";
 import { format, addDays, isBefore, isToday, addMonths } from "date-fns";
-// import { getDoctorAvailability } from "../../services/doctor_service";
+import { getWorkScheduleTimeSlot } from "../../services/workSchedule_service";
+import {
+  formatDateToString,
+  parseDateTimeFromString,
+  formatTime,
+} from "../../utils/dateUtils";
 
 interface SelectDateTimeProps {
   doctor: any;
@@ -53,31 +58,33 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
 
       // setAvailableTimes(sortedTimes);
 
+      const result = await getWorkScheduleTimeSlot(
+        doctor.userId,
+        formatDateToString(date)
+      )
+        .then((response) => response.data.data)
+        .catch((error) => {
+          console.log(error);
+          return null;
+        });
+
+      const data = result.map((item: object) => {
+        const getStart = parseDateTimeFromString(item.workSchedule.start);
+        const getEnd = parseDateTimeFromString(item.workSchedule.end);
+
+        return {
+          isAvailable: item.isAvailable,
+          workSchedule: item.workSchedule.id,
+          time: `${formatTime(getStart.getHours().toString())}:${formatTime(
+            getStart.getMinutes().toString()
+          )} - ${formatTime(getEnd.getHours().toString())}:${formatTime(
+            getEnd.getMinutes().toString()
+          )}`,
+        };
+      });
+
       // Tạm thời sử dụng dữ liệu mẫu
-      setAvailableTimes([
-        "08:00",
-        "08:30",
-        "09:00",
-        "09:30",
-        "10:00",
-        "10:30",
-        "11:00",
-        "11:30",
-        "13:00",
-        "13:30",
-        "14:00",
-        "14:30",
-        "15:00",
-        "15:30",
-        "16:00",
-        "16:30",
-        "17:00",
-        "17:30",
-        "18:00",
-        "18:30",
-        "19:00",
-        "19:30",
-      ]);
+      setAvailableTimes(data);
     } catch (err) {
       console.error("Không thể lấy lịch khám của bác sĩ:", err);
       setError("Không thể tải các khung giờ khả dụng. Vui lòng thử lại.");
@@ -110,11 +117,17 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   };
 
   // Vô hiệu hóa các khung giờ đã qua trong ngày hôm nay
-  const isTimeSlotDisabled = (time: string) => {
+  const isTimeSlotDisabled = (time: string, isAvailable: boolean) => {
+    if (isAvailable === false) {
+      return false;
+    }
+
+    const getTimeStart = time.split("-")[0];
+
     if (!selectedDate || !isToday(selectedDate)) return false;
 
     const now = new Date();
-    const [hours, minutes] = time.split(":").map(Number);
+    const [hours, minutes] = getTimeStart.split(":").map(Number);
     return (
       now.getHours() > hours ||
       (now.getHours() === hours && now.getMinutes() >= minutes)
@@ -197,19 +210,22 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
                       {availableTimes.length > 0 ? (
                         availableTimes.map((time) => (
                           <Button
-                            key={time}
+                            key={time.time}
                             variant={
                               selectedTime === time ? "contained" : "outlined"
                             }
-                            size="small"
+                            size="medium"
                             onClick={() => handleTimeSelect(time)}
-                            disabled={isTimeSlotDisabled(time)}
+                            disabled={isTimeSlotDisabled(
+                              time.time,
+                              time.isAvailable
+                            )}
                             sx={{
+                              width: "150px",
                               height: "36px", // Fixed height for buttons
-                              margin: "4px 0", // Consistent vertical spacing
                             }}
                           >
-                            {time} - 45 phút
+                            {time.time}
                           </Button>
                         ))
                       ) : (

@@ -16,7 +16,6 @@ import SelectDateTime from "./SelectDateTime";
 import DoctorDetails from "./DoctorDetails";
 import ConfirmAppointment from "./ConfirmAppointment";
 import { createAppointment } from "../../services/booking_service";
-import { formatDateTimeToString } from "../../utils/dateUtils";
 
 interface BookAppointmentProps {
   onClose: () => void;
@@ -69,7 +68,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
     handleNext();
   };
 
-  const handleConfirm = async () => {
+  const handleConfirm = async () => {   
     if (!selectedDate || !selectedTime || !selectedDoctor || !patientId) {
       setError("Missing required information for booking");
       return;
@@ -79,18 +78,10 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
       setLoading(true);
       setError(null);
 
-      // Create a combined date object and format it using the utility function
-      const [hours, minutes] = selectedTime.split(":").map(Number);
-      const dateObj = new Date(selectedDate);
-      dateObj.setHours(hours, minutes, 0, 0);
-
-      const formattedDateTime = formatDateTimeToString(dateObj);
-
       await createAppointment(
-        selectedDoctor.userId,
         patientId,
         note,
-        formattedDateTime
+        selectedTime.workSchedule
       );
 
       handleNext(); // Move to confirmation step
@@ -160,7 +151,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
               {selectedDate ? selectedDate.toLocaleDateString() : ""}
             </Typography>
             <Typography variant="body1">
-              {t("patient.appointments.time")}: {selectedTime}
+              {t("patient.appointments.time")}: {selectedTime.time}
             </Typography>
             <Typography variant="body1">
               {t("patient.appointments.service")}: {selectedService.name}
