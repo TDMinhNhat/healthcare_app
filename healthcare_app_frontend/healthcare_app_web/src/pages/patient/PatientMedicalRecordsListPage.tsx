@@ -1,21 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Button,
-} from "@mui/material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import EventIcon from "@mui/icons-material/Event";
-import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
+import { Box, Typography, Paper, Grid, CircularProgress } from "@mui/material";
 import { format } from "date-fns";
 import MedicalRecordModal from "../../components/medical/MedicalRecordModal";
+import MedicalRecordCard, {
+  MedicalRecord,
+} from "../../components/medical/MedicalRecordCard";
 
 // Mock data for medical records
 const MOCK_MEDICAL_RECORDS = [
@@ -48,7 +38,7 @@ const MOCK_MEDICAL_RECORDS = [
 const PatientMedicalRecordsListPage: React.FC = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
-  const [medicalRecords, setMedicalRecords] = useState<any[]>([]);
+  const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([]);
 
   // Add state for modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -134,61 +124,12 @@ const PatientMedicalRecordsListPage: React.FC = () => {
         <Grid container spacing={3}>
           {medicalRecords.map((record) => (
             <Grid item xs={12} key={record.id}>
-              <Card>
-                <CardContent>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} md={8}>
-                      <Typography variant="h6" gutterBottom>
-                        {record.diagnosisDisease}
-                      </Typography>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", mb: 1 }}
-                      >
-                        <LocalHospitalIcon
-                          sx={{ mr: 1, color: "primary.main" }}
-                        />
-                        <Typography variant="body2">
-                          {record.doctor} - {record.specialization}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <EventIcon sx={{ mr: 1, color: "primary.main" }} />
-                        <Typography variant="body2">
-                          {formatDate(record.appointmentDate)}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    <Grid
-                      item
-                      xs={12}
-                      md={4}
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "flex-end",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Chip
-                        label={t(
-                          `patient.appointments.status.${record.status}`,
-                          record.status
-                        )}
-                        color="success"
-                        size="small"
-                        sx={{ mb: 1 }}
-                      />
-                      <Button
-                        variant="outlined"
-                        startIcon={<VisibilityIcon />}
-                        onClick={() => handleViewRecord(record.id)}
-                      >
-                        {t("common.view_details", "View Details")}
-                      </Button>
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
+              <MedicalRecordCard
+                record={record}
+                onViewRecord={handleViewRecord}
+                formatDate={formatDate}
+                t={t}
+              />
             </Grid>
           ))}
         </Grid>

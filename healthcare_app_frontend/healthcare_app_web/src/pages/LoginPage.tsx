@@ -57,9 +57,9 @@ export default function LoginPage() {
         if (response.status === 200 && response.data.code === 200) {
           const userData = response.data.data;
           if (userData) {
-            dispatch(setUser(userData)); // Remove the nested object structure
+            dispatch(setUser(userData.user));
             // lưu thông tin user vào localStorage
-            localStorage.setItem("user", JSON.stringify(userData));
+            localStorage.setItem("user", JSON.stringify(userData.user));
             toast.success("Login successful!");
 
             sessionStorage.setItem("user", JSON.stringify(userData));
@@ -67,7 +67,7 @@ export default function LoginPage() {
             // console.log("userData", userData);
             if (userData.role === "doctor") {
               setTimeout(() => navigate(ROUTING.DOCTOR), 1500); // Redirect after showing toast
-            } else if(userData.role === "patient") {
+            } else if (userData.role === "patient") {
               setTimeout(() => navigate(ROUTING.PATIENT), 1500); // Redirect after showing toast
             } else {
               setTimeout(() => navigate(ROUTING.ADMIN), 1500);

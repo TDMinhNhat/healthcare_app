@@ -13,7 +13,11 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useTranslation } from "react-i18next";
 import { format, addDays, isBefore, isToday, addMonths } from "date-fns";
 import { getWorkScheduleTimeSlot } from "../../services/workSchedule_service";
-import { formatDateToString, parseDateTimeFromString, formatTime } from "../../utils/dateUtils";
+import {
+  formatDateToString,
+  parseDateTimeFromString,
+  formatTime,
+} from "../../utils/dateUtils";
 
 interface SelectDateTimeProps {
   doctor: any;
@@ -56,8 +60,12 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
         return {
           isAvailable: item.isAvailable,
           workSchedule: item.workSchedule.id,
-          time: `${formatTime(getStart.getHours().toString())}:${formatTime(getStart.getMinutes().toString())} - ${formatTime(getEnd.getHours().toString())}:${formatTime(getEnd.getMinutes().toString())}`
-        }  
+          time: `${formatTime(getStart.getHours().toString())}:${formatTime(
+            getStart.getMinutes().toString()
+          )} - ${formatTime(getEnd.getHours().toString())}:${formatTime(
+            getEnd.getMinutes().toString()
+          )}`,
+        };
       });
 
       data.sort((a: object, b: object) => {
@@ -200,7 +208,10 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
                             }
                             size="medium"
                             onClick={() => handleTimeSelect(time)}
-                            disabled={isTimeSlotDisabled(time.time, time.isAvailable)}
+                            disabled={isTimeSlotDisabled(
+                              time.time,
+                              time.isAvailable
+                            )}
                             sx={{
                               width: "150px",
                               height: "36px", // Fixed height for buttons

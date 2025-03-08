@@ -46,8 +46,7 @@ export const DoctorEducationSection: React.FC<DoctorEducationProps> = ({
                 />
               </Box>
               <Typography variant="body2" color="text.secondary">
-                {new Date(edu.joinedDate).toLocaleDateString()} -{" "}
-                {new Date(edu.graduateDate).toLocaleDateString()}
+                {edu.joinDate} - {edu.graduateDate}
               </Typography>
             </Box>
           </Box>

@@ -33,7 +33,7 @@ export const DoctorCertificatesSection: React.FC<DoctorCertificatesProps> = ({
             <Box>
               <Typography variant="h6">{cert.certName}</Typography>
               <Typography variant="body2" color="text.secondary">
-                Issue date: {new Date(cert.issueDate).toLocaleDateString()}
+                Issue date: {cert.issueDate}
               </Typography>
             </Box>
           </Paper>

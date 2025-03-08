@@ -1,87 +1,13 @@
 import React, { useState, useEffect } from "react";
-import {
-  Container,
-  Grid,
-  Box,
-  Typography,
-  Button,
-  Paper,
-  IconButton,
-  Alert,
-} from "@mui/material";
+import { Container, Grid, Box, IconButton, Alert } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 
 import { PersonalInfoSection } from "../../components/profile/PersonalInfoSection";
-import { PatientMedicalRecordsSection } from "../../components/patient/PatientMedicalRecordsSection";
-import { PatientAppointmentsSection } from "../../components/patient/PatientAppointmentsSection";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
 import AvatarUploadModal from "../../components/profile/AvatarUploadModal";
-import { Appointment } from "../../types/appointment";
 import { useTranslation } from "react-i18next";
-import { Patient } from "../../types";
 import { getPatientInfo } from "../../services/user_service";
-
-// Mock data for medical records and appointments as they're not in the API response
-const mockMedicalRecordsAndAppointments = {
-  medicalRecords: [
-    {
-      id: 101,
-      diagnosisDisease: "Hypertension",
-      note: "Patient has elevated blood pressure. Recommended lifestyle changes and prescribed medication.",
-      createdAt: "2023-06-01T14:30:00",
-      doctorName: "Dr. John Smith",
-    },
-    {
-      id: 102,
-      diagnosisDisease: "Seasonal Allergies",
-      note: "Patient experiencing allergic rhinitis. Prescribed antihistamines and nasal spray.",
-      createdAt: "2023-04-12T10:15:00",
-      doctorName: "Dr. Laura Chen",
-    },
-  ],
-  appointments: [
-    {
-      id: 201,
-      patient: {
-        id: 2,
-        firstName: "Emma",
-        lastName: "Johnson",
-        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      },
-      doctor: {
-        id: 101,
-        firstName: "John",
-        lastName: "Smith",
-        specialization: "Cardiologist",
-        avatar: "https://randomuser.me/api/portraits/men/41.jpg",
-      },
-      note: "Follow-up for hypertension",
-      start: "2023-07-15T09:00:00",
-      end: "2023-07-15T09:30:00",
-      status: "upcoming" as const,
-    },
-    {
-      id: 202,
-      patient: {
-        id: 2,
-        firstName: "Emma",
-        lastName: "Johnson",
-        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      },
-      doctor: {
-        id: 102,
-        firstName: "Laura",
-        lastName: "Chen",
-        specialization: "Allergist",
-        avatar: "https://randomuser.me/api/portraits/women/68.jpg",
-      },
-      note: "Seasonal allergies consultation",
-      start: "2023-04-12T10:00:00",
-      end: "2023-04-12T10:30:00",
-      status: "completed" as const,
-    },
-  ],
-};
+import { useSelector } from "react-redux";
 
 const PatientProfilePage: React.FC = () => {
   const { t } = useTranslation();
@@ -90,22 +16,23 @@ const PatientProfilePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+  const user = useSelector((state: any) => state.user.user);
 
   useEffect(() => {
+    // Only fetch patient data for display
     const fetchPatientData = async () => {
       setLoading(true);
       try {
         // Fetch patient data using the userId - in a real app, you might get this from authentication
-        const userId = "20250228192235-63089-20000102"; // This would typically come from auth context
-        const response = await getPatientInfo(userId);
+        if (!user?.userId) {
+          setError("User not found");
+          setLoading(false);
+          return;
+        }
+        const response = await getPatientInfo(user.userId);
 
         if (response.data && response.data.code === 200) {
-          // Combine API patient data with mock medical records and appointments
-          setPatientData({
-            ...response.data.data,
-            medicalRecords: mockMedicalRecordsAndAppointments.medicalRecords,
-            appointments: mockMedicalRecordsAndAppointments.appointments,
-          });
+          setPatientData(response.data.data);
         } else {
           setError("Failed to retrieve patient data");
         }
@@ -118,8 +45,9 @@ const PatientProfilePage: React.FC = () => {
     };
 
     fetchPatientData();
-  }, []);
+  }, [user.userId]);
 
+  // Modal control functions - no API calls
   const handleOpenEditModal = () => {
     setIsEditModalOpen(true);
   };
@@ -136,23 +64,23 @@ const PatientProfilePage: React.FC = () => {
     setIsAvatarModalOpen(false);
   };
 
+  // Only updates local state for UI preview
+  // In a real application, this would make an API call to update the profile
   const handleSaveProfile = (updatedData: any) => {
-    // Ensure we handle the case where the user might not have an address initially
     const updatedPatientData = {
       ...patientData,
       ...updatedData,
-      // If address was null and is now populated, make sure the updated structure is correct
       address: updatedData.address || patientData.address || null,
     };
-
     setPatientData(updatedPatientData);
-    console.log("Saving updated profile data:", updatedData);
+    console.log("Profile data updated locally (no API call):", updatedData);
   };
 
+  // Only updates local state for UI preview
+  // In a real application, this would make an API call to update the avatar
   const handleSaveAvatar = (newAvatar: string) => {
-    // Here you would make an API call to update the avatar
     setPatientData({ ...patientData, avatar: newAvatar });
-    console.log("Saving updated avatar:", newAvatar);
+    console.log("Avatar updated locally (no API call):", newAvatar);
   };
 
   if (loading) {
@@ -203,25 +131,6 @@ const PatientProfilePage: React.FC = () => {
               <EditIcon />
             </IconButton>
           </Box>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          {patientData.appointments && patientData.appointments.length > 0 ? (
-            <PatientAppointmentsSection
-              appointments={patientData.appointments}
-            />
-          ) : (
-            <Alert severity="info">{t("appointments.noAppointments")}</Alert>
-          )}
-        </Grid>
-        <Grid item xs={12} md={6}>
-          {patientData.medicalRecords &&
-          patientData.medicalRecords.length > 0 ? (
-            <PatientMedicalRecordsSection
-              records={patientData.medicalRecords}
-            />
-          ) : (
-            <Alert severity="info">{t("medicalRecords.noRecords")}</Alert>
-          )}
         </Grid>
       </Grid>
 

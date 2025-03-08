@@ -10,9 +10,13 @@ interface DoctorExperienceProps {
 }
 
 export const DoctorExperienceSection: React.FC<DoctorExperienceProps> = ({
-  experiences,
-  specialization,
+  experiences = [],
+  specialization = "Not specified",
 }) => {
+  console.log("DoctorExperienceSection -> experiences", experiences);
+
+  const validExperiences = Array.isArray(experiences) ? experiences : [];
+
   return (
     <ProfileCard title="Professional Experience">
       <Box mb={2}>
@@ -22,31 +26,50 @@ export const DoctorExperienceSection: React.FC<DoctorExperienceProps> = ({
         <Chip label={specialization} color="primary" />
       </Box>
       <Divider sx={{ my: 2 }} />
-      {experiences.map((exp) => (
-        <Box key={exp.id} mb={3}>
-          <Box display="flex" alignItems="flex-start">
-            <WorkIcon sx={{ mr: 1, color: "primary.main" }} />
-            <Box>
-              <Typography variant="h6">{exp.compName}</Typography>
-              <Typography variant="subtitle1" color="text.secondary">
-                {exp.specialization}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {new Date(exp.startDate).toLocaleDateString()} -{" "}
-                {exp.endDate
-                  ? new Date(exp.endDate).toLocaleDateString()
-                  : "Present"}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {exp.compAddress.city}, {exp.compAddress.country}
-              </Typography>
-              <Typography variant="body1" mt={1}>
-                {exp.description}
-              </Typography>
+      {validExperiences && validExperiences.length > 0 ? (
+        validExperiences.map((exp) => (
+          <Box key={exp.id || `exp-${Math.random()}`} mb={3}>
+            <Box display="flex" alignItems="flex-start">
+              <WorkIcon sx={{ mr: 1, color: "primary.main" }} />
+              <Box>
+                <Typography variant="h6">
+                  {exp.companyName || "Unknown company"}
+                </Typography>
+                <Typography variant="subtitle1" color="text.secondary">
+                  {exp.specialization || "General Practice"}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {exp.startDate || "Unknown"} -{" "}
+                  {exp.endDate && exp.endDate ? exp.endDate : "Present"}
+                </Typography>
+                {(exp.compAddress?.city || exp.compAddress?.country) && (
+                  <Typography variant="body2" color="text.secondary">
+                    {exp.compAddress?.city || ""}
+                    {exp.compAddress?.city && exp.compAddress?.country
+                      ? ", "
+                      : ""}
+                    {exp.compAddress?.country || ""}
+                  </Typography>
+                )}
+                {exp.description && (
+                  <Typography variant="body1" mt={1}>
+                    {exp.description}
+                  </Typography>
+                )}
+              </Box>
             </Box>
           </Box>
+        ))
+      ) : (
+        <Box>
+          <Typography variant="body2" color="text.secondary">
+            No experience information available
+          </Typography>
+          <Typography variant="caption" color="error">
+            Debug info: {JSON.stringify(experiences)}
+          </Typography>
         </Box>
-      ))}
+      )}
     </ProfileCard>
   );
 };

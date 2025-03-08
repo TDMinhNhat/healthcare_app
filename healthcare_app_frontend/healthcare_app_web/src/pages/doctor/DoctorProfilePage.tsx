@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Grid, Box, IconButton } from "@mui/material";
+import { Container, Grid, Box, IconButton, Alert } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import { PersonalInfoSection } from "../../components/profile/PersonalInfoSection";
 import { DoctorExperienceSection } from "../../components/doctor/DoctorExperienceSection";
@@ -10,9 +10,12 @@ import AvatarUploadModal from "../../components/profile/AvatarUploadModal";
 import { Doctor } from "../../types/doctor";
 import { useTranslation } from "react-i18next";
 import { Diploma } from "../../types";
+import { useSelector } from "react-redux";
+import { getDoctorInfo } from "../../services/user_service";
+import { log } from "console";
 
 // Mock data - would normally come from API
-const mockDoctorData: Doctor = {
+const mockDoctorData: any = {
   id: 1,
   userId: "dr123",
   firstName: "John",
@@ -78,7 +81,6 @@ const mockDoctorData: Doctor = {
       doctorId: 1,
       address: {
         city: "Metropolis",
-        country: "USA",
         id: 3,
         number: "123",
         street: "Medical Street",
@@ -93,7 +95,6 @@ const mockDoctorData: Doctor = {
       doctorId: 1,
       address: {
         city: "Metropolis",
-        country: "USA",
         id: 4,
         number: "123",
         street: "Medical Street",
@@ -106,20 +107,42 @@ const mockDoctorData: Doctor = {
 
 const DoctorProfilePage: React.FC = () => {
   const { t } = useTranslation();
-  const [doctorData, setDoctorData] = useState(mockDoctorData);
-  const [loading, setLoading] = useState(false);
+  const [doctorData, setDoctorData] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const user = useSelector((state: any) => state.user.user);
 
   useEffect(() => {
-    // Here you would fetch the doctor data from the API
-    // For now we're using the mock data
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
-  }, []);
+    // Fetch doctor data from API
+    const fetchDoctorData = async () => {
+      setLoading(true);
+      try {
+        if (!user?.userId) {
+          setError("User not found");
+          setLoading(false);
+          return;
+        }
+        const response = await getDoctorInfo(user.userId);
+        console.log("response", response.data.data);
+        if (response.data && response.data.code === 200) {
+          setDoctorData(response.data.data);
+          console.log("Doctor exp", response.data.data.experiences);
+        } else {
+          setError("Failed to retrieve doctor data");
+        }
+      } catch (error) {
+        console.error("Error fetching doctor data:", error);
+        setError("Error loading doctor data. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchDoctorData();
+  }, [user?.userId]);
+  console.log("DoctorProfilePage -> doctorData", doctorData);
   const handleOpenEditModal = () => {
     setIsEditModalOpen(true);
   };
@@ -153,20 +176,30 @@ const DoctorProfilePage: React.FC = () => {
     return <div>{t("common.loading")}</div>;
   }
 
+  if (error) {
+    return <Alert severity="error">{error}</Alert>;
+  }
+
+  if (!doctorData) {
+    return <Alert severity="info">{t("common.noData")}</Alert>;
+  }
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12}>
           <Box sx={{ position: "relative" }}>
             <PersonalInfoSection
-              firstName={doctorData.firstName}
-              lastName={doctorData.lastName}
-              email={doctorData.email}
-              phone={doctorData.phone}
-              dob={doctorData.dob}
-              gender={String(doctorData.sex)}
-              address={doctorData.address}
-              avatar={doctorData.avatar}
+              firstName={
+                doctorData.doctor?.firstName || t("common.notAvailable")
+              }
+              lastName={doctorData.doctor?.lastName || t("common.notAvailable")}
+              email={doctorData.doctor?.email || t("common.notAvailable")}
+              phone={doctorData.doctor?.phone || t("common.notAvailable")}
+              dob={doctorData.doctor?.dob || t("common.notAvailable")}
+              sex={doctorData.doctor?.sex || t("common.notAvailable")}
+              address={doctorData.doctor?.address || null}
+              avatar={doctorData.doctor?.avatar || "/default-avatar.png"}
               onEditAvatar={handleOpenAvatarModal}
               hideEditButton={false} // Changed to false to show edit button
             />
@@ -190,14 +223,22 @@ const DoctorProfilePage: React.FC = () => {
               <EditIcon />
             </IconButton>
           </Box>
-          <DoctorCertificatesSection certificates={doctorData.certificates} />
         </Grid>
         <Grid item xs={12} md={6}>
           <DoctorExperienceSection
-            experiences={[doctorData.experience]}
-            specialization={doctorData.specialization}
+            experiences={doctorData.experiences || []}
+            specialization={
+              doctorData.doctor?.typeDisease?.name || t("common.notAvailable")
+            }
           />
-          <DoctorEducationSection education={doctorData.educations} />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <DoctorEducationSection education={doctorData.educations || []} />
+          <Box sx={{ mt: 3 }}>
+            <DoctorCertificatesSection
+              certificates={doctorData.certificates || []}
+            />
+          </Box>
         </Grid>
       </Grid>
 
@@ -206,19 +247,19 @@ const DoctorProfilePage: React.FC = () => {
         onClose={handleCloseEditModal}
         onSave={handleSaveProfile}
         userData={{
-          firstName: doctorData.firstName,
-          lastName: doctorData.lastName,
-          email: doctorData.email,
-          phone: doctorData.phone,
-          dob: doctorData.dob,
-          sex: doctorData.sex,
-          address: doctorData.address,
+          firstName: doctorData.doctor?.firstName || "",
+          lastName: doctorData.doctor?.lastName || "",
+          email: doctorData.doctor?.email || "",
+          phone: doctorData.doctor?.phone || "",
+          dob: doctorData.doctor?.dob || "",
+          sex: doctorData.doctor?.sex,
+          address: doctorData.doctor?.address || null,
         }}
       />
 
       <AvatarUploadModal
         open={isAvatarModalOpen}
-        currentAvatar={doctorData.avatar}
+        currentAvatar={doctorData.doctor?.avatar || "/default-avatar.png"}
         onClose={handleCloseAvatarModal}
         onSave={handleSaveAvatar}
       />
