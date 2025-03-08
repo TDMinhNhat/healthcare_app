@@ -84,21 +84,21 @@ const DoctorAppointmentPage = () => {
             <DoctorAppointmentList
               type="upcoming"
               status={["WAITING", "IN_PROGRESS"]}
-              doctorId={user?.id || ""}
+              doctorId={user?.user.userId || ""}
             />
           </TabPanel>
           <TabPanel value={tabValue} index={1}>
             <DoctorAppointmentList
               type="completed"
               status="DONE"
-              doctorId={user?.id || ""}
+              doctorId={user?.user.userId || ""}
             />
           </TabPanel>
           <TabPanel value={tabValue} index={2}>
             <DoctorAppointmentList
               type="cancelled"
               status="CANCELLED"
-              doctorId={user?.id || ""}
+              doctorId={user?.user.userId || ""}
             />
           </TabPanel>
         </Box>

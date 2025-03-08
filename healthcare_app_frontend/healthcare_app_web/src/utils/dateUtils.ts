@@ -93,3 +93,7 @@ export const formatTime = (time: string): string => {
     return time;
   }
 }
+
+export const formatTimeFromDateTime = (dateTime: Date): string => {
+  return `${formatTime(dateTime.getHours().toString())}:${formatTime(dateTime.getMinutes().toString())}`;
+}

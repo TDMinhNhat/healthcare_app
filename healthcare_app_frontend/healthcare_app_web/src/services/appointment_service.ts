@@ -11,13 +11,21 @@ export const getAppointmentPatient = async (userId: string) => {
   return response;
 };
 
-export const getAppointmentDoctor = async (userId: string) => {
-  const response = await axiosConfig.get(`${prefix}/doctor`, {
+export const getAppointmentStatusWithDoctorId = async (doctorId: string, status: string) => {
+  return await axiosConfig.get(`${prefix}/doctor/status`, {
     params: {
-      userId: userId,
+      "doctorId": doctorId,
+      "status": status
+    }
+  })
+}
+
+export const getAppointmentDoctor = async (doctorId: string) => {
+  return await axiosConfig.get(`${prefix}/doctor`, {
+    params: {
+      "doctorId": doctorId,
     },
   });
-  return response;
 };
 
 export const getAppoinmentStatusWithPatientId = async (

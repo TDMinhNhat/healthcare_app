@@ -32,7 +32,8 @@ import MenuItem from "@mui/material/MenuItem";
 import { useNavigate } from "react-router";
 import { ROUTING } from "../../constants/routing";
 import MedicalRecordModal from "../medical/MedicalRecordModal";
-// import { getAppointmentStatusWithDoctorId } from "../../services/appointment_service";
+import { getAppointmentDoctor, getAppointmentStatusWithDoctorId } from "../../services/appointment_service";
+import { parseDateTimeFromString, formatTimeFromDateTime } from "../../utils/dateUtils";
 
 // Mock data for doctor appointments
 const MOCK_DOCTOR_APPOINTMENTS: {
@@ -350,13 +351,62 @@ const DoctorAppointmentList: React.FC<DoctorAppointmentListProps> = ({
 
         // Sử dụng mock data và lọc theo status
         if (Array.isArray(status)) {
-          allAppointments = MOCK_DOCTOR_APPOINTMENTS.filter((appointment) =>
-            status.includes(appointment.appointment.status)
-          );
+          const result = await getAppointmentDoctor(doctorId).then(response => response.data.data).catch(error => {
+            console.log(error);
+            return null;
+          })
+
+          allAppointments = result.map((item: object) => ({
+            "patient": {
+              "id": item.patient.id,
+              "userId": item.patient.userId,
+              "firstName": item.patient.firstName,
+              "lastName": item.patient.lastName,
+              "dateOfBirth": item.patient.dob,
+              "gender": item.patient.sex ? "Nữ" : "Nam",
+              "avatar": item.patient.avatar
+            },
+            "appointment": {
+              "id": item.appointment.id,
+              "patient": item.appointment.patient,
+              "doctor": doctorId,
+              "note": item.appointment.note,
+              "roomId": item.appointment.roomId,
+              "start": formatTimeFromDateTime(parseDateTimeFromString(item.appointment.start)),
+              "end": formatTimeFromDateTime(parseDateTimeFromString(item.appointment.end)),
+              "createdAt": item.appointment.createdAt,
+              "status": item.appointment.status
+            }
+          }))
+
         } else {
-          allAppointments = MOCK_DOCTOR_APPOINTMENTS.filter(
-            (appointment) => appointment.appointment.status === status
-          );
+          const result = await getAppointmentStatusWithDoctorId(doctorId, status).then(response => response.data.data).catch(error => {
+            console.log(error);
+            return null;
+          })
+
+          allAppointments = result.map((item: object) => ({
+            "patient": {
+              "id": item.patient.id,
+              "userId": item.patient.userId,
+              "firstName": item.patient.firstName,
+              "lastName": item.patient.lastName,
+              "dateOfBirth": item.patient.dob,
+              "gender": item.patient.sex ? "Nữ" : "Nam",
+              "avatar": item.patient.avatar
+            },
+            "appointment": {
+              "id": item.appointment.id,
+              "patient": item.appointment.patient,
+              "doctor": doctorId,
+              "note": item.appointment.note,
+              "roomId": item.appointment.roomId,
+              "start": formatTimeFromDateTime(parseDateTimeFromString(item.appointment.start)),
+              "end": formatTimeFromDateTime(parseDateTimeFromString(item.appointment.end)),
+              "createdAt": item.appointment.createdAt,
+              "status": item.appointment.status
+            }
+          }))
         }
 
         // Bỏ setTimeout để tránh vấn đề load mãi không dừng

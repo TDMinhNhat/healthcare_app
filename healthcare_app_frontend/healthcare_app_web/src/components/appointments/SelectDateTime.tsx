@@ -44,16 +44,6 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
       setLoading(true);
       setError(null);
 
-      // Gọi API thật
-      // const response = await getDoctorAvailability(doctor.userId);
-      // const availableSlots = response.data.data || {};
-      // const dateTimes = availableSlots[formattedDate] || [];
-
-      // Sắp xếp các khung giờ theo thứ tự tăng dần
-      // const sortedTimes = [...dateTimes].sort();
-
-      // setAvailableTimes(sortedTimes);
-
       const result = await getWorkScheduleTimeSlot(doctor.userId, formatDateToString(date)).then(response => response.data.data).catch(error => {
         console.log(error);
         return null;
@@ -113,7 +103,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   // Vô hiệu hóa các khung giờ đã qua trong ngày hôm nay
   const isTimeSlotDisabled = (time: string, isAvailable: boolean) => {
     if(isAvailable === false) {
-      return false;
+      return true;
     }
 
     const getTimeStart = time.split("-")[0];

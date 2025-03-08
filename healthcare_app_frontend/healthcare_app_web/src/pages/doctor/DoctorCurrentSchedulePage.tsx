@@ -28,37 +28,6 @@ interface DateSchedule {
   }[];
 }
 
-// Dữ liệu giả lập - trong thực tế sẽ được lấy từ API
-const mockSavedSchedule: DateSchedule[] = [
-  {
-    id: 1,
-    date: formatDateToString(new Date()),
-    timeSlots: [
-      { startTime: "08:00", endTime: "08:30", isAvailable: true },
-      { startTime: "09:00", endTime: "09:30", isAvailable: true },
-      { startTime: "10:30", endTime: "11:00", isAvailable: false },
-      { startTime: "14:00", endTime: "14:30", isAvailable: true },
-      { startTime: "15:00", endTime: "15:30", isAvailable: true },
-    ],
-  },
-  {
-    id: 2,
-    date: formatDateToString(addDays(new Date(), 1)),
-    timeSlots: [
-      { startTime: "08:00", endTime: "08:30", isAvailable: true },
-      { startTime: "09:30", endTime: "10:00", isAvailable: true },
-    ],
-  },
-  {
-    id: 3,
-    date: formatDateToString(addDays(new Date(), 2)),
-    timeSlots: [
-      { startTime: "14:00", endTime: "14:30", isAvailable: true },
-      { startTime: "15:00", endTime: "15:30", isAvailable: true },
-    ],
-  },
-];
-
 // Tạo mảng các ngày trong 7 ngày tới để hiển thị
 const generateDates = () => {
   const dates = [];
