@@ -35,141 +35,6 @@ import MedicalRecordModal from "../medical/MedicalRecordModal";
 import { getAppointmentDoctor, getAppointmentStatusWithDoctorId } from "../../services/appointment_service";
 import { parseDateTimeFromString, formatTimeFromDateTime } from "../../utils/dateUtils";
 
-// Mock data for doctor appointments
-const MOCK_DOCTOR_APPOINTMENTS: {
-  patient: {
-    id: number;
-    userId: string;
-    firstName: string;
-    lastName: string;
-    dateOfBirth: string;
-    gender: string;
-    avatar: string | null;
-  };
-  appointment: {
-    id: number;
-    patient: string;
-    doctor: string;
-    note: string | null;
-    roomId: string;
-    start: string;
-    end: string;
-    createdAt: string;
-    status: string;
-  };
-}[] = [
-  {
-    patient: {
-      id: 1,
-      userId: "patient-001",
-      firstName: "Hùng",
-      lastName: "Nguyễn Văn",
-      dateOfBirth: "15-05-1985",
-      gender: "Nam",
-      avatar: null,
-    },
-    appointment: {
-      id: 101,
-      patient: "patient-001",
-      doctor: "doctor-001",
-      note: "Bệnh nhân bị đau đầu trong một tuần qua, cần kiểm tra huyết áp.",
-      roomId: "room-001",
-      start: "20-07-2023-09-00-00",
-      end: "20-07-2023-09-30-00",
-      createdAt: "15-07-2023",
-      status: "WAITING",
-    },
-  },
-  {
-    patient: {
-      id: 2,
-      userId: "patient-002",
-      firstName: "Linh",
-      lastName: "Trần Thị",
-      dateOfBirth: "22-11-1990",
-      gender: "Nữ",
-      avatar: null,
-    },
-    appointment: {
-      id: 102,
-      patient: "patient-002",
-      doctor: "doctor-001",
-      note: "Tái khám theo dõi huyết áp, bệnh nhân đã dùng thuốc 2 tuần.",
-      roomId: "room-002",
-      start: "20-07-2023-10-00-00",
-      end: "20-07-2023-10-30-00",
-      createdAt: "16-07-2023",
-      status: "IN_PROGRESS",
-    },
-  },
-  {
-    patient: {
-      id: 3,
-      userId: "patient-003",
-      firstName: "Minh",
-      lastName: "Lê Quang",
-      dateOfBirth: "05-03-1978",
-      gender: "Nam",
-      avatar: null,
-    },
-    appointment: {
-      id: 103,
-      patient: "patient-003",
-      doctor: "doctor-001",
-      note: null,
-      roomId: "room-003",
-      start: "21-07-2023-14-00-00",
-      end: "21-07-2023-14-30-00",
-      createdAt: "17-07-2023",
-      status: "DONE",
-    },
-  },
-  {
-    patient: {
-      id: 4,
-      userId: "patient-004",
-      firstName: "Hương",
-      lastName: "Phạm Thị",
-      dateOfBirth: "12-09-1992",
-      gender: "Nữ",
-      avatar: null,
-    },
-    appointment: {
-      id: 104,
-      patient: "patient-004",
-      doctor: "doctor-001",
-      note: "Bệnh nhân hủy lịch khám do đi công tác đột xuất.",
-      roomId: "room-004",
-      start: "22-07-2023-11-00-00",
-      end: "22-07-2023-11-30-00",
-      createdAt: "18-07-2023",
-      status: "CANCELLED",
-    },
-  },
-  {
-    patient: {
-      id: 5,
-      userId: "patient-005",
-      firstName: "Tùng",
-      lastName: "Đỗ Thanh",
-      dateOfBirth: "28-02-1982",
-      gender: "Nam",
-      avatar: null,
-    },
-    appointment: {
-      id: 105,
-      patient: "patient-005",
-      doctor: "doctor-001",
-      note: "Khám kiểm tra định kỳ, cần theo dõi tiểu đường.",
-      roomId: "room-005",
-      start: "23-07-2023-15-00-00",
-      end: "23-07-2023-15-30-00",
-      createdAt: "19-07-2023",
-      status: "WAITING",
-    },
-  },
-];
-
 interface DoctorAppointmentListProps {
   type: "upcoming" | "completed" | "cancelled";
   status: string | string[];
@@ -685,6 +550,7 @@ const DoctorAppointmentList: React.FC<DoctorAppointmentListProps> = ({
         open={medicalRecordModalOpen}
         onClose={() => setMedicalRecordModalOpen(false)}
         appointmentId={selectedMedicalRecordId}
+        roomId={currentAppointment?.appointment.roomId}
         isDoctor={true}
       />
 

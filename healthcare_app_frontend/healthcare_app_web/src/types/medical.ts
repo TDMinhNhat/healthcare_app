@@ -1,5 +1,4 @@
 import { Appointment } from "./appointment";
-import { Doctor } from "./doctor";
 
 export interface Drug {
   id: number;
@@ -8,8 +7,7 @@ export interface Drug {
 }
 
 export interface MedicalRecordDrug {
-  medicalRecord: MedicalRecord;
-  drug: Drug;
+  drugId: number;
   howUse: string;
   quantity: number;
 }

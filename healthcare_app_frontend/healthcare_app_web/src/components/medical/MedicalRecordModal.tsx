@@ -31,6 +31,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import { MedicalRecord, MedicalRecordDrug, Drug } from "../../types/medical";
 import { User } from "../../types/user";
 import { formatCreatedAtDate } from "../../utils/dateUtils";
+import { createMedicalRecord } from "../../services/medical_record_service";
 
 // Mock drugs data for the autocomplete
 const MOCK_DRUGS: Drug[] = [
@@ -119,6 +120,7 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
   open,
   onClose,
   appointmentId,
+  roomId,
   isDoctor = false,
 }) => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -216,16 +218,20 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
 
     try {
       // Tạo bản ghi đã cập nhật
-      const updatedRecord: MedicalRecord = {
-        ...medicalRecord,
+      const updatedRecord: object = {
+        roomId,
         diagnosisDisease,
         note,
         reExaminationDate,
         drugs,
       };
 
-      // Giả lập gọi API lưu
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const result: object = await createMedicalRecord(updatedRecord).then(response => response.data.data).catch(error => {
+        console.error(error);
+        return null;
+      })
+
+      console.log(result);
 
       console.log("Lưu hồ sơ bệnh án:", updatedRecord);
 
@@ -253,8 +259,7 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
     }
 
     const newDrug: MedicalRecordDrug = {
-      medicalRecord: medicalRecord,
-      drug: selectedDrug,
+      drugId: selectedDrug.id,
       howUse: howUse,
       quantity: drugQuantity,
     };
