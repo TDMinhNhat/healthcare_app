@@ -38,6 +38,7 @@ public class AppointmentService {
                 {
                     put("appointment", appointment);
                     put("patient", userFeign.getPatientByUserId(appointment.getPatient()).getBody().getData());
+                    put("workSchedule", workScheduleFeign.getById(appointment.getWorkSchedule()).getBody().getData());
                 }
             };
 
@@ -58,6 +59,7 @@ public class AppointmentService {
                 {
                     put("appointment", appointment);
                     put("patient", userFeign.getPatientByUserId(appointment.getPatient()).getBody().getData());
+                    put("workSchedule", workScheduleFeign.getById(appointment.getWorkSchedule()).getBody().getData());
                 }
             };
 
