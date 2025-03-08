@@ -17,7 +17,7 @@ import EmptyState from "../../components/EmptyState";
 import AppointmentList from "../../components/appointments/AppointmentList";
 
 const PatientDashboard: React.FC = () => {
-  const user = useSelector((state: any) => state.user.user.user);
+  const user = useSelector((state: any) => state.user.user);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [patientData, setPatientData] = useState<any | null>(null);
@@ -26,6 +26,7 @@ const PatientDashboard: React.FC = () => {
 
   useEffect(() => {
     const fetchPatientData = async () => {
+      console.log("user.userId", user.userId);
       if (!user?.userId) {
         setError("User not found");
         setLoading(false);

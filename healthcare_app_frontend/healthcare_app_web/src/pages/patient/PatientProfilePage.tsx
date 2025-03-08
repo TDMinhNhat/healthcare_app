@@ -7,6 +7,7 @@ import { EditProfileModal } from "../../components/profile/EditProfileModal";
 import AvatarUploadModal from "../../components/profile/AvatarUploadModal";
 import { useTranslation } from "react-i18next";
 import { getPatientInfo } from "../../services/user_service";
+import { useSelector } from "react-redux";
 
 const PatientProfilePage: React.FC = () => {
   const { t } = useTranslation();
@@ -15,14 +16,20 @@ const PatientProfilePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+  const user = useSelector((state: any) => state.user.user);
 
   useEffect(() => {
+    // Only fetch patient data for display
     const fetchPatientData = async () => {
       setLoading(true);
       try {
         // Fetch patient data using the userId - in a real app, you might get this from authentication
-        const userId = "20250228192235-63089-20000102"; // This would typically come from auth context
-        const response = await getPatientInfo(userId);
+        if (!user?.userId) {
+          setError("User not found");
+          setLoading(false);
+          return;
+        }
+        const response = await getPatientInfo(user.userId);
 
         if (response.data && response.data.code === 200) {
           setPatientData(response.data.data);
@@ -38,8 +45,9 @@ const PatientProfilePage: React.FC = () => {
     };
 
     fetchPatientData();
-  }, []);
+  }, [user.userId]);
 
+  // Modal control functions - no API calls
   const handleOpenEditModal = () => {
     setIsEditModalOpen(true);
   };
@@ -56,23 +64,23 @@ const PatientProfilePage: React.FC = () => {
     setIsAvatarModalOpen(false);
   };
 
+  // Only updates local state for UI preview
+  // In a real application, this would make an API call to update the profile
   const handleSaveProfile = (updatedData: any) => {
-    // Ensure we handle the case where the user might not have an address initially
     const updatedPatientData = {
       ...patientData,
       ...updatedData,
-      // If address was null and is now populated, make sure the updated structure is correct
       address: updatedData.address || patientData.address || null,
     };
-
     setPatientData(updatedPatientData);
-    console.log("Saving updated profile data:", updatedData);
+    console.log("Profile data updated locally (no API call):", updatedData);
   };
 
+  // Only updates local state for UI preview
+  // In a real application, this would make an API call to update the avatar
   const handleSaveAvatar = (newAvatar: string) => {
-    // Here you would make an API call to update the avatar
     setPatientData({ ...patientData, avatar: newAvatar });
-    console.log("Saving updated avatar:", newAvatar);
+    console.log("Avatar updated locally (no API call):", newAvatar);
   };
 
   if (loading) {

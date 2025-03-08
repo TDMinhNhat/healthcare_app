@@ -113,8 +113,8 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
             <Typography variant="body1">
               {typeof sex !== "undefined"
                 ? sex
-                  ? t("profile.male")
-                  : t("profile.female")
+                  ? t("profile.female")
+                  : t("profile.male")
                 : gender || ""}
             </Typography>
           </Box>

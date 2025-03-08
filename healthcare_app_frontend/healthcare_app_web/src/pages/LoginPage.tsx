@@ -57,9 +57,9 @@ export default function LoginPage() {
         if (response.status === 200 && response.data.code === 200) {
           const userData = response.data.data;
           if (userData) {
-            dispatch(setUser(userData)); // Remove the nested object structure
+            dispatch(setUser(userData.user));
             // lưu thông tin user vào localStorage
-            localStorage.setItem("user", JSON.stringify(userData));
+            localStorage.setItem("user", JSON.stringify(userData.user));
             toast.success("Login successful!");
 
             sessionStorage.setItem("user", JSON.stringify(userData));
