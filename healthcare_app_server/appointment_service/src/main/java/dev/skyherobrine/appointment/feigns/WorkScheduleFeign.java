@@ -15,4 +15,7 @@ public interface WorkScheduleFeign {
 
     @GetMapping("/id/doctor")
     ResponseEntity<Response> getWorkScheduleIdByDoctorId(@RequestParam String doctorId);
+
+    @GetMapping("/{id}")
+    ResponseEntity<Response> getWorkScheduleById(@PathVariable String id);
 }

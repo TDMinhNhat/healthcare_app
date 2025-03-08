@@ -56,8 +56,7 @@ public class AppointmentController {
     public ResponseEntity<Response> getAppointmentDoctorByStatus(@RequestParam String doctorId, @RequestParam String status) {
         try {
             log.info("Appointment: Call the api to get doctor's appointments by status");
-            List<Long> workSchedules = (List<Long>) workScheduleFeign.getWorkScheduleIdByDoctorId(doctorId).getBody().getData();
-            List<Appointment> result = appointmentRepository.findByStatus(AppointmentStatus.valueOf(status)).stream().filter(appointment -> workSchedules.contains(appointment.getWorkSchedule())).toList();
+            var result = appointmentService.getAppointmentByDoctorAndStatus(doctorId, AppointmentStatus.valueOf(status));
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "Get the appointments by status",

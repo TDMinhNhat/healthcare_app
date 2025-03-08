@@ -1,5 +1,6 @@
 package dev.skyherobrine.appointment.services;
 
+import dev.skyherobrine.appointment.enums.AppointmentStatus;
 import dev.skyherobrine.appointment.feigns.UserFeign;
 import dev.skyherobrine.appointment.feigns.WorkScheduleFeign;
 import dev.skyherobrine.appointment.models.mongodb.Appointment;
@@ -30,6 +31,26 @@ public class AppointmentService {
         log.info("Appointment Service: Call the api to get doctor's appointments");
         List<Long> workSchedules = (List<Long>) workScheduleFeign.getWorkScheduleIdByDoctorId(doctorId).getBody().getData();
         List<Appointment> appointments = appointmentRepository.findAll().stream().filter(appointment -> workSchedules.contains(Integer.parseInt(appointment.getWorkSchedule().toString()))).toList();
+
+        List<Map<String,Object>> result = new ArrayList<>();
+        appointments.forEach(appointment -> {
+            Map<String,Object> map = new HashMap<>() {
+                {
+                    put("appointment", appointment);
+                    put("patient", userFeign.getPatientByUserId(appointment.getPatient()).getBody().getData());
+                }
+            };
+
+            result.add(map);
+        });
+
+        return result;
+    }
+
+    public List<Map<String,Object>> getAppointmentByDoctorAndStatus(String doctorId, AppointmentStatus status) {
+        log.info("Appointment Service: Call the api to get doctor's appointments by status");
+        List<Long> workSchedules = (List<Long>) workScheduleFeign.getWorkScheduleIdByDoctorId(doctorId).getBody().getData();
+        List<Appointment> appointments = appointmentRepository.findByStatus(status).stream().filter(appointment -> workSchedules.contains(Integer.parseInt(appointment.getWorkSchedule().toString()))).toList();
 
         List<Map<String,Object>> result = new ArrayList<>();
         appointments.forEach(appointment -> {
