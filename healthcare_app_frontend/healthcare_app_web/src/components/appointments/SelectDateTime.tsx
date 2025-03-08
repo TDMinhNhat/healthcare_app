@@ -70,6 +70,13 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
         }  
       });
 
+      data.sort((a: object, b: object) => {
+        const timeA = a.time.split("-")[0].trim();
+        const timeB = b.time.split("-")[0].trim();
+
+        return timeA.localeCompare(timeB);
+      })
+
       // Tạm thời sử dụng dữ liệu mẫu
       setAvailableTimes(data);
     } catch (err) {
@@ -182,7 +189,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
                       sx={{
                         display: "grid",
                         gridTemplateColumns:
-                          "repeat(auto-fill, minmax(70px, 1fr))",
+                          "repeat(auto-fill, minmax(150px, 1fr))",
                         gap: 1,
                         mb: 2,
                         minHeight: "200px", // Fixed minimum height
