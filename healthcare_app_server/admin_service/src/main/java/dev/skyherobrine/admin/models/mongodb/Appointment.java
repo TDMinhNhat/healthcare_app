@@ -12,29 +12,19 @@ import java.time.LocalDateTime;
 
 @Document(collection = "appointments")
 @Getter @Setter
-@NoArgsConstructor @RequiredArgsConstructor @AllArgsConstructor
+@NoArgsConstructor
 public class Appointment {
 
     @MongoId
     private Long id;
-    @Field(name = "patient_id")
-    private Patient patient;
-    @Field(name = "work_schedule_id") @NonNull
+    @Field(name = "work_schedule_id")
     private Long workScheduleId;
-    private String note;
-    @Field(name = "room_id")
-    private String roomId;
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
     @Field(name = "created_at")
     private LocalDateTime createdAt;
-    private AppointmentStatus status;
 
-    public Appointment(@NonNull Patient patient, @NonNull Long workScheduleId, String note, String roomId) {
-        this.patient = patient;
+    public Appointment(Long id, Long workScheduleId) {
+        this.id = id;
         this.workScheduleId = workScheduleId;
-        this.note = note;
-        this.roomId = roomId;
-        this.status = AppointmentStatus.WAITING;
-        this.createdAt = LocalDateTime.now();
     }
 }

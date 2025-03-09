@@ -1,5 +1,6 @@
 package dev.skyherobrine.admin.models.mongodb;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -10,15 +11,30 @@ import java.time.LocalDateTime;
 
 @Document(collection = "calls")
 @Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@NoArgsConstructor
 public class Call {
     @MongoId
     private Long id;
-    private Appointment appointment;
+
+    @Field(name = "book_appointment_id")
+    private BookAppointment bookAppointment;
+
+    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
     @Field(targetType = FieldType.DATE_TIME)
     private LocalDateTime start;
+
+    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
     @Field(targetType = FieldType.DATE_TIME)
     private LocalDateTime end;
+
     @Field(name = "created_at", targetType = FieldType.DATE_TIME)
     private LocalDateTime createdAt;
+
+    public Call(Long id, BookAppointment bookAppointment, LocalDateTime start) {
+        this.id = id;
+        this.bookAppointment = bookAppointment;
+        this.start = start;
+        this.end = null;
+        this.createdAt = LocalDateTime.now();
+    }
 }
