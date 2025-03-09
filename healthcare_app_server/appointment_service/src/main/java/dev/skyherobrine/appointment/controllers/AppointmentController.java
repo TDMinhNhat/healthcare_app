@@ -9,10 +9,7 @@ import dev.skyherobrine.appointment.services.AppointmentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -92,5 +89,16 @@ public class AppointmentController {
                     null
             ));
         }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Response> getAppointmentById(@PathVariable("id") String appointmentId) {
+        log.info("Appointment: Call the api to get appointment by id");
+        var result = appointmentRepository.findById(Long.parseLong(appointmentId)).orElseThrow(() -> new RuntimeException("The appointment wasn't found!"));
+        return ResponseEntity.ok(new Response(
+                HttpStatus.OK.value(),
+                "Get the appointment by id",
+                result
+        ));
     }
 }

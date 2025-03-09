@@ -68,12 +68,18 @@ public class MedicalRecordConsumer {
             Double getQuantity = node.get("medicalRecordDrug").get("quantity").asDouble();
             String getHowUse = node.get("medicalRecordDrug").get("howUse").asText();
 
-            MedicalRecordDrug medicalRecordDrug = new MedicalRecordDrug(new MedicalRecordDrugKey(medicalRecord, drug), getQuantity, getHowUse);
+            MedicalRecord target = medicalRecordRepository.save(medicalRecord);
+            MedicalRecordDrug medicalRecordDrug = new MedicalRecordDrug(new MedicalRecordDrugKey(target, drug), getQuantity, getHowUse);
+
             medicalRecordDrugRepository.save(medicalRecordDrug);
             log.info("Medical Record Consumer: inserted medical record drug into database");
         } catch (Exception e) {
             log.error("Medical Record Consumer: can't insert medical record drug into database");
             log.error(e.getMessage());
         }
+    }
+
+    private Long getMaxId() {
+        return appointmentRepository.findTopByOrderByIdDesc().map(Appointment::getId).orElse(0L);
     }
 }

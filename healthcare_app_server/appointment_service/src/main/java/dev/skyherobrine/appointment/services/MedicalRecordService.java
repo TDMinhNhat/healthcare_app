@@ -49,6 +49,7 @@ public class MedicalRecordService {
                 medicalRecordDTO.getDiagnosisDisease(),
                 LocalDate.parse(medicalRecordDTO.getReExaminationDate(),
                         DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        medicalRecord.setId(getMaxId() + 1);
         MedicalRecord target = medicalRecordRepository.save(medicalRecord);
         log.info("Medical Record Service: medical record saved into database");
 
@@ -70,5 +71,9 @@ public class MedicalRecordService {
         }
         log.info("Medical Record Service: medical record drugs saved into database");
         return target;
+    }
+
+    private Long getMaxId() {
+        return medicalRecordRepository.findTopByOrderByIdDesc().map(MedicalRecord::getId).orElse(0L);
     }
 }
