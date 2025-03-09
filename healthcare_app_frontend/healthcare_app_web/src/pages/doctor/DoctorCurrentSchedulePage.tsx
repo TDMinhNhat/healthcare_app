@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
 import {
   Box,
   Typography,
@@ -104,6 +105,7 @@ const DAYS_OF_WEEK = [
 ];
 
 const DoctorCurrentSchedulePage: React.FC = () => {
+  const navigate = useNavigate();
   // Lưu trữ ngày hiện tại
   const [today] = useState(new Date());
 
@@ -280,6 +282,13 @@ const DoctorCurrentSchedulePage: React.FC = () => {
     return shift2Schedules.some((schedule) => schedule.isAvailable);
   };
 
+  // Xử lý chuyển hướng đến trang chi tiết ca khám
+  const handleAppointmentClick = (date: string, shift: number) => {
+    // Tạo ID cuộc hẹn từ ngày và ca làm việc
+    const appointmentId = `${date.replace(/-/g, "")}-${shift}`;
+    navigate(`/doctor/appointments/${appointmentId}`);
+  };
+
   // Hiển thị trạng thái ca làm việc cùng với thông tin phòng
   const renderShiftStatus = (
     hasShift: boolean,
@@ -371,7 +380,13 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                   backgroundColor: colors.bg,
                   borderLeft: `4px solid ${colors.border}`,
                   width: "100%",
+                  cursor: "pointer",
+                  "&:hover": {
+                    boxShadow: 2,
+                    opacity: 0.9,
+                  },
                 }}
+                onClick={() => handleAppointmentClick(date, shift)}
               >
                 {s.roomId && (
                   <Typography variant="body2" sx={{ color: colors.text }}>

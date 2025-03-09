@@ -29,4 +29,5 @@ export const ROUTING = {
 
   // Patient routes (nested under /patient)
   FIND_DOCTOR: "find-doctor",
+  PATIENT_APPOINTMENT_DETAILS: "appointments/:appointmentId", // New route for patient appointment details
 };

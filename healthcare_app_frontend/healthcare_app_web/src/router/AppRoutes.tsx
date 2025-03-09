@@ -6,6 +6,7 @@ import PatientProfilePage from "../pages/patient/PatientProfilePage";
 import DoctorProfilePage from "../pages/doctor/DoctorProfilePage";
 import MedicalRecordPage from "../pages/doctor/MedicalRecordPage";
 import DoctorAppointmentDetailsPage from "../pages/doctor/DoctorAppointmentDetailsPage";
+import PatientAppointmentDetailsPage from "../pages/patient/PatientAppointmentDetailsPage";
 
 // Import layout components
 import AdminLayout from "../layouts/AdminLayout";
@@ -77,6 +78,10 @@ export const AppRoutes = () => {
             <Route index element={<PatientDashboard />} />
             <Route path={ROUTING.PROFILE} element={<PatientProfilePage />} />
             <Route path={ROUTING.APPOINTMENTS} element={<AppointmentPage />} />
+            <Route
+              path={ROUTING.PATIENT_APPOINTMENT_DETAILS}
+              element={<PatientAppointmentDetailsPage />}
+            />
             <Route
               path={ROUTING.FIND_DOCTOR}
               element={<div>Find Doctor</div>}

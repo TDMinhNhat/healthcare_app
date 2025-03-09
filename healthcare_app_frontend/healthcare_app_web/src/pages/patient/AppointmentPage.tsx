@@ -25,6 +25,7 @@ import DateRangeIcon from "@mui/icons-material/DateRange";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router";
 import BookAppointment from "../../components/appointments/BookAppointment";
 
 // Import DatePicker components
@@ -101,6 +102,7 @@ const SHIFTS: Record<string, Shift> = {
 
 const AppointmentPage = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [showBooking, setShowBooking] = useState(false);
   const user = useSelector((state: any) => state.user.user);
 
@@ -340,6 +342,11 @@ const AppointmentPage = () => {
     return filtered;
   };
 
+  // Navigate to appointment details page
+  const handleAppointmentClick = (appointmentId: number) => {
+    navigate(`/patient/appointments/${appointmentId}`);
+  };
+
   // Hiển thị thông tin cuộc hẹn với ID, lý do khám và tên bác sĩ
   const renderAppointmentItem = (appointment: Appointment) => {
     // Lấy màu sắc tương ứng với trạng thái lịch hẹn
@@ -387,15 +394,17 @@ const AppointmentPage = () => {
             cursor: "pointer",
             "&:hover": {
               boxShadow: 1,
+              opacity: 0.9,
             },
           }}
+          onClick={() => handleAppointmentClick(appointment.id)}
         >
           {/* Hiển thị ID và tên bác sĩ */}
           <Typography
             variant="body2"
             sx={{ fontWeight: "bold", color: colors.text }}
           >
-            ID: {appointment.id}
+            STT: {appointment.id}
           </Typography>
           <Typography
             variant="body2"
@@ -790,10 +799,10 @@ const AppointmentPage = () => {
               </Stack>
             </Box>
 
-            <Alert severity="info" sx={{ mt: 2 }}>
+            {/* <Alert severity="info" sx={{ mt: 2 }}>
               Đây là lịch hẹn khám của bạn. Bạn có thể xem các cuộc hẹn với đủ
               trạng thái trên lịch.
-            </Alert>
+            </Alert> */}
           </Box>
         </Paper>
       )}
