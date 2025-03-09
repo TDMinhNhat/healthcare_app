@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Document(collection = "work_schedules")
 @Getter @Setter
@@ -20,18 +21,21 @@ public class WorkSchedule {
     @Field(name = "type_day")
     private TypeDay typeDay;
     private Shift shift;
+    @Field(name = "max_slots")
+    private int maxSlots;
     @Field(name = "created_at")
     private String createdAt;
     @Field(name = "updated_at")
     private String updatedAt;
     private boolean status;
 
-    public WorkSchedule(Long id, Doctor doctor, TypeDay typeDay, Shift shift) {
+    public WorkSchedule(Long id, Doctor doctor, TypeDay typeDay, Shift shift, int maxSlots) {
         this.id = id;
         this.doctor = doctor;
         this.typeDay = typeDay;
         this.shift = shift;
-        this.createdAt = this.updatedAt = LocalDateTime.now();
+        this.maxSlots = maxSlots;
+        this.createdAt = this.updatedAt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss"));
         this.status = true;
     }
 }
