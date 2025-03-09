@@ -58,7 +58,7 @@ export default function LoginPage() {
           const userData = response.data.data;
           if (userData) {
             dispatch(setUser(userData.user));
-            // lưu thông tin user vào localStorage
+            // Lưu thông tin người dùng vào localStorage
             // localStorage.setItem("user", JSON.stringify(userData.user));
             toast.success("Login successful!");
 

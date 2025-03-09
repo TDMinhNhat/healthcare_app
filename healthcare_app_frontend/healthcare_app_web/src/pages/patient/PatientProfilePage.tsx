@@ -16,7 +16,7 @@ const PatientProfilePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
-  const user = useSelector((state: any) => state.user.user.user);
+  const user = useSelector((state: any) => state.user.user);
 
   useEffect(() => {
     // Only fetch patient data for display

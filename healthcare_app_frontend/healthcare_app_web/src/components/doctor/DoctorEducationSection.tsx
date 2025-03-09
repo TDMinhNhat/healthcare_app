@@ -29,7 +29,7 @@ export const DoctorEducationSection: React.FC<DoctorEducationProps> = ({
   };
 
   return (
-    <ProfileCard title="Education & Qualifications">
+    <ProfileCard title="Học Vấn & Bằng Cấp">
       <Divider sx={{ my: 2 }} />
       {education.map((edu) => (
         <Box key={edu.id} mb={3}>

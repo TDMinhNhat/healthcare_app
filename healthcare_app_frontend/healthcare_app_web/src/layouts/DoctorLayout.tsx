@@ -44,21 +44,21 @@ export default function DoctorLayout() {
           <ListItemIcon>
             <DashboardIcon />
           </ListItemIcon>
-          <ListItemText primary="Dashboard" />
+          <ListItemText primary="Thống kê" />
         </ListItemButton>
-        <ListItemButton
+        {/* <ListItemButton
           onClick={() => handleNavigation("/doctor/appointments")}
         >
           <ListItemIcon>
             <EventNoteIcon />
           </ListItemIcon>
           <ListItemText primary="Appointments" />
-        </ListItemButton>
+        </ListItemButton> */}
         <ListItemButton onClick={() => handleNavigation("/doctor/schedule")}>
           <ListItemIcon>
             <CalendarMonthIcon />
           </ListItemIcon>
-          <ListItemText primary="Manage Schedule" />
+          <ListItemText primary="Thêm lịch khám" />
         </ListItemButton>
         <ListItemButton
           onClick={() => handleNavigation("/doctor/current-schedule")}
@@ -66,7 +66,7 @@ export default function DoctorLayout() {
           <ListItemIcon>
             <EventAvailableIcon />
           </ListItemIcon>
-          <ListItemText primary="View Schedule" />
+          <ListItemText primary="Xem lịch khám" />
         </ListItemButton>
         {/* <ListItemButton onClick={() => handleNavigation("/doctor/patients")}>
           <ListItemIcon>

@@ -112,7 +112,7 @@ const DoctorProfilePage: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const user = useSelector((state: any) => state.user.user.user);
+  const user = useSelector((state: any) => state.user.user);
 
   useEffect(() => {
     // Fetch doctor data from API

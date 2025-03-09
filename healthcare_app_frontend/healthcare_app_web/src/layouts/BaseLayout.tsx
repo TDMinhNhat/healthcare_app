@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, use, useState } from "react";
 import {
   Box,
   CssBaseline,
@@ -16,7 +16,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import { useNavigate } from "react-router";
 import { ROUTING } from "../constants/routing";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logOut } from "../stores/slices/user.slice";
 
 const drawerWidth = 240;
@@ -55,6 +55,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const user = useSelector((state: any) => state.user.user);
 
   const handleDrawerToggle = () => {
     setOpen(!open);
@@ -103,7 +104,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            {title}
+            {user ? `${user.firstName} ${user.lastName}` : ""}
           </Typography>
           <div>
             <IconButton
@@ -133,8 +134,8 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              <MenuItem onClick={handleProfile}>Profile</MenuItem>
-              <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              <MenuItem onClick={handleProfile}>Trang cá nhân</MenuItem>
+              <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
             </Menu>
           </div>
         </Toolbar>

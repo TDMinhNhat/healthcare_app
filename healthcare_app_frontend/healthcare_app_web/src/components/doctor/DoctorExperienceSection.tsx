@@ -18,10 +18,10 @@ export const DoctorExperienceSection: React.FC<DoctorExperienceProps> = ({
   const validExperiences = Array.isArray(experiences) ? experiences : [];
 
   return (
-    <ProfileCard title="Professional Experience">
+    <ProfileCard title="Kinh Nghiệm Chuyên Môn">
       <Box mb={2}>
         <Typography variant="subtitle1" gutterBottom>
-          Specialization
+          Chuyên Ngành
         </Typography>
         <Chip label={specialization} color="primary" />
       </Box>
@@ -33,14 +33,14 @@ export const DoctorExperienceSection: React.FC<DoctorExperienceProps> = ({
               <WorkIcon sx={{ mr: 1, color: "primary.main" }} />
               <Box>
                 <Typography variant="h6">
-                  {exp.companyName || "Unknown company"}
+                  {exp.companyName || "Công ty không xác định"}
                 </Typography>
                 <Typography variant="subtitle1" color="text.secondary">
-                  {exp.specialization || "General Practice"}
+                  {exp.specialization || "Thực hành chung"}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {exp.startDate || "Unknown"} -{" "}
-                  {exp.endDate && exp.endDate ? exp.endDate : "Present"}
+                  {exp.startDate || "Không xác định"} -{" "}
+                  {exp.endDate && exp.endDate ? exp.endDate : "Hiện tại"}
                 </Typography>
                 {(exp.compAddress?.city || exp.compAddress?.country) && (
                   <Typography variant="body2" color="text.secondary">
@@ -63,10 +63,10 @@ export const DoctorExperienceSection: React.FC<DoctorExperienceProps> = ({
       ) : (
         <Box>
           <Typography variant="body2" color="text.secondary">
-            No experience information available
+            Không có thông tin kinh nghiệm
           </Typography>
           <Typography variant="caption" color="error">
-            Debug info: {JSON.stringify(experiences)}
+            Thông tin gỡ lỗi: {JSON.stringify(experiences)}
           </Typography>
         </Box>
       )}

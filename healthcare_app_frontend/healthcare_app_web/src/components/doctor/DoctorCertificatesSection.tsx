@@ -12,7 +12,7 @@ export const DoctorCertificatesSection: React.FC<DoctorCertificatesProps> = ({
   certificates,
 }) => {
   return (
-    <ProfileCard title="Certificates & Licenses">
+    <ProfileCard title="Chứng Chỉ & Giấy Phép">
       <Divider sx={{ my: 2 }} />
       {certificates.length ? (
         certificates.map((cert) => (
@@ -33,14 +33,14 @@ export const DoctorCertificatesSection: React.FC<DoctorCertificatesProps> = ({
             <Box>
               <Typography variant="h6">{cert.certName}</Typography>
               <Typography variant="body2" color="text.secondary">
-                Issue date: {cert.issueDate}
+                Ngày cấp: {cert.issueDate}
               </Typography>
             </Box>
           </Paper>
         ))
       ) : (
         <Typography variant="body1" color="text.secondary" align="center">
-          No certificates listed
+          Không có chứng chỉ nào
         </Typography>
       )}
     </ProfileCard>

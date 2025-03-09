@@ -39,13 +39,13 @@ export default function PatientLayout() {
           <ListItemIcon>
             <DashboardIcon />
           </ListItemIcon>
-          <ListItemText primary="Dashboard" />
+          <ListItemText primary="Thống kê" />
         </ListItemButton>
         <ListItemButton onClick={() => handleNavigation(ROUTING.APPOINTMENTS)}>
           <ListItemIcon>
             <EventNoteIcon />
           </ListItemIcon>
-          <ListItemText primary="My Appointments" />
+          <ListItemText primary="Lịch hẹn" />
         </ListItemButton>
         {/* <ListItemButton onClick={() => handleNavigation(ROUTING.FIND_DOCTOR)}>
           <ListItemIcon>
@@ -62,7 +62,7 @@ export default function PatientLayout() {
           <ListItemIcon>
             <DescriptionIcon />
           </ListItemIcon>
-          <ListItemText primary="My Medical Records" />
+          <ListItemText primary="Hồ sơ bệnh án" />
         </ListItemButton>
         {/* <ListItemButton onClick={() => handleNavigation(ROUTING.CHAT)}>
           <ListItemIcon>
