@@ -115,24 +115,25 @@ public class WorkScheduleController {
     {
         try {
             log.info("Work Schedule: Call the api get work schedule time slot by doctor");
-            List<Map<String,Object>> result = new ArrayList<>();
-            workScheduleRepository.findAllByDoctor_UserId(doctorId).stream().filter(
-                    schedule -> {
-                        LocalDate getDate = LocalDateTime.parse(schedule.getStart(), DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")).toLocalDate();
-                        LocalDate checkDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                        return getDate.equals(checkDate);
-                    }
-            ).forEach(workSchedule -> {
-                Map<String,Object> data = new HashMap<>();
-                data.put("workSchedule", workSchedule);
-                data.put("isAvailable", appointmentFeign.getAppointmentByWorkSchedule(workSchedule.getId().toString()).getBody().getData() == null);
-                result.add(data);
-            });
+//            List<Map<String,Object>> result = new ArrayList<>();
+//            workScheduleRepository.findAllByDoctor_UserId(doctorId).stream().filter(
+//                    schedule -> {
+//                        LocalDate getDate = LocalDateTime.parse(schedule.getStart(), DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss")).toLocalDate();
+//                        LocalDate checkDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+//                        return getDate.equals(checkDate);
+//                    }
+//            ).forEach(workSchedule -> {
+//                Map<String,Object> data = new HashMap<>();
+//                data.put("workSchedule", workSchedule);
+//                data.put("isAvailable", appointmentFeign.getAppointmentByWorkSchedule(workSchedule.getId().toString()).getBody().getData() == null);
+//                result.add(data);
+//            });
 
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "Get the work schedule time slot by doctor successfully",
-                    result
+//                    result
+                    null
             ));
         } catch (Exception e) {
             log.error("Work Schedule: The api thrown an exception");

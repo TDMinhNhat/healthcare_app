@@ -32,22 +32,23 @@ public class WorkScheduleService {
         log.info("Work Schedule Service: Call the service add work schedule");
         Doctor doctor = doctorRepository.findDoctorByUserId(workScheduleDTO.getDoctorId()).orElseThrow(() -> new EntityNotFoundException("The doctor wasn't found!"));
 
-        Long getMaxId = workScheduleRepository.findAll().stream().sorted(
-                (a, b) -> Integer.parseInt(String.valueOf(b.getId())) - Integer.parseInt(String.valueOf(a.getId()))
-        ).map(WorkSchedule::getId).findFirst().orElse(0L);
-        log.info("Work Schedule Service: The max id is {}", getMaxId);
-
-        WorkSchedule workSchedule = new WorkSchedule(
-                getMaxId + 1,
-                doctor,
-                workScheduleDTO.getTimeStart(),
-                workScheduleDTO.getTimeEnd()
-        );
-        log.info("Work Schedule Service: send the add work schedule to kafka");
-        kafkaTemplate.send("insert_work_schedule", ObjectParser.convertObjectToJson(workSchedule));
-
-        WorkSchedule result = workScheduleRepository.save(workSchedule);
+//        Long getMaxId = workScheduleRepository.findAll().stream().sorted(
+//                (a, b) -> Integer.parseInt(String.valueOf(b.getId())) - Integer.parseInt(String.valueOf(a.getId()))
+//        ).map(WorkSchedule::getId).findFirst().orElse(0L);
+//        log.info("Work Schedule Service: The max id is {}", getMaxId);
+//
+//        WorkSchedule workSchedule = new WorkSchedule(
+//                getMaxId + 1,
+//                doctor,
+//                workScheduleDTO.getTimeStart(),
+//                workScheduleDTO.getTimeEnd()
+//        );
+//        log.info("Work Schedule Service: send the add work schedule to kafka");
+//        kafkaTemplate.send("insert_work_schedule", ObjectParser.convertObjectToJson(workSchedule));
+//
+//        WorkSchedule result = workScheduleRepository.save(workSchedule);
         log.info("Work Schedule Service: add work schedule successfully!");
-        return result;
+//        return result;
+        return null;
     }
 }
