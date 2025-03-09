@@ -16,7 +16,7 @@ const PatientProfilePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
-  const user = useSelector((state: any) => state.user.user);
+  const user = useSelector((state: any) => state.user.user.user);
 
   useEffect(() => {
     // Only fetch patient data for display
@@ -24,11 +24,11 @@ const PatientProfilePage: React.FC = () => {
       setLoading(true);
       try {
         // Fetch patient data using the userId - in a real app, you might get this from authentication
-        if (!user?.userId) {
-          setError("User not found");
-          setLoading(false);
-          return;
-        }
+        // if (!user?.userId) {
+        //   setError("User not found");
+        //   setLoading(false);
+        //   return;
+        // }
         const response = await getPatientInfo(user.userId);
 
         if (response.data && response.data.code === 200) {

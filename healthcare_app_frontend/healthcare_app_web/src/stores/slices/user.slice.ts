@@ -5,9 +5,9 @@ interface UserState {
 }
 
 // Try to get user from localStorage if available
-const getUserFromLocalStorage = (): any | null => {
+const getUserFromSessionStorage = (): any | null => {
   try {
-    const savedUser = localStorage.getItem("user");
+    const savedUser = sessionStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;
   } catch (error) {
     console.error("Failed to parse user from localStorage:", error);
@@ -16,7 +16,7 @@ const getUserFromLocalStorage = (): any | null => {
 };
 
 const initialState: UserState = {
-  user: getUserFromLocalStorage(),
+  user: getUserFromSessionStorage(),
 };
 
 const userSlice = createSlice({
@@ -28,7 +28,7 @@ const userSlice = createSlice({
     },
     logOut: (state) => {
       state.user = null;
-      localStorage.removeItem("user");
+      sessionStorage.removeItem("user");
     },
   },
 });

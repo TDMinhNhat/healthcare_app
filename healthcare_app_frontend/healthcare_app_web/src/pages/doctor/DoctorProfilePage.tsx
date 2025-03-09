@@ -112,18 +112,18 @@ const DoctorProfilePage: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const user = useSelector((state: any) => state.user.user);
+  const user = useSelector((state: any) => state.user.user.user);
 
   useEffect(() => {
     // Fetch doctor data from API
     const fetchDoctorData = async () => {
       setLoading(true);
       try {
-        if (!user?.userId) {
-          setError("User not found");
-          setLoading(false);
-          return;
-        }
+        // if (!user?.userId) {
+        //   setError("User not found");
+        //   setLoading(false);
+        //   return;
+        // }
         const response = await getDoctorInfo(user.userId);
         console.log("response", response.data.data);
         if (response.data && response.data.code === 200) {

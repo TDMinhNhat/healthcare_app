@@ -59,10 +59,10 @@ export default function LoginPage() {
           if (userData) {
             dispatch(setUser(userData.user));
             // lưu thông tin user vào localStorage
-            localStorage.setItem("user", JSON.stringify(userData.user));
+            // localStorage.setItem("user", JSON.stringify(userData.user));
             toast.success("Login successful!");
 
-            sessionStorage.setItem("user", JSON.stringify(userData));
+            sessionStorage.setItem("user", JSON.stringify(userData.user));
 
             // console.log("userData", userData);
             if (userData.role === "doctor") {

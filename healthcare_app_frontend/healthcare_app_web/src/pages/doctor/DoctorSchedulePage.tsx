@@ -12,221 +12,289 @@ import {
   TableHead,
   TableRow,
   IconButton,
-  Tooltip,
+  Checkbox,
   Stack,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TextField,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
+  Grid,
 } from "@mui/material";
-import { addDays, format, parse } from "date-fns";
-import { vi } from "date-fns/locale"; // Import Vietnamese locale from date-fns
+import {
+  addDays,
+  format,
+  startOfWeek,
+  endOfWeek,
+  addWeeks,
+  subWeeks,
+} from "date-fns";
+import { vi } from "date-fns/locale";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SaveIcon from "@mui/icons-material/Save";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { useTranslation } from "react-i18next";
-import { formatDateToString, parseDateFromString } from "../../utils/dateUtils";
-import { addWorkSchedule } from "../../services/workSchedule_service.ts";
+import EventRepeatIcon from "@mui/icons-material/EventRepeat";
+import { formatDateToString } from "../../utils/dateUtils";
+import { addWorkSchedule } from "../../services/workSchedule_service";
 
-// Tạo mảng các ngày trong 14 ngày tới, trừ ngày hiện tại
-const generateDates = () => {
-  const dates = [];
-  const today = new Date();
-
-  // Bắt đầu từ ngày mai (i = 1)
-  for (let i = 1; i <= 14; i++) {
-    const date = addDays(today, i);
-    dates.push({
-      date, // Đối tượng Date gốc
-      formattedDate: formatDateToString(date), // Chuỗi ngày theo định dạng dd-MM-yyyy
-      displayDate: format(date, "EEE dd/MM", { locale: vi }), // Hiển thị ngày với định dạng tiếng Việt
-    });
-  }
-
-  return dates;
+// Định nghĩa các ca làm việc theo mô hình Shift trong schedule.md
+// - id: ID của ca làm việc
+// - shift: Giá trị shift được lưu vào database (1 hoặc 2)
+// - start: Thời gian bắt đầu ca làm việc
+// - end: Thời gian kết thúc ca làm việc
+const SHIFTS = {
+  CA1: { id: 1, shift: 1, start: "08:00", end: "12:00" },
+  CA2: { id: 2, shift: 2, start: "13:00", end: "17:00" },
 };
 
-// Định nghĩa kiểu dữ liệu cho một khung giờ làm việc
-interface TimeSlot {
-  id: number;
-  startTime: string; // Thời gian bắt đầu (định dạng HH:mm)
-  endTime: string; // Thời gian kết thúc (định dạng HH:mm)
-  isAvailable: boolean;
-}
+// Định nghĩa các ngày trong tuần theo enum TypeDay trong schedule.md
+// - key: Giá trị enum TypeDay để lưu vào database
+// - label: Tên hiển thị của ngày trong tuần
+const DAYS_OF_WEEK = [
+  { key: "MONDAY", label: "Thứ 2" },
+  { key: "TUESDAY", label: "Thứ 3" },
+  { key: "WEDNESDAY", label: "Thứ 4" },
+  { key: "THURSDAY", label: "Thứ 5" },
+  { key: "FRIDAY", label: "Thứ 6" },
+  { key: "SATURDAY", label: "Thứ 7" },
+  { key: "SUNDAY", label: "Chủ nhật" },
+];
 
-// Định nghĩa kiểu dữ liệu cho lịch làm việc của một ngày
-interface DateSchedule {
-  id: number;
-  date: string; // Ngày làm việc (định dạng dd-MM-yyyy)
-  timeSlots: TimeSlot[];
+// Interface định nghĩa cấu trúc dữ liệu cho một ngày trong lịch làm việc
+// - dayOfWeek: Enum TypeDay (MONDAY, TUESDAY, etc.) theo schedule.md
+// - dayIndex: Chỉ số của ngày trong tuần (0-6)
+// - date: Đối tượng Date chứa thông tin ngày tháng đầy đủ
+// - shifts: Object chứa trạng thái chọn/không chọn của các ca làm việc
+interface ScheduleItem {
+  typeDay: string;
+  dayIndex: number;
+  date: Date;
+  shifts: {
+    shift1: boolean; // true nếu ca 1 được chọn, false nếu không
+    shift2: boolean; // true nếu ca 2 được chọn, false nếu không
+  };
 }
-
-// Format time string to ensure 24h format display
-const formatTimeDisplay = (timeString: string): string => {
-  // Time is already in 24h format, just ensure consistent display
-  return timeString;
-};
 
 const DoctorSchedulePage = () => {
-  const { t } = useTranslation();
-  const dates = generateDates();
+  // Lưu trữ ngày hiện tại để tính toán giới hạn tuần
+  const [today] = useState(new Date());
 
-  // State cho ngày đã chọn
-  const [selectedDate, setSelectedDate] = useState<string>(
-    dates[0]?.formattedDate || ""
+  // State lưu ngày bắt đầu của tuần hiện tại (mặc định là thứ 2)
+  const [currentWeekStart, setCurrentWeekStart] = useState(
+    startOfWeek(today, { weekStartsOn: 1 })
   );
 
-  // State cho các time slots đã thêm
-  const [schedule, setSchedule] = useState<DateSchedule[]>([]);
+  // State lưu trữ lịch làm việc của cả tuần hiện tại
+  // Mỗi phần tử trong mảng là một đối tượng ScheduleItem đại diện cho một ngày
+  const [weekSchedule, setWeekSchedule] = useState<ScheduleItem[]>([]);
 
-  // State cho dialog thêm time slot mới - Sử dụng định dạng 24h
-  const [openAddDialog, setOpenAddDialog] = useState(false);
-  const [startTime, setStartTime] = useState("08:00");
-  const [endTime, setEndTime] = useState("08:30");
-
-  // State cho thông báo
-  const [errorMessage, setErrorMessage] = useState("");
+  // State lưu trữ thông báo thành công để hiển thị cho người dùng
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Lấy các time slots cho ngày đã chọn
-  const getTimeSlotsForSelectedDate = (): TimeSlot[] => {
-    const dateSchedule = schedule.find((s) => s.date === selectedDate);
-    return dateSchedule?.timeSlots || [];
-  };
+  // State lưu trữ thông báo lỗi để hiển thị cho người dùng
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // Mở dialog thêm time slot với giờ mặc định theo định dạng 24h
-  const handleOpenAddDialog = () => {
-    setStartTime("08:00");
-    setEndTime("08:30");
-    setOpenAddDialog(true);
-  };
+  // State lưu trữ lịch làm việc của tuần trước để có thể áp dụng lại
+  const [prevWeekSchedule, setPrevWeekSchedule] = useState<ScheduleItem[]>([]);
 
-  // Đóng dialog thêm time slot
-  const handleCloseAddDialog = () => {
-    setOpenAddDialog(false);
-  };
+  // Khởi tạo lịch làm việc khi tuần hiện tại thay đổi
+  useEffect(() => {
+    initializeWeekSchedule();
+  }, [currentWeekStart]);
 
-  // Thêm time slot mới
-  const handleAddTimeSlot = () => {
-    // Validate time input
-    if (!startTime || !endTime) {
-      setErrorMessage(t("doctor.schedule.error_select_times"));
-      return;
+  // Khởi tạo lịch làm việc cho tuần được chọn với tất cả ca làm việc là chưa được chọn (false)
+  const initializeWeekSchedule = () => {
+    const newWeekSchedule: ScheduleItem[] = [];
+
+    // Tạo dữ liệu cho 7 ngày trong tuần
+    for (let i = 0; i < 7; i++) {
+      const currentDate = addDays(currentWeekStart, i);
+      newWeekSchedule.push({
+        typeDay: DAYS_OF_WEEK[i].key,
+        dayIndex: i,
+        date: currentDate,
+        shifts: {
+          shift1: false,
+          shift2: false,
+        },
+      });
     }
 
-    // Check if start time is before end time
-    if (startTime >= endTime) {
-      setErrorMessage(t("doctor.schedule.error_invalid_time_range"));
-      return;
+    setWeekSchedule(newWeekSchedule);
+  };
+
+  // Kiểm tra xem có đang ở tuần hiện tại không (tuần có chứa ngày hôm nay)
+  const isCurrentWeek = () => {
+    const currentWeekStartTime = startOfWeek(today, {
+      weekStartsOn: 1,
+    }).getTime();
+    return currentWeekStart.getTime() === currentWeekStartTime;
+  };
+
+  // Kiểm tra xem có đang ở tuần kế tiếp không (tuần sau tuần hiện tại)
+  const isNextWeek = () => {
+    const nextWeekStartTime = startOfWeek(addWeeks(today, 1), {
+      weekStartsOn: 1,
+    }).getTime();
+    return currentWeekStart.getTime() === nextWeekStartTime;
+  };
+
+  // Chuyển đến tuần trước đó (bị giới hạn ở tuần hiện tại)
+  const handlePrevWeek = () => {
+    // Chỉ cho phép chuyển về tuần hiện tại, không sớm hơn
+    if (!isCurrentWeek()) {
+      // Lưu lịch làm việc hiện tại trước khi chuyển tuần
+      setPrevWeekSchedule([...weekSchedule]);
+      setCurrentWeekStart(startOfWeek(today, { weekStartsOn: 1 }));
     }
+  };
 
-    setSchedule((prevSchedule) => {
-      const newSchedule = [...prevSchedule];
-      const dateIndex = newSchedule.findIndex((s) => s.date === selectedDate);
+  // Chuyển đến tuần tiếp theo (bị giới hạn ở tuần kế tiếp)
+  const handleNextWeek = () => {
+    // Chỉ cho phép chuyển đến tuần kế tiếp, không xa hơn
+    if (!isNextWeek()) {
+      // Lưu lịch làm việc hiện tại trước khi chuyển tuần
+      setPrevWeekSchedule([...weekSchedule]);
+      setCurrentWeekStart(startOfWeek(addWeeks(today, 1), { weekStartsOn: 1 }));
+    }
+  };
 
-      // Create new time slot
-      const newTimeSlot: TimeSlot = {
-        id: Date.now(), // Use timestamp as temporary ID
-        startTime,
-        endTime,
-        isAvailable: true,
-      };
+  // Áp dụng lịch làm việc của tuần trước cho tuần hiện tại
+  const handleApplyPrevWeek = () => {
+    if (prevWeekSchedule.length > 0) {
+      const newSchedule = weekSchedule.map((day, index) => ({
+        ...day,
+        shifts: { ...prevWeekSchedule[index].shifts },
+      }));
 
-      if (dateIndex >= 0) {
-        // Date exists, add new time slot
-        const existingSlots = newSchedule[dateIndex].timeSlots;
-
-        // Check for overlapping slots
-        const hasOverlap = existingSlots.some(
-          (slot) =>
-            (startTime >= slot.startTime && startTime < slot.endTime) ||
-            (endTime > slot.startTime && endTime <= slot.endTime) ||
-            (startTime <= slot.startTime && endTime >= slot.endTime)
-        );
-
-        if (hasOverlap) {
-          setErrorMessage(t("doctor.schedule.error_time_slot_overlap"));
-          return prevSchedule;
-        }
-
-        newSchedule[dateIndex].timeSlots = [...existingSlots, newTimeSlot].sort(
-          (a, b) => a.startTime.localeCompare(b.startTime)
-        );
-      } else {
-        // Create new date entry
-        newSchedule.push({
-          id: Date.now(),
-          date: selectedDate,
-          timeSlots: [newTimeSlot],
-        });
-      }
-
-      setErrorMessage("");
-      setOpenAddDialog(false);
-      setSuccessMessage(t("doctor.schedule.success_added"));
+      setWeekSchedule(newSchedule);
+      setSuccessMessage("Áp dụng lịch tuần trước thành công");
       setTimeout(() => setSuccessMessage(""), 3000);
-      return newSchedule;
-    });
+    } else {
+      setErrorMessage("Không có dữ liệu lịch tuần trước");
+      setTimeout(() => setErrorMessage(""), 3000);
+    }
   };
 
-  // Xóa time slot
-  const handleDeleteTimeSlot = (slotId: number) => {
-    setSchedule((prevSchedule) => {
-      const newSchedule = [...prevSchedule];
-      const dateIndex = newSchedule.findIndex((s) => s.date === selectedDate);
+  // Bật/tắt một ca làm việc cụ thể cho một ngày
+  const toggleShift = (dayIndex: number, shift: "shift1" | "shift2") => {
+    const newSchedule = [...weekSchedule];
+    newSchedule[dayIndex].shifts[shift] = !newSchedule[dayIndex].shifts[shift];
+    setWeekSchedule(newSchedule);
+  };
 
-      if (dateIndex >= 0) {
-        // Filter out the deleted time slot
-        newSchedule[dateIndex].timeSlots = newSchedule[
-          dateIndex
-        ].timeSlots.filter((slot) => slot.id !== slotId);
+  // Chọn tất cả ca 1 cho mọi ngày trong tuần
+  const selectAllShift1 = () => {
+    const newSchedule = weekSchedule.map((day) => ({
+      ...day,
+      shifts: { ...day.shifts, shift1: true },
+    }));
+    setWeekSchedule(newSchedule);
+  };
 
-        // If no time slots left for this date, remove the date entry
-        if (newSchedule[dateIndex].timeSlots.length === 0) {
-          newSchedule.splice(dateIndex, 1);
+  // Chọn tất cả ca 2 cho mọi ngày trong tuần
+  const selectAllShift2 = () => {
+    const newSchedule = weekSchedule.map((day) => ({
+      ...day,
+      shifts: { ...day.shifts, shift2: true },
+    }));
+    setWeekSchedule(newSchedule);
+  };
+
+  // Chọn tất cả các ca làm việc cho mọi ngày trong tuần
+  const selectAllShifts = () => {
+    const newSchedule = weekSchedule.map((day) => ({
+      ...day,
+      shifts: { shift1: true, shift2: true },
+    }));
+    setWeekSchedule(newSchedule);
+  };
+
+  // Bỏ chọn tất cả các ca làm việc
+  const clearAllSelections = () => {
+    const newSchedule = weekSchedule.map((day) => ({
+      ...day,
+      shifts: { shift1: false, shift2: false },
+    }));
+    setWeekSchedule(newSchedule);
+  };
+
+  // Xử lý lưu lịch làm việc vào database
+  // Sử dụng cấu trúc theo mô hình WorkSchedule trong schedule.md
+  const handleSaveSchedule = async () => {
+    try {
+      // Lấy thông tin người dùng (bác sĩ) từ session storage
+      const user = JSON.parse(sessionStorage.getItem("user") || "{}");
+      const doctorId = user?.user?.userId;
+
+      if (!doctorId) {
+        setErrorMessage("Không tìm thấy thông tin người dùng");
+        return;
+      }
+
+      // Tạo mảng chứa các promise gọi API để lưu lịch làm việc
+      const savePromises = [];
+
+      // Duyệt qua từng ngày trong tuần
+      for (const day of weekSchedule) {
+        // Lấy ngày định dạng để lưu vào database (nếu cần)
+        const formattedDate = formatDateToString(day.date);
+
+        // Lấy giá trị TypeDay cho ngày này (MONDAY, TUESDAY, v.v.)
+        const typeDay = day.typeDay; // Sử dụng trực tiếp enum TypeDay
+
+        // Nếu ca 1 được chọn, thêm vào danh sách cần lưu
+        if (day.shifts.shift1) {
+          const data = {
+            doctorId: doctorId,
+            typeDay: typeDay, // Sử dụng trực tiếp enum TypeDay
+            shift: SHIFTS.CA1.shift, // Sử dụng giá trị shift (1)
+            // Các trường khác theo yêu cầu của API
+          };
+
+          savePromises.push(addWorkSchedule(data));
+        }
+
+        // Nếu ca 2 được chọn, thêm vào danh sách cần lưu
+        if (day.shifts.shift2) {
+          const data = {
+            doctorId: doctorId,
+            typeDay: typeDay, // Sử dụng trực tiếp enum TypeDay
+            shift: SHIFTS.CA2.shift, // Sử dụng giá trị shift (2)
+            // Các trường khác theo yêu cầu của API
+          };
+
+          savePromises.push(addWorkSchedule(data));
         }
       }
 
-      return newSchedule;
-    });
+      // Kiểm tra nếu không có ca làm việc nào được chọn
+      if (savePromises.length === 0) {
+        setErrorMessage("Chưa chọn ca làm việc nào");
+        return;
+      }
+
+      // Thực thi tất cả các lệnh lưu
+      await Promise.all(savePromises);
+
+      // Hiển thị thông báo thành công
+      setSuccessMessage("Lưu lịch làm việc thành công");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (error) {
+      console.error("Error saving schedule:", error);
+      setErrorMessage("Lỗi khi lưu lịch làm việc");
+      setTimeout(() => setErrorMessage(""), 3000);
+    }
   };
 
-  // Lưu lịch làm việc
-  const handleSaveSchedule = () => {
-    // Tại đây có thể thêm code để lưu lịch làm việc vào database
-    const user: object = JSON.parse(sessionStorage.getItem("user") as string)
-
-    schedule.map((item) => {
-      const getDate: string = item.date;
-      item.timeSlots.map(async (time: TimeSlot) => {
-        const data = {
-          doctorId: user.user.userId,
-          timeStart: getDate + "-" + time.startTime.replace(":", "-") + "-00",
-          timeEnd: getDate + "-" + time.endTime.replace(":", "-") + "-00"
-        }
-
-        const result: object = await addWorkSchedule(data).then(response => response.data).catch(error => {
-          console.log(error);
-          return error;
-        })
-
-        console.log(result);
-      })
-    })
-
-    setSuccessMessage(t("doctor.schedule.success_saved"));
-    setTimeout(() => setSuccessMessage(""), 3000);
+  // Định dạng hiển thị khoảng thời gian của tuần hiện tại
+  const formatWeekRange = () => {
+    const weekEnd = addDays(currentWeekStart, 6);
+    return `${format(currentWeekStart, "dd/MM/yyyy")} - ${format(
+      weekEnd,
+      "dd/MM/yyyy"
+    )}`;
   };
 
   return (
     <Box sx={{ p: 3 }}>
+      {/* Tiêu đề trang */}
       <Typography
         variant="h4"
         component="h1"
@@ -234,164 +302,214 @@ const DoctorSchedulePage = () => {
         sx={{ display: "flex", alignItems: "center", mb: 3 }}
       >
         <CalendarMonthIcon sx={{ mr: 1 }} />
-        {t("doctor.schedule.title")}
+        Thêm Lịch Làm Việc
       </Typography>
 
-      {/* Hiển thị thông báo thành công nếu có */}
+      {/* Hiển thị thông báo thành công hoặc lỗi */}
       {successMessage && (
         <Alert severity="success" sx={{ mb: 2 }}>
           {successMessage}
         </Alert>
       )}
 
-      {/* Hiển thị thông báo lỗi nếu có */}
       {errorMessage && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {errorMessage}
         </Alert>
       )}
 
-      {/* Dropdown chọn ngày */}
+      {/* Điều hướng tuần và các nút thao tác hàng loạt */}
       <Paper sx={{ mb: 3, p: 2 }}>
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel id="date-select-label">
-            {t("doctor.schedule.select_date")}
-          </InputLabel>
-          <Select
-            labelId="date-select-label"
-            id="date-select"
-            value={selectedDate}
-            label={t("doctor.schedule.select_date")}
-            onChange={(e) => setSelectedDate(e.target.value as string)}
-          >
-            {dates.map((dateInfo) => (
-              <MenuItem
-                key={dateInfo.formattedDate}
-                value={dateInfo.formattedDate}
+        <Grid container spacing={2} alignItems="center">
+          {/* Phần chọn tuần */}
+          <Grid item xs={12} md={6}>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <IconButton
+                onClick={handlePrevWeek}
+                aria-label="Tuần trước"
+                disabled={isCurrentWeek()}
+                sx={{
+                  color: isCurrentWeek() ? "text.disabled" : "inherit",
+                  "&:hover": {
+                    color: isCurrentWeek() ? "text.disabled" : "primary.main",
+                  },
+                }}
               >
-                {dateInfo.displayDate} (
-                {format(dateInfo.date, "EEEE", { locale: vi })})
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+                <NavigateBeforeIcon />
+              </IconButton>
 
-        {/* Nút thêm slot thời gian mới */}
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddCircleIcon />}
-          onClick={handleOpenAddDialog}
-        >
-          {t("doctor.schedule.add_time_slot")}
-        </Button>
+              <Typography
+                variant="h6"
+                sx={{ flexGrow: 1, textAlign: "center" }}
+              >
+                {formatWeekRange()}
+                {isCurrentWeek() && (
+                  <Typography variant="caption" display="block" color="primary">
+                    Tuần hiện tại
+                  </Typography>
+                )}
+                {isNextWeek() && (
+                  <Typography
+                    variant="caption"
+                    display="block"
+                    color="secondary"
+                  >
+                    Tuần kế tiếp
+                  </Typography>
+                )}
+              </Typography>
 
-        {/* Hiển thị các time slot đã thêm */}
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="h6" gutterBottom>
-            {t("doctor.schedule.time_slots") || "Khung Giờ"}
-          </Typography>
+              <IconButton
+                onClick={handleNextWeek}
+                aria-label="Tuần sau"
+                disabled={isNextWeek()}
+                sx={{
+                  color: isNextWeek() ? "text.disabled" : "inherit",
+                  "&:hover": {
+                    color: isNextWeek() ? "text.disabled" : "primary.main",
+                  },
+                }}
+              >
+                <NavigateNextIcon />
+              </IconButton>
+            </Stack>
+          </Grid>
 
-          {getTimeSlotsForSelectedDate().length > 0 ? (
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t("doctor.schedule.start_time")}</TableCell>
-                    <TableCell>{t("doctor.schedule.end_time")}</TableCell>
-                    <TableCell align="right">
-                      {t("common.actions") || "Thao Tác"}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {getTimeSlotsForSelectedDate().map((slot) => (
-                    <TableRow key={slot.id}>
-                      <TableCell>{formatTimeDisplay(slot.startTime)}</TableCell>
-                      <TableCell>{formatTimeDisplay(slot.endTime)}</TableCell>
-                      <TableCell align="right">
-                        <IconButton
-                          color="error"
-                          onClick={() => handleDeleteTimeSlot(slot.id)}
-                          size="small"
-                          aria-label={t("common.delete")}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          ) : (
-            <Alert severity="info" sx={{ mt: 1 }}>
-              {t("doctor.schedule.no_time_slots")}
-            </Alert>
-          )}
-        </Box>
+          {/* Các nút thao tác hàng loạt */}
+          <Grid item xs={12} md={6}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1}
+              justifyContent="flex-end"
+            >
+              <Button
+                variant="outlined"
+                startIcon={<EventRepeatIcon />}
+                onClick={handleApplyPrevWeek}
+                size="small"
+              >
+                Áp dụng tuần trước
+              </Button>
+
+              <Button variant="outlined" onClick={selectAllShift1} size="small">
+                Chọn tất cả ca 1
+              </Button>
+
+              <Button variant="outlined" onClick={selectAllShift2} size="small">
+                Chọn tất cả ca 2
+              </Button>
+
+              <Button variant="outlined" onClick={selectAllShifts} size="small">
+                Chọn tất cả
+              </Button>
+
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={clearAllSelections}
+                size="small"
+              >
+                Bỏ chọn tất cả
+              </Button>
+            </Stack>
+          </Grid>
+        </Grid>
       </Paper>
 
-      {/* Nút lưu lịch làm việc */}
-      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+      {/* Bảng lịch làm việc theo tuần */}
+      <Paper sx={{ mb: 3, overflow: "auto" }}>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: "bold", width: "100px" }}>
+                  Ca
+                </TableCell>
+
+                {/* Tiêu đề các ngày trong tuần */}
+                {weekSchedule.map((day) => (
+                  <TableCell
+                    key={day.typeDay}
+                    align="center"
+                    sx={{ fontWeight: "bold", minWidth: "120px" }}
+                  >
+                    {DAYS_OF_WEEK[day.dayIndex].label}
+                    <Typography variant="body2" color="textSecondary">
+                      {format(day.date, "dd/MM")}
+                    </Typography>
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+
+            <TableBody>
+              {/* Hàng cho ca 1 */}
+              <TableRow>
+                <TableCell sx={{ fontWeight: "bold" }}>
+                  Ca 1
+                  <Typography
+                    variant="caption"
+                    display="block"
+                    color="textSecondary"
+                  >
+                    {SHIFTS.CA1.start} - {SHIFTS.CA1.end}
+                  </Typography>
+                </TableCell>
+
+                {/* Các ô checkbox cho ca 1 của từng ngày */}
+                {weekSchedule.map((day) => (
+                  <TableCell key={`${day.typeDay}-shift1`} align="center">
+                    <Checkbox
+                      checked={day.shifts.shift1}
+                      onChange={() => toggleShift(day.dayIndex, "shift1")}
+                    />
+                  </TableCell>
+                ))}
+              </TableRow>
+
+              {/* Hàng cho ca 2 */}
+              <TableRow>
+                <TableCell sx={{ fontWeight: "bold" }}>
+                  Ca 2
+                  <Typography
+                    variant="caption"
+                    display="block"
+                    color="textSecondary"
+                  >
+                    {SHIFTS.CA2.start} - {SHIFTS.CA2.end}
+                  </Typography>
+                </TableCell>
+
+                {/* Các ô checkbox cho ca 2 của từng ngày */}
+                {weekSchedule.map((day) => (
+                  <TableCell key={`${day.typeDay}-shift2`} align="center">
+                    <Checkbox
+                      checked={day.shifts.shift2}
+                      onChange={() => toggleShift(day.dayIndex, "shift2")}
+                    />
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+
+      {/* Các nút tác vụ chính */}
+      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
+        <Button variant="outlined" onClick={() => initializeWeekSchedule()}>
+          Hủy
+        </Button>
+
         <Button
           variant="contained"
           color="primary"
           startIcon={<SaveIcon />}
           onClick={handleSaveSchedule}
-          size="large"
         >
-          {t("doctor.schedule.save_schedule")}
+          Lưu lịch
         </Button>
       </Box>
-
-      {/* Dialog thêm time slot mới với input sử dụng định dạng 24h */}
-      <Dialog open={openAddDialog} onClose={handleCloseAddDialog}>
-        <DialogTitle>{t("doctor.schedule.add_time_slot")}</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1, minWidth: "300px" }}>
-            <TextField
-              label={t("doctor.schedule.start_time")}
-              type="time"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              // Ensure 5 min steps and force 24h format
-              inputProps={{
-                step: 300,
-                form: {
-                  autocomplete: "off", // Disable browser autocomplete which might suggest AM/PM
-                },
-              }}
-              fullWidth
-            />
-            <TextField
-              label={t("doctor.schedule.end_time")}
-              type="time"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              // Ensure 5 min steps and force 24h format
-              inputProps={{
-                step: 300,
-                form: {
-                  autocomplete: "off", // Disable browser autocomplete which might suggest AM/PM
-                },
-              }}
-              fullWidth
-            />
-            <Typography variant="caption" color="textSecondary">
-              Thời gian sử dụng định dạng 24 giờ (00:00 - 23:59)
-            </Typography>
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseAddDialog}>{t("common.cancel")}</Button>
-          <Button onClick={handleAddTimeSlot} variant="contained">
-            {t("common.save")}
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };
