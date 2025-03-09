@@ -694,12 +694,12 @@ const DoctorCurrentSchedulePage: React.FC = () => {
         </Stack>
       </Box>
 
-      <Alert severity="info" sx={{ width: "auto", mt: 2 }}>
+      {/* <Alert severity="info" sx={{ width: "auto", mt: 2 }}>
         <Typography variant="body2">
           Các lịch hẹn sẽ hiển thị mã phòng khám và ID bệnh nhân khi đã được đặt
           lịch. Màu sắc thể hiện trạng thái của lịch hẹn.
         </Typography>
-      </Alert>
+      </Alert> */}
     </Box>
   );
 };

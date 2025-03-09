@@ -74,6 +74,9 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   // State lưu thông báo lỗi nếu có
   const [error, setError] = useState<string | null>(null);
 
+  // State để kiểm tra xem có lịch làm việc nào trong ngày đã chọn không
+  const [hasWorkSchedules, setHasWorkSchedules] = useState<boolean>(true);
+
   // Gọi API để lấy danh sách ca khám mỗi khi ngày hoặc bác sĩ thay đổi
   useEffect(() => {
     if (selectedDate && doctor) {
@@ -90,6 +93,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
     try {
       setLoading(true);
       setError(null);
+      setHasWorkSchedules(true); // Reset state khi bắt đầu fetch dữ liệu mới
 
       const result = await getWorkScheduleTimeSlot(
         doctor.userId,
@@ -104,6 +108,14 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
       // Kiểm tra dữ liệu trả về từ API
       if (!result || !Array.isArray(result)) {
         setAvailableShifts([]);
+        setHasWorkSchedules(false); // Không có lịch làm việc nào cho ngày này
+        return;
+      }
+
+      // Kiểm tra xem có lịch làm việc nào trong ngày đã chọn không
+      if (result.length === 0) {
+        setAvailableShifts([]);
+        setHasWorkSchedules(false);
         return;
       }
 
@@ -333,12 +345,14 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
                         </Card>
                       ))
                     ) : (
-                      // Hiển thị thông báo nếu không có ca khám
+                      // Hiển thị thông báo dựa trên trạng thái
                       <Typography
                         color="text.secondary"
                         sx={{ py: 3, textAlign: "center" }}
                       >
-                        {t("patient.appointments.no_available_slots")}
+                        {!hasWorkSchedules
+                          ? "Bác sĩ không có lịch làm việc trong ngày này"
+                          : t("patient.appointments.no_available_slots")}
                       </Typography>
                     )}
                   </Stack>
