@@ -29,43 +29,45 @@ public class AppointmentService {
 
     public List<Map<String,Object>> getAppointmentByDoctor(String doctorId) {
         log.info("Appointment Service: Call the api to get doctor's appointments");
-        List<Long> workSchedules = (List<Long>) workScheduleFeign.getWorkScheduleIdByDoctorId(doctorId).getBody().getData();
-        List<Appointment> appointments = appointmentRepository.findAll().stream().filter(appointment -> workSchedules.contains(Integer.parseInt(appointment.getWorkSchedule().toString()))).toList();
+//        List<Long> workSchedules = (List<Long>) workScheduleFeign.getWorkScheduleIdByDoctorId(doctorId).getBody().getData();
+//        List<Appointment> appointments = appointmentRepository.findAll().stream().filter(appointment -> workSchedules.contains(Integer.parseInt(appointment.getWorkSchedule().toString()))).toList();
+//
+//        List<Map<String,Object>> result = new ArrayList<>();
+//        appointments.forEach(appointment -> {
+//            Map<String,Object> map = new HashMap<>() {
+//                {
+//                    put("appointment", appointment);
+//                    put("patient", userFeign.getPatientByUserId(appointment.getPatient()).getBody().getData());
+//                    put("workSchedule", workScheduleFeign.getById(appointment.getWorkSchedule()).getBody().getData());
+//                }
+//            };
+//
+//            result.add(map);
+//        });
 
-        List<Map<String,Object>> result = new ArrayList<>();
-        appointments.forEach(appointment -> {
-            Map<String,Object> map = new HashMap<>() {
-                {
-                    put("appointment", appointment);
-                    put("patient", userFeign.getPatientByUserId(appointment.getPatient()).getBody().getData());
-                    put("workSchedule", workScheduleFeign.getById(appointment.getWorkSchedule()).getBody().getData());
-                }
-            };
-
-            result.add(map);
-        });
-
-        return result;
+//        return result;
+        return null;
     }
 
     public List<Map<String,Object>> getAppointmentByDoctorAndStatus(String doctorId, AppointmentStatus status) {
         log.info("Appointment Service: Call the api to get doctor's appointments by status");
-        List<Long> workSchedules = (List<Long>) workScheduleFeign.getWorkScheduleIdByDoctorId(doctorId).getBody().getData();
-        List<Appointment> appointments = appointmentRepository.findByStatus(status).stream().filter(appointment -> workSchedules.contains(Integer.parseInt(appointment.getWorkSchedule().toString()))).toList();
-
-        List<Map<String,Object>> result = new ArrayList<>();
-        appointments.forEach(appointment -> {
-            Map<String,Object> map = new HashMap<>() {
-                {
-                    put("appointment", appointment);
-                    put("patient", userFeign.getPatientByUserId(appointment.getPatient()).getBody().getData());
-                    put("workSchedule", workScheduleFeign.getById(appointment.getWorkSchedule()).getBody().getData());
-                }
-            };
-
-            result.add(map);
-        });
-
-        return result;
+//        List<Long> workSchedules = (List<Long>) workScheduleFeign.getWorkScheduleIdByDoctorId(doctorId).getBody().getData();
+//        List<Appointment> appointments = appointmentRepository.findByStatus(status).stream().filter(appointment -> workSchedules.contains(Integer.parseInt(appointment.getWorkSchedule().toString()))).toList();
+//
+//        List<Map<String,Object>> result = new ArrayList<>();
+//        appointments.forEach(appointment -> {
+//            Map<String,Object> map = new HashMap<>() {
+//                {
+//                    put("appointment", appointment);
+//                    put("patient", userFeign.getPatientByUserId(appointment.getPatient()).getBody().getData());
+//                    put("workSchedule", workScheduleFeign.getById(appointment.getWorkSchedule()).getBody().getData());
+//                }
+//            };
+//
+//            result.add(map);
+//        });
+//
+//        return result;
+        return null;
     }
 }

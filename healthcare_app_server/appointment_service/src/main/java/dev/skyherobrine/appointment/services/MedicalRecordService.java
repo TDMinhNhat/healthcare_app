@@ -43,34 +43,35 @@ public class MedicalRecordService {
         log.info("Medical Record Service: sending insert medical record message to kafka");
         kafkaTemplate.send("insert_medical_record", ObjectParser.convertObjectToJson(medicalRecordDTO));
 
-        Appointment appointment = appointmentRepository.findAppointmentByRoomId(medicalRecordDTO.getRoomId()).orElseThrow(() -> new EntityNotFoundException("Appointment not found!"));
-        MedicalRecord medicalRecord = new MedicalRecord(
-                appointment,
-                medicalRecordDTO.getDiagnosisDisease(),
-                LocalDate.parse(medicalRecordDTO.getReExaminationDate(),
-                        DateTimeFormatter.ofPattern("dd-MM-yyyy")));
-        medicalRecord.setId(getMaxId() + 1);
-        MedicalRecord target = medicalRecordRepository.save(medicalRecord);
-        log.info("Medical Record Service: medical record saved into database");
-
-        Thread.sleep(1000);
-
-        log.info("Medical Record Service: sending insert medical record drug message to kafka");
-        for(MedicalRecordDTO.MedicalRecordDrugDTO item : medicalRecordDTO.getDrugs()) {
-            Map<String,Object> data = new HashMap<>();
-            data.put("medicalRecordId", target.getId());
-            data.put("medicalRecordDrug", item);
-            kafkaTemplate.send("insert_medical_record_drug", ObjectParser.convertObjectToJson(data));
-
-            MedicalRecordDrug medicalRecordDrug = new MedicalRecordDrug(
-                    new MedicalRecordDrugKey(target, drugRepository.findById(item.getDrugId()).orElseThrow(() -> new EntityNotFoundException("Drug not found!"))),
-                    item.getQuantity(),
-                    item.getHowUse()
-            );
-            medicalRecordDrugRepository.save(medicalRecordDrug);
-        }
-        log.info("Medical Record Service: medical record drugs saved into database");
-        return target;
+//        Appointment appointment = appointmentRepository.findAppointmentByRoomId(medicalRecordDTO.getRoomId()).orElseThrow(() -> new EntityNotFoundException("Appointment not found!"));
+//        MedicalRecord medicalRecord = new MedicalRecord(
+//                appointment,
+//                medicalRecordDTO.getDiagnosisDisease(),
+//                LocalDate.parse(medicalRecordDTO.getReExaminationDate(),
+//                        DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+//        medicalRecord.setId(getMaxId() + 1);
+//        MedicalRecord target = medicalRecordRepository.save(medicalRecord);
+//        log.info("Medical Record Service: medical record saved into database");
+//
+//        Thread.sleep(1000);
+//
+//        log.info("Medical Record Service: sending insert medical record drug message to kafka");
+//        for(MedicalRecordDTO.MedicalRecordDrugDTO item : medicalRecordDTO.getDrugs()) {
+//            Map<String,Object> data = new HashMap<>();
+//            data.put("medicalRecordId", target.getId());
+//            data.put("medicalRecordDrug", item);
+//            kafkaTemplate.send("insert_medical_record_drug", ObjectParser.convertObjectToJson(data));
+//
+//            MedicalRecordDrug medicalRecordDrug = new MedicalRecordDrug(
+//                    new MedicalRecordDrugKey(target, drugRepository.findById(item.getDrugId()).orElseThrow(() -> new EntityNotFoundException("Drug not found!"))),
+//                    item.getQuantity(),
+//                    item.getHowUse()
+//            );
+//            medicalRecordDrugRepository.save(medicalRecordDrug);
+//        }
+//        log.info("Medical Record Service: medical record drugs saved into database");
+//        return target;
+        return null;
     }
 
     private Long getMaxId() {

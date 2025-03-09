@@ -1,7 +1,7 @@
 package dev.skyherobrine.appointment.models.mongodb;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import dev.skyherobrine.admin.models.mongodb.BookAppointment;
+import dev.skyherobrine.appointment.models.mongodb.BookAppointment;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;

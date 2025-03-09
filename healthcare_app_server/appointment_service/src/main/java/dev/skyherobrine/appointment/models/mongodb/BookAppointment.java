@@ -1,9 +1,7 @@
 package dev.skyherobrine.appointment.models.mongodb;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import dev.skyherobrine.admin.enums.AppointmentStatus;
-import dev.skyherobrine.admin.models.mariadb.Patient;
-import dev.skyherobrine.admin.models.mongodb.Appointment;
+import dev.skyherobrine.appointment.enums.AppointmentStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

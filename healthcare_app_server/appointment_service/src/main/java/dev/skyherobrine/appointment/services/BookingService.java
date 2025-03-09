@@ -33,18 +33,19 @@ public class BookingService {
 
     public Appointment booking(AppointmentDTO appointmentDTO) throws Exception {
         log.info("Booking Service: add the book appointment");
-        Map<String,Object> dataSend = new HashMap<>();
-        Appointment appointment = appointmentDTO.toObject();
-        appointment.setId(getMaxIdAppointment() + 1);
-        appointment.setRoomId(generateRoomId());
+//        Map<String,Object> dataSend = new HashMap<>();
+//        Appointment appointment = appointmentDTO.toObject();
+//        appointment.setId(getMaxIdAppointment() + 1);
+//        appointment.setRoomId(generateRoomId());
+//
+//        log.info("Booking Service: send insert appointment message to kafka");
+//        kafkaTemplate.send("insert_appointment", ObjectParser.convertObjectToJson(appointment));
+//
+//        Appointment result = ar.save(appointment);
+//        log.info("Booking Service: add book appointment successfully");
 
-        log.info("Booking Service: send insert appointment message to kafka");
-        kafkaTemplate.send("insert_appointment", ObjectParser.convertObjectToJson(appointment));
-
-        Appointment result = ar.save(appointment);
-        log.info("Booking Service: add book appointment successfully");
-
-        return result;
+//        return result;
+        return null;
     }
 
     private String generateRoomId() {

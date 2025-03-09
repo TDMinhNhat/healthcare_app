@@ -14,11 +14,11 @@ public class AppointmentDTO {
     private Long workSchedule;
     private String note;
 
-    public Appointment toObject() {
-        return new Appointment(
-            patientId,
-            workSchedule,
-            note
-        );
-    }
+//    public Appointment toObject() {
+//        return new Appointment(
+//            patientId,
+//            workSchedule,
+//            note
+//        );
+//    }
 }

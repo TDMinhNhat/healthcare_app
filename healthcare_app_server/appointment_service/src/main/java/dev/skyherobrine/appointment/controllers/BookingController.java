@@ -59,14 +59,15 @@ public class BookingController {
         try {
             log.info("Booking: Call the api cancel appointment");
             kafkaTemplate.send("cancel_appointment", roomId);
-            Appointment appointment = ar.findAppointmentByRoomId(roomId).orElseThrow(() -> new EntityNotFoundException("The appointment wasn't found!"));
-            appointment.setStatus(AppointmentStatus.CANCELLED);
-            Appointment result = ar.save(appointment);
+//            Appointment appointment = ar.findAppointmentByRoomId(roomId).orElseThrow(() -> new EntityNotFoundException("The appointment wasn't found!"));
+//            appointment.setStatus(AppointmentStatus.CANCELLED);
+//            Appointment result = ar.save(appointment);
             log.info("Booking: The appointment was canceled");
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "Cancel appointment successfully",
-                    result
+//                    result
+                    null
             ));
         } catch (Exception e) {
             log.error("Booking: The api return an error");
