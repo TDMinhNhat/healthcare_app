@@ -41,14 +41,14 @@ public class MedicalRecordConsumer {
             log.info("Medical Record Consumer: listening insert medical record message");
             log.info("Medical Record Consumer: {}", message);
 
-            JsonNode node = new ObjectMapper().readTree(message);
-            Appointment appointment = appointmentRepository.findAppointmentByRoomId(node.get("roomId").asText()).orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
-            String getDiagnosisDisease = node.get("diagnosisDisease").asText();
-            String getNote = node.get("note").asText();
-            String getReExaminationDate = node.get("reExaminationDate").asText();
-
-            MedicalRecord medicalRecord = new MedicalRecord(appointment, getDiagnosisDisease, getNote, LocalDate.parse(getReExaminationDate, DateTimeFormatter.ofPattern("dd-MM-yyyy")));
-            medicalRecordRepository.save(medicalRecord);
+//            JsonNode node = new ObjectMapper().readTree(message);
+//            Appointment appointment = appointmentRepository.findAppointmentByRoomId(node.get("roomId").asText()).orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
+//            String getDiagnosisDisease = node.get("diagnosisDisease").asText();
+//            String getNote = node.get("note").asText();
+//            String getReExaminationDate = node.get("reExaminationDate").asText();
+//
+//            MedicalRecord medicalRecord = new MedicalRecord(appointment, getDiagnosisDisease, getNote, LocalDate.parse(getReExaminationDate, DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+//            medicalRecordRepository.save(medicalRecord);
             log.info("Medical Record Consumer: inserted medical record into database");
         } catch (Exception e) {
             log.error("Medical Record Consumer: can't insert medical record into database");

@@ -36,21 +36,21 @@ public class AppointmentConsumer {
             log.info("Appointment Consumer: receive insert appointment message from kafka");
             log.info("Appointment Consumer: {}", message);
 
-            JsonNode node = new ObjectMapper().readTree(message);
-            String getPatient = node.get("patient").asText();
-            Long getWorkSchedule = node.get("workSchedule").asLong();
-            String getNote = node.get("note").asText();
-            String getRoomId = node.get("roomId").asText();
-            Long getId = node.get("id").asLong();
-
-            Appointment appointment = new Appointment(
-                    pr.findPatientByUserId(getPatient).orElseThrow(() -> new EntityNotFoundException("Patient not found")),
-                    workScheduleRepository.findById(getWorkSchedule).orElseThrow(() -> new EntityNotFoundException("Work schedule not found")).getId(),
-                    getNote,
-                    getRoomId
-            );
-            appointment.setId(getId);
-            ar.save(appointment);
+//            JsonNode node = new ObjectMapper().readTree(message);
+//            String getPatient = node.get("patient").asText();
+//            Long getWorkSchedule = node.get("workSchedule").asLong();
+//            String getNote = node.get("note").asText();
+//            String getRoomId = node.get("roomId").asText();
+//            Long getId = node.get("id").asLong();
+//
+//            Appointment appointment = new Appointment(
+//                    pr.findPatientByUserId(getPatient).orElseThrow(() -> new EntityNotFoundException("Patient not found")),
+//                    workScheduleRepository.findById(getWorkSchedule).orElseThrow(() -> new EntityNotFoundException("Work schedule not found")).getId(),
+//                    getNote,
+//                    getRoomId
+//            );
+//            appointment.setId(getId);
+//            ar.save(appointment);
         } catch (Exception e) {
             log.error("Appointment Consumer: Can't add the book appointment");
             log.error(e.getMessage());
@@ -62,10 +62,10 @@ public class AppointmentConsumer {
         try {
             log.info("Appointment Consumer: receive update cancel appointment message from kafka");
             log.info("Appointment Consumer: {}", message);
-            String getRoomId = ObjectParser.convertJsonToObject(message, String.class);
-            Appointment appointment = ar.findAppointmentByRoomId(getRoomId).orElseThrow(() -> new EntityNotFoundException("The appointment wasn't found!"));
-            appointment.setStatus(AppointmentStatus.CANCELLED);
-            ar.save(appointment);
+//            String getRoomId = ObjectParser.convertJsonToObject(message, String.class);
+//            Appointment appointment = ar.findAppointmentByRoomId(getRoomId).orElseThrow(() -> new EntityNotFoundException("The appointment wasn't found!"));
+//            appointment.setStatus(AppointmentStatus.CANCELLED);
+//            ar.save(appointment);
             log.info("Appointment Consumer: update the status appointment successfully!");
         } catch (Exception e) {
             log.error("Appointment Consumer: Can't update the cancel appointment");
