@@ -16,5 +16,5 @@ public interface WorkScheduleRepository extends MongoRepository<WorkSchedule,Lon
 
     List<WorkSchedule> findAllByDoctor_UserId(String doctorId);
 
-    List<WorkSchedule> findByDateAppointmentBetween(LocalDate dateAppointmentStart, LocalDate dateAppointmentEnd);
+    List<WorkSchedule> findByDoctor_UserIdAndDateAppointmentBetween(String userId, LocalDate dateAppointmentStart, LocalDate dateAppointmentEnd);
 }

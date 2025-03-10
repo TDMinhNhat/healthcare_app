@@ -59,14 +59,16 @@ public class WorkScheduleController {
         }
     }
 
-    @GetMapping("/between")
+    @GetMapping("/between/{doctorId}")
     public ResponseEntity<Response> getWorkScheduleByBetweenDay(
+            @PathVariable("doctorId") String doctorId,
             @RequestParam String start,
             @RequestParam String end
     ) {
         try {
             log.info("Work Schedule: Call the api get work schedule by between day");
-            List<WorkSchedule> result = workScheduleRepository.findByDateAppointmentBetween(
+            List<WorkSchedule> result = workScheduleRepository.findByDoctor_UserIdAndDateAppointmentBetween(
+                    doctorId,
                     LocalDate.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy")),
                     LocalDate.parse(end, DateTimeFormatter.ofPattern("dd-MM-yyyy"))
             );
