@@ -1,5 +1,6 @@
 package dev.skyherobrine.authenticate.dtos;
 
+import dev.skyherobrine.authenticate.enums.TypeDay;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,8 +10,7 @@ import lombok.Setter;
 public class WorkScheduleDTO {
 
     private String doctorId;
-    private String timeStart;
-    private String timeEnd;
-
-
+    private TypeDay typeDay;
+    private int shift;
+    private int maxSlots;
 }
