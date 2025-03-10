@@ -110,4 +110,14 @@ public class BookingController {
             ));
         }
     }
+
+    @GetMapping("/detail")
+    public ResponseEntity<Response> getAppointmentDetail(@RequestParam("appointmentId") Long appointmentId) {
+        log.info("Booking: Call the api get appointment detail");
+        return ResponseEntity.ok(new Response(
+                HttpStatus.OK.value(),
+                "Get appointment detail successfully",
+                bookingService.getAppointmentDetail(appointmentId)
+        ));
+    }
 }
