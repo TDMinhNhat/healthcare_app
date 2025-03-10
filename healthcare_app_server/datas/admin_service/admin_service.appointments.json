@@ -17,7 +17,7 @@
         },
         "name": "MÒN RĂNG",
         "createdAt": {
-          "$date": "2025-03-04T10:07:44.660Z"
+          "$date": "2025-03-04T10:07:44.000Z"
         },
         "status": true
       },
@@ -33,7 +33,7 @@
           "$numberLong": "1"
         },
         "createdAt": {
-          "$date": "2025-03-04T11:05:17.431Z"
+          "$date": "2025-03-04T11:05:17.000Z"
         }
       },
       "phone": "(812) 976-1981",
@@ -49,10 +49,9 @@
       "emailVerified": true,
       "status": true,
       "createdAt": {
-        "$date": "2025-03-04T11:05:17.425Z"
+        "$date": "2025-03-04T11:05:17.000Z"
       }
     },
-    "type_day": "MONDAY",
     "shift": {
       "_id": {
         "$numberLong": "1"
@@ -72,16 +71,14 @@
       },
       "status": true
     },
-    "max_slots": 29,
-    "created_at": "10-03-2025-11-20-31",
-    "updated_at": "10-03-2025-11-20-31",
+    "max_slots": 20,
+    "date_appointment": "17-03-2025",
+    "created_at": "10-03-2025-19-34-12",
+    "updated_at": "10-03-2025-19-34-12",
     "status": true
   },
-  "date_appointment": {
-    "$date": "2025-03-16T17:00:00.000Z"
-  },
   "created_at": {
-    "$date": "2025-03-10T09:19:09.168Z"
+    "$date": "2025-03-10T12:36:56.547Z"
   },
   "_class": "dev.skyherobrine.admin.models.mongodb.Appointment"
 }]
