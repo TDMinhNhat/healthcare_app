@@ -17,6 +17,6 @@ public class ShiftDTO {
     private String end;
 
     public Shift toObject() {
-        return new Shift(shift, LocalTime.parse(start, DateTimeFormatter.ofPattern("HH-mm-ss")), LocalTime.parse(end, DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        return new Shift(shift, LocalTime.parse(start, DateTimeFormatter.ofPattern("HH-mm")), LocalTime.parse(end, DateTimeFormatter.ofPattern("HH-mm")));
     }
 }
