@@ -84,7 +84,7 @@ public class BookingController {
     public ResponseEntity<Response> getAppointmentByWorkSchedule(@RequestParam String workSchedule) {
         try {
             log.info("Booking: Call the api get appointment by work schedule");
-            Appointment result = ar.findByWorkSchedule(Long.parseLong(workSchedule)).orElse(null);
+            var result = ar.findByWorkScheduleId(Long.parseLong(workSchedule));
             if(result != null) {
                 return ResponseEntity.ok(new Response(
                         HttpStatus.OK.value(),

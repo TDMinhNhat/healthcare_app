@@ -10,15 +10,8 @@ import java.util.Optional;
 
 @Repository
 public interface AppointmentRepository extends MongoRepository<Appointment,Long> {
-    List<Appointment> findByPatient(String patient);
-
-    Optional<Appointment> findAppointmentByRoomId(String roomId);
-
-    List<Appointment> findByStatus(AppointmentStatus status);
-
-    List<Appointment> findByPatientAndStatus(String patient, AppointmentStatus status);
-
-    Optional<Appointment> findByWorkSchedule(Long workSchedule);
-
     Optional<Appointment> findFirstByOrderByIdDesc();
+
+    List<Appointment> findByWorkScheduleId(Long workScheduleId);
+
 }
