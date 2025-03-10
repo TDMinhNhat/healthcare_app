@@ -1,0 +1,399 @@
+[{
+  "_id": {
+    "$numberLong": "1"
+  },
+  "patient_id": {
+    "_id": {
+      "$numberLong": "4"
+    },
+    "userId": "20250304182049-40175-20010221",
+    "firstName": "Leslie",
+    "lastName": "Tremblay",
+    "sex": false,
+    "dob": {
+      "$date": "2001-02-20T17:00:00.000Z"
+    },
+    "address": {
+      "_id": {
+        "$numberLong": "41"
+      },
+      "createdAt": {
+        "$date": "2025-03-04T11:20:50.458Z"
+      }
+    },
+    "phone": "(414) 902-8116",
+    "email": "kelley.greenfelder@hotmail.com",
+    "password": "2p7hdf9j7q",
+    "authedProvider": {
+      "_id": {
+        "$numberLong": "1"
+      },
+      "authenName": "APPLICATION",
+      "status": true
+    },
+    "emailVerified": false,
+    "status": true,
+    "createdAt": {
+      "$date": "2025-03-04T11:20:50.451Z"
+    }
+  },
+  "appointment_id": {
+    "_id": {
+      "$numberLong": "1"
+    },
+    "work_schedule_id": {
+      "_id": {
+        "$numberLong": "1"
+      },
+      "doctor": {
+        "_id": {
+          "$numberLong": "1"
+        },
+        "specialization": "",
+        "typeDisease": {
+          "_id": {
+            "$numberLong": "6"
+          },
+          "name": "MÒN RĂNG",
+          "createdAt": {
+            "$date": "2025-03-04T10:07:44.660Z"
+          },
+          "status": true
+        },
+        "userId": "20250304180516-62345-19950810",
+        "firstName": "Truman",
+        "lastName": "Spinka",
+        "sex": true,
+        "dob": {
+          "$date": "1995-08-09T17:00:00.000Z"
+        },
+        "address": {
+          "_id": {
+            "$numberLong": "1"
+          },
+          "createdAt": {
+            "$date": "2025-03-04T11:05:17.431Z"
+          }
+        },
+        "phone": "(812) 976-1981",
+        "email": "barbra.powlowski@yahoo.com",
+        "password": "6u5vjao881r1pjzl",
+        "authedProvider": {
+          "_id": {
+            "$numberLong": "1"
+          },
+          "authenName": "APPLICATION",
+          "status": true
+        },
+        "emailVerified": true,
+        "status": true,
+        "createdAt": {
+          "$date": "2025-03-04T11:05:17.425Z"
+        }
+      },
+      "type_day": "MONDAY",
+      "shift": {
+        "_id": {
+          "$numberLong": "1"
+        },
+        "shift": 1,
+        "start": {
+          "$date": "2025-03-10T00:00:00.000Z"
+        },
+        "end": {
+          "$date": "2025-03-10T04:00:00.000Z"
+        },
+        "createdAt": {
+          "$date": "2025-03-10T02:20:11.755Z"
+        },
+        "updatedAt": {
+          "$date": "2025-03-10T02:20:11.755Z"
+        },
+        "status": true
+      },
+      "max_slots": 29,
+      "created_at": "10-03-2025-11-20-31",
+      "updated_at": "10-03-2025-11-20-31",
+      "status": true
+    },
+    "date_appointment": {
+      "$date": "2025-03-16T17:00:00.000Z"
+    },
+    "created_at": {
+      "$date": "2025-03-10T09:19:09.168Z"
+    }
+  },
+  "numerical_order": 0,
+  "note": "null",
+  "created_at": {
+    "$date": "2025-03-10T09:19:10.258Z"
+  },
+  "status": "WAITING",
+  "_class": "dev.skyherobrine.admin.models.mongodb.BookAppointment"
+},
+{
+  "_id": {
+    "$numberLong": "2"
+  },
+  "patient_id": {
+    "_id": {
+      "$numberLong": "5"
+    },
+    "userId": "20250304182050-56975-19860218",
+    "firstName": "Johnathan",
+    "lastName": "Wyman",
+    "sex": false,
+    "dob": {
+      "$date": "1986-02-17T17:00:00.000Z"
+    },
+    "address": {
+      "_id": {
+        "$numberLong": "42"
+      },
+      "createdAt": {
+        "$date": "2025-03-04T11:20:50.517Z"
+      }
+    },
+    "phone": "(730) 201-7158",
+    "email": "vina.ondricka@gmail.com",
+    "password": "28hje83y3h9",
+    "authedProvider": {
+      "_id": {
+        "$numberLong": "1"
+      },
+      "authenName": "APPLICATION",
+      "status": true
+    },
+    "emailVerified": false,
+    "status": true,
+    "createdAt": {
+      "$date": "2025-03-04T11:20:50.517Z"
+    }
+  },
+  "appointment_id": {
+    "_id": {
+      "$numberLong": "1"
+    },
+    "work_schedule_id": {
+      "_id": {
+        "$numberLong": "1"
+      },
+      "doctor": {
+        "_id": {
+          "$numberLong": "1"
+        },
+        "specialization": "",
+        "typeDisease": {
+          "_id": {
+            "$numberLong": "6"
+          },
+          "name": "MÒN RĂNG",
+          "createdAt": {
+            "$date": "2025-03-04T10:07:44.660Z"
+          },
+          "status": true
+        },
+        "userId": "20250304180516-62345-19950810",
+        "firstName": "Truman",
+        "lastName": "Spinka",
+        "sex": true,
+        "dob": {
+          "$date": "1995-08-09T17:00:00.000Z"
+        },
+        "address": {
+          "_id": {
+            "$numberLong": "1"
+          },
+          "createdAt": {
+            "$date": "2025-03-04T11:05:17.431Z"
+          }
+        },
+        "phone": "(812) 976-1981",
+        "email": "barbra.powlowski@yahoo.com",
+        "password": "6u5vjao881r1pjzl",
+        "authedProvider": {
+          "_id": {
+            "$numberLong": "1"
+          },
+          "authenName": "APPLICATION",
+          "status": true
+        },
+        "emailVerified": true,
+        "status": true,
+        "createdAt": {
+          "$date": "2025-03-04T11:05:17.425Z"
+        }
+      },
+      "type_day": "MONDAY",
+      "shift": {
+        "_id": {
+          "$numberLong": "1"
+        },
+        "shift": 1,
+        "start": {
+          "$date": "2025-03-10T00:00:00.000Z"
+        },
+        "end": {
+          "$date": "2025-03-10T04:00:00.000Z"
+        },
+        "createdAt": {
+          "$date": "2025-03-10T02:20:11.755Z"
+        },
+        "updatedAt": {
+          "$date": "2025-03-10T02:20:11.755Z"
+        },
+        "status": true
+      },
+      "max_slots": 29,
+      "created_at": "10-03-2025-11-20-31",
+      "updated_at": "10-03-2025-11-20-31",
+      "status": true
+    },
+    "date_appointment": {
+      "$date": "2025-03-16T17:00:00.000Z"
+    },
+    "created_at": {
+      "$date": "2025-03-10T09:19:09.168Z"
+    }
+  },
+  "numerical_order": 0,
+  "note": "null",
+  "created_at": {
+    "$date": "2025-03-10T09:20:24.088Z"
+  },
+  "status": "WAITING",
+  "_class": "dev.skyherobrine.admin.models.mongodb.BookAppointment"
+},
+{
+  "_id": {
+    "$numberLong": "3"
+  },
+  "patient_id": {
+    "_id": {
+      "$numberLong": "6"
+    },
+    "userId": "20250304182050-32009-19900330",
+    "firstName": "Jeannine",
+    "lastName": "Torp",
+    "sex": false,
+    "dob": {
+      "$date": "1990-03-29T17:00:00.000Z"
+    },
+    "address": {
+      "_id": {
+        "$numberLong": "43"
+      },
+      "createdAt": {
+        "$date": "2025-03-04T11:20:50.527Z"
+      }
+    },
+    "phone": "(305) 232-2688",
+    "email": "peter.morissette@yahoo.com",
+    "password": "l7qy35l8qdj16zc",
+    "authedProvider": {
+      "_id": {
+        "$numberLong": "1"
+      },
+      "authenName": "APPLICATION",
+      "status": true
+    },
+    "emailVerified": false,
+    "status": true,
+    "createdAt": {
+      "$date": "2025-03-04T11:20:50.527Z"
+    }
+  },
+  "appointment_id": {
+    "_id": {
+      "$numberLong": "1"
+    },
+    "work_schedule_id": {
+      "_id": {
+        "$numberLong": "1"
+      },
+      "doctor": {
+        "_id": {
+          "$numberLong": "1"
+        },
+        "specialization": "",
+        "typeDisease": {
+          "_id": {
+            "$numberLong": "6"
+          },
+          "name": "MÒN RĂNG",
+          "createdAt": {
+            "$date": "2025-03-04T10:07:44.660Z"
+          },
+          "status": true
+        },
+        "userId": "20250304180516-62345-19950810",
+        "firstName": "Truman",
+        "lastName": "Spinka",
+        "sex": true,
+        "dob": {
+          "$date": "1995-08-09T17:00:00.000Z"
+        },
+        "address": {
+          "_id": {
+            "$numberLong": "1"
+          },
+          "createdAt": {
+            "$date": "2025-03-04T11:05:17.431Z"
+          }
+        },
+        "phone": "(812) 976-1981",
+        "email": "barbra.powlowski@yahoo.com",
+        "password": "6u5vjao881r1pjzl",
+        "authedProvider": {
+          "_id": {
+            "$numberLong": "1"
+          },
+          "authenName": "APPLICATION",
+          "status": true
+        },
+        "emailVerified": true,
+        "status": true,
+        "createdAt": {
+          "$date": "2025-03-04T11:05:17.425Z"
+        }
+      },
+      "type_day": "MONDAY",
+      "shift": {
+        "_id": {
+          "$numberLong": "1"
+        },
+        "shift": 1,
+        "start": {
+          "$date": "2025-03-10T00:00:00.000Z"
+        },
+        "end": {
+          "$date": "2025-03-10T04:00:00.000Z"
+        },
+        "createdAt": {
+          "$date": "2025-03-10T02:20:11.755Z"
+        },
+        "updatedAt": {
+          "$date": "2025-03-10T02:20:11.755Z"
+        },
+        "status": true
+      },
+      "max_slots": 29,
+      "created_at": "10-03-2025-11-20-31",
+      "updated_at": "10-03-2025-11-20-31",
+      "status": true
+    },
+    "date_appointment": {
+      "$date": "2025-03-16T17:00:00.000Z"
+    },
+    "created_at": {
+      "$date": "2025-03-10T09:19:09.168Z"
+    }
+  },
+  "numerical_order": 0,
+  "note": "null",
+  "created_at": {
+    "$date": "2025-03-10T09:20:31.969Z"
+  },
+  "status": "WAITING",
+  "_class": "dev.skyherobrine.admin.models.mongodb.BookAppointment"
+}]

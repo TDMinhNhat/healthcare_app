@@ -459,6 +459,26 @@ CREATE TABLE IF NOT EXISTS `patient_face_encodes` (
 -- Dumping data for table admin_service.patient_face_encodes: ~0 rows (approximately)
 DELETE FROM `patient_face_encodes`;
 
+-- Dumping structure for table admin_service.shifts
+DROP TABLE IF EXISTS `shifts`;
+CREATE TABLE IF NOT EXISTS `shifts` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) NOT NULL,
+  `end` time(6) NOT NULL,
+  `shift` int(11) NOT NULL,
+  `start` time(6) NOT NULL,
+  `status` bit(1) NOT NULL,
+  `updated_at` datetime(6) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+
+-- Dumping data for table admin_service.shifts: ~3 rows (approximately)
+DELETE FROM `shifts`;
+INSERT INTO `shifts` (`id`, `created_at`, `end`, `shift`, `start`, `status`, `updated_at`) VALUES
+	(1, '2025-03-10 09:20:11.545133', '11:00:00.000000', 1, '07:00:00.000000', b'1', '2025-03-10 09:20:11.545133'),
+	(2, '2025-03-10 09:20:45.531810', '17:00:00.000000', 2, '13:00:00.000000', b'1', '2025-03-10 09:20:45.531810'),
+	(3, '2025-03-10 09:20:55.261404', '21:00:00.000000', 3, '18:00:00.000000', b'1', '2025-03-10 09:20:55.261404');
+
 -- Dumping structure for table admin_service.type_diseases
 DROP TABLE IF EXISTS `type_diseases`;
 CREATE TABLE IF NOT EXISTS `type_diseases` (
@@ -930,6 +950,26 @@ CREATE TABLE IF NOT EXISTS `patient_face_encodes` (
 
 -- Dumping data for table authenticate_service.patient_face_encodes: ~0 rows (approximately)
 DELETE FROM `patient_face_encodes`;
+
+-- Dumping structure for table authenticate_service.shifts
+DROP TABLE IF EXISTS `shifts`;
+CREATE TABLE IF NOT EXISTS `shifts` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) NOT NULL,
+  `end` time(6) NOT NULL,
+  `shift` int(11) NOT NULL,
+  `start` time(6) NOT NULL,
+  `status` bit(1) NOT NULL,
+  `updated_at` datetime(6) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+
+-- Dumping data for table authenticate_service.shifts: ~3 rows (approximately)
+DELETE FROM `shifts`;
+INSERT INTO `shifts` (`id`, `created_at`, `end`, `shift`, `start`, `status`, `updated_at`) VALUES
+	(1, '2025-03-10 09:20:11.755434', '11:00:00.000000', 1, '07:00:00.000000', b'1', '2025-03-10 09:20:11.755434'),
+	(2, '2025-03-10 09:20:45.542119', '17:00:00.000000', 2, '13:00:00.000000', b'1', '2025-03-10 09:20:45.542119'),
+	(3, '2025-03-10 09:20:55.267401', '21:00:00.000000', 3, '18:00:00.000000', b'1', '2025-03-10 09:20:55.267401');
 
 -- Dumping structure for table authenticate_service.type_diseases
 DROP TABLE IF EXISTS `type_diseases`;
