@@ -35,11 +35,10 @@ public class BookingService {
         log.info("Booking Service: add the book appointment");
         Map<String,Object> result = new HashMap<>();
 
-        Appointment appointment = appointmentRepository.findByDateAppointment(LocalDate.parse(appointmentDTO.getDateAppointment(), DateTimeFormatter.ofPattern("dd-MM-yyyy")))
-                .orElse(null);
+        Appointment appointment = appointmentRepository.findByWorkScheduleId(appointmentDTO.getWorkSchedule()).orElse(null);
 
         if(appointment == null) {
-            appointment = new Appointment(getMaxIdAppointment(), appointmentDTO.getWorkSchedule(), LocalDate.parse(appointmentDTO.getDateAppointment(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+            appointment = new Appointment(getMaxIdAppointment(), appointmentDTO.getWorkSchedule());
             Appointment target = appointmentRepository.save(appointment);
             kafkaTemplate.send("insert_appointment", ObjectParser.convertObjectToJson(appointmentDTO));
             result.put("appointment", target);

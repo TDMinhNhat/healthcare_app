@@ -13,7 +13,5 @@ import java.util.Optional;
 public interface AppointmentRepository extends MongoRepository<Appointment,Long> {
     Optional<Appointment> findFirstByOrderByIdDesc();
 
-    List<Appointment> findByWorkScheduleId(Long workScheduleId);
-
-    Optional<Appointment> findByDateAppointment(LocalDate dateAppointment);
+    Optional<Appointment> findByWorkScheduleId(Long workScheduleId);
 }

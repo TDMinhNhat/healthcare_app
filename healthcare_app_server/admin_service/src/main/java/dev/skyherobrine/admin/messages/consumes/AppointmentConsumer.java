@@ -43,13 +43,11 @@ public class AppointmentConsumer {
 
             JsonNode node = new ObjectMapper().readTree(message);
             Long getWorkScheduleId = node.get("workSchedule").asLong();
-            String getDateAppointment = node.get("dateAppointment").asText();
             Long getId = getMaxIdAppointment();
 
             Appointment appointment = new Appointment(
                     getId,
-                    workScheduleRepository.findById(getWorkScheduleId).orElseThrow(() -> new EntityNotFoundException("The work schedule wasn't found!")),
-                    LocalDate.parse(getDateAppointment, DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                    workScheduleRepository.findById(getWorkScheduleId).orElseThrow(() -> new EntityNotFoundException("The work schedule wasn't found!"))
             );
             appointmentRepository.save(appointment);
 

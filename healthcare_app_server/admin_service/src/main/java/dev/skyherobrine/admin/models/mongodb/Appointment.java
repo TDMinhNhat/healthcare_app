@@ -20,17 +20,13 @@ public class Appointment {
     private Long id;
     @Field(name = "work_schedule_id")
     private WorkSchedule workScheduleId;
-    @JsonFormat(pattern = "dd-MM-yyyy")
-    @Field(name = "date_appointment")
-    private LocalDate dateAppointment;
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
     @Field(name = "created_at")
     private LocalDateTime createdAt;
 
-    public Appointment(Long id, WorkSchedule workScheduleId, LocalDate dateAppointment) {
+    public Appointment(Long id, WorkSchedule workScheduleId) {
         this.id = id;
         this.workScheduleId = workScheduleId;
-        this.dateAppointment = dateAppointment;
         createdAt = LocalDateTime.now();
     }
 }
