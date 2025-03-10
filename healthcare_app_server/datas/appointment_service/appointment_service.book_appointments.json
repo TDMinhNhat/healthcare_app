@@ -2,7 +2,7 @@
   "_id": {
     "$numberLong": "1"
   },
-  "patient_id": "20250228081950-93569-20030913",
+  "patient_id": "20250304182049-40175-20010221",
   "appointment_id": {
     "_id": {
       "$numberLong": "1"
@@ -13,7 +13,27 @@
   },
   "numerical_order": 0,
   "created_at": {
-    "$date": "2025-03-10T12:36:57.427Z"
+    "$date": "2025-03-10T12:59:05.570Z"
+  },
+  "status": "WAITING",
+  "_class": "dev.skyherobrine.appointment.models.mongodb.BookAppointment"
+},
+{
+  "_id": {
+    "$numberLong": "2"
+  },
+  "patient_id": "20250304182050-56975-19860218",
+  "appointment_id": {
+    "_id": {
+      "$numberLong": "1"
+    },
+    "work_schedule_id": {
+      "$numberLong": "1"
+    }
+  },
+  "numerical_order": 0,
+  "created_at": {
+    "$date": "2025-03-10T12:59:14.873Z"
   },
   "status": "WAITING",
   "_class": "dev.skyherobrine.appointment.models.mongodb.BookAppointment"

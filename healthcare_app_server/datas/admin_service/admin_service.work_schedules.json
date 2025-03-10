@@ -68,9 +68,11 @@
     "status": true
   },
   "max_slots": 20,
-  "date_appointment": "17-03-2025",
-  "created_at": "10-03-2025-19-34-12",
-  "updated_at": "10-03-2025-19-34-12",
+  "date_appointment": {
+    "$date": "2025-03-10T17:00:00.000Z"
+  },
+  "created_at": "10-03-2025-19-51-45",
+  "updated_at": "10-03-2025-19-51-45",
   "status": true,
   "_class": "dev.skyherobrine.admin.models.mongodb.WorkSchedule"
 },
@@ -144,9 +146,11 @@
     "status": true
   },
   "max_slots": 20,
-  "date_appointment": "17-03-2025",
-  "created_at": "10-03-2025-19-34-57",
-  "updated_at": "10-03-2025-19-34-57",
+  "date_appointment": {
+    "$date": "2025-03-10T17:00:00.000Z"
+  },
+  "created_at": "10-03-2025-19-52-21",
+  "updated_at": "10-03-2025-19-52-21",
   "status": true,
   "_class": "dev.skyherobrine.admin.models.mongodb.WorkSchedule"
 },
@@ -220,9 +224,11 @@
     "status": true
   },
   "max_slots": 20,
-  "date_appointment": "19-03-2025",
-  "created_at": "10-03-2025-19-35-05",
-  "updated_at": "10-03-2025-19-35-05",
+  "date_appointment": {
+    "$date": "2025-03-12T17:00:00.000Z"
+  },
+  "created_at": "10-03-2025-19-52-31",
+  "updated_at": "10-03-2025-19-52-31",
   "status": true,
   "_class": "dev.skyherobrine.admin.models.mongodb.WorkSchedule"
 },
@@ -296,9 +302,11 @@
     "status": true
   },
   "max_slots": 20,
-  "date_appointment": "19-03-2025",
-  "created_at": "10-03-2025-19-35-07",
-  "updated_at": "10-03-2025-19-35-07",
+  "date_appointment": {
+    "$date": "2025-03-12T17:00:00.000Z"
+  },
+  "created_at": "10-03-2025-19-52-34",
+  "updated_at": "10-03-2025-19-52-34",
   "status": true,
   "_class": "dev.skyherobrine.admin.models.mongodb.WorkSchedule"
 },
@@ -372,9 +380,11 @@
     "status": true
   },
   "max_slots": 20,
-  "date_appointment": "21-03-2025",
-  "created_at": "10-03-2025-19-35-14",
-  "updated_at": "10-03-2025-19-35-14",
+  "date_appointment": {
+    "$date": "2025-03-14T17:00:00.000Z"
+  },
+  "created_at": "10-03-2025-19-52-41",
+  "updated_at": "10-03-2025-19-52-41",
   "status": true,
   "_class": "dev.skyherobrine.admin.models.mongodb.WorkSchedule"
 },
@@ -448,9 +458,401 @@
     "status": true
   },
   "max_slots": 20,
-  "date_appointment": "21-03-2025",
-  "created_at": "10-03-2025-19-35-17",
-  "updated_at": "10-03-2025-19-35-17",
+  "date_appointment": {
+    "$date": "2025-03-14T17:00:00.000Z"
+  },
+  "created_at": "10-03-2025-19-52-43",
+  "updated_at": "10-03-2025-19-52-43",
+  "status": true,
+  "_class": "dev.skyherobrine.admin.models.mongodb.WorkSchedule"
+},
+{
+  "_id": {
+    "$numberLong": "7"
+  },
+  "doctor": {
+    "_id": {
+      "$numberLong": "2"
+    },
+    "specialization": "",
+    "typeDisease": {
+      "_id": {
+        "$numberLong": "5"
+      },
+      "name": "VIÊM NHA CHU",
+      "createdAt": {
+        "$date": "2025-03-04T10:07:31.000Z"
+      },
+      "status": true
+    },
+    "userId": "20250304180517-42192-19871021",
+    "firstName": "Oda",
+    "lastName": "Wiza",
+    "sex": false,
+    "dob": {
+      "$date": "1987-10-20T17:00:00.000Z"
+    },
+    "address": {
+      "_id": {
+        "$numberLong": "5"
+      },
+      "createdAt": {
+        "$date": "2025-03-04T11:05:17.000Z"
+      }
+    },
+    "phone": "(730) 608-1762",
+    "email": "lee.durgan@gmail.com",
+    "password": "m9l4uc5j9r9qy3g",
+    "authedProvider": {
+      "_id": {
+        "$numberLong": "1"
+      },
+      "authenName": "APPLICATION",
+      "status": true
+    },
+    "emailVerified": true,
+    "status": true,
+    "createdAt": {
+      "$date": "2025-03-04T11:05:17.000Z"
+    }
+  },
+  "shift": {
+    "_id": {
+      "$numberLong": "1"
+    },
+    "shift": 1,
+    "start": {
+      "$date": "2025-03-10T00:00:00.000Z"
+    },
+    "end": {
+      "$date": "2025-03-10T04:00:00.000Z"
+    },
+    "createdAt": {
+      "$date": "2025-03-10T02:20:11.755Z"
+    },
+    "updatedAt": {
+      "$date": "2025-03-10T02:20:11.755Z"
+    },
+    "status": true
+  },
+  "max_slots": 10,
+  "date_appointment": {
+    "$date": "2025-03-09T17:00:00.000Z"
+  },
+  "created_at": "10-03-2025-19-53-02",
+  "updated_at": "10-03-2025-19-53-02",
+  "status": true,
+  "_class": "dev.skyherobrine.admin.models.mongodb.WorkSchedule"
+},
+{
+  "_id": {
+    "$numberLong": "8"
+  },
+  "doctor": {
+    "_id": {
+      "$numberLong": "2"
+    },
+    "specialization": "",
+    "typeDisease": {
+      "_id": {
+        "$numberLong": "5"
+      },
+      "name": "VIÊM NHA CHU",
+      "createdAt": {
+        "$date": "2025-03-04T10:07:31.000Z"
+      },
+      "status": true
+    },
+    "userId": "20250304180517-42192-19871021",
+    "firstName": "Oda",
+    "lastName": "Wiza",
+    "sex": false,
+    "dob": {
+      "$date": "1987-10-20T17:00:00.000Z"
+    },
+    "address": {
+      "_id": {
+        "$numberLong": "5"
+      },
+      "createdAt": {
+        "$date": "2025-03-04T11:05:17.000Z"
+      }
+    },
+    "phone": "(730) 608-1762",
+    "email": "lee.durgan@gmail.com",
+    "password": "m9l4uc5j9r9qy3g",
+    "authedProvider": {
+      "_id": {
+        "$numberLong": "1"
+      },
+      "authenName": "APPLICATION",
+      "status": true
+    },
+    "emailVerified": true,
+    "status": true,
+    "createdAt": {
+      "$date": "2025-03-04T11:05:17.000Z"
+    }
+  },
+  "shift": {
+    "_id": {
+      "$numberLong": "1"
+    },
+    "shift": 1,
+    "start": {
+      "$date": "2025-03-10T00:00:00.000Z"
+    },
+    "end": {
+      "$date": "2025-03-10T04:00:00.000Z"
+    },
+    "createdAt": {
+      "$date": "2025-03-10T02:20:11.755Z"
+    },
+    "updatedAt": {
+      "$date": "2025-03-10T02:20:11.755Z"
+    },
+    "status": true
+  },
+  "max_slots": 10,
+  "date_appointment": {
+    "$date": "2025-03-11T17:00:00.000Z"
+  },
+  "created_at": "10-03-2025-19-53-05",
+  "updated_at": "10-03-2025-19-53-05",
+  "status": true,
+  "_class": "dev.skyherobrine.admin.models.mongodb.WorkSchedule"
+},
+{
+  "_id": {
+    "$numberLong": "9"
+  },
+  "doctor": {
+    "_id": {
+      "$numberLong": "2"
+    },
+    "specialization": "",
+    "typeDisease": {
+      "_id": {
+        "$numberLong": "5"
+      },
+      "name": "VIÊM NHA CHU",
+      "createdAt": {
+        "$date": "2025-03-04T10:07:31.000Z"
+      },
+      "status": true
+    },
+    "userId": "20250304180517-42192-19871021",
+    "firstName": "Oda",
+    "lastName": "Wiza",
+    "sex": false,
+    "dob": {
+      "$date": "1987-10-20T17:00:00.000Z"
+    },
+    "address": {
+      "_id": {
+        "$numberLong": "5"
+      },
+      "createdAt": {
+        "$date": "2025-03-04T11:05:17.000Z"
+      }
+    },
+    "phone": "(730) 608-1762",
+    "email": "lee.durgan@gmail.com",
+    "password": "m9l4uc5j9r9qy3g",
+    "authedProvider": {
+      "_id": {
+        "$numberLong": "1"
+      },
+      "authenName": "APPLICATION",
+      "status": true
+    },
+    "emailVerified": true,
+    "status": true,
+    "createdAt": {
+      "$date": "2025-03-04T11:05:17.000Z"
+    }
+  },
+  "shift": {
+    "_id": {
+      "$numberLong": "2"
+    },
+    "shift": 2,
+    "start": {
+      "$date": "2025-03-10T06:00:00.000Z"
+    },
+    "end": {
+      "$date": "2025-03-10T10:00:00.000Z"
+    },
+    "createdAt": {
+      "$date": "2025-03-10T02:20:45.542Z"
+    },
+    "updatedAt": {
+      "$date": "2025-03-10T02:20:45.542Z"
+    },
+    "status": true
+  },
+  "max_slots": 10,
+  "date_appointment": {
+    "$date": "2025-03-11T17:00:00.000Z"
+  },
+  "created_at": "10-03-2025-19-53-08",
+  "updated_at": "10-03-2025-19-53-08",
+  "status": true,
+  "_class": "dev.skyherobrine.admin.models.mongodb.WorkSchedule"
+},
+{
+  "_id": {
+    "$numberLong": "10"
+  },
+  "doctor": {
+    "_id": {
+      "$numberLong": "2"
+    },
+    "specialization": "",
+    "typeDisease": {
+      "_id": {
+        "$numberLong": "5"
+      },
+      "name": "VIÊM NHA CHU",
+      "createdAt": {
+        "$date": "2025-03-04T10:07:31.000Z"
+      },
+      "status": true
+    },
+    "userId": "20250304180517-42192-19871021",
+    "firstName": "Oda",
+    "lastName": "Wiza",
+    "sex": false,
+    "dob": {
+      "$date": "1987-10-20T17:00:00.000Z"
+    },
+    "address": {
+      "_id": {
+        "$numberLong": "5"
+      },
+      "createdAt": {
+        "$date": "2025-03-04T11:05:17.000Z"
+      }
+    },
+    "phone": "(730) 608-1762",
+    "email": "lee.durgan@gmail.com",
+    "password": "m9l4uc5j9r9qy3g",
+    "authedProvider": {
+      "_id": {
+        "$numberLong": "1"
+      },
+      "authenName": "APPLICATION",
+      "status": true
+    },
+    "emailVerified": true,
+    "status": true,
+    "createdAt": {
+      "$date": "2025-03-04T11:05:17.000Z"
+    }
+  },
+  "shift": {
+    "_id": {
+      "$numberLong": "1"
+    },
+    "shift": 1,
+    "start": {
+      "$date": "2025-03-10T00:00:00.000Z"
+    },
+    "end": {
+      "$date": "2025-03-10T04:00:00.000Z"
+    },
+    "createdAt": {
+      "$date": "2025-03-10T02:20:11.755Z"
+    },
+    "updatedAt": {
+      "$date": "2025-03-10T02:20:11.755Z"
+    },
+    "status": true
+  },
+  "max_slots": 10,
+  "date_appointment": {
+    "$date": "2025-03-13T17:00:00.000Z"
+  },
+  "created_at": "10-03-2025-19-53-13",
+  "updated_at": "10-03-2025-19-53-13",
+  "status": true,
+  "_class": "dev.skyherobrine.admin.models.mongodb.WorkSchedule"
+},
+{
+  "_id": {
+    "$numberLong": "11"
+  },
+  "doctor": {
+    "_id": {
+      "$numberLong": "2"
+    },
+    "specialization": "",
+    "typeDisease": {
+      "_id": {
+        "$numberLong": "5"
+      },
+      "name": "VIÊM NHA CHU",
+      "createdAt": {
+        "$date": "2025-03-04T10:07:31.000Z"
+      },
+      "status": true
+    },
+    "userId": "20250304180517-42192-19871021",
+    "firstName": "Oda",
+    "lastName": "Wiza",
+    "sex": false,
+    "dob": {
+      "$date": "1987-10-20T17:00:00.000Z"
+    },
+    "address": {
+      "_id": {
+        "$numberLong": "5"
+      },
+      "createdAt": {
+        "$date": "2025-03-04T11:05:17.000Z"
+      }
+    },
+    "phone": "(730) 608-1762",
+    "email": "lee.durgan@gmail.com",
+    "password": "m9l4uc5j9r9qy3g",
+    "authedProvider": {
+      "_id": {
+        "$numberLong": "1"
+      },
+      "authenName": "APPLICATION",
+      "status": true
+    },
+    "emailVerified": true,
+    "status": true,
+    "createdAt": {
+      "$date": "2025-03-04T11:05:17.000Z"
+    }
+  },
+  "shift": {
+    "_id": {
+      "$numberLong": "2"
+    },
+    "shift": 2,
+    "start": {
+      "$date": "2025-03-10T06:00:00.000Z"
+    },
+    "end": {
+      "$date": "2025-03-10T10:00:00.000Z"
+    },
+    "createdAt": {
+      "$date": "2025-03-10T02:20:45.542Z"
+    },
+    "updatedAt": {
+      "$date": "2025-03-10T02:20:45.542Z"
+    },
+    "status": true
+  },
+  "max_slots": 10,
+  "date_appointment": {
+    "$date": "2025-03-13T17:00:00.000Z"
+  },
+  "created_at": "10-03-2025-19-53-22",
+  "updated_at": "10-03-2025-19-53-22",
   "status": true,
   "_class": "dev.skyherobrine.admin.models.mongodb.WorkSchedule"
 }]
