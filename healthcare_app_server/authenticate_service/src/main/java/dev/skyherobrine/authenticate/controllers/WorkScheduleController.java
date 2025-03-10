@@ -59,6 +59,36 @@ public class WorkScheduleController {
         }
     }
 
+    @PostMapping("/add_multi")
+    public synchronized ResponseEntity<Response> addMultiWorkSchedule(@RequestBody List<WorkScheduleDTO> workScheduleDTOList) {
+        try {
+            log.info("Work Schedule: Call the api add work schedule of the doctor");
+
+            workScheduleDTOList.forEach(workSchedule -> {
+                try {
+                    workScheduleService.addWorkSchedule(workSchedule);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Add the work schedule successfully",
+                    true
+            ));
+
+        } catch (Exception e) {
+            log.error("Work Schedule: The api thrown an exception");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
     @GetMapping("/between/{doctorId}")
     public ResponseEntity<Response> getWorkScheduleByBetweenDay(
             @PathVariable("doctorId") String doctorId,
