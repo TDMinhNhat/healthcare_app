@@ -10,7 +10,6 @@ import lombok.Setter;
 public class WorkScheduleDTO {
 
     private String doctorId;
-    private TypeDay typeDay;
     private int shift;
     private int maxSlots;
     private String dateAppointment;

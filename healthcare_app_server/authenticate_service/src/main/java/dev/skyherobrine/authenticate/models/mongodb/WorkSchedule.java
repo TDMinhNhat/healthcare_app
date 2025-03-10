@@ -20,8 +20,6 @@ public class WorkSchedule {
     @MongoId
     private Long id;
     private Doctor doctor;
-    @Field(name = "type_day")
-    private TypeDay typeDay;
     private Shift shift;
     @Field(name = "max_slots")
     private int maxSlots;
@@ -33,10 +31,9 @@ public class WorkSchedule {
     private String updatedAt;
     private boolean status;
 
-    public WorkSchedule(Long id, Doctor doctor, TypeDay typeDay, Shift shift, int maxSlots, String dateAppointment) {
+    public WorkSchedule(Long id, Doctor doctor, Shift shift, int maxSlots, String dateAppointment) {
         this.id = id;
         this.doctor = doctor;
-        this.typeDay = typeDay;
         this.shift = shift;
         this.maxSlots = maxSlots;
         this.dateAppointment = dateAppointment;

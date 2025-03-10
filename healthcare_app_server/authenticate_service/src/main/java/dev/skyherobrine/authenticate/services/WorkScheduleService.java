@@ -45,7 +45,6 @@ public class WorkScheduleService {
         WorkSchedule workSchedule = new WorkSchedule(
                 id,
                 doctor,
-                workScheduleDTO.getTypeDay(),
                 shift,
                 workScheduleDTO.getMaxSlots(),
                 workScheduleDTO.getDateAppointment()
