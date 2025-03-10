@@ -2,6 +2,7 @@ package dev.skyherobrine.authenticate.services;
 
 import dev.skyherobrine.authenticate.dtos.WorkScheduleDTO;
 import dev.skyherobrine.authenticate.enums.TypeDay;
+import dev.skyherobrine.authenticate.messages.producers.WorkScheduleProducer;
 import dev.skyherobrine.authenticate.models.mariadb.Doctor;
 import dev.skyherobrine.authenticate.models.mariadb.Shift;
 import dev.skyherobrine.authenticate.models.mongodb.WorkSchedule;
@@ -26,7 +27,7 @@ public class WorkScheduleService {
     private final DoctorRepository doctorRepository;
     private final KafkaTemplate<String,String> kafkaTemplate;
 
-    public WorkScheduleService(ShiftRepository shiftRepository, WorkScheduleRepository workScheduleRepository, DoctorRepository doctorRepository, KafkaTemplate<String, String> kafkaTemplate) {
+    public WorkScheduleService(ShiftRepository shiftRepository, WorkScheduleRepository workScheduleRepository, DoctorRepository doctorRepository, KafkaTemplate<String, String> kafkaTemplate, WorkScheduleProducer workScheduleProducer) {
         this.shiftRepository = shiftRepository;
         this.workScheduleRepository = workScheduleRepository;
         this.doctorRepository = doctorRepository;
@@ -46,7 +47,8 @@ public class WorkScheduleService {
                 doctor,
                 workScheduleDTO.getTypeDay(),
                 shift,
-                workScheduleDTO.getMaxSlots()
+                workScheduleDTO.getMaxSlots(),
+                workScheduleDTO.getDateAppointment()
         );
         log.info("Work Schedule Service: send the add work schedule to kafka");
         kafkaTemplate.send("insert_work_schedule", ObjectParser.convertObjectToJson(workSchedule));

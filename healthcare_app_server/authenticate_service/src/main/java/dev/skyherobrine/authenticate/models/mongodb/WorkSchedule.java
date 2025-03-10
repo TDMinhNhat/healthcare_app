@@ -25,18 +25,21 @@ public class WorkSchedule {
     private Shift shift;
     @Field(name = "max_slots")
     private int maxSlots;
+    @Field(name = "date_appointment")
+    private String dateAppointment;
     @Field(name = "created_at")
     private String createdAt;
     @Field(name = "updated_at")
     private String updatedAt;
     private boolean status;
 
-    public WorkSchedule(Long id, Doctor doctor, TypeDay typeDay, Shift shift, int maxSlots) {
+    public WorkSchedule(Long id, Doctor doctor, TypeDay typeDay, Shift shift, int maxSlots, String dateAppointment) {
         this.id = id;
         this.doctor = doctor;
         this.typeDay = typeDay;
         this.shift = shift;
         this.maxSlots = maxSlots;
+        this.dateAppointment = dateAppointment;
         this.createdAt = this.updatedAt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss"));
         this.status = true;
     }

@@ -13,4 +13,5 @@ public class WorkScheduleDTO {
     private TypeDay typeDay;
     private int shift;
     private int maxSlots;
+    private String dateAppointment;
 }
