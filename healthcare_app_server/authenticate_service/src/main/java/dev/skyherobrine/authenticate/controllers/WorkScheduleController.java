@@ -59,6 +59,33 @@ public class WorkScheduleController {
         }
     }
 
+    @GetMapping("/between")
+    public ResponseEntity<Response> getWorkScheduleByBetweenDay(
+            @RequestParam String start,
+            @RequestParam String end
+    ) {
+        try {
+            log.info("Work Schedule: Call the api get work schedule by between day");
+            List<WorkSchedule> result = workScheduleRepository.findByDateAppointmentBetween(
+                    LocalDate.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy")),
+                    LocalDate.parse(end, DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+            );
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Get the work schedule by between day successfully",
+                    result
+            ));
+        } catch (Exception e) {
+            log.error("Work Schedule: The api thrown an exception");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Response> getById(@PathVariable("id") String id) {
         try {

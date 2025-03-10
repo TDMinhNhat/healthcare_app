@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -24,7 +25,7 @@ public class WorkSchedule {
     @Field(name = "max_slots")
     private int maxSlots;
     @Field(name = "date_appointment")
-    private String dateAppointment;
+    private LocalDate dateAppointment;
     @Field(name = "created_at")
     private String createdAt;
     @Field(name = "updated_at")
@@ -36,7 +37,7 @@ public class WorkSchedule {
         this.doctor = doctor;
         this.shift = shift;
         this.maxSlots = maxSlots;
-        this.dateAppointment = dateAppointment;
+        this.dateAppointment = LocalDate.parse(dateAppointment, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         this.createdAt = this.updatedAt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss"));
         this.status = true;
     }
