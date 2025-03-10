@@ -14,6 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 @Component
 @Slf4j
 public class AppointmentConsumer {
@@ -22,12 +25,14 @@ public class AppointmentConsumer {
     private final PatientRepository pr;
     private final DoctorRepository dr;
     private final WorkScheduleRepository workScheduleRepository;
+    private final AppointmentRepository appointmentRepository;
 
-    public AppointmentConsumer(AppointmentRepository ar, PatientRepository pr, DoctorRepository dr, WorkScheduleRepository workScheduleRepository) {
+    public AppointmentConsumer(AppointmentRepository ar, PatientRepository pr, DoctorRepository dr, WorkScheduleRepository workScheduleRepository, AppointmentRepository appointmentRepository) {
         this.ar = ar;
         this.pr = pr;
         this.dr = dr;
         this.workScheduleRepository = workScheduleRepository;
+        this.appointmentRepository = appointmentRepository;
     }
 
     @KafkaListener(topics = "insert_appointment", groupId = "admin_insert_appointment")
@@ -36,21 +41,18 @@ public class AppointmentConsumer {
             log.info("Appointment Consumer: receive insert appointment message from kafka");
             log.info("Appointment Consumer: {}", message);
 
-//            JsonNode node = new ObjectMapper().readTree(message);
-//            String getPatient = node.get("patient").asText();
-//            Long getWorkSchedule = node.get("workSchedule").asLong();
-//            String getNote = node.get("note").asText();
-//            String getRoomId = node.get("roomId").asText();
-//            Long getId = node.get("id").asLong();
-//
-//            Appointment appointment = new Appointment(
-//                    pr.findPatientByUserId(getPatient).orElseThrow(() -> new EntityNotFoundException("Patient not found")),
-//                    workScheduleRepository.findById(getWorkSchedule).orElseThrow(() -> new EntityNotFoundException("Work schedule not found")).getId(),
-//                    getNote,
-//                    getRoomId
-//            );
-//            appointment.setId(getId);
-//            ar.save(appointment);
+            JsonNode node = new ObjectMapper().readTree(message);
+            Long getWorkScheduleId = node.get("workSchedule").asLong();
+            String getDateAppointment = node.get("dateAppointment").asText();
+            Long getId = getMaxIdAppointment();
+
+            Appointment appointment = new Appointment(
+                    getId,
+                    workScheduleRepository.findById(getWorkScheduleId).orElseThrow(() -> new EntityNotFoundException("The work schedule wasn't found!")),
+                    LocalDate.parse(getDateAppointment, DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+            );
+            appointmentRepository.save(appointment);
+
         } catch (Exception e) {
             log.error("Appointment Consumer: Can't add the book appointment");
             log.error(e.getMessage());
@@ -71,5 +73,10 @@ public class AppointmentConsumer {
             log.error("Appointment Consumer: Can't update the cancel appointment");
             log.error(e.getMessage());
         }
+    }
+
+    private Long getMaxIdAppointment() {
+        Appointment appointment = ar.findFirstByOrderByIdDesc().orElse(null);
+        return (appointment == null ? 0 : appointment.getId()) + 1;
     }
 }

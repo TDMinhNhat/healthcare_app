@@ -23,7 +23,7 @@ public class BookAppointment {
     private String patientId;
 
     @Field(name = "appointment_id")
-    private String appointmentId;
+    private Appointment appointment;
 
     @Field(name = "numerical_order")
     private int numericalOrder;
@@ -36,10 +36,10 @@ public class BookAppointment {
 
     private AppointmentStatus status;
 
-    public BookAppointment(Long id, String patientId, String appointmentId, int numericalOrder, String note) {
+    public BookAppointment(Long id, String patientId, Appointment appointment, int numericalOrder, String note) {
         this.id = id;
         this.patientId = patientId;
-        this.appointmentId = appointmentId;
+        this.appointment = appointment;
         this.numericalOrder = numericalOrder;
         this.note = note;
         this.createdAt = LocalDateTime.now();

@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/appointment/api/v1/booking")
 @Slf4j
@@ -35,11 +37,11 @@ public class BookingController {
     public ResponseEntity<Response> bookingAppointment(@RequestBody AppointmentDTO appointmentDTO) {
         try {
             log.info("Booking: Call the api booking appointment");
-            Appointment appointment = bookingService.booking(appointmentDTO);
+            Map<String,Object> result = bookingService.booking(appointmentDTO);
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "Booking appointment successfully",
-                    appointment
+                    result
             ));
         } catch (Exception e) {
             log.error("Booking: The api return an error");

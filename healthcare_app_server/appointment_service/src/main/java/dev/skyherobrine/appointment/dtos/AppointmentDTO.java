@@ -12,13 +12,6 @@ public class AppointmentDTO {
 
     private String patientId;
     private Long workSchedule;
+    private String dateAppointment;
     private String note;
-
-//    public Appointment toObject() {
-//        return new Appointment(
-//            patientId,
-//            workSchedule,
-//            note
-//        );
-//    }
 }

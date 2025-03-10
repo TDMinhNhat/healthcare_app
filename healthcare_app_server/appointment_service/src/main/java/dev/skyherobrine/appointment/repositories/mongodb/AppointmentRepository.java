@@ -5,6 +5,7 @@ import dev.skyherobrine.appointment.models.mongodb.Appointment;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,4 +15,5 @@ public interface AppointmentRepository extends MongoRepository<Appointment,Long>
 
     List<Appointment> findByWorkScheduleId(Long workScheduleId);
 
+    Optional<Appointment> findByDateAppointment(LocalDate dateAppointment);
 }
