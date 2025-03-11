@@ -1,4 +1,4 @@
-import axiosConfig from "./axiosConfig";
+import axiosConfig from "../axiosConfig";
 
 const prefix = "/appointment/api/v1/appointments";
 
@@ -11,19 +11,22 @@ export const getAppointmentPatient = async (userId: string) => {
   return response;
 };
 
-export const getAppointmentStatusWithDoctorId = async (doctorId: string, status: string) => {
+export const getAppointmentStatusWithDoctorId = async (
+  doctorId: string,
+  status: string
+) => {
   return await axiosConfig.get(`${prefix}/doctor/status`, {
     params: {
-      "doctorId": doctorId,
-      "status": status
-    }
-  })
-}
+      doctorId: doctorId,
+      status: status,
+    },
+  });
+};
 
 export const getAppointmentDoctor = async (doctorId: string) => {
   return await axiosConfig.get(`${prefix}/doctor`, {
     params: {
-      "doctorId": doctorId,
+      doctorId: doctorId,
     },
   });
 };

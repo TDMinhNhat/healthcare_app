@@ -1,4 +1,4 @@
-import axiosConfig from "./axiosConfig";
+import axiosConfig from "../axiosConfig";
 
 const prefix = "/appointment/api/v1/booking";
 
@@ -17,9 +17,23 @@ export const createAppointment = async (
   workSchedule: number
 ) => {
   const response = await axiosConfig.post(`${prefix}`, {
-    "patientId": patientId,
-    "workSchedule": workSchedule,
-    "note": note
+    patientId: patientId,
+    workSchedule: workSchedule,
+    note: note,
+  });
+  return response;
+};
+
+export const getAppointmentBetweenDate = async (
+  userId: string,
+  start: string,
+  end: string
+) => {
+  const response = await axiosConfig.get(`${prefix}/week/patient/${userId}`, {
+    params: {
+      start: start,
+      end: end,
+    },
   });
   return response;
 };
