@@ -1,6 +1,5 @@
 package dev.skyherobrine.appointment.dtos;
 
-import dev.skyherobrine.appointment.models.mongodb.Appointment;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

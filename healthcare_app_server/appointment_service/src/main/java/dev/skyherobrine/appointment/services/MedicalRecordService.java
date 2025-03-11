@@ -1,24 +1,14 @@
 package dev.skyherobrine.appointment.services;
 
 import dev.skyherobrine.appointment.dtos.MedicalRecordDTO;
-import dev.skyherobrine.appointment.keys.MedicalRecordDrugKey;
-import dev.skyherobrine.appointment.models.mongodb.Appointment;
 import dev.skyherobrine.appointment.models.mongodb.MedicalRecord;
-import dev.skyherobrine.appointment.models.mongodb.MedicalRecordDrug;
-import dev.skyherobrine.appointment.repositories.mongodb.AppointmentRepository;
 import dev.skyherobrine.appointment.repositories.mariadb.DrugRepository;
 import dev.skyherobrine.appointment.repositories.mongodb.MedicalRecordDrugRepository;
 import dev.skyherobrine.appointment.repositories.mongodb.MedicalRecordRepository;
 import dev.skyherobrine.appointment.utils.ObjectParser;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 @Slf4j
