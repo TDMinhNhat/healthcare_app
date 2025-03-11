@@ -2,6 +2,7 @@ package dev.skyherobrine.appointment.controllers;
 
 import dev.skyherobrine.appointment.dtos.AppointmentDTO;
 import dev.skyherobrine.appointment.feigns.DoctorFeign;
+import dev.skyherobrine.appointment.feigns.UserFeign;
 import dev.skyherobrine.appointment.feigns.WorkScheduleFeign;
 import dev.skyherobrine.appointment.models.Response;
 import dev.skyherobrine.appointment.models.mongodb.BookAppointment;
@@ -14,7 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -27,13 +30,15 @@ public class BookingController {
     private final DoctorFeign doctorFeign;
     private final KafkaTemplate<String,String> kafkaTemplate;
     private final WorkScheduleFeign workScheduleFeign;
+    private final UserFeign userFeign;
 
-    public BookingController(BookAppointmentRepository bar, BookingService bookingService, DoctorFeign doctorFeign, KafkaTemplate<String, String> kafkaTemplate, WorkScheduleFeign workScheduleFeign) {
+    public BookingController(BookAppointmentRepository bar, BookingService bookingService, DoctorFeign doctorFeign, KafkaTemplate<String, String> kafkaTemplate, WorkScheduleFeign workScheduleFeign, UserFeign userFeign) {
         this.bar = bar;
         this.bookingService = bookingService;
         this.doctorFeign = doctorFeign;
         this.kafkaTemplate = kafkaTemplate;
         this.workScheduleFeign = workScheduleFeign;
+        this.userFeign = userFeign;
     }
 
     @PostMapping
@@ -144,6 +149,43 @@ public class BookingController {
             return ResponseEntity.ok(new Response(
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "The api get appointment detail by patient and work schedule was return an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/detail/doctor")
+    public ResponseEntity<Response> getAppointmentDetailByDoctor(
+            @RequestParam String doctorId,
+            @RequestParam String workSchedule
+    ) {
+        try {
+            log.info("Booking: Call the api get appointment detail by doctor and work schedule");
+
+            Map<String,Object> result = new HashMap<>();
+            result.put("work_schedule", workScheduleFeign.getById(Long.parseLong(workSchedule)).getBody().getData());
+
+            List<Map<String,Object>> patients = new ArrayList<>();
+            bar.findByWorkSchedule(Long.parseLong(workSchedule)).forEach(bookAppointment -> {
+                Map<String,Object> data = new HashMap<>();
+                data.put("user_info", userFeign.getPatientByUserId(bookAppointment.getPatientId()).getBody().getData());
+                data.put("book_appointment", bookAppointment);
+
+                patients.add(data);
+            });
+            result.put("patients", patients);
+
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Get the appointment detail by doctor",
+                    result
+            ));
+        } catch (Exception e) {
+            log.error("Booking: The api thrown an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
                     e.getMessage()
             ));
         }
