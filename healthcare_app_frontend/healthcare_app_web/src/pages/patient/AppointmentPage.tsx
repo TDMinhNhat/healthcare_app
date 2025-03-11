@@ -27,7 +27,7 @@ import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import BookAppointment from "../../components/appointments/BookAppointment";
-import { getAppointmentPatientBookInWeek } from "../../services/booking_service";
+import { getAppointmentPatientBookInWeek } from "../../services/appointment/booking_service";
 
 // Import DatePicker components
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";

@@ -21,7 +21,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import DescriptionIcon from "@mui/icons-material/Description";
 import MedicalRecordModal from "../../components/medical/MedicalRecordModal";
-import { getAppointmentPatientDetail } from "../../services/booking_service";
+import { getAppointmentPatientDetail } from "../../services/appointment/booking_service";
 import { formatTimeFromTimeString } from "../../utils/dateUtils";
 
 /**
