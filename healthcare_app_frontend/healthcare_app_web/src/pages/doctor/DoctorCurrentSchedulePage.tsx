@@ -30,8 +30,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import HomeIcon from "@mui/icons-material/Home";
 import {
   format,
-  addDays,
-  startOfWeek,
+  addDays, // Thêm số ngày vào ngày hiện tại
+  startOfWeek, // trả về ngày thứ 2 của tuần
   addWeeks,
   subWeeks,
   getYear,
@@ -45,63 +45,51 @@ import {
   parseDateTimeFromString,
   formatTime,
 } from "../../utils/dateUtils";
-import { getWorkSchedule } from "../../services/workSchedule_service.ts";
+import { getWorkScheduleBetweenDate } from "../../services/authenticate/workSchedule_service.ts";
 
-// Enum TypeDay - phù hợp với mô hình UML
-enum TypeDay {
-  MONDAY = "MONDAY",
-  TUESDAY = "TUESDAY",
-  WEDNESDAY = "WEDNESDAY",
-  THURSDAY = "THURSDAY",
-  FRIDAY = "FRIDAY",
-  SATURDAY = "SATURDAY",
-  SUNDAY = "SUNDAY",
-}
-
-// Interface Shift - phù hợp với mô hình UML
+// Interface Shift - phù hợp với mô hình cơ sở dữ liệu
 interface Shift {
   id: number;
   shift: number;
   start: string; // LocalTime biểu diễn dưới dạng chuỗi (HH:mm)
   end: string; // LocalTime biểu diễn dưới dạng chuỗi (HH:mm)
   status: boolean;
+  createdAt?: string; // Thêm theo mô hình
+  updatedAt?: string; // Thêm theo mô hình
 }
 
-// Interface WorkSchedule - phù hợp với mô hình UML
+// Interface Doctor - đơn giản hóa từ API
+interface Doctor {
+  id: number;
+  // Các thông tin khác của bác sĩ nếu cần
+}
+
+// Interface WorkSchedule - phù hợp với mô hình cơ sở dữ liệu
 interface WorkSchedule {
   id: number;
-  doctorId: number; // Tham chiếu đến thực thể Doctor
-  typeDay: TypeDay;
+  doctor: Doctor;
   shift: Shift;
+  maxSlots: number;
+  dateAppointment: string; // LocalDate dạng chuỗi (yyyy-MM-dd)
+  createdAt?: string;
+  updatedAt?: string;
   status: boolean;
-  // Các trường bổ sung cho mục đích UI
-  isAvailable: boolean;
-  roomId?: string;
-  patientId?: number;
-  appointmentStatus?: "WAITING" | "IN_PROGRESS" | "DONE" | "CANCELLED";
+  // Thông tin cuộc hẹn
+  currentAppointments?: number; // Số lượng cuộc hẹn hiện tại
 }
 
-// Interface cho lịch làm việc được nhóm theo ngày (cho mục đích UI)
-interface DateSchedule {
-  date: string; // Ngày ở định dạng dd-MM-yyyy
-  workSchedules: WorkSchedule[];
-}
-
-// Định nghĩa các ca cố định
-const SHIFTS: Record<string, Shift> = {
-  CA1: { id: 1, shift: 1, start: "08:00", end: "12:00", status: true },
-  CA2: { id: 2, shift: 2, start: "13:00", end: "17:00", status: true },
-};
+// Map date strings (dd-MM-yyyy) to arrays of work schedules - more efficient structure
+type ScheduleMap = Record<string, WorkSchedule[]>;
 
 // Định nghĩa các ngày trong tuần với nhãn
 const DAYS_OF_WEEK = [
-  { key: TypeDay.MONDAY, label: "Thứ 2" },
-  { key: TypeDay.TUESDAY, label: "Thứ 3" },
-  { key: TypeDay.WEDNESDAY, label: "Thứ 4" },
-  { key: TypeDay.THURSDAY, label: "Thứ 5" },
-  { key: TypeDay.FRIDAY, label: "Thứ 6" },
-  { key: TypeDay.SATURDAY, label: "Thứ 7" },
-  { key: TypeDay.SUNDAY, label: "Chủ nhật" },
+  { key: "MONDAY", label: "Thứ 2" },
+  { key: "TUESDAY", label: "Thứ 3" },
+  { key: "WEDNESDAY", label: "Thứ 4" },
+  { key: "THURSDAY", label: "Thứ 5" },
+  { key: "FRIDAY", label: "Thứ 6" },
+  { key: "SATURDAY", label: "Thứ 7" },
+  { key: "SUNDAY", label: "Chủ nhật" },
 ];
 
 const DoctorCurrentSchedulePage: React.FC = () => {
@@ -114,8 +102,8 @@ const DoctorCurrentSchedulePage: React.FC = () => {
     startOfWeek(today, { weekStartsOn: 1 })
   );
 
-  // State lưu trữ lịch làm việc
-  const [schedule, setSchedule] = useState<DateSchedule[]>([]);
+  // Replace DateSchedule[] with a more efficient mapping
+  const [scheduleMap, setScheduleMap] = useState<ScheduleMap>({});
 
   // State cho modal calendar
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -174,82 +162,109 @@ const DoctorCurrentSchedulePage: React.FC = () => {
   };
 
   useEffect(() => {
-    // Gọi API để lấy lịch làm việc của bác sĩ
+    // Gọi API để lấy lịch làm việc của bác sĩ trong khoảng thời gian của tuần hiện tại
     async function fetchData() {
-      if (!user?.user?.userId) return;
+      if (!user?.userId) return;
 
       try {
-        const response = await getWorkSchedule(user.user.userId);
-        const result = response.data.data;
+        // Tính ngày bắt đầu và kết thúc của tuần hiện tại
+        const startDate = format(currentWeekStart, "dd-MM-yyyy");
+        const endDate = format(addDays(currentWeekStart, 6), "dd-MM-yyyy");
 
-        // Tạo mảng lưu trữ lịch theo ngày
-        let dateSchedules: DateSchedule[] = [];
+        // Gọi API với khoảng thời gian của tuần
+        const response = await getWorkScheduleBetweenDate(
+          user.userId,
+          startDate,
+          endDate
+        );
+        const result = response.data.data || [];
+        console.log("Work schedules:", result);
+
+        // Tạo object để lưu trữ lịch theo ngày - cấu trúc đơn giản hơn
+        const newScheduleMap: ScheduleMap = {};
 
         // Xử lý dữ liệu trả về từ API
-        result.forEach((item: any) => {
-          const [day, month, year, hour, minute, second] =
-            item.workSchedule.start.split("-");
-          const date: Date = new Date(year, month - 1, day);
-          const dateStr = formatDateToString(date);
+        result.forEach((item: WorkSchedule) => {
+          // Kiểm tra dữ liệu hợp lệ
+          if (!item.dateAppointment) {
+            console.error("Thiếu ngày hẹn trong mục lịch làm việc:", item);
+            return; // Bỏ qua mục này nếu thiếu ngày hẹn
+          }
 
-          const start: Date = parseDateTimeFromString(item.workSchedule.start);
-          const end: Date = parseDateTimeFromString(item.workSchedule.end);
+          // Chuyển đổi định dạng ngày từ API (yyyy-MM-dd) sang định dạng UI (dd-MM-yyyy)
+          const dateFromAPI = item.dateAppointment;
+          const [year, month, day] = dateFromAPI.split("-");
+          const date = new Date(
+            parseInt(year),
+            parseInt(month) - 1,
+            parseInt(day)
+          );
+          const dateStr = formatDateToString(date); // Chuyển thành dd-MM-yyyy
 
-          // Xác định ca làm việc dựa trên giờ bắt đầu
-          const shiftNumber = start.getHours() < 12 ? 1 : 2;
-          const shift = { ...(shiftNumber === 1 ? SHIFTS.CA1 : SHIFTS.CA2) };
+          // Xử lý thông tin ca làm việc từ API
+          const shiftData = item.shift;
 
-          // Xác định ngày trong tuần
-          const dayOfWeek = date.getDay();
-          const typeDayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Chuyển đổi thành chỉ mục 0-6 (Thứ 2=0, Chủ nhật=6)
-          const typeDay = Object.values(TypeDay)[typeDayIndex];
+          // Kiểm tra dữ liệu ca làm việc tồn tại
+          if (!shiftData) {
+            console.error("Thiếu thông tin ca làm việc:", item);
+            return; // Bỏ qua mục này nếu thiếu thông tin ca
+          }
 
-          // Tạo đối tượng WorkSchedule
-          const workSchedule: WorkSchedule = {
-            id: item.id || Math.floor(Math.random() * 1000), // Tạo ID ngẫu nhiên nếu không được cung cấp
-            doctorId: user.user.userId,
-            typeDay: typeDay,
-            shift: shift,
-            status: true,
-            isAvailable: item.isAvailable,
-            roomId: item.isAvailable
-              ? undefined
-              : `P${100 + Math.floor(Math.random() * 20)}`,
-            patientId: item.isAvailable
-              ? undefined
-              : 1000 + Math.floor(Math.random() * 1000),
-            appointmentStatus: item.isAvailable
-              ? undefined
-              : (["WAITING", "IN_PROGRESS", "DONE", "CANCELLED"][
-                  Math.floor(Math.random() * 4)
-                ] as any),
+          // Chuyển đổi định dạng thời gian nếu cần
+          const formatTimeString = (timeStr: string) => {
+            // Nếu định dạng là "hh-mm-ss", chuyển thành "hh:mm"
+            if (timeStr.includes("-")) {
+              return timeStr.split("-").slice(0, 2).join(":");
+            }
+            return timeStr; // Giữ nguyên nếu đã đúng định dạng
           };
 
-          // Tìm lịch theo ngày hoặc tạo mới
-          let dateSchedule = dateSchedules.find((ds) => ds.date === dateStr);
-          if (dateSchedule) {
-            dateSchedule.workSchedules.push(workSchedule);
-          } else {
-            dateSchedules.push({
-              date: dateStr,
-              workSchedules: [workSchedule],
-            });
+          // Tạo đối tượng Shift (đảm bảo đúng theo cấu trúc mô hình)
+          const shift: Shift = {
+            id: shiftData.id,
+            shift: shiftData.shift,
+            start: formatTimeString(shiftData.start),
+            end: formatTimeString(shiftData.end),
+            status: shiftData.status,
+            createdAt: shiftData.createdAt,
+            updatedAt: shiftData.updatedAt,
+          };
+
+          // Tính toán số chỗ trống còn lại (mô phỏng, thực tế sẽ từ API)
+          const currentAppointments = Math.floor(Math.random() * item.maxSlots);
+
+          // Tạo đối tượng WorkSchedule phù hợp với mô hình và UI
+          const workSchedule: WorkSchedule = {
+            id: item.id,
+            doctor: item.doctor,
+            shift: shift,
+            maxSlots: item.maxSlots,
+            dateAppointment: item.dateAppointment,
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt,
+            status: item.status,
+            currentAppointments: currentAppointments,
+          };
+
+          // Thêm vào map theo ngày - đơn giản và hiệu quả hơn
+          if (!newScheduleMap[dateStr]) {
+            newScheduleMap[dateStr] = [];
           }
+          newScheduleMap[dateStr].push(workSchedule);
         });
 
-        setSchedule(dateSchedules);
+        setScheduleMap(newScheduleMap);
       } catch (error) {
-        console.log(error);
+        console.error("Lỗi khi lấy lịch làm việc:", error);
       }
     }
 
     fetchData();
-  }, [currentWeekStart, user?.user?.userId]);
+  }, [currentWeekStart, user?.userId]);
 
-  // Tìm tất cả các work schedules cho một ngày cụ thể
+  // Tìm tất cả các lịch làm việc cho một ngày cụ thể - truy cập nhanh O(1)
   const getSchedulesForDate = (date: string): WorkSchedule[] => {
-    const dateSchedule = schedule.find((s) => s.date === date);
-    return dateSchedule ? dateSchedule.workSchedules : [];
+    return scheduleMap[date] || [];
   };
 
   // Kiểm tra xem một ngày có ca 1 không
@@ -258,28 +273,38 @@ const DoctorCurrentSchedulePage: React.FC = () => {
     return schedules.some((schedule) => schedule.shift.shift === 1);
   };
 
-  // Kiểm tra xem ca 1 có sẵn sàng không
-  const isShift1Available = (date: string): boolean => {
-    const schedules = getSchedulesForDate(date);
-    const shift1Schedules = schedules.filter(
-      (schedule) => schedule.shift.shift === 1
-    );
-    return shift1Schedules.some((schedule) => schedule.isAvailable);
-  };
-
   // Kiểm tra xem một ngày có ca 2 không
   const hasShift2 = (date: string): boolean => {
     const schedules = getSchedulesForDate(date);
     return schedules.some((schedule) => schedule.shift.shift === 2);
   };
 
-  // Kiểm tra xem ca 2 có sẵn sàng không
-  const isShift2Available = (date: string): boolean => {
+  // Lấy thông tin ca 1 cho ngày cụ thể
+  const getShift1Schedule = (date: string): WorkSchedule | undefined => {
     const schedules = getSchedulesForDate(date);
-    const shift2Schedules = schedules.filter(
-      (schedule) => schedule.shift.shift === 2
-    );
-    return shift2Schedules.some((schedule) => schedule.isAvailable);
+    return schedules.find((schedule) => schedule.shift.shift === 1);
+  };
+
+  // Lấy thông tin ca 2 cho ngày cụ thể
+  const getShift2Schedule = (date: string): WorkSchedule | undefined => {
+    const schedules = getSchedulesForDate(date);
+    return schedules.find((schedule) => schedule.shift.shift === 2);
+  };
+
+  // Lấy thông tin thời gian ca 1 (nếu có)
+  const getShift1Time = (
+    date: string
+  ): { start: string; end: string } | null => {
+    const shift1 = getShift1Schedule(date);
+    return shift1 ? { start: shift1.shift.start, end: shift1.shift.end } : null;
+  };
+
+  // Lấy thông tin thời gian ca 2 (nếu có)
+  const getShift2Time = (
+    date: string
+  ): { start: string; end: string } | null => {
+    const shift2 = getShift2Schedule(date);
+    return shift2 ? { start: shift2.shift.start, end: shift2.shift.end } : null;
   };
 
   // Xử lý chuyển hướng đến trang chi tiết ca khám
@@ -289,13 +314,8 @@ const DoctorCurrentSchedulePage: React.FC = () => {
     navigate(`/doctor/appointments/${appointmentId}`);
   };
 
-  // Hiển thị trạng thái ca làm việc cùng với thông tin phòng
-  const renderShiftStatus = (
-    hasShift: boolean,
-    isAvailable: boolean,
-    date: string,
-    shift: 1 | 2
-  ) => {
+  // Hiển thị trạng thái ca làm việc
+  const renderShiftStatus = (hasShift: boolean, date: string, shift: 1 | 2) => {
     if (!hasShift) {
       return (
         <Box sx={{ textAlign: "center" }}>
@@ -313,89 +333,36 @@ const DoctorCurrentSchedulePage: React.FC = () => {
       );
     }
 
-    // Lấy các lịch làm việc cho ca cụ thể
-    const schedules = getSchedulesForDate(date);
-    const shiftSchedules = schedules.filter((s) => s.shift.shift === shift);
+    // Lấy thông tin ca làm việc
+    const shiftSchedule =
+      shift === 1 ? getShift1Schedule(date) : getShift2Schedule(date);
 
-    // Nếu không có cuộc hẹn nào, hiển thị trạng thái "Còn trống"
-    if (isAvailable || shiftSchedules.every((s) => s.isAvailable)) {
-      return (
-        <Box sx={{ textAlign: "center" }}>
-          <Paper
-            elevation={0}
-            sx={{
-              border: "1px solid",
-              borderColor: "success.main",
-              bgcolor: "success.50",
-              py: 0.5,
-              px: 1,
-              display: "inline-block",
-              minWidth: "120px",
-            }}
-          >
-            <Typography variant="body2" fontWeight="medium">
-              Còn trống
-            </Typography>
-          </Paper>
-        </Box>
-      );
-    }
+    if (!shiftSchedule) return null;
 
-    // Hiển thị các cuộc hẹn đã được lên lịch
     return (
-      <Box
-        sx={{
-          textAlign: "center",
-          minHeight: "100px",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        {shiftSchedules
-          .filter((s) => !s.isAvailable)
-          .map((s, index) => {
-            const getStatusColor = () => {
-              switch (s.appointmentStatus) {
-                case "WAITING":
-                  return { bg: "#e3f2fd", border: "#2196f3", text: "#0d47a1" };
-                case "IN_PROGRESS":
-                  return { bg: "#ede7f6", border: "#673ab7", text: "#311b92" };
-                case "DONE":
-                  return { bg: "#e8f5e9", border: "#4caf50", text: "#1b5e20" };
-                case "CANCELLED":
-                  return { bg: "#ffebee", border: "#f44336", text: "#b71c1c" };
-                default:
-                  return { bg: "#f5f5f5", border: "#9e9e9e", text: "#212121" };
-              }
-            };
-
-            const colors = getStatusColor();
-
-            return (
-              <Paper
-                key={`${date}-${shift}-${index}`}
-                sx={{
-                  p: 1,
-                  mb: 1,
-                  backgroundColor: colors.bg,
-                  borderLeft: `4px solid ${colors.border}`,
-                  width: "100%",
-                  cursor: "pointer",
-                  "&:hover": {
-                    boxShadow: 2,
-                    opacity: 0.9,
-                  },
-                }}
-                onClick={() => handleAppointmentClick(date, shift)}
-              >
-                {s.roomId && (
-                  <Typography variant="body2" sx={{ color: colors.text }}>
-                    Phòng: <strong>{s.roomId}</strong>
-                  </Typography>
-                )}
-              </Paper>
-            );
-          })}
+      <Box sx={{ textAlign: "center" }}>
+        <Button
+          variant="contained"
+          onClick={() => handleAppointmentClick(date, shift)}
+          sx={{
+            backgroundColor: "#f5f5f5",
+            color: "#333",
+            border: "1px solid #ddd",
+            boxShadow: 1,
+            "&:hover": {
+              backgroundColor: "#e0e0e0",
+              boxShadow: 2,
+            },
+            textTransform: "none",
+            minWidth: "120px",
+            height: "30px",
+          }}
+        >
+          {/* <Typography variant="body2">
+            {shiftSchedule.currentAppointments}/{shiftSchedule.maxSlots} cuộc
+            hẹn
+          </Typography> */}
+        </Button>
       </Box>
     );
   };
@@ -600,7 +567,18 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                     display="block"
                     color="textSecondary"
                   >
-                    {SHIFTS.CA1.start} - {SHIFTS.CA1.end}
+                    {/* Hiển thị thông tin ca 1 từ dữ liệu động */}
+                    {weekDays.some((day) => hasShift1(day.formattedDate))
+                      ? weekDays
+                          .map((day) => getShift1Time(day.formattedDate))
+                          .filter(Boolean)[0]?.start
+                      : ""}{" "}
+                    -{" "}
+                    {weekDays.some((day) => hasShift1(day.formattedDate))
+                      ? weekDays
+                          .map((day) => getShift1Time(day.formattedDate))
+                          .filter(Boolean)[0]?.end
+                      : ""}
                   </Typography>
                 </TableCell>
 
@@ -613,7 +591,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                   >
                     {renderShiftStatus(
                       hasShift1(day.formattedDate),
-                      isShift1Available(day.formattedDate),
                       day.formattedDate,
                       1
                     )}
@@ -630,7 +607,18 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                     display="block"
                     color="textSecondary"
                   >
-                    {SHIFTS.CA2.start} - {SHIFTS.CA2.end}
+                    {/* Hiển thị thông tin ca 2 từ dữ liệu động */}
+                    {weekDays.some((day) => hasShift2(day.formattedDate))
+                      ? weekDays
+                          .map((day) => getShift2Time(day.formattedDate))
+                          .filter(Boolean)[0]?.start
+                      : ""}{" "}
+                    -{" "}
+                    {weekDays.some((day) => hasShift2(day.formattedDate))
+                      ? weekDays
+                          .map((day) => getShift2Time(day.formattedDate))
+                          .filter(Boolean)[0]?.end
+                      : ""}
                   </Typography>
                 </TableCell>
 
@@ -643,7 +631,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                   >
                     {renderShiftStatus(
                       hasShift2(day.formattedDate),
-                      isShift2Available(day.formattedDate),
                       day.formattedDate,
                       2
                     )}
@@ -654,67 +641,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
           </Table>
         </TableContainer>
       </Paper>
-
-      {/* Thêm chú thích trạng thái lịch hẹn */}
-      <Box mt={2} display="flex" justifyContent="center">
-        <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Box
-              sx={{
-                width: 12,
-                height: 12,
-                bgcolor: "#2196f3",
-                borderRadius: "50%",
-                mr: 1,
-              }}
-            />
-            <Typography variant="caption">Chờ khám</Typography>
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Box
-              sx={{
-                width: 12,
-                height: 12,
-                bgcolor: "#673ab7",
-                borderRadius: "50%",
-                mr: 1,
-              }}
-            />
-            <Typography variant="caption">Đang khám</Typography>
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Box
-              sx={{
-                width: 12,
-                height: 12,
-                bgcolor: "#4caf50",
-                borderRadius: "50%",
-                mr: 1,
-              }}
-            />
-            <Typography variant="caption">Đã khám</Typography>
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Box
-              sx={{
-                width: 12,
-                height: 12,
-                bgcolor: "#f44336",
-                borderRadius: "50%",
-                mr: 1,
-              }}
-            />
-            <Typography variant="caption">Đã hủy</Typography>
-          </Box>
-        </Stack>
-      </Box>
-
-      {/* <Alert severity="info" sx={{ width: "auto", mt: 2 }}>
-        <Typography variant="body2">
-          Các lịch hẹn sẽ hiển thị mã phòng khám và ID bệnh nhân khi đã được đặt
-          lịch. Màu sắc thể hiện trạng thái của lịch hẹn.
-        </Typography>
-      </Alert> */}
     </Box>
   );
 };

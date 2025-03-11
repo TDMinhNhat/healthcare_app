@@ -15,7 +15,6 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useTranslation } from "react-i18next";
 import { format, addDays, isBefore, isToday } from "date-fns";
-import { getWorkScheduleTimeSlot } from "../../services/workSchedule_service";
 import {
   formatDateToString,
   parseDateTimeFromString,
@@ -95,15 +94,15 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
       setError(null);
       setHasWorkSchedules(true); // Reset state khi bắt đầu fetch dữ liệu mới
 
-      const result = await getWorkScheduleTimeSlot(
-        doctor.userId,
-        formatDateToString(date)
-      )
-        .then((response) => response.data.data)
-        .catch((error) => {
-          console.log(error);
-          return null;
-        });
+      // const result = await getWorkScheduleTimeSlot(
+      //   doctor.userId,
+      //   formatDateToString(date)
+      // )
+      //   .then((response) => response.data.data)
+      //   .catch((error) => {
+      //     console.log(error);
+      //     return null;
+      //   });
 
       // Kiểm tra dữ liệu trả về từ API
       if (!result || !Array.isArray(result)) {

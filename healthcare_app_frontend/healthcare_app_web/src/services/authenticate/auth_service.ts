@@ -1,4 +1,4 @@
-import axiosConfig from "./axiosConfig";
+import axiosConfig from "../axiosConfig";
 
 const prefix = "/authenticate/api/v1/authenticate";
 export const login = async (email: string, password: string) => {

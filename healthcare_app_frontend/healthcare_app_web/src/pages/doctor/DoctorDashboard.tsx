@@ -1,7 +1,6 @@
 import React from "react";
 import { Typography, Paper, Grid, Card, CardContent } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import DoctorAppointmentList from "../../components/appointments/DoctorAppointmentList";
 
 const DoctorDashboard: React.FC = () => {
   const { t } = useTranslation();
@@ -47,11 +46,11 @@ const DoctorDashboard: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               {t("doctor.dashboard.upcoming_appointments")}
             </Typography>
-            <DoctorAppointmentList
+            {/* <DoctorAppointmentList
               type="upcoming"
               status={["WAITING", "IN_PROGRESS"]}
               doctorId="doctor-001"
-            />
+            /> */}
           </Paper>
         </Grid>
       </Grid>

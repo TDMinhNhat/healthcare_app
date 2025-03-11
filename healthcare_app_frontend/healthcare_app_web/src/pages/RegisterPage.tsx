@@ -25,7 +25,7 @@ import {
   Facebook,
   Apple,
 } from "@mui/icons-material";
-import { signUp } from "../services/auth_service";
+import { signUp } from "../services/authenticate/auth_service";
 import { useNavigate } from "react-router";
 import { formatDateToString } from "../utils/dateUtils";
 import { toast } from "react-toastify";

@@ -24,7 +24,7 @@ import {
 } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
-import { login } from "../services/auth_service";
+import { login } from "../services/authenticate/auth_service";
 import { setUser } from "../stores/slices/user.slice";
 import { toast } from "react-toastify";
 import { ROUTING } from "../constants/routing";
