@@ -16,14 +16,12 @@ public class MedicalRecordService {
 
     private final DrugRepository drugRepository;
     private final MedicalRecordDrugRepository medicalRecordDrugRepository;
-    private final AppointmentRepository appointmentRepository;
     private final MedicalRecordRepository medicalRecordRepository;
     private final KafkaTemplate<String,String> kafkaTemplate;
 
-    public MedicalRecordService(DrugRepository drugRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, AppointmentRepository appointmentRepository, MedicalRecordRepository medicalRecordRepository, KafkaTemplate<String, String> kafkaTemplate) {
+    public MedicalRecordService(DrugRepository drugRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, MedicalRecordRepository medicalRecordRepository, KafkaTemplate<String, String> kafkaTemplate) {
         this.drugRepository = drugRepository;
         this.medicalRecordDrugRepository = medicalRecordDrugRepository;
-        this.appointmentRepository = appointmentRepository;
         this.medicalRecordRepository = medicalRecordRepository;
         this.kafkaTemplate = kafkaTemplate;
     }
