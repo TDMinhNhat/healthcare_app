@@ -40,6 +40,17 @@ const PatientAppointmentDetailsPage: React.FC = () => {
     useState<boolean>(false);
   const user = useSelector((state: any) => state.user.user);
 
+  const getStatus = (status: string) => {
+    switch(status) {
+      case "WAITING": return "Đang chờ";
+      case "IN_PROGRESS": return "Đang khám";
+      case "DONE": return "Đã hoàn thành";
+      case "CANCEL": return "Đã hủy";
+      default:
+        return "default";
+    }
+  }
+
   useEffect(() => {
     // Mô phỏng gọi API
     const fetchAppointmentDetails = async () => {
@@ -125,17 +136,6 @@ const PatientAppointmentDetailsPage: React.FC = () => {
         return "default";
     }
   };
-
-  const getStatus = (status: string) => {
-    switch(status) {
-      case "WAITING": return "Đang chờ";
-      case "IN_PROGRESS": return "Đang khám";
-      case "DONE": return "Đã hoàn thành";
-      case "CANCEL": return "Đã hủy";
-      default:
-        return "default";
-    }
-  }
 
   /**
    * Mở modal hồ sơ bệnh án
