@@ -75,7 +75,7 @@ interface WorkSchedule {
   updatedAt?: string;
   status: boolean;
   // Thông tin cuộc hẹn
-  currentAppointments?: number; // Số lượng cuộc hẹn hiện tại
+  totalBook?: number; // Số lượng cuộc hẹn hiện tại
 }
 
 // Map date strings (dd-MM-yyyy) to arrays of work schedules - more efficient structure
@@ -184,7 +184,9 @@ const DoctorCurrentSchedulePage: React.FC = () => {
         const newScheduleMap: ScheduleMap = {};
 
         // Xử lý dữ liệu trả về từ API
-        result.forEach((item: WorkSchedule) => {
+        result.forEach((i: any) => {
+          const item = i.workSchedule;
+          console.log("Item:", item);
           // Kiểm tra dữ liệu hợp lệ
           if (!item.dateAppointment) {
             console.error("Thiếu ngày hẹn trong mục lịch làm việc:", item);
@@ -231,7 +233,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
           };
 
           // Tính toán số chỗ trống còn lại (mô phỏng, thực tế sẽ từ API)
-          const currentAppointments = Math.floor(Math.random() * item.maxSlots);
+          const totalBook = item?.detail?.information?.total_book ?? 0;
 
           // Tạo đối tượng WorkSchedule phù hợp với mô hình và UI
           const workSchedule: WorkSchedule = {
@@ -243,7 +245,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
             createdAt: item.createdAt,
             updatedAt: item.updatedAt,
             status: item.status,
-            currentAppointments: currentAppointments,
+            totalBook: totalBook,
           };
 
           // Thêm vào map theo ngày - đơn giản và hiệu quả hơn
@@ -318,7 +320,16 @@ const DoctorCurrentSchedulePage: React.FC = () => {
   const renderShiftStatus = (hasShift: boolean, date: string, shift: 1 | 2) => {
     if (!hasShift) {
       return (
-        <Box sx={{ textAlign: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+            width: "100%",
+            py: 1,
+          }}
+        >
           <Chip
             label="Không có ca"
             size="small"
@@ -327,6 +338,9 @@ const DoctorCurrentSchedulePage: React.FC = () => {
               color: "text.disabled",
               borderColor: "text.disabled",
               fontSize: "0.75rem",
+              width: "120px",
+              height: "30px",
+              justifyContent: "center",
             }}
           />
         </Box>
@@ -339,14 +353,33 @@ const DoctorCurrentSchedulePage: React.FC = () => {
 
     if (!shiftSchedule) return null;
 
+    // Calculate fill rate for color indication
+    const fillRate = shiftSchedule.totalBook / shiftSchedule.maxSlots;
+    let textColor = "#333";
+
+    if (fillRate >= 0.8) {
+      textColor = "#d32f2f"; // Red text when nearly full
+    } else if (fillRate >= 0.5) {
+      textColor = "#ed6c02"; // Orange text when half full
+    }
+
     return (
-      <Box sx={{ textAlign: "center" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+          width: "100%",
+          py: 1,
+        }}
+      >
         <Button
           variant="contained"
           onClick={() => handleAppointmentClick(date, shift)}
           sx={{
             backgroundColor: "#f5f5f5",
-            color: "#333",
+            color: textColor,
             border: "1px solid #ddd",
             boxShadow: 1,
             "&:hover": {
@@ -354,14 +387,14 @@ const DoctorCurrentSchedulePage: React.FC = () => {
               boxShadow: 2,
             },
             textTransform: "none",
-            minWidth: "120px",
+            width: "120px",
             height: "30px",
+            padding: "4px 8px",
           }}
         >
-          {/* <Typography variant="body2">
-            {shiftSchedule.currentAppointments}/{shiftSchedule.maxSlots} cuộc
-            hẹn
-          </Typography> */}
+          <Typography variant="body2" sx={{ fontWeight: "medium" }}>
+            {shiftSchedule.totalBook}/{shiftSchedule.maxSlots} cuộc hẹn
+          </Typography>
         </Button>
       </Box>
     );
@@ -587,7 +620,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                   <TableCell
                     key={`${day.formattedDate}-shift1`}
                     align="center"
-                    sx={{ verticalAlign: "top", p: 1 }}
+                    sx={{ verticalAlign: "center", p: 1 }}
                   >
                     {renderShiftStatus(
                       hasShift1(day.formattedDate),
@@ -627,7 +660,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                   <TableCell
                     key={`${day.formattedDate}-shift2`}
                     align="center"
-                    sx={{ verticalAlign: "top", p: 1 }}
+                    sx={{ verticalAlign: "center", p: 1 }}
                   >
                     {renderShiftStatus(
                       hasShift2(day.formattedDate),
