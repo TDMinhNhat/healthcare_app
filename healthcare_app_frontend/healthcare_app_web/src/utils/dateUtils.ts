@@ -97,3 +97,17 @@ export const formatTime = (time: string): string => {
 export const formatTimeFromDateTime = (dateTime: Date): string => {
   return `${formatTime(dateTime.getHours().toString())}:${formatTime(dateTime.getMinutes().toString())}`;
 }
+
+export const formatTimeFromTimeString = (timeString: string, type: string): any => {
+  if(type === "string") {
+    const time = timeString.split("-");
+    return `${formatTime(time[0])}:${formatTime(time[1])}`;
+  } else {
+    const time = timeString.split(":");
+    const date = new Date();
+    date.setHours(parseInt(time[0]));
+    date.setMinutes(parseInt(time[1]));
+    date.setSeconds(parseInt(time[2]));
+    return date;
+  }
+}

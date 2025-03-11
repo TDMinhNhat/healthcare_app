@@ -27,6 +27,7 @@ import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import BookAppointment from "../../components/appointments/BookAppointment";
+import { getAppointmentPatientBookInWeek } from "../../services/booking_service";
 
 // Import DatePicker components
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
@@ -45,7 +46,7 @@ import {
   getMonth,
 } from "date-fns";
 import { vi } from "date-fns/locale";
-import { formatDateToString, formatTime } from "../../utils/dateUtils";
+import { formatDateToString, formatTime, formatTimeFromTimeString } from "../../utils/dateUtils";
 
 // Định nghĩa TypeDay enum để phù hợp với mô hình UML
 enum TypeDay {
@@ -96,7 +97,7 @@ interface Shift {
 
 // Định nghĩa các ca làm việc cố định để khớp với lịch của bác sĩ
 const SHIFTS: Record<string, Shift> = {
-  CA1: { id: 1, shift: 1, start: "08:00", end: "12:00", status: true }, // Ca sáng
+  CA1: { id: 1, shift: 1, start: "07:00", end: "11:00", status: true }, // Ca sáng
   CA2: { id: 2, shift: 2, start: "13:00", end: "17:00", status: true }, // Ca chiều
 };
 
@@ -123,11 +124,30 @@ const AppointmentPage = () => {
   useEffect(() => {
     (async () => {
       const getUserId = user.userId;
-      console.log(getUserId);
+      // console.log(getUserId);
+      var latestWeek = new Date();
+      latestWeek.setDate(currentWeekStart.getDate() + 6)
 
-      // Lấy dữ liệu lịch hẹn mẫu
-      const mockData = getMockAppointments();
-      setAppointments(mockData);
+      const result = await getAppointmentPatientBookInWeek(getUserId, formatDateToString(currentWeekStart), formatDateToString(latestWeek)).then(response => response.data.data).catch(error => {
+        console.log(error);
+        return null;
+      });
+     
+      const appointmentsData = result.map((item: any) => {
+        return {
+          id: item.work_schedule.id,
+          date: item.work_schedule.dateAppointment,
+          startTime: formatTimeFromTimeString(item.work_schedule.shift.start, "string"),
+          endTime: formatTimeFromTimeString(item.work_schedule.shift.end, "string"),
+          status: item.book_appointment.status,
+          doctorName: item.work_schedule.doctor.lastName + " " + item.work_schedule.doctor.firstName,
+          specialization: item.work_schedule.doctor.specialization,
+          reason: "Khám " + item.work_schedule.doctor.typeDisease.name,
+          doctorId: item.work_schedule.doctor.userId,
+          shiftId: item.work_schedule.shift.id
+        };
+      });
+      setAppointments(appointmentsData);
     })();
   }, []);
 
@@ -209,118 +229,6 @@ const AppointmentPage = () => {
     setCalendarOpen(false);
   };
 
-  // Tạo dữ liệu lịch hẹn mẫu
-  const getMockAppointments = (): Appointment[] => {
-    // Get current date and format it
-    const currentDate = new Date();
-
-    // Get dates for this week (starting from Monday)
-    const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
-
-    // Create mock appointments
-    return [
-      // WAITING appointments
-      {
-        id: 1,
-        date: formatDateToString(addDays(weekStart, 0)), // Monday
-        startTime: "09:00",
-        endTime: "09:30",
-        status: "WAITING",
-        doctorName: "Dr. Nguyễn Văn A",
-        specialization: "Tim mạch",
-        reason: "Khám định kỳ",
-      },
-      {
-        id: 2,
-        date: formatDateToString(addDays(weekStart, 2)), // Wednesday
-        startTime: "10:30",
-        endTime: "11:00",
-        status: "WAITING",
-        doctorName: "Dr. Trần Thị B",
-        specialization: "Da liễu",
-        reason: "Phát ban trên da",
-      },
-
-      // IN_PROGRESS appointments
-      {
-        id: 3,
-        date: formatDateToString(currentDate), // Today
-        startTime: "08:45",
-        endTime: "09:15",
-        status: "IN_PROGRESS",
-        doctorName: "Dr. Lê Văn C",
-        specialization: "Nội tiết",
-        reason: "Tiểu đường",
-      },
-
-      // DONE appointments
-      {
-        id: 4,
-        date: formatDateToString(addDays(weekStart, -2)), // Last week
-        startTime: "14:00",
-        endTime: "14:30",
-        status: "DONE",
-        doctorName: "Dr. Phạm Thị D",
-        specialization: "Tai mũi họng",
-        reason: "Viêm xoang",
-      },
-      {
-        id: 5,
-        date: formatDateToString(addDays(weekStart, -1)), // Yesterday
-        startTime: "15:30",
-        endTime: "16:00",
-        status: "DONE",
-        doctorName: "Dr. Hoàng Văn E",
-        specialization: "Mắt",
-        reason: "Khám mắt định kỳ",
-      },
-
-      // CANCELLED appointments
-      {
-        id: 6,
-        date: formatDateToString(addDays(weekStart, 3)), // Thursday
-        startTime: "13:30",
-        endTime: "14:00",
-        status: "CANCELLED",
-        doctorName: "Dr. Ngô Thị F",
-        specialization: "Thần kinh",
-        reason: "Đau đầu thường xuyên",
-      },
-
-      // Add more appointments for current week
-      {
-        id: 7,
-        date: formatDateToString(addDays(weekStart, 1)), // Tuesday
-        startTime: "11:00",
-        endTime: "11:30",
-        status: "WAITING",
-        doctorName: "Dr. Đặng Văn G",
-        specialization: "Cơ xương khớp",
-        reason: "Đau lưng mãn tính",
-      },
-      {
-        id: 8,
-        date: formatDateToString(addDays(weekStart, 4)), // Friday
-        startTime: "09:30",
-        endTime: "10:00",
-        status: "WAITING",
-        doctorName: "Dr. Mai Thị H",
-        specialization: "Dinh dưỡng",
-        reason: "Tư vấn chế độ ăn",
-      },
-      {
-        id: 9,
-        date: formatDateToString(addDays(weekStart, 1)), // Tuesday
-        startTime: "14:30",
-        endTime: "15:00",
-        status: "CANCELLED",
-        doctorName: "Dr. Vũ Văn I",
-        specialization: "Nhi khoa",
-        reason: "Khám tổng quát cho trẻ",
-      },
-    ];
-  };
-
   // Lọc lịch hẹn cho một ngày và ca cụ thể
   const getAppointmentsForDateAndShift = (date: string, shift: 1 | 2) => {
     const filtered = appointments.filter((appointment) => {
@@ -329,10 +237,10 @@ const AppointmentPage = () => {
 
       // Kiểm tra xem lịch hẹn có thuộc ca đã chỉ định không
       const hour = parseInt(appointment.startTime.split(":")[0]);
-      if (shift === 1 && hour >= 8 && hour < 12) {
+      if (shift === 1 && hour >= 7 && hour <= 11) {
         return true;
       }
-      if (shift === 2 && hour >= 13 && hour < 17) {
+      if (shift === 2 && hour >= 13 && hour <= 17) {
         return true;
       }
 

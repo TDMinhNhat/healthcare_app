@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
+import { useSelector } from "react-redux";
 import {
   Box,
   Typography,
@@ -20,32 +21,8 @@ import PersonIcon from "@mui/icons-material/Person";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import DescriptionIcon from "@mui/icons-material/Description";
 import MedicalRecordModal from "../../components/medical/MedicalRecordModal";
-
-// Dữ liệu mẫu - sẽ được thay thế bằng API calls trong môi trường sản xuất
-const mockAppointmentData = {
-  id: "123",
-  date: "15-10-2023",
-  time: "09:00 - 11:00",
-  location: "Phòng 302, Tòa nhà chính",
-  status: "Đã xác nhận",
-  patientInfo: {
-    id: 1,
-    medicalId: "BN001",
-    name: "Nguyễn Văn A",
-    age: 45,
-    gender: "Nam",
-    reason: "Khám định kỳ",
-  },
-  doctorInfo: {
-    id: "D001",
-    name: "TS. BS. Trần Văn Minh",
-    specialization: "Khoa Tim mạch",
-    avatar: "/doctor-avatar.jpg",
-    experience: "15 năm kinh nghiệm",
-    degree: "Tiến sĩ Y khoa, Đại học Y Hà Nội",
-  },
-  hasMedicalRecord: true,
-};
+import { getAppointmentPatientDetail } from "../../services/booking_service";
+import { formatTimeFromTimeString } from "../../utils/dateUtils";
 
 /**
  * Trang hiển thị chi tiết cuộc hẹn khám bệnh của bệnh nhân
@@ -61,17 +38,53 @@ const PatientAppointmentDetailsPage: React.FC = () => {
   // State điều khiển hiển thị modal hồ sơ bệnh án
   const [isMedicalRecordOpen, setIsMedicalRecordOpen] =
     useState<boolean>(false);
+  const user = useSelector((state: any) => state.user.user);
+
+  const getStatus = (status: string) => {
+    switch(status) {
+      case "WAITING": return "Đang chờ";
+      case "IN_PROGRESS": return "Đang khám";
+      case "DONE": return "Đã hoàn thành";
+      case "CANCEL": return "Đã hủy";
+      default:
+        return "default";
+    }
+  }
 
   useEffect(() => {
     // Mô phỏng gọi API
     const fetchAppointmentDetails = async () => {
       try {
-        // Trong môi trường thực tế: const response = await api.getPatientAppointmentDetails(appointmentId);
-        // Mô phỏng thời gian tải dữ liệu
-        setTimeout(() => {
-          setAppointment(mockAppointmentData);
+        const result = await getAppointmentPatientDetail(user.userId, appointmentId).then(response => response.data.data).catch(error => {
+          console.error("Lỗi khi tải thông tin cuộc hẹn:", error);
           setLoading(false);
-        }, 800);
+        });
+
+        const data = {
+          id: result.work_schedule.id,
+          date: result.work_schedule.dateAppointment,
+          time: `${formatTimeFromTimeString(result.work_schedule.shift.start, "string")} - ${formatTimeFromTimeString(result.work_schedule.shift.end, "string")}`,
+          location: "Phòng 302, Tòa nhà chính",
+          status: getStatus(result.book_appointment.status),
+          patientInfo: {
+            id: 1,
+            medicalId: result.book_appointment.numericalOrder,
+            name: "Nguyễn Văn A",
+            age: 45,
+            gender: "Nam",
+            reason: "Khám định kỳ",
+          },
+          doctorInfo: {
+            id: result.work_schedule.doctor.userId,
+            name: `${result.work_schedule.doctor.firstName} ${result.work_schedule.doctor.lastName}`,
+            specialization: result.work_schedule.doctor.specialization,
+            avatar: result.work_schedule.doctor.avatar,
+          },
+          hasMedicalRecord: true,
+        }
+        setAppointment(data);
+        setLoading(false);
+
       } catch (error) {
         console.error("Lỗi khi tải thông tin cuộc hẹn:", error);
         setLoading(false);
@@ -111,7 +124,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
    */
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Đã xác nhận":
+      case "Đang khám":
         return "success";
       case "Đang chờ":
         return "warning";
@@ -168,7 +181,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
           {/* Hiển thị ID khám bệnh của bệnh nhân */}
           <Box mb={2}>
             <Chip
-              label={`ID khám bệnh: ${appointment.patientInfo.medicalId}`}
+              label={`Số Thứ Tự Khám: ${appointment.patientInfo.medicalId}`}
               color="primary"
               sx={{
                 fontWeight: "medium",

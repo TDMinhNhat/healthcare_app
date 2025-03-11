@@ -37,3 +37,25 @@ export const getAppointmentBetweenDate = async (
   });
   return response;
 };
+
+export const getAppointmentPatientBookInWeek = async (
+  patientId: string,
+  start: string,
+  end: string
+) => {
+  return await axiosConfig.get(`${prefix}/week/patient/${patientId}`, {
+    params: {
+      "start": start,
+      "end": end
+    }
+  });
+}
+
+export const getAppointmentPatientDetail = async (patientId: string, workSchedule: number) => {
+  return await axiosConfig.get(`${prefix}/detail/patient`, {
+    params: {
+      "patientId": patientId,
+      "workSchedule": workSchedule
+    }
+  })
+}
