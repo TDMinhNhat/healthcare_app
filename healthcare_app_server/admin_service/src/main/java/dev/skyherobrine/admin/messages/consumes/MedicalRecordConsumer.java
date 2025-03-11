@@ -3,11 +3,9 @@ package dev.skyherobrine.admin.messages.consumes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.skyherobrine.admin.keys.MedicalRecordDrugKey;
-import dev.skyherobrine.admin.models.mongodb.Appointment;
 import dev.skyherobrine.admin.models.mariadb.Drug;
 import dev.skyherobrine.admin.models.mongodb.MedicalRecord;
 import dev.skyherobrine.admin.models.mongodb.MedicalRecordDrug;
-import dev.skyherobrine.admin.repositories.mongodb.AppointmentRepository;
 import dev.skyherobrine.admin.repositories.mariadb.DrugRepository;
 import dev.skyherobrine.admin.repositories.mongodb.MedicalRecordDrugRepository;
 import dev.skyherobrine.admin.repositories.mongodb.MedicalRecordRepository;
@@ -16,20 +14,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
 @Component
 @Slf4j
 public class MedicalRecordConsumer {
 
-    private final AppointmentRepository appointmentRepository;
     private final MedicalRecordRepository medicalRecordRepository;
     private final MedicalRecordDrugRepository medicalRecordDrugRepository;
     private final DrugRepository drugRepository;
 
-    public MedicalRecordConsumer(AppointmentRepository appointmentRepository, MedicalRecordRepository medicalRecordRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, DrugRepository drugRepository) {
-        this.appointmentRepository = appointmentRepository;
+    public MedicalRecordConsumer(MedicalRecordRepository medicalRecordRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, DrugRepository drugRepository) {
         this.medicalRecordRepository = medicalRecordRepository;
         this.medicalRecordDrugRepository = medicalRecordDrugRepository;
         this.drugRepository = drugRepository;
@@ -77,9 +70,5 @@ public class MedicalRecordConsumer {
             log.error("Medical Record Consumer: can't insert medical record drug into database");
             log.error(e.getMessage());
         }
-    }
-
-    private Long getMaxId() {
-        return appointmentRepository.findTopByOrderByIdDesc().map(Appointment::getId).orElse(0L);
     }
 }

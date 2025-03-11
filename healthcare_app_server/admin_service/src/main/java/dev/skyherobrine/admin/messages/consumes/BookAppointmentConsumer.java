@@ -1,12 +1,11 @@
 package dev.skyherobrine.admin.messages.consumes;
 
-import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.skyherobrine.admin.models.mongodb.BookAppointment;
 import dev.skyherobrine.admin.repositories.mariadb.PatientRepository;
-import dev.skyherobrine.admin.repositories.mongodb.AppointmentRepository;
 import dev.skyherobrine.admin.repositories.mongodb.BookAppointmentRepository;
+import dev.skyherobrine.admin.repositories.mongodb.WorkScheduleRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -17,13 +16,13 @@ import org.springframework.stereotype.Component;
 public class BookAppointmentConsumer {
 
     private final PatientRepository patientRepository;
-    private final AppointmentRepository appointmentRepository;
     private final BookAppointmentRepository bookAppointmentRepository;
+    private final WorkScheduleRepository workScheduleRepository;
 
-    public BookAppointmentConsumer(PatientRepository patientRepository, AppointmentRepository appointmentRepository, BookAppointmentRepository bookAppointmentRepository) {
+    public BookAppointmentConsumer(PatientRepository patientRepository, BookAppointmentRepository bookAppointmentRepository, WorkScheduleRepository workScheduleRepository) {
         this.patientRepository = patientRepository;
-        this.appointmentRepository = appointmentRepository;
         this.bookAppointmentRepository = bookAppointmentRepository;
+        this.workScheduleRepository = workScheduleRepository;
     }
 
     @KafkaListener(topics = "insert_book_appointment", groupId = "admin_insert_book_appointment")
@@ -35,14 +34,14 @@ public class BookAppointmentConsumer {
             JsonNode node = new ObjectMapper().readTree(message);
             Long getId = node.get("id").asLong();
             String getPatientId = node.get("patientId").asText();
-            Long getAppointmentId = node.get("appointment").get("id").asLong();
+            Long getWorkSchedule = node.get("workSchedule").asLong();
             int getNumericOrders = node.get("numericalOrder").asInt();
             String getNote = node.get("note").asText();
 
             BookAppointment bookAppointment = new BookAppointment(
                     getId,
                     patientRepository.findPatientByUserId(getPatientId).orElseThrow(() -> new EntityNotFoundException("Patient was not found")),
-                    appointmentRepository.findById(getAppointmentId).orElseThrow(() -> new EntityNotFoundException("Appointment was not found")),
+                    workScheduleRepository.findById(getWorkSchedule).orElseThrow(() -> new EntityNotFoundException("Work Schedule was not found")),
                     getNumericOrders,
                     getNote
             );
