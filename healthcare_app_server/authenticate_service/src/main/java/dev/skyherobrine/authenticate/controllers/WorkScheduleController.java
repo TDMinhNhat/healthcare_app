@@ -1,7 +1,7 @@
 package dev.skyherobrine.authenticate.controllers;
 
 import dev.skyherobrine.authenticate.dtos.WorkScheduleDTO;
-import dev.skyherobrine.authenticate.feigns.AppointmentFeign;
+import dev.skyherobrine.authenticate.feigns.BookAppointmentFeign;
 import dev.skyherobrine.authenticate.models.mariadb.Response;
 import dev.skyherobrine.authenticate.models.mongodb.WorkSchedule;
 import dev.skyherobrine.authenticate.repositories.mongodb.WorkScheduleRepository;
@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,12 +26,12 @@ public class WorkScheduleController {
 
     private final WorkScheduleService workScheduleService;
     private final WorkScheduleRepository workScheduleRepository;
-    private final AppointmentFeign appointmentFeign;
+    private final BookAppointmentFeign bookAppointmentFeign;
 
-    public WorkScheduleController(WorkScheduleService workScheduleService, WorkScheduleRepository workScheduleRepository, AppointmentFeign appointmentFeign) {
+    public WorkScheduleController(WorkScheduleService workScheduleService, WorkScheduleRepository workScheduleRepository, BookAppointmentFeign bookAppointmentFeign) {
         this.workScheduleService = workScheduleService;
         this.workScheduleRepository = workScheduleRepository;
-        this.appointmentFeign = appointmentFeign;
+        this.bookAppointmentFeign = bookAppointmentFeign;
     }
 
     @PostMapping
@@ -97,11 +96,18 @@ public class WorkScheduleController {
     ) {
         try {
             log.info("Work Schedule: Call the api get work schedule by between day");
-            List<WorkSchedule> result = workScheduleRepository.findByDoctor_UserIdAndDateAppointmentBetween(
+            List<Map<String,Object>> result = new ArrayList<>();
+            workScheduleRepository.findByDoctor_UserIdAndDateAppointmentBetween(
                     doctorId,
                     LocalDate.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy")),
                     LocalDate.parse(end, DateTimeFormatter.ofPattern("dd-MM-yyyy"))
-            );
+            ).forEach(workSchedule -> {
+                Map<String,Object> data = new HashMap<>();
+                data.put("workSchedule", workSchedule);
+                data.put("detail", bookAppointmentFeign.getAppointmentDetailByWorkSchedule(workSchedule.getId().toString()).getBody().getData());
+
+                result.add(data);
+            });
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "Get the work schedule by between day successfully",
@@ -157,7 +163,7 @@ public class WorkScheduleController {
             workScheduleRepository.findAllByDoctor_UserId(doctorId).forEach(workSchedule -> {
                 Map<String,Object> data = new HashMap<>();
                 data.put("workSchedule", workSchedule);
-                data.put("isAvailable", appointmentFeign.getAppointmentByWorkSchedule(workSchedule.getId().toString()).getBody().getData() == null);
+                data.put("isAvailable", bookAppointmentFeign.getAppointmentByWorkSchedule(workSchedule.getId().toString()).getBody().getData() == null);
                 result.add(data);
             });
 

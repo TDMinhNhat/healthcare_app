@@ -77,12 +77,12 @@ public class BookingController {
     }
 
     @GetMapping("/detail")
-    public ResponseEntity<Response> getAppointmentDetail(@RequestParam("appointmentId") Long appointmentId) {
+    public ResponseEntity<Response> getAppointmentDetail(@RequestParam("workSchedule") Long workSchedule) {
         log.info("Booking: Call the api get appointment detail");
         return ResponseEntity.ok(new Response(
                 HttpStatus.OK.value(),
                 "Get appointment detail successfully",
-                bookingService.getAppointmentDetail(appointmentId)
+                bookingService.getAppointmentDetail(workSchedule)
         ));
     }
 }
