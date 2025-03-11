@@ -2,14 +2,19 @@ package dev.skyherobrine.appointment.controllers;
 
 import dev.skyherobrine.appointment.dtos.AppointmentDTO;
 import dev.skyherobrine.appointment.feigns.DoctorFeign;
+import dev.skyherobrine.appointment.feigns.WorkScheduleFeign;
 import dev.skyherobrine.appointment.models.Response;
+import dev.skyherobrine.appointment.models.mongodb.BookAppointment;
+import dev.skyherobrine.appointment.repositories.mongodb.BookAppointmentRepository;
 import dev.skyherobrine.appointment.services.BookingService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -17,14 +22,18 @@ import java.util.Map;
 @Slf4j
 public class BookingController {
 
+    private final BookAppointmentRepository bar;
     private final BookingService bookingService;
     private final DoctorFeign doctorFeign;
     private final KafkaTemplate<String,String> kafkaTemplate;
+    private final WorkScheduleFeign workScheduleFeign;
 
-    public BookingController(BookingService bookingService, DoctorFeign doctorFeign, KafkaTemplate<String, String> kafkaTemplate) {
+    public BookingController(BookAppointmentRepository bar, BookingService bookingService, DoctorFeign doctorFeign, KafkaTemplate<String, String> kafkaTemplate, WorkScheduleFeign workScheduleFeign) {
+        this.bar = bar;
         this.bookingService = bookingService;
         this.doctorFeign = doctorFeign;
         this.kafkaTemplate = kafkaTemplate;
+        this.workScheduleFeign = workScheduleFeign;
     }
 
     @PostMapping
@@ -108,5 +117,35 @@ public class BookingController {
                 "Get appointment detail successfully",
                 bookingService.getAppointmentDetail(workSchedule)
         ));
+    }
+
+    @GetMapping("/detail/patient")
+    public ResponseEntity<Response> getAppointmentDetailByPatient(
+            @RequestParam("patientId") String patientId,
+            @RequestParam("workSchedule") String workSchedule
+    ) {
+        try {
+            log.info("Booking: Call the api get appointment detail by patient and work schedule");
+            Map<String,Object> result = new HashMap<>();
+
+            BookAppointment bookAppointment = bar.findByPatientIdAndWorkSchedule(patientId, Long.parseLong(workSchedule)).orElseThrow(() -> new EntityNotFoundException("The appointment wasn't found!"));
+
+            result.put("book_appointment", bookAppointment);
+            result.put("work_schedule", workScheduleFeign.getById(Long.parseLong(workSchedule)).getBody().getData());
+
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Get appointment detail by patient and work schedule",
+                    result
+            ));
+        } catch (Exception e) {
+            log.error("Booking: The api return an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api get appointment detail by patient and work schedule was return an error",
+                    e.getMessage()
+            ));
+        }
     }
 }
