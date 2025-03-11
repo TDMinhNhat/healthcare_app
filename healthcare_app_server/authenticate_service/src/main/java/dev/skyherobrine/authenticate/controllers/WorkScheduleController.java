@@ -88,6 +88,16 @@ public class WorkScheduleController {
         }
     }
 
+    @GetMapping("/doctor/date")
+    public ResponseEntity<Response> getWorkScheduleDoctorByDate(@RequestParam String doctorId, @RequestParam String date) {
+        log.info("Work Schedule: Call the api get work schedule by doctor and date");
+        return ResponseEntity.ok(new Response(
+                HttpStatus.OK.value(),
+                "Get the work schedule by doctor and date successfully",
+                workScheduleRepository.findByDoctor_UserIdAndDateAppointment(doctorId, LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyyy")))
+        ));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Response> getById(@PathVariable("id") String id) {
         try {
