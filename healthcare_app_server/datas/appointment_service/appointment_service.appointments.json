@@ -1,9 +1,0 @@
-[{
-  "_id": {
-    "$numberLong": "1"
-  },
-  "work_schedule_id": {
-    "$numberLong": "1"
-  },
-  "_class": "dev.skyherobrine.appointment.models.mongodb.Appointment"
-}]
