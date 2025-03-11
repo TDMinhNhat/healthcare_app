@@ -18,4 +18,7 @@ public interface WorkScheduleFeign {
 
     @GetMapping("/{id}")
     ResponseEntity<Response> getWorkScheduleById(@PathVariable String id);
+
+    @GetMapping("/between")
+    ResponseEntity<Response> getWorkScheduleByBetweenDate(@RequestParam("start") String start, @RequestParam("end") String end);
 }

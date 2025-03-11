@@ -88,8 +88,35 @@ public class WorkScheduleController {
         }
     }
 
+    @GetMapping("/between")
+    public ResponseEntity<Response> getWorkScheduleByBetween(
+            @RequestParam("start") String start,
+            @RequestParam("end") String end
+    ) {
+        try {
+            log.info("Work Schedule: Call the api get work schedule by between day");
+            var result = workScheduleRepository.findByDateAppointmentBetween(
+                    LocalDate.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy")),
+                    LocalDate.parse(end, DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+            );
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Get the work schedule by between day successfully",
+                    result.stream().map(WorkSchedule::getId).toList()
+            ));
+        } catch (Exception e) {
+            log.error("Work Schedule: The api thrown an exception");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
     @GetMapping("/between/{doctorId}")
-    public ResponseEntity<Response> getWorkScheduleByBetweenDay(
+    public ResponseEntity<Response> getWorkScheduleByBetweenAndDoctor(
             @PathVariable("doctorId") String doctorId,
             @RequestParam String start,
             @RequestParam String end

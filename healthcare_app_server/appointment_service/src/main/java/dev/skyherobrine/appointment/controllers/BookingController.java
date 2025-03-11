@@ -76,6 +76,30 @@ public class BookingController {
         }
     }
 
+    @GetMapping("/week/patient/{patientId}")
+    public ResponseEntity<Response> getBookAppointmentByPatientInWeek(
+            @PathVariable("patientId") String patientId,
+            @RequestParam("start") String start,
+            @RequestParam("end") String end
+    ) {
+        try {
+            log.info("Booking: Call the api get book appointment by patient in week");
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Get book appointment by patient in week successfully",
+                    bookingService.getAppointmentByPatientInWeek(patientId, start, end)
+            ));
+        } catch (Exception e) {
+            log.error("Booking: The api return an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api get book appointment by patient in week was return an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
     @GetMapping("/detail")
     public ResponseEntity<Response> getAppointmentDetail(@RequestParam("workSchedule") Long workSchedule) {
         log.info("Booking: Call the api get appointment detail");
