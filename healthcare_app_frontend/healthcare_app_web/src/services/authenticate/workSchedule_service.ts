@@ -47,3 +47,12 @@ export const getWorkScheduleBetweenDate = async (
     },
   });
 };
+
+export const getWorkScheduleByDoctorAndExactDate = async (doctorId: string, date: string) => {
+  return await axiosConfig.get(`${prefix}/doctor/date`, {
+    params: {
+      doctorId: doctorId,
+      date: date
+    }
+  });
+}

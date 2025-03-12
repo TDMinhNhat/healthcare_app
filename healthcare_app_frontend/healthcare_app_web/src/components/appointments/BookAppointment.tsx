@@ -102,7 +102,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
   const handleNoteChange = (value: string) => {
     setNote(value);
   };
-
+  console.log(patientId, note, selectedTime);
   return (
     <Box sx={{ width: "100%" }}>
       <Typography variant="h6" gutterBottom>
