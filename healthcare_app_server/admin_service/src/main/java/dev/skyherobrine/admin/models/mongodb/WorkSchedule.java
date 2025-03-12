@@ -1,5 +1,6 @@
 package dev.skyherobrine.admin.models.mongodb;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import dev.skyherobrine.admin.enums.TypeDay;
 import dev.skyherobrine.admin.models.mariadb.Doctor;
 import dev.skyherobrine.admin.models.mariadb.Shift;
@@ -22,6 +23,7 @@ public class WorkSchedule {
     private Shift shift;
     @Field(name = "max_slots")
     private int maxSlots;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     @Field(name = "date_appointment")
     private LocalDate dateAppointment;
     @Field(name = "created_at")
