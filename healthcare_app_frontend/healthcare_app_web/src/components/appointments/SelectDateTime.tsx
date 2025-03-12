@@ -19,7 +19,9 @@ import {
   formatDateToString,
   parseDateTimeFromString,
   formatTime,
+  formatTimeFromTimeString
 } from "../../utils/dateUtils";
+import { getWorkScheduleByDoctorAndExactDate } from "../../services/authenticate/workSchedule_service";
 
 /**
  * Props cho component SelectDateTime
@@ -94,6 +96,13 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
       setError(null);
       setHasWorkSchedules(true); // Reset state khi bắt đầu fetch dữ liệu mới
 
+      const result = await getWorkScheduleByDoctorAndExactDate(
+        doctor.userId, formatDateToString(date)
+      ).then(response => response.data.data).catch(error => {
+        console.log(error);
+        return null;
+      })
+
       // const result = await getWorkScheduleTimeSlot(
       //   doctor.userId,
       //   formatDateToString(date)
@@ -121,14 +130,14 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
       // Nhóm các khung giờ theo ca (sáng/chiều)
       // Kiểm tra xem ca 1 (8h-12h) có slot nào còn trống không
       const shift1Available = result.some((item) => {
-        const start = parseDateTimeFromString(item.workSchedule.start);
+        const start = formatTimeFromTimeString(item.shift.start, "date");
         const hourStart = start.getHours();
         return hourStart >= 8 && hourStart < 12 && item.isAvailable;
       });
 
       // Kiểm tra xem ca 2 (13h-17h) có slot nào còn trống không
       const shift2Available = result.some((item) => {
-        const start = parseDateTimeFromString(item.workSchedule.start);
+        const start = formatTimeFromTimeString(item.shift.start, "date");
         const hourStart = start.getHours();
         return hourStart >= 13 && hourStart < 17 && item.isAvailable;
       });

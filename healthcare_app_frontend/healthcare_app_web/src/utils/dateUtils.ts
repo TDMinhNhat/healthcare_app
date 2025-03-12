@@ -103,7 +103,7 @@ export const formatTimeFromTimeString = (timeString: string, type: string): any 
     const time = timeString.split("-");
     return `${formatTime(time[0])}:${formatTime(time[1])}`;
   } else {
-    const time = timeString.split(":");
+    const time = timeString.split("-");
     const date = new Date();
     date.setHours(parseInt(time[0]));
     date.setMinutes(parseInt(time[1]));
