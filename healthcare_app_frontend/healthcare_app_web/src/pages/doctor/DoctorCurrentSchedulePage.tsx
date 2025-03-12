@@ -186,7 +186,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
         // Xử lý dữ liệu trả về từ API
         result.forEach((i: any) => {
           const item = i.workSchedule;
-          console.log("Item:", item);
+          // console.log("Item:", item);
           // Kiểm tra dữ liệu hợp lệ
           if (!item.dateAppointment) {
             console.error("Thiếu ngày hẹn trong mục lịch làm việc:", item);
@@ -195,14 +195,8 @@ const DoctorCurrentSchedulePage: React.FC = () => {
 
           // Chuyển đổi định dạng ngày từ API (yyyy-MM-dd) sang định dạng UI (dd-MM-yyyy)
           const dateFromAPI = item.dateAppointment;
-          const [year, month, day] = dateFromAPI.split("-");
-          const date = new Date(
-            parseInt(year),
-            parseInt(month) - 1,
-            parseInt(day)
-          );
-          const dateStr = formatDateToString(date); // Chuyển thành dd-MM-yyyy
-
+          // Chuyển thành dd-MM-yyyy
+          // console.log("Date string:", dateFromAPI);
           // Xử lý thông tin ca làm việc từ API
           const shiftData = item.shift;
 
@@ -228,8 +222,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
             start: formatTimeString(shiftData.start),
             end: formatTimeString(shiftData.end),
             status: shiftData.status,
-            createdAt: shiftData.createdAt,
-            updatedAt: shiftData.updatedAt,
           };
 
           // Tính toán số chỗ trống còn lại (mô phỏng, thực tế sẽ từ API)
@@ -242,17 +234,16 @@ const DoctorCurrentSchedulePage: React.FC = () => {
             shift: shift,
             maxSlots: item.maxSlots,
             dateAppointment: item.dateAppointment,
-            createdAt: item.createdAt,
-            updatedAt: item.updatedAt,
+
             status: item.status,
             totalBook: totalBook,
           };
 
           // Thêm vào map theo ngày - đơn giản và hiệu quả hơn
-          if (!newScheduleMap[dateStr]) {
-            newScheduleMap[dateStr] = [];
+          if (!newScheduleMap[dateFromAPI]) {
+            newScheduleMap[dateFromAPI] = [];
           }
-          newScheduleMap[dateStr].push(workSchedule);
+          newScheduleMap[dateFromAPI].push(workSchedule);
         });
 
         setScheduleMap(newScheduleMap);
@@ -272,6 +263,8 @@ const DoctorCurrentSchedulePage: React.FC = () => {
   // Kiểm tra xem một ngày có ca 1 không
   const hasShift1 = (date: string): boolean => {
     const schedules = getSchedulesForDate(date);
+    // console.log("Checking shift 1 for date:", schedules);
+    // console.log("schedule map", scheduleMap);
     return schedules.some((schedule) => schedule.shift.shift === 1);
   };
 

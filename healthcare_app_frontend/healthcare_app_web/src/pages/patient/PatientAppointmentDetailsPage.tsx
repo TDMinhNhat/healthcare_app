@@ -41,29 +41,44 @@ const PatientAppointmentDetailsPage: React.FC = () => {
   const user = useSelector((state: any) => state.user.user);
 
   const getStatus = (status: string) => {
-    switch(status) {
-      case "WAITING": return "Đang chờ";
-      case "IN_PROGRESS": return "Đang khám";
-      case "DONE": return "Đã hoàn thành";
-      case "CANCEL": return "Đã hủy";
+    switch (status) {
+      case "WAITING":
+        return "Đang chờ";
+      case "IN_PROGRESS":
+        return "Đang khám";
+      case "DONE":
+        return "Đã hoàn thành";
+      case "CANCEL":
+        return "Đã hủy";
       default:
         return "default";
     }
-  }
+  };
 
   useEffect(() => {
     // Mô phỏng gọi API
     const fetchAppointmentDetails = async () => {
       try {
-        const result = await getAppointmentPatientDetail(user.userId, appointmentId).then(response => response.data.data).catch(error => {
-          console.error("Lỗi khi tải thông tin cuộc hẹn:", error);
-          setLoading(false);
-        });
+        const result = await getAppointmentPatientDetail(
+          user.userId,
+          appointmentId
+        )
+          .then((response) => response.data.data)
+          .catch((error) => {
+            console.error("Lỗi khi tải thông tin cuộc hẹn:", error);
+            setLoading(false);
+          });
 
         const data = {
           id: result.work_schedule.id,
           date: result.work_schedule.dateAppointment,
-          time: `${formatTimeFromTimeString(result.work_schedule.shift.start, "string")} - ${formatTimeFromTimeString(result.work_schedule.shift.end, "string")}`,
+          time: `${formatTimeFromTimeString(
+            result.work_schedule.shift.start,
+            "string"
+          )} - ${formatTimeFromTimeString(
+            result.work_schedule.shift.end,
+            "string"
+          )}`,
           location: "Phòng 302, Tòa nhà chính",
           status: getStatus(result.book_appointment.status),
           patientInfo: {
@@ -81,10 +96,9 @@ const PatientAppointmentDetailsPage: React.FC = () => {
             avatar: result.work_schedule.doctor.avatar,
           },
           hasMedicalRecord: true,
-        }
+        };
         setAppointment(data);
         setLoading(false);
-
       } catch (error) {
         console.error("Lỗi khi tải thông tin cuộc hẹn:", error);
         setLoading(false);
