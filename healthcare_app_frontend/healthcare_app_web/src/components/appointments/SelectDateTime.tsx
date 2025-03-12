@@ -37,7 +37,7 @@ interface SelectDateTimeProps {
 
 // Định nghĩa các ca làm việc cố định của bác sĩ
 const SHIFTS = {
-  CA1: { id: 1, shift: "Ca 1", start: "08:00", end: "12:00" }, // Ca sáng: 8h-12h
+  CA1: { id: 1, shift: "Ca 1", start: "07:00", end: "11:00" }, // Ca sáng: 8h-12h
   CA2: { id: 2, shift: "Ca 2", start: "13:00", end: "17:00" }, // Ca chiều: 13h-17h
 };
 
@@ -78,6 +78,8 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   // State để kiểm tra xem có lịch làm việc nào trong ngày đã chọn không
   const [hasWorkSchedules, setHasWorkSchedules] = useState<boolean>(true);
 
+  const [workSchedule, setWorkSchedule] = useState<any>(null);
+
   // Gọi API để lấy danh sách ca khám mỗi khi ngày hoặc bác sĩ thay đổi
   useEffect(() => {
     if (selectedDate && doctor) {
@@ -103,15 +105,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
         return null;
       })
 
-      // const result = await getWorkScheduleTimeSlot(
-      //   doctor.userId,
-      //   formatDateToString(date)
-      // )
-      //   .then((response) => response.data.data)
-      //   .catch((error) => {
-      //     console.log(error);
-      //     return null;
-      //   });
+      setWorkSchedule(result);
 
       // Kiểm tra dữ liệu trả về từ API
       if (!result || !Array.isArray(result)) {
@@ -132,13 +126,15 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
       const shift1Available = result.some((item) => {
         const start = formatTimeFromTimeString(item.shift.start, "date");
         const hourStart = start.getHours();
-        return hourStart >= 8 && hourStart < 12 && item.isAvailable;
+        item.isAvailable = true;
+        return hourStart >= 7 && hourStart < 11 && item.isAvailable;
       });
 
       // Kiểm tra xem ca 2 (13h-17h) có slot nào còn trống không
       const shift2Available = result.some((item) => {
         const start = formatTimeFromTimeString(item.shift.start, "date");
         const hourStart = start.getHours();
+        item.isAvailable = true;
         return hourStart >= 13 && hourStart < 17 && item.isAvailable;
       });
 
@@ -220,14 +216,13 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
     if (!selectedDate || !isToday(selectedDate)) return false;
 
     const now = new Date();
-
     // Vô hiệu hóa ca sáng nếu đã quá 12h trưa
-    if (shift.id === 1 && now.getHours() >= 12) {
+    if (shift.id === 1 && now.getHours() > 11) {
       return true;
     }
 
     // Vô hiệu hóa ca chiều nếu đã quá 17h chiều
-    if (shift.id === 2 && now.getHours() >= 17) {
+    if (shift.id === 2 && now.getHours() > 17) {
       return true;
     }
 
