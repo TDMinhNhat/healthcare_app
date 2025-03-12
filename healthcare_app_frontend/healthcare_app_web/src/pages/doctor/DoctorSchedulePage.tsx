@@ -35,6 +35,7 @@ import {
   getWorkScheduleBetweenDate,
   addMultipleWorkSchedule,
 } from "../../services/authenticate/workSchedule_service";
+import { parse } from "date-fns/esm";
 
 // Interface Shift - phù hợp với mô hình cơ sở dữ liệu
 interface Shift {
@@ -131,12 +132,17 @@ const DoctorSchedulePage = () => {
           // Cập nhật lịch làm việc với dữ liệu từ API
           if (data.length > 0) {
             const updatedSchedule = [...newWeekSchedule];
-
+            console.log("Update schedule with data:", updatedSchedule);
             // Process each item in the response
             data.forEach((item: any) => {
+              // console.log("Processing item:", item);
+              // console.log("Date:", item.workSchedule.shift.shift);
               // Extract date from the response
-              const appointmentDate = new Date(item.dateAppointment);
-
+              const appointmentDate = parse(
+                item.workSchedule.dateAppointment,
+                "dd-MM-yyyy",
+                new Date()
+              );
               // Find the day index in the week schedule
               const dayIndex = updatedSchedule.findIndex(
                 (day) =>
@@ -148,18 +154,25 @@ const DoctorSchedulePage = () => {
               // If the day is found in current week schedule
               if (dayIndex !== -1) {
                 // Check which shift is set in the response and update accordingly
-                if (item.shift && item.shift.shift === 1) {
+                if (
+                  item.workSchedule.shift &&
+                  item.workSchedule.shift.shift === 1
+                ) {
                   if (!updatedSchedule[dayIndex].selectedShifts.includes(1)) {
+                    console.log("Shift 1 found for day:", dayIndex);
                     updatedSchedule[dayIndex].selectedShifts.push(1);
                   }
-                } else if (item.shift && item.shift.shift === 2) {
+                } else if (
+                  item.workSchedule.shift &&
+                  item.workSchedule.shift.shift === 2
+                ) {
                   if (!updatedSchedule[dayIndex].selectedShifts.includes(2)) {
                     updatedSchedule[dayIndex].selectedShifts.push(2);
                   }
                 }
               }
             });
-
+            console.log("Updated schedule with data:", updatedSchedule);
             // Update the week schedule state with the fetched data
             setWeekSchedule(updatedSchedule);
           }
@@ -402,7 +415,7 @@ const DoctorSchedulePage = () => {
               }
             }
           });
-
+          console.log("Reset schedule with data:", updatedSchedule);
           setWeekSchedule(updatedSchedule);
         }
       }

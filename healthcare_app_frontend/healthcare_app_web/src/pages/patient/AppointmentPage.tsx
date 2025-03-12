@@ -27,7 +27,7 @@ import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import BookAppointment from "../../components/appointments/BookAppointment";
-import { getAppointmentPatientBookInWeek } from "../../services/booking_service";
+import { getAppointmentPatientBookInWeek } from "../../services/appointment/booking_service";
 
 // Import DatePicker components
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
@@ -46,7 +46,11 @@ import {
   getMonth,
 } from "date-fns";
 import { vi } from "date-fns/locale";
-import { formatDateToString, formatTime, formatTimeFromTimeString } from "../../utils/dateUtils";
+import {
+  formatDateToString,
+  formatTime,
+  formatTimeFromTimeString,
+} from "../../utils/dateUtils";
 
 // Định nghĩa TypeDay enum để phù hợp với mô hình UML
 enum TypeDay {
@@ -126,25 +130,40 @@ const AppointmentPage = () => {
       const getUserId = user.userId;
       // console.log(getUserId);
       var latestWeek = new Date();
-      latestWeek.setDate(currentWeekStart.getDate() + 6)
+      latestWeek.setDate(currentWeekStart.getDate() + 6);
 
-      const result = await getAppointmentPatientBookInWeek(getUserId, formatDateToString(currentWeekStart), formatDateToString(latestWeek)).then(response => response.data.data).catch(error => {
-        console.log(error);
-        return null;
-      });
-     
+      const result = await getAppointmentPatientBookInWeek(
+        getUserId,
+        formatDateToString(currentWeekStart),
+        formatDateToString(latestWeek)
+      )
+        .then((response) => response.data.data)
+        .catch((error) => {
+          console.log(error);
+          return null;
+        });
+
       const appointmentsData = result.map((item: any) => {
         return {
           id: item.work_schedule.id,
           date: item.work_schedule.dateAppointment,
-          startTime: formatTimeFromTimeString(item.work_schedule.shift.start, "string"),
-          endTime: formatTimeFromTimeString(item.work_schedule.shift.end, "string"),
+          startTime: formatTimeFromTimeString(
+            item.work_schedule.shift.start,
+            "string"
+          ),
+          endTime: formatTimeFromTimeString(
+            item.work_schedule.shift.end,
+            "string"
+          ),
           status: item.book_appointment.status,
-          doctorName: item.work_schedule.doctor.lastName + " " + item.work_schedule.doctor.firstName,
+          doctorName:
+            item.work_schedule.doctor.lastName +
+            " " +
+            item.work_schedule.doctor.firstName,
           specialization: item.work_schedule.doctor.specialization,
           reason: "Khám " + item.work_schedule.doctor.typeDisease.name,
           doctorId: item.work_schedule.doctor.userId,
-          shiftId: item.work_schedule.shift.id
+          shiftId: item.work_schedule.shift.id,
         };
       });
       setAppointments(appointmentsData);
