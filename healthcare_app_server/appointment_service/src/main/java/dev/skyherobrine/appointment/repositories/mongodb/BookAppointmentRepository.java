@@ -17,13 +17,11 @@ public interface BookAppointmentRepository extends MongoRepository<BookAppointme
 
     Optional<BookAppointment> findFirstByWorkScheduleOrderByNumericalOrderDesc(Long workSchedule);
 
-    long countByWorkSchedule(Long workSchedule);
-
-    long countByWorkScheduleAndStatusNot(Long workSchedule, AppointmentStatus status);
-
     List<BookAppointment> findByWorkSchedule(Long workSchedule);
 
     Optional<BookAppointment> findByPatientIdAndWorkSchedule(String patientId, Long workSchedule);
+
+    List<BookAppointment> findByWorkScheduleAndStatusNot(Long workSchedule, AppointmentStatus status);
 
 
 }

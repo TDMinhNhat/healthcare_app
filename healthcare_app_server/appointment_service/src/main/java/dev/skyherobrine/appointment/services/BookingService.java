@@ -64,12 +64,12 @@ public class BookingService {
     public Map<String,Object> getAppointmentDetail(Long workSchedule) {
         Map<String,Object> result = new HashMap<>();
         result.put("information", new HashMap<>(){{
-            put("total_book", bar.countByWorkSchedule(workSchedule));
-            put("total_book_without_cancel", bar.countByWorkScheduleAndStatusNot(workSchedule, AppointmentStatus.CANCELLED));
-            put("waiting", bar.findByStatus(AppointmentStatus.WAITING));
-            put("in_progress", bar.findByStatus(AppointmentStatus.IN_PROGRESS));
-            put("done", bar.findByStatus(AppointmentStatus.DONE));
-            put("cancelled", bar.findByStatus(AppointmentStatus.CANCELLED));
+            put("total_book", bar.findByWorkSchedule(workSchedule).size());
+            put("total_book_without_cancel", bar.findByWorkScheduleAndStatusNot(workSchedule, AppointmentStatus.CANCELLED).size());
+            put("waiting", bar.findByStatus(AppointmentStatus.WAITING).size());
+            put("in_progress", bar.findByStatus(AppointmentStatus.IN_PROGRESS).size());
+            put("done", bar.findByStatus(AppointmentStatus.DONE).size());
+            put("cancelled", bar.findByStatus(AppointmentStatus.CANCELLED).size());
         }});
         result.put("work_schedule", workScheduleFeign.getById(workSchedule).getBody().getData());
         result.put("patient_book", listPatientBookAppointment(workSchedule));
