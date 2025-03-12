@@ -35,6 +35,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string>("");
+  const [workSchedule, setWorkSchedule] = useState<any>(null);
 
   const steps = [
     t("patient.appointments.steps.select_service"),
@@ -62,9 +63,10 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
     handleNext();
   };
 
-  const handleDateTimeSelect = (date: Date, time: string) => {
+  const handleDateTimeSelect = (date: Date, time: string, workSchedule: object) => {
     setSelectedDate(date);
     setSelectedTime(time);
+    setWorkSchedule(workSchedule);
     handleNext();
   };
 
@@ -77,8 +79,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
     try {
       setLoading(true);
       setError(null);
-
-      await createAppointment(patientId, note, selectedTime.workSchedule);
+      await createAppointment(patientId, note, workSchedule.id);
 
       handleNext(); // Move to confirmation step
     } catch (err) {
@@ -95,6 +96,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
     setSelectedDoctor(null);
     setSelectedDate(null);
     setSelectedTime("");
+    setWorkSchedule(null);
     setNote("");
     onClose();
   };
