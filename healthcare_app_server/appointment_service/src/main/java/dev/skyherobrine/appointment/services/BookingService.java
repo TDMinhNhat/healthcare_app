@@ -78,12 +78,16 @@ public class BookingService {
 
     public List<?> getAppointmentByPatientInWeek(String patientId, String start, String end) {
         try {
+            log.info("Booking Service: Get the appointments by patient in week");
             List<Map<String,Object>> result = new ArrayList<>();
             kafkaTemplate.send("request_get_work_schedule_by_between", "{" +
                     "\"start\":\"" + start + "\"," +
                     "\"end\":\"" + end + "\"" +
                     "}");
+            log.info("Booking Service: Sent the request get work schedule by between");
+
             JsonNode nodes = workScheduleResponseConsumer.getStorageData();
+            log.info("Booking Service: Received the response from work schedule service");
 
             for(JsonNode node : nodes) {
                 BookAppointment target = bar.findByPatientIdAndWorkSchedule(patientId, node.get("id").asLong()).orElse(null);
@@ -99,7 +103,6 @@ public class BookingService {
         } catch (Exception e) {
             log.error("Booking Service: The service return an error");
             log.error(e.getMessage());
-
             return null;
         }
     }
