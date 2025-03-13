@@ -277,6 +277,18 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
               </Box>
             </Grid> */}
           </Grid>
+
+          {/* Thêm nút khám duy nhất ở thông tin ca khám */}
+          <Box mt={3} display="flex" justifyContent="flex-end">
+            <Button
+              variant="contained"
+              color="success"
+              startIcon={<VideocamIcon />}
+              onClick={() => navigate(`/doctor/examination/${appointmentId}`)}
+            >
+              Bắt đầu ca khám
+            </Button>
+          </Box>
         </CardContent>
       </Card>
 
@@ -385,19 +397,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
 
                       {/* Stack của các nút tương tác */}
                       <Stack spacing={1}>
-                        {/* Nút bắt đầu khám bệnh trực tuyến */}
-                        <Button
-                          variant="contained"
-                          size="small"
-                          color="success"
-                          startIcon={<VideocamIcon />}
-                          onClick={() => handleStartExamination(patient.id)}
-                          fullWidth
-                        >
-                          Khám
-                        </Button>
-
-                        {/* Nút xem hồ sơ bệnh án */}
+                        {/* Nút xem hồ sơ bệnh án thay vì nút khám riêng */}
                         <Button
                           variant="outlined"
                           size="small"
