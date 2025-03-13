@@ -23,6 +23,7 @@ import DoctorSchedulePage from "../pages/doctor/DoctorSchedulePage";
 import DoctorCurrentSchedulePage from "../pages/doctor/DoctorCurrentSchedulePage";
 import PatientMedicalRecordsListPage from "../pages/patient/PatientMedicalRecordsListPage";
 import PatientMedicalRecordPage from "../pages/patient/PatientMedicalRecordPage";
+import ExaminationRoomPage from "../pages/doctor/ExaminationRoomPage";
 
 // const ChatPage = lazy(() => import("../pages/ChatPage"));
 
@@ -70,6 +71,10 @@ export const AppRoutes = () => {
               element={<div>Prescriptions</div>}
             />
             <Route path={ROUTING.CHAT} element={<div>Chat</div>} />
+            <Route
+              path={ROUTING.EXAMINATION_ROOM}
+              element={<ExaminationRoomPage />}
+            />
           </Route>
 
           {/* Patient routes */}
