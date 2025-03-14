@@ -1,8 +1,8 @@
-import { axios } from "../axiosConfig";
+import axiosConfig from "../axiosConfig";
 
 const prefix = "/authenticate/api/v1/authenticate"
 const checkLogin = async (email: string, password: string) => {
-    return await axios.post(`${prefix}`, {
+    return await axiosConfig.post(`${prefix}`, {
         params: {
             "email": email,
             "password": password
@@ -11,7 +11,7 @@ const checkLogin = async (email: string, password: string) => {
 }
 
 const register = async (firstName: string, lastName: string, sex: boolean, dob: Date, phone: string, username: string, email: string, password: string){
-    return await axios.post(`${prefix}/register`, {
+    return await axiosConfig.post(`${prefix}/register`, {
         "firstName": firstName,
         "lastName": lastName,
         "sex": sex,
