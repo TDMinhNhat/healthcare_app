@@ -225,7 +225,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
           };
 
           // Tính toán số chỗ trống còn lại (mô phỏng, thực tế sẽ từ API)
-          const totalBook = item?.detail?.information?.total_book ?? 0;
+          const totalBook = i?.detail?.information?.total_book ?? 0;
 
           // Tạo đối tượng WorkSchedule phù hợp với mô hình và UI
           const workSchedule: WorkSchedule = {
@@ -234,7 +234,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
             shift: shift,
             maxSlots: item.maxSlots,
             dateAppointment: item.dateAppointment,
-
             status: item.status,
             totalBook: totalBook,
           };
@@ -245,7 +244,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
           }
           newScheduleMap[dateFromAPI].push(workSchedule);
         });
-
+        // console.log("New schedule map:", newScheduleMap);
         setScheduleMap(newScheduleMap);
       } catch (error) {
         console.error("Lỗi khi lấy lịch làm việc:", error);
@@ -304,9 +303,16 @@ const DoctorCurrentSchedulePage: React.FC = () => {
 
   // Xử lý chuyển hướng đến trang chi tiết ca khám
   const handleAppointmentClick = (date: string, shift: number) => {
-    // Tạo ID cuộc hẹn từ ngày và ca làm việc
-    const appointmentId = `${date.replace(/-/g, "")}-${shift}`;
-    navigate(`/doctor/appointments/${appointmentId}`);
+    // Get the work schedule for the selected shift
+    const schedule =
+      shift === 1 ? getShift1Schedule(date) : getShift2Schedule(date);
+
+    if (schedule) {
+      // Navigate using the actual work schedule ID
+      navigate(`/doctor/appointments/${schedule.id}`);
+    } else {
+      console.error("Không tìm thấy thông tin ca làm việc");
+    }
   };
 
   // Handle navigation to examination room

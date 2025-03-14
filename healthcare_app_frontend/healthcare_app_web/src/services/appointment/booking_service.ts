@@ -62,3 +62,16 @@ export const getAppointmentPatientDetail = async (
     },
   });
 };
+
+// hay còn gọi là chi tiết ca khám đúng hơn
+export const getDetailDoctorAppointment = async (
+  doctorId: string,
+  workSchedule: number
+) => {
+  return await axiosConfig.get(`${prefix}/detail/doctor`, {
+    params: {
+      doctorId: doctorId,
+      workSchedule: workSchedule,
+    },
+  });
+};

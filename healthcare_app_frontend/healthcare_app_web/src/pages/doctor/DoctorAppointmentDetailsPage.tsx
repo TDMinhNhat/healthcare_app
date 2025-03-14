@@ -28,44 +28,31 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import MedicalRecordModal from "../../components/medical/MedicalRecordModal";
 import { useNavigate } from "react-router";
+import { getDetailDoctorAppointment } from "../../services/appointment/booking_service";
+import { useSelector } from "react-redux";
 
-// Dữ liệu mẫu - sẽ được thay thế bằng API calls trong môi trường sản xuất
-const mockAppointmentData = {
-  id: "123",
-  date: "15-10-2023", // Định dạng ngày đã được thay đổi sang dd-MM-yyyy
-  time: "09:00 - 11:00",
-  location: "Phòng 302, Tòa nhà chính",
-  status: "Đang diễn ra",
-  totalSlots: 15,
-  registeredPatients: [
-    {
-      id: 1,
-      medicalId: "BN001", // ID khám bệnh nhân
-      name: "Nguyễn Văn A",
-      age: 45,
-      gender: "Nam",
-      reason: "Khám định kỳ",
-      status: "Đã xác nhận",
-    },
-    {
-      id: 2,
-      medicalId: "BN002", // ID khám bệnh nhân
-      name: "Trần Thị B",
-      age: 32,
-      gender: "Nữ",
-      reason: "Tái khám",
-      status: "Đang chờ",
-    },
-    {
-      id: 3,
-      medicalId: "BN003", // ID khám bệnh nhân
-      name: "Lê Văn C",
-      age: 58,
-      gender: "Nam",
-      reason: "Tư vấn",
-      status: "Đã xác nhận",
-    },
-  ],
+// Helper function to calculate age from birthdate (dd-MM-yyyy format)
+const calculateAge = (dobString: string) => {
+  const parts = dobString.split("-");
+  if (parts.length !== 3) return 0;
+
+  const dob = new Date(
+    parseInt(parts[2]),
+    parseInt(parts[1]) - 1,
+    parseInt(parts[0])
+  );
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const monthDifference = today.getMonth() - dob.getMonth();
+
+  if (
+    monthDifference < 0 ||
+    (monthDifference === 0 && today.getDate() < dob.getDate())
+  ) {
+    age--;
+  }
+
+  return age;
 };
 
 /**
@@ -82,7 +69,8 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   // State lưu trữ từ khóa tìm kiếm
   const [searchQuery, setSearchQuery] = useState<string>("");
-
+  // Doctor ID would typically come from authentication context
+  const doctorId = useSelector((state: any) => state.user.user).userId;
   // State for medical record modal
   const [selectedPatientId, setSelectedPatientId] = useState<number | null>(
     null
@@ -91,15 +79,72 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
     useState<boolean>(false);
 
   useEffect(() => {
-    // Mô phỏng gọi API
+    // Actual API call to fetch appointment details
     const fetchAppointmentDetails = async () => {
       try {
-        // Trong môi trường thực tế: const response = await api.getAppointmentDetails(appointmentId);
-        // Mô phỏng thời gian tải dữ liệu
-        setTimeout(() => {
-          setAppointment(mockAppointmentData);
-          setLoading(false);
-        }, 800);
+        setLoading(true);
+        // Convert appointmentId from string to number
+        const workScheduleId = Number(appointmentId);
+        if (isNaN(workScheduleId)) {
+          throw new Error("Invalid appointment ID");
+        }
+
+        const response = await getDetailDoctorAppointment(
+          doctorId,
+          workScheduleId
+        );
+
+        // Transform API response to match expected format
+        const responseData = response.data.data;
+        const workSchedule = responseData.work_schedule;
+
+        // Format time from hh-mm-ss to hh:mm
+        const formatTime = (timeStr: string) => {
+          const parts = timeStr.split("-");
+          return `${parts[0]}:${parts[1]}`;
+        };
+
+        // Determine appointment status based on date
+        const appointmentDate = new Date(
+          workSchedule.dateAppointment.split("-").reverse().join("-")
+        );
+        const today = new Date();
+
+        let status = "Sắp tới";
+        if (
+          appointmentDate.getDate() === today.getDate() &&
+          appointmentDate.getMonth() === today.getMonth() &&
+          appointmentDate.getFullYear() === today.getFullYear()
+        ) {
+          status = "Đang diễn ra";
+        } else if (appointmentDate < today) {
+          status = "Đã kết thúc";
+        }
+
+        // Map patients data
+        const transformedPatients = responseData.patients.map(
+          (patient: any) => ({
+            id: patient.user_info.id,
+            medicalId: patient.user_info.userId.substring(0, 10),
+            name: `${patient.user_info.lastName} ${patient.user_info.firstName}`,
+            age: calculateAge(patient.user_info.dob),
+            gender: patient.user_info.sex ? "Nữ" : "Nam",
+          })
+        );
+
+        const transformedData = {
+          id: workSchedule.id.toString(),
+          date: workSchedule.dateAppointment,
+          time: `${formatTime(workSchedule.shift.start)} - ${formatTime(
+            workSchedule.shift.end
+          )}`,
+          status: status,
+          totalSlots: workSchedule.maxSlots,
+          registeredPatients: transformedPatients,
+        };
+
+        setAppointment(transformedData);
+        setLoading(false);
       } catch (error) {
         console.error("Lỗi khi tải thông tin ca khám:", error);
         setLoading(false);
@@ -107,7 +152,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
     };
 
     fetchAppointmentDetails();
-  }, [appointmentId]);
+  }, [appointmentId, doctorId]);
 
   // Hiển thị trạng thái đang tải
   if (loading) {
@@ -145,22 +190,6 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
         return "default";
       case "Sắp tới":
         return "info";
-      default:
-        return "default";
-    }
-  };
-
-  /**
-   * Xác định màu cho trạng thái đăng ký của bệnh nhân
-   * @param status - Trạng thái đăng ký
-   * @returns Màu tương ứng với trạng thái
-   */
-  const getPatientStatusColor = (status: string) => {
-    switch (status) {
-      case "Đã xác nhận":
-        return "success";
-      case "Đang chờ":
-        return "warning";
       default:
         return "default";
     }
@@ -228,9 +257,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
             alignItems="center"
             mb={2}
           >
-            <Typography variant="h5">
-              Thông tin ca khám #{appointment.id}
-            </Typography>
+            <Typography variant="h5">Thông tin ca khám</Typography>
             {/* Hiển thị trạng thái ca khám */}
             <Chip
               label={appointment.status}
@@ -371,15 +398,10 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
                           <Typography component="span" variant="body2">
                             {patient.age} tuổi • {patient.gender}
                           </Typography>
-                          <br />
-                          {/* Lý do khám của bệnh nhân */}
-                          <Typography component="span" variant="body2">
-                            Lý do khám: {patient.reason}
-                          </Typography>
                         </>
                       }
                     />
-                    {/* Cột bên phải chứa trạng thái và các nút tương tác */}
+                    {/* Cột bên phải chứa các nút tương tác */}
                     <Box
                       sx={{
                         display: "flex",
@@ -388,16 +410,9 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
                         gap: 1,
                       }}
                     >
-                      {/* Hiển thị trạng thái đăng ký của bệnh nhân */}
-                      <Chip
-                        size="small"
-                        label={patient.status}
-                        color={getPatientStatusColor(patient.status) as any}
-                      />
-
                       {/* Stack của các nút tương tác */}
                       <Stack spacing={1}>
-                        {/* Nút xem hồ sơ bệnh án thay vì nút khám riêng */}
+                        {/* Nút xem hồ sơ bệnh án */}
                         <Button
                           variant="outlined"
                           size="small"
