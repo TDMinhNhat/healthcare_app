@@ -31,7 +31,7 @@ import { getWorkScheduleByDoctorAndExactDate } from "../../services/authenticate
  */
 interface SelectDateTimeProps {
   doctor: any;
-  onSelect: (date: Date, shift: string) => void;
+  onSelect: (date: Date, shift: string, workScheduleTarget: object) => void;
   onBack: () => void;
 }
 
@@ -78,7 +78,8 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   // State để kiểm tra xem có lịch làm việc nào trong ngày đã chọn không
   const [hasWorkSchedules, setHasWorkSchedules] = useState<boolean>(true);
 
-  const [workSchedule, setWorkSchedule] = useState<any>(null);
+  const [workSchedules, setWorkSchedules] = useState<any>(null);
+  const [workScheduleTarget, setWorkScheduleTarget] = useState<any>(null);
 
   // Gọi API để lấy danh sách ca khám mỗi khi ngày hoặc bác sĩ thay đổi
   useEffect(() => {
@@ -105,7 +106,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
         return null;
       })
 
-      setWorkSchedule(result);
+      setWorkSchedules(result);
 
       // Kiểm tra dữ liệu trả về từ API
       if (!result || !Array.isArray(result)) {
@@ -174,6 +175,11 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
    * @param shift - Ca khám được chọn
    */
   const handleShiftSelect = (shift: string) => {
+    if(shift === "Ca 1") {
+      setWorkScheduleTarget(workSchedules.find((item: object) => item.shift.id === 1));
+    } else {
+      setWorkScheduleTarget(workSchedules.find((item: object) => item.shift.id === 2));
+    }
     setSelectedShift(shift);
   };
 
@@ -183,7 +189,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
    */
   const handleContinue = () => {
     if (selectedDate && selectedShift) {
-      onSelect(selectedDate, selectedShift);
+      onSelect(selectedDate, selectedShift, workScheduleTarget);
     }
   };
 

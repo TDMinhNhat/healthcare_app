@@ -4,54 +4,38 @@
     "slug": "healthcare_app_mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/images/logo.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
-      "supportsTablet": true,
-      "infoPlist": {
-        "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera.",
-        "NSMicrophoneUsageDescription": "$(PRODUCT_NAME) needs access to your Microphone."
-      }
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/images/logo.png",
         "backgroundColor": "#ffffff"
-      },
-      "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
-      ],
-      "package": "com.dangquang.healthcare_app_mobile"
+      }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/logo.png"
     },
     "plugins": [
+      "expo-router",
       [
-        "react-native-vision-camera",
+        "expo-splash-screen",
         {
-          "cameraPermissionText": "$(PRODUCT_NAME) needs access to your Camera.",
-          "enableMicrophonePermission": true,
-          "microphonePermissionText": "$(PRODUCT_NAME) needs access to your Microphone."
-        }
-      ],
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
-          "recordAudioAndroid": true
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
         }
       ]
-    ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }
