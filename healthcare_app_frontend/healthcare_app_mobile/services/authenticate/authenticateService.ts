@@ -1,24 +1,10 @@
-import axiosConfig from "../axiosConfig";
+import axios from "axios";
 
 const prefix = "/authenticate/api/v1/authenticate"
-const checkLogin = async (email: string, password: string) => {
-    return await axiosConfig.post(`${prefix}`, {
-        params: {
-            "email": email,
-            "password": password
-        }
-    });
+class AuthenticateService {
+    checkLogin = async (email: string, password: string) => {
+        return await axios.post(`http://192.168.100.6:8081/authenticate/api/v1/authenticate/login?email=${email}&password=${password}`)
+    }
 }
 
-const register = async (firstName: string, lastName: string, sex: boolean, dob: Date, phone: string, username: string, email: string, password: string) => {
-    return await axiosConfig.post(`${prefix}/register`, {
-        "firstName": firstName,
-        "lastName": lastName,
-        "sex": sex,
-        "dob": "",
-        "phone": phone,
-        "username": username,
-        "email": email,
-        "password": password
-    })
-}
+export default AuthenticateService;

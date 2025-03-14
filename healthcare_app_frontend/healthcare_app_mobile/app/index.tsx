@@ -1,15 +1,31 @@
-import {StyleSheet, SafeAreaView, View, Text, TextInput, Pressable, Image} from "react-native"
+import {StyleSheet, SafeAreaView, View, Text, TextInput, Pressable, Image, TouchableOpacity} from "react-native"
 import {useState} from "react";
-import {Link} from "expo-router";
+import {Link, router} from "expo-router";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import AuthenticateService from "../services/authenticate/authenticateService";
 
 export default function HomeScreen() {
 
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [showPassword, setShowPassword] = useState<boolean>(false);
+
+    async function clickLogin() {
+        const result = await new AuthenticateService().checkLogin(email, password).then(response => response.data).catch(error => {
+            console.log(error);
+            return null;
+        });
+        
+        if(result === null) {
+            alert("Server có lỗi")
+        } else if(result.code === 200) {
+            alert("Đăng Nhập Thành Công")
+        } else {
+            alert("Đăng Nhập Thất Bại") 
+        }
+    }
 
     return (
         <SafeAreaView style={style.main}>
@@ -20,16 +36,18 @@ export default function HomeScreen() {
                 <View style={style.itemArea}>
                     <TextInput
                         inputMode={"email"}
+                        defaultValue={email}
                         placeholder={"Nhập tài khoản email"}
-                        onChangeText={(text: string) => setEmail(text)}
+                        onChange={(event) => setEmail(event.target.value)}
                         style={style.input}
                     />
                 </View>
                 <View style={style.itemAreaPassword}>
                     <TextInput
                         secureTextEntry={!showPassword}
+                        defaultValue={password}
                         placeholder={"Nhập mật khẩu"}
-                        onChangeText={(text: string) => setEmail(text)}
+                        onChange={(event) => setPassword(event.target.value)}
                         style={style.inputPassword}
                     />
                     <MaterialCommunityIcons
@@ -57,14 +75,14 @@ export default function HomeScreen() {
                     </Link>
                 </View>
                 <View style={style.itemArea}>
-                    <Pressable style={style.button}>
+                    <TouchableOpacity style={style.button} onPress={() => clickLogin()}>
                         <Text style={style.buttonText}>Đăng Nhập</Text>
-                    </Pressable>
+                    </TouchableOpacity>
                 </View>
                 <View style={style.itemArea}>
-                    <Pressable style={style.button}>
+                    <TouchableOpacity style={style.button}>
                         <Text style={style.buttonText}>Đăng Nhập Bằng Khuôn Mặt</Text>
-                    </Pressable>
+                    </TouchableOpacity>
                 </View>
                 <View style={style.itemArea}>
                     <View style={{width: "100%"}}>
@@ -138,11 +156,11 @@ const style = StyleSheet.create({
         padding: 8
     },
     inputPassword: {
-        width: "80%",
+        width: "90%",
         padding: 8
     },
     togglePassword: {
-        marginRight: 10
+        marginRight: 10,
     },
     buttonDirectLink: {
         color: "#26b9c8",
