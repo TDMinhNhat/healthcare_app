@@ -43,14 +43,14 @@ export default function HomeScreen() {
                 <View style={style.itemArea}>
                     <Link href={"/register"}>
                         <View>
-                            <Text style={style.forgotPass}>
+                            <Text style={style.buttonDirectLink}>
                                 Tạo Tài Khoản
                             </Text>
                         </View>
                     </Link>
                     <Link href={"/forgot_password"}>
                         <View>
-                            <Text style={style.forgotPass}>
+                            <Text style={style.buttonDirectLink}>
                                 Quên Mật Khẩu
                             </Text>
                         </View>
@@ -142,13 +142,7 @@ const style = StyleSheet.create({
     togglePassword: {
         marginRight: 10
     },
-    forgotPassArea: {
-        width: "100%",
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "flex-end",
-    },
-    forgotPass: {
+    buttonDirectLink: {
         color: "#26b9c8",
         textDecorationLine: "underline"
     },
