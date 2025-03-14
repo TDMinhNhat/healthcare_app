@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Box,
   Typography,
@@ -110,7 +110,7 @@ const AppointmentPage = () => {
   const navigate = useNavigate();
   const [showBooking, setShowBooking] = useState(false);
   const user = useSelector((state: any) => state.user.user);
-
+  const getUserId = user.userId;
   // Các state quản lý hiển thị lịch
   const [today] = useState(new Date()); // Ngày hiện tại
   const [currentWeekStart, setCurrentWeekStart] = useState(
@@ -126,25 +126,45 @@ const AppointmentPage = () => {
 
   // Lấy dữ liệu lịch hẹn khi component được render
   useEffect(() => {
-    (async () => {
-      const getUserId = user.userId;
-      // console.log(getUserId);
-      var latestWeek = new Date();
-      latestWeek.setDate(currentWeekStart.getDate() + 6);
+    const fetchAppointments = async () => {
+      try {
+        // Calculate the end of week properly using date-fns for consistency
+        const weekEnd = addDays(currentWeekStart, 6);
 
-      const result = await getAppointmentPatientBookInWeek(
-        getUserId,
-        formatDateToString(currentWeekStart),
-        formatDateToString(latestWeek)
-      )
-        .then((response) => response.data.data)
-        .catch((error) => {
-          console.log(error);
-          return null;
+        console.log("Starting fetch for week:", {
+          start: formatDateToString(currentWeekStart),
+          end: formatDateToString(weekEnd),
         });
 
-      const appointmentsData = result.map((item: any) => {
-        return {
+        // Clear appointments during loading
+        setAppointments([]);
+
+        const response = await getAppointmentPatientBookInWeek(
+          getUserId,
+          formatDateToString(currentWeekStart),
+          formatDateToString(weekEnd)
+        );
+
+        if (!response?.data?.data) {
+          console.log("No appointments data received");
+          setAppointments([]);
+          return;
+        }
+
+        const result = response.data.data;
+        console.log("API response for week:", {
+          startDate: formatDateToString(currentWeekStart),
+          data: result,
+        });
+
+        // If no results, set empty array
+        if (!result || result.length === 0) {
+          console.log("No appointments found for this week");
+          setAppointments([]);
+          return;
+        }
+
+        const appointmentsData = result.map((item: any) => ({
           id: item.work_schedule.id,
           date: item.work_schedule.dateAppointment,
           startTime: formatTimeFromTimeString(
@@ -164,11 +184,22 @@ const AppointmentPage = () => {
           reason: "Khám " + item.work_schedule.doctor.typeDisease.name,
           doctorId: item.work_schedule.doctor.userId,
           shiftId: item.work_schedule.shift.id,
-        };
-      });
-      setAppointments(appointmentsData);
-    })();
-  }, []);
+        }));
+
+        console.log("Setting appointments for week:", {
+          count: appointmentsData.length,
+          dates: appointmentsData.map((a) => a.date),
+        });
+
+        setAppointments(appointmentsData);
+      } catch (error) {
+        console.error("Error fetching appointments:", error);
+        setAppointments([]);
+      }
+    };
+
+    fetchAppointments();
+  }, [currentWeekStart, getUserId]);
 
   // Xử lý khi người dùng muốn đặt lịch hẹn mới
   const handleBookingClick = () => {
@@ -198,19 +229,43 @@ const AppointmentPage = () => {
   // Lấy danh sách các ngày trong tuần
   const weekDays = getDaysInWeek();
 
-  // Xử lý chuyển đến tuần trước
+  // Xử lý chuyển đến tuần trước - handle more safely
   const handlePrevWeek = () => {
-    setCurrentWeekStart(subWeeks(currentWeekStart, 1));
+    console.log("Moving to previous week");
+    const newWeekStart = subWeeks(currentWeekStart, 1);
+    console.log("New week start:", formatDateToString(newWeekStart));
+
+    // Clear current appointments to avoid showing stale data
+    setAppointments([]);
+
+    // Update week start - use the actual date object, not a function
+    setCurrentWeekStart(newWeekStart);
   };
 
-  // Xử lý chuyển đến tuần sau
+  // Xử lý chuyển đến tuần sau - handle more safely
   const handleNextWeek = () => {
-    setCurrentWeekStart(addWeeks(currentWeekStart, 1));
+    console.log("Moving to next week");
+    const newWeekStart = addWeeks(currentWeekStart, 1);
+    console.log("New week start:", formatDateToString(newWeekStart));
+
+    // Clear current appointments
+    setAppointments([]);
+
+    // Update week start
+    setCurrentWeekStart(newWeekStart);
   };
 
-  // Xử lý quay về tuần hiện tại
+  // Xử lý quay về tuần hiện tại - handle more safely
   const handleGoToCurrentWeek = () => {
-    setCurrentWeekStart(startOfWeek(today, { weekStartsOn: 1 }));
+    console.log("Moving to current week");
+    const newWeekStart = startOfWeek(today, { weekStartsOn: 1 });
+    console.log("Current week start:", formatDateToString(newWeekStart));
+
+    // Clear current appointments
+    setAppointments([]);
+
+    // Update week start
+    setCurrentWeekStart(newWeekStart);
   };
 
   // Định dạng hiển thị khoảng thời gian của tuần hiện tại
@@ -239,11 +294,18 @@ const AppointmentPage = () => {
     setCalendarOpen(false);
   };
 
-  // Xử lý khi người dùng chọn một ngày từ lịch
+  // Xử lý khi người dùng chọn một ngày từ lịch - fix this too
   const handleDateSelect = (date: Date) => {
     setCurrentDate(date);
+
     // Lấy tuần chứa ngày đã chọn (bắt đầu từ thứ 2)
     const weekStart = startOfWeek(date, { weekStartsOn: 1 });
+    console.log("Selected date week start:", formatDateToString(weekStart));
+
+    // Clear appointments
+    setAppointments([]);
+
+    // Set new week start
     setCurrentWeekStart(weekStart);
     setCalendarOpen(false);
   };

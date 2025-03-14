@@ -25,6 +25,7 @@ export const ROUTING = {
   PROFILE: "profile",
   SCHEDULE: "schedule",
   CURRENT_SCHEDULE: "current-schedule",
+  EXAMINATION_ROOM: "examination/:roomId", // New route for examination room
   MEDICAL_RECORDS: "medical-records", // This will be used for both doctor and patient
 
   // Patient routes (nested under /patient)

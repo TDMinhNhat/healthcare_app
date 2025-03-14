@@ -309,6 +309,14 @@ const DoctorCurrentSchedulePage: React.FC = () => {
     navigate(`/doctor/appointments/${appointmentId}`);
   };
 
+  // Handle navigation to examination room
+  const handleExamination = (date: string, shift: number) => {
+    // Create an examination room ID (you can modify this according to your needs)
+    const roomId = `room-${date.replace(/-/g, "")}-${shift}`;
+    // Navigate to the virtual examination room
+    navigate(`/doctor/examination/${roomId}`);
+  };
+
   // Hiển thị trạng thái ca làm việc
   const renderShiftStatus = (hasShift: boolean, date: string, shift: 1 | 2) => {
     if (!hasShift) {
@@ -348,47 +356,77 @@ const DoctorCurrentSchedulePage: React.FC = () => {
 
     // Calculate fill rate for color indication
     const fillRate = shiftSchedule.totalBook / shiftSchedule.maxSlots;
-    let textColor = "#333";
+    let statusColor = "success.main";
 
     if (fillRate >= 0.8) {
-      textColor = "#d32f2f"; // Red text when nearly full
+      statusColor = "error.main"; // Red when nearly full
     } else if (fillRate >= 0.5) {
-      textColor = "#ed6c02"; // Orange text when half full
+      statusColor = "warning.main"; // Orange when half full
     }
 
     return (
       <Box
         sx={{
           display: "flex",
+          flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          height: "100%",
           width: "100%",
-          py: 1,
+          p: 0.5,
+          gap: 0.75,
         }}
       >
-        <Button
-          variant="contained"
-          onClick={() => handleAppointmentClick(date, shift)}
+        {/* Appointment count chip - larger size */}
+        <Chip
+          label={`${shiftSchedule.totalBook}/${shiftSchedule.maxSlots} cuộc hẹn`}
+          size="small"
           sx={{
-            backgroundColor: "#f5f5f5",
-            color: textColor,
-            border: "1px solid #ddd",
-            boxShadow: 1,
-            "&:hover": {
-              backgroundColor: "#e0e0e0",
-              boxShadow: 2,
-            },
-            textTransform: "none",
-            width: "120px",
-            height: "30px",
-            padding: "4px 8px",
+            bgcolor: "background.paper",
+            color: statusColor,
+            border: `1px solid ${statusColor}`,
+            fontSize: "0.8rem",
+            fontWeight: "bold",
+            width: "135px",
+            height: "28px",
           }}
+        />
+
+        {/* Button container with vertical layout and larger buttons */}
+        <Stack
+          direction="column"
+          spacing={0.5}
+          sx={{ width: "100%", maxWidth: "135px" }}
         >
-          <Typography variant="body2" sx={{ fontWeight: "medium" }}>
-            {shiftSchedule.totalBook}/{shiftSchedule.maxSlots} cuộc hẹn
-          </Typography>
-        </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            color="primary"
+            onClick={() => handleAppointmentClick(date, shift)}
+            sx={{
+              fontSize: "0.8rem",
+              py: 0.25,
+              height: "28px",
+              fontWeight: "bold",
+            }}
+          >
+            Chi tiết
+          </Button>
+
+          <Button
+            variant="contained"
+            size="small"
+            color="success"
+            onClick={() => handleExamination(date, shift)}
+            sx={{
+              fontSize: "0.8rem",
+              py: 0.25,
+              height: "28px",
+              fontWeight: "bold",
+            }}
+          >
+            Khám
+          </Button>
+        </Stack>
       </Box>
     );
   };
@@ -587,7 +625,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
               {/* Hàng cho ca 1 */}
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold" }}>
-                  Ca 1
+                  Ca 1 (Sáng)
                   <Typography
                     variant="caption"
                     display="block"
@@ -627,7 +665,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
               {/* Hàng cho ca 2 */}
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold" }}>
-                  Ca 2
+                  Ca 2 (Chiều)
                   <Typography
                     variant="caption"
                     display="block"

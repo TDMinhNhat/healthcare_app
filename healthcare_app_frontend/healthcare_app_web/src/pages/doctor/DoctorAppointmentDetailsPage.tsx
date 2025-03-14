@@ -17,6 +17,7 @@ import {
   InputAdornment,
   IconButton,
   Button,
+  Stack,
 } from "@mui/material";
 import EventIcon from "@mui/icons-material/Event";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
@@ -24,7 +25,9 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import VideocamIcon from "@mui/icons-material/Videocam";
 import MedicalRecordModal from "../../components/medical/MedicalRecordModal";
+import { useNavigate } from "react-router";
 
 // Dữ liệu mẫu - sẽ được thay thế bằng API calls trong môi trường sản xuất
 const mockAppointmentData = {
@@ -70,6 +73,7 @@ const mockAppointmentData = {
  * Hiển thị thông tin về ca khám và danh sách bệnh nhân đã đăng ký
  */
 const DoctorAppointmentDetailsPage: React.FC = () => {
+  const navigate = useNavigate();
   // Lấy ID ca khám từ URL params
   const { appointmentId } = useParams<{ appointmentId: string }>();
   // State lưu trữ thông tin ca khám
@@ -195,6 +199,17 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
   const handleCloseMedicalRecord = () => {
     setIsMedicalRecordOpen(false);
     setSelectedPatientId(null);
+  };
+
+  /**
+   * Xử lý chuyển đến phòng khám trực tuyến
+   * @param patientId - ID của bệnh nhân
+   */
+  const handleStartExamination = (patientId: number) => {
+    // Create an examination room ID using appointment and patient information
+    const roomId = `${appointmentId}-patient-${patientId}`;
+    // Navigate to the virtual examination room
+    navigate(`/doctor/examination/${roomId}`);
   };
 
   return (
@@ -352,12 +367,13 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
                         </>
                       }
                     />
-                    {/* Cột bên phải chứa trạng thái và nút xem hồ sơ */}
+                    {/* Cột bên phải chứa trạng thái và các nút tương tác */}
                     <Box
                       sx={{
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "flex-end",
+                        gap: 1,
                       }}
                     >
                       {/* Hiển thị trạng thái đăng ký của bệnh nhân */}
@@ -365,17 +381,33 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
                         size="small"
                         label={patient.status}
                         color={getPatientStatusColor(patient.status) as any}
-                        sx={{ mb: 1 }}
                       />
-                      {/* Nút xem hồ sơ bệnh án */}
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<VisibilityIcon />}
-                        onClick={() => handleOpenMedicalRecord(patient.id)}
-                      >
-                        Xem hồ sơ bệnh án
-                      </Button>
+
+                      {/* Stack của các nút tương tác */}
+                      <Stack spacing={1}>
+                        {/* Nút bắt đầu khám bệnh trực tuyến */}
+                        <Button
+                          variant="contained"
+                          size="small"
+                          color="success"
+                          startIcon={<VideocamIcon />}
+                          onClick={() => handleStartExamination(patient.id)}
+                          fullWidth
+                        >
+                          Khám
+                        </Button>
+
+                        {/* Nút xem hồ sơ bệnh án */}
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<VisibilityIcon />}
+                          onClick={() => handleOpenMedicalRecord(patient.id)}
+                          fullWidth
+                        >
+                          Xem hồ sơ
+                        </Button>
+                      </Stack>
                     </Box>
                   </ListItem>
                   {/* Thêm dòng phân cách giữa các bệnh nhân, trừ bệnh nhân cuối cùng */}
