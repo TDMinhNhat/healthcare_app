@@ -41,8 +41,15 @@ export default function HomeScreen() {
                     />
                 </View>
                 <View style={style.itemArea}>
+                    <Link href={"/register"}>
+                        <View>
+                            <Text style={style.forgotPass}>
+                                Tạo Tài Khoản
+                            </Text>
+                        </View>
+                    </Link>
                     <Link href={"/forgot_password"}>
-                        <View style={style.forgotPassArea}>
+                        <View>
                             <Text style={style.forgotPass}>
                                 Quên Mật Khẩu
                             </Text>
@@ -60,9 +67,11 @@ export default function HomeScreen() {
                     </Pressable>
                 </View>
                 <View style={style.itemArea}>
-                    <Text>
-                        Hoặc
-                    </Text>
+                    <View style={{width: "100%"}}>
+                        <Text style={{textAlign: "center"}}>
+                            Hoặc
+                        </Text>
+                    </View>
                 </View>
                 <View style={[style.itemArea, style.socialButtonArea]}>
                     <Pressable style={[style.socialButton, {borderColor: "blue"}]}>
@@ -103,6 +112,7 @@ const style = StyleSheet.create({
         fontWeight: "bold",
     },
     itemArea: {
+        width: "100%",
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
