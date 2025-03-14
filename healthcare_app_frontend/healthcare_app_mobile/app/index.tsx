@@ -135,9 +135,11 @@ const style = StyleSheet.create({
         borderStyle: "solid",
         borderColor: "black",
         borderWidth: 1,
+        padding: 8
     },
     inputPassword: {
-        width: "80%"
+        width: "80%",
+        padding: 8
     },
     togglePassword: {
         marginRight: 10
