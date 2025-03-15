@@ -21,6 +21,7 @@ export default function HomeScreen() {
         if(result === null) {
             alert("Server có lỗi")
         } else if(result.code === 200) {
+            sessionStorage.setItem("user", JSON.stringify(result.data));
             router.navigate("/(tabs)/dashboard");
         } else {
             alert("Đăng Nhập Thất Bại") 

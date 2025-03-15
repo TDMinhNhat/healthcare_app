@@ -1,9 +1,9 @@
 import {SafeAreaView, Text} from "react-native";
 
-export default function UserTab() {
+export default function SettingTab() {
     return (
         <SafeAreaView>
-            <Text>User Tab Component</Text>
+            <Text>Setting Tab Component</Text>
         </SafeAreaView>
     )
 }
