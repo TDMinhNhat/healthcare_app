@@ -95,7 +95,6 @@ public class BookingService {
                     Map<String,Object> map = new HashMap<>();
                     map.put("work_schedule", node);
                     map.put("book_appointment", target);
-
                     result.add(map);
                 }
             }
