@@ -19,9 +19,8 @@ export default function TabLayout() {
             tabBarActiveBackgroundColor: "#e7e4e4"
         }} screenListeners={{
             tabPress: (e) => {
-                const parts = e.target?.split("-");
-                const name = parts[0];
-                setTab(name);
+                const name = e.target?.split("-")[0];
+                setTab(name === undefined ? "dashboard" : name);
             }
         }}>
             <Tabs.Screen name={"dashboard"} options={{
