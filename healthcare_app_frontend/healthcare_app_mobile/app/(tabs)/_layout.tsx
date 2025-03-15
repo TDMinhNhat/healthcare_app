@@ -1,47 +1,64 @@
-import { Tabs } from "expo-router";
+import { Tabs, useLocalSearchParams } from "expo-router";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Feather from '@expo/vector-icons/Feather';
-import { Text } from "react-native";
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { useState } from "react";
 
 export default function TabLayout() {
 
-    const user = JSON.parse(sessionStorage.getItem("user") as string);
+    const user = useLocalSearchParams();    
+    const [tab, setTab] = useState<string>("dashboard");
 
     return (
-        <Tabs>
+        <Tabs screenOptions={{ 
+            headerShown: false,
+            tabBarActiveTintColor: "#26b9c8", 
+            tabBarInactiveTintColor: "black",
+            tabBarInactiveBackgroundColor: "white",
+            tabBarActiveBackgroundColor: "#e7e4e4"
+        }} screenListeners={{
+            tabPress: (e) => {
+                const parts = e.target?.split("-");
+                const name = parts[0];
+                setTab(name);
+            }
+        }}>
             <Tabs.Screen name={"dashboard"} options={{
                 headerShown: false,
-                tabBarIcon: ({ color, size }) => <AntDesign name="dashboard" size={24} color="black" />,
-                title: "Tổng Quan"
+                tabBarIcon: ({ color, size }: { color: string; size: number }) => <FontAwesome name="home" size={28} color={tab === "dashboard" ? "#26b9c8" : "black"} />,
+                title: "Trang Chủ",
+                href: "/(tabs)/dashboard",
             }} />
             <Tabs.Screen name={"appointments"} options={{
                 headerShown: false,
-                tabBarIcon: ({ color, size }) => <MaterialIcons name="event" size={28} color="black" />,
-                title: "Lịch Hẹn"
+                tabBarIcon: ({ color, size }) => <MaterialIcons name="event" size={28} color={tab === "appointments" ? "#26b9c8" : "black"} />,
+                title: "Lịch Hẹn",
+                href: "/(tabs)/appointments"
             }} />
             <Tabs.Screen
                 name={"work_schedule"}
                 options={{
                     headerShown: false,
-                    tabBarIcon: ({ color, size }) => <MaterialIcons name="work" size={24} color="black" />,
+                    tabBarIcon: ({ color, size }) => <MaterialIcons name="work" size={28} color={tab === "work_schedule" ? "#26b9c8" : "black"} />,
                     title: "Lịch Làm Việc",
+                    href: user.role === "doctor" ? "/(tabs)/work_schedule" : null
                 }}
-                redirect={user.role === "doctor" ? false : true}
             />
             <Tabs.Screen
                 name={"emergency"}
                 options={{
                     headerShown: false,
-                    tabBarIcon: ({ color, size }) => <MaterialIcons name="local-hospital" size={28} color="black" />,
-                    title: "Cấp Cứu"
+                    tabBarIcon: ({ color, size }) => <MaterialIcons name="local-hospital" size={28} color={tab === "emergency" ? "#26b9c8" : "black"} />,
+                    title: "Cấp Cứu",
+                    href: user.role === "patient" ? "/(tabs)/emergency" : null
                 }}
-                redirect={user.role === "patient" ? false : true}
             />
             <Tabs.Screen name={"settings"} options={{
                 headerShown: false,
-                tabBarIcon: ({ color, size }) => <Feather name="settings" size={24} color="black" />,
-                title: "Cài Đặt"
+                tabBarIcon: ({ color, size }) => <Feather name="settings" size={28} color={tab === "settings" ? "#26b9c8" : "black"} />,
+                title: "Cài Đặt",
+                href: "/(tabs)/settings"
             }} />
         </Tabs>
     )

@@ -1,6 +1,6 @@
 import {StyleSheet, SafeAreaView, View, Text, TextInput, Pressable, Image, TouchableOpacity} from "react-native"
 import {useState} from "react";
-import {Link, router} from "expo-router";
+import {Link, useRouter} from "expo-router";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -11,6 +11,7 @@ export default function HomeScreen() {
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [showPassword, setShowPassword] = useState<boolean>(false);
+    const router = useRouter();
 
     async function clickLogin() {
         const result = await new AuthenticateService().checkLogin(email, password).then(response => response.data).catch(error => {
@@ -21,10 +22,13 @@ export default function HomeScreen() {
         if(result === null) {
             alert("Server có lỗi")
         } else if(result.code === 200) {
-            sessionStorage.setItem("user", JSON.stringify(result.data));
-            router.navigate("/(tabs)/dashboard");
+            alert("Đăng Nhập Thành Công")
+            router.navigate({
+                pathname: "/(tabs)/dashboard",
+                params: result.data
+            });
         } else {
-            alert("Đăng Nhập Thất Bại") 
+            alert("Đăng Nhập Thất Bại")
         }
     }
 
@@ -39,7 +43,7 @@ export default function HomeScreen() {
                         inputMode={"email"}
                         defaultValue={email}
                         placeholder={"Nhập tài khoản email"}
-                        onChange={(event) => setEmail(event.target.value)}
+                        onChangeText={(text) => setEmail(text)}
                         style={style.input}
                     />
                 </View>
@@ -48,7 +52,7 @@ export default function HomeScreen() {
                         secureTextEntry={!showPassword}
                         defaultValue={password}
                         placeholder={"Nhập mật khẩu"}
-                        onChange={(event) => setPassword(event.target.value)}
+                        onChangeText={(text) => setPassword(text)}
                         style={style.inputPassword}
                     />
                     <MaterialCommunityIcons
