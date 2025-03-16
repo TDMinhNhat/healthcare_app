@@ -9,10 +9,10 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.time.LocalDateTime;
 
-@Document(collection = "calls")
+@Document(collection = "room_calls")
 @Getter @Setter
 @NoArgsConstructor
-public class Call {
+public class RoomCall {
     @MongoId
     private Long id;
 
@@ -30,7 +30,7 @@ public class Call {
     @Field(name = "created_at", targetType = FieldType.DATE_TIME)
     private LocalDateTime createdAt;
 
-    public Call(Long id, BookAppointment bookAppointment, LocalDateTime start) {
+    public RoomCall(Long id, BookAppointment bookAppointment, LocalDateTime start) {
         this.id = id;
         this.bookAppointment = bookAppointment;
         this.start = start;

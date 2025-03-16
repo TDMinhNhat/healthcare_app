@@ -19,8 +19,8 @@ public class ChatMessage {
     @MongoId
     private Long id;
 
-    @Field(name = "book_appointment_id")
-    private BookAppointment bookAppointment;
+    @Field(name = "room_call_id")
+    private RoomCall roomCall;
 
     private String message;
 
@@ -36,18 +36,18 @@ public class ChatMessage {
     @Field(name = "updated-at", targetType = FieldType.DATE_TIME)
     private LocalDateTime updatedAt;
 
-    public ChatMessage(Long id, BookAppointment bookAppointment, String message) {
+    public ChatMessage(Long id, RoomCall roomCall, String message) {
         this.id = id;
-        this.bookAppointment = bookAppointment;
+        this.roomCall = roomCall;
         this.message = message;
         this.reply = null;
         this.isRecall = false;
         this.createdAt = updatedAt = LocalDateTime.now();
     }
 
-    public ChatMessage(Long id, BookAppointment bookAppointment, ChatMessage reply, String message) {
+    public ChatMessage(Long id, RoomCall roomCall, ChatMessage reply, String message) {
         this.id = id;
-        this.bookAppointment = bookAppointment;
+        this.roomCall = roomCall;
         this.reply = reply;
         this.message = message;
         this.isRecall = false;
