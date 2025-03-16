@@ -1,12 +1,12 @@
 const Room = require("./room");
 
 class Call {
-    constructor(id, appointment, start, end, createdAt) {
+    constructor(id, bookAppointment, start, end, createdAt) {
         this._id = id;
         this._start = start;
         this._end = end;
         this._createdAt = createdAt;
-        this._appointment = appointment;
+        this._bookAppointment = bookAppointment;
     }
 
 
@@ -18,12 +18,12 @@ class Call {
         this._id = value;
     }
 
-    get appointment() {
-        return this._appointment;
+    get bookAppointment() {
+        return this._bookAppointment;
     }
 
-    set appointment(value) {
-        this._appointment = value;
+    set bookAppointment(value) {
+        this._bookAppointment = value;
     }
 
     get start() {
