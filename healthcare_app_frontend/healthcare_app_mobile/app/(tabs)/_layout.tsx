@@ -29,7 +29,7 @@ export default function TabLayout() {
                 title: "Trang Chủ",
                 href: "/(tabs)/dashboard",
             }} />
-            <Tabs.Screen name={"appointments"} options={{
+            <Tabs.Screen name={"appointments"} initialParams={user} options={{
                 headerShown: false,
                 tabBarIcon: ({ color, size }) => <MaterialIcons name="event" size={28} color={tab === "appointments" ? "#26b9c8" : "black"} />,
                 title: "Lịch Hẹn",
