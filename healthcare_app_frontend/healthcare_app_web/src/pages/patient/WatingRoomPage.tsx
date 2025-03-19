@@ -60,20 +60,26 @@ export default function WaitingRoomPage() {
 
   // Dùng socket như state để tránh việc mất kết nối khi component re-render
   // Hoặc tránh tạo kết nối mới mỗi khi component re-render
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const [socket, setSocket] = useState<Socket>(io("ws://localhost:8081", {
+      path: "/chat",
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      autoConnect: false,
+    }));
 
   // Thiết lập kết nối socket và xử lý các sự kiện
   useEffect(() => {
-    // Khởi tạo kết nối socket
-    const socketInstance = io("http://localhost:8000");
-    setSocket(socketInstance);
-
-    // Khi kết nối thành công
-    socketInstance.on("connect", () => {
-      console.log("Socket connected:", socketInstance.id);
+    socket.connect();
+    // // Khởi tạo kết nối socket
+    // const socketInstance = io("http://localhost:8000");
+    // setSocket(socketInstance);
+    // // Khi kết nối thành công
+    socket.on("connect", () => {
+      console.log("Socket connected to the server");
 
       // Gửi thông báo tham gia hàng đợi với số thứ tự trong tên
-      socketInstance.emit("joinWaitingQueue", {
+      socket.emit("joinWaitingQueue", {
         scheduleId,
         userId: userId,
         numericalOrder,
@@ -81,14 +87,15 @@ export default function WaitingRoomPage() {
       });
     });
 
-    // Lắng nghe sự kiện cập nhật số thứ tự hiện tại
-    socketInstance.on("queueUpdate", (data) => {
-      setLoading(false);
-      setCurrentExamNumber(data.currentExamNumber ?? 0);
-    });
+    // // Lắng nghe sự kiện cập nhật số thứ tự hiện tại
+    // socketInstance.on("queueUpdate", (data) => {
+    //   setLoading(false);
+    //   setCurrentExamNumber(data.currentExamNumber ?? 0);
+    // });
 
     // Lắng nghe sự kiện khi bác sĩ chấp nhận bệnh nhân này
-    socketInstance.on("patientAccepted", (data) => {
+    socket.on("patientAccepted", (data) => {
+      console.log(data);
       if (data.patientId === userId) {
         console.log(
           "You've been accepted by the doctor. Joining examination room..."
@@ -104,19 +111,19 @@ export default function WaitingRoomPage() {
       }
     });
 
-    // Xử lý lỗi kết nối
-    socketInstance.on("connect_error", (error) => {
-      console.error("Socket connection error:", error);
-      // Fallback sang chế độ mô phỏng nếu không thể kết nối socket
-      simulateQueueUpdate();
-    });
+    // // Xử lý lỗi kết nối
+    // socketInstance.on("connect_error", (error) => {
+    //   console.error("Socket connection error:", error);
+    //   // Fallback sang chế độ mô phỏng nếu không thể kết nối socket
+    //   simulateQueueUpdate();
+    // });
 
-    // Cleanup function
-    return () => {
-      if (socketInstance) {
-        socketInstance.disconnect();
-      }
-    };
+    // // Cleanup function
+    // return () => {
+    //   if (socketInstance) {
+    //     socketInstance.disconnect();
+    //   }
+    // };
   }, [
     navigate,
     scheduleId,

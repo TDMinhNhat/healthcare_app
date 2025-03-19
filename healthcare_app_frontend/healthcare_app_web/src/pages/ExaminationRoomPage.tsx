@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { LiveRole, ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { useParams } from "react-router";
 import { useSelector } from "react-redux";
@@ -79,53 +79,59 @@ export default function ExaminationRoomPage() {
   const patientNameFromURL = searchParams.get("patientName");
 
   // State for patient queue - Trạng thái cho hàng đợi bệnh nhân
-  const [patientQueue, setPatientQueue] = useState<Patient[]>([]);
+  const [patientQueue, setPatientQueue] = useState<object[]>([]);
 
   // Kết nối socket cho giao tiếp thời gian thực
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const [socket, setSocket] = useState<Socket>(io("ws://localhost:8081", {
+    path: "/chat",
+    transports: ["websocket", "polling"],
+    reconnection: true,
+    reconnectionAttempts: 10,
+    autoConnect: false,
+  }));
 
   // Khởi tạo kết nối socket với xử lý riêng cho bác sĩ và bệnh nhân
   useEffect(() => {
-    const socketInstance = io("http://localhost:8000");
-    setSocket(socketInstance);
+    socket.connect();
 
-    socketInstance.on("connect", () => {
+    socket.on("connect", () => {
+      console.log("Kết nối socket thành công");
       if (isPatient) {
         // Xử lý socket dành riêng cho bệnh nhân
-        console.log("Bệnh nhân đã kết nối với socket:", socketInstance.id);
-        socketInstance.emit("patientJoinRoom", {
+        console.log("Bệnh nhân đã kết nối với socket:", socket.id);
+        socket.emit("patientJoinRoom", {
           scheduleId,
           patientId: userId,
           patientName: patientNameFromURL || userName,
         });
       } else {
         // Xử lý socket dành riêng cho bác sĩ
-        console.log("Bác sĩ đã kết nối với socket:", socketInstance.id);
-        socketInstance.emit("doctorJoinRoom", {
+        console.log("Bác sĩ đã kết nối với socket:", socket.id);
+        socket.emit("doctorJoinRoom", {
           scheduleId,
           doctorId: userId,
         });
 
         // Chỉ bác sĩ mới cần yêu cầu danh sách hàng đợi bệnh nhân
-        socketInstance.emit("getPatientQueue", { scheduleId });
+        socket.emit("getPatientQueue", { scheduleId });
       }
     });
 
     // Chỉ thiết lập lắng nghe cập nhật hàng đợi cho bác sĩ
     if (!isPatient) {
-      socketInstance.on("patientQueueUpdate", (data) => {
+      socket.on("patientQueueUpdate", (data) => {
         console.log("Nhận được cập nhật hàng đợi bệnh nhân:", data);
-        setPatientQueue(data.queue || []);
+        setPatientQueue([...patientQueue, data]);
       });
     }
 
-    socketInstance.on("connect_error", (error) => {
-      console.error("Lỗi kết nối socket:", error);
-    });
+    // socketInstance.on("connect_error", (error) => {
+    //   console.error("Lỗi kết nối socket:", error);
+    // });
 
-    return () => {
-      socketInstance.disconnect();
-    };
+    // return () => {
+    //   socketInstance.disconnect();
+    // };
   }, [scheduleId, userId, isPatient, patientNameFromURL, userName]);
 
   // Tạo đường link phòng khám cho bệnh nhân sử dụng role thay vì roomID
@@ -141,15 +147,16 @@ export default function ExaminationRoomPage() {
 
   // Accept patient into examination - Tiếp nhận bệnh nhân vào khám
   const acceptPatient = (patient: Patient) => {
+    console.log(patient);
     // Đánh dấu bệnh nhân đã được tiếp nhận
-    const updatedQueue = patientQueue.filter((p) => p.id !== patient.id);
+    const updatedQueue = patientQueue.filter((p) => p.userId !== patient.userId);
     setPatientQueue(updatedQueue);
 
     // Send notification to the patient with the room link
     if (socket) {
       const roomLink = generateRoomLink();
       socket.emit("acceptPatient", {
-        patientId: patient.id,
+        patientId: patient.userId,
         scheduleId,
         roomLink,
         patientName: patient.name, // Đảm bảo tên bệnh nhân (có số thứ tự) được gửi đi
@@ -163,7 +170,7 @@ export default function ExaminationRoomPage() {
   };
 
   // Cài đặt cuộc gọi Zego - Cập nhật để xử lý cho cả bác sĩ và bệnh nhân
-  let myMeeting = async (element) => {
+  const myMeeting = useCallback(async (element) => {
     if (!element) return;
 
     try {
@@ -215,7 +222,7 @@ export default function ExaminationRoomPage() {
     } catch (error) {
       console.error("Error joining room:", error);
     }
-  };
+  }, []);
 
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
