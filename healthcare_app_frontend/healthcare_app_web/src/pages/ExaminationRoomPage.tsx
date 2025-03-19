@@ -1,37 +1,3 @@
-/**
- * Trang Phòng Khám dành cho bác sĩ và bệnh nhân
- *
- * Luồng hoạt động:
- * 1. Người dùng truy cập vào phòng khám (examination room) dựa trên scheduleId
- * 2. Vai trò được xác định qua tham số URL "role" (doctor hoặc patient)
- * 3. Đối với bác sĩ:
- *    - Hiển thị hàng đợi bệnh nhân bên phải màn hình
- *    - Có thể tiếp nhận bệnh nhân từ hàng đợi vào phòng khám
- *    - Gửi thông báo đến bệnh nhân thông qua socket.io khi được tiếp nhận
- * 4. Đối với bệnh nhân:
- *    - Hiển thị chỉ giao diện video call
- *    - Tham gia cuộc gọi theo link được bác sĩ cung cấp
- * 5. Cuộc gọi video diễn ra giữa bác sĩ và bệnh nhân
- * 6. Sau khi khám xong, bác sĩ có thể kết thúc phiên khám và tiếp tục với bệnh nhân tiếp theo
- *
- * Dữ liệu đầu vào:
- * - scheduleId: ID của lịch hẹn (từ URL params)
- * - userId: ID của người dùng (từ Redux store)
- * - userName: Tên của người dùng (từ Redux store)
- * - role: Vai trò người dùng (từ URL query parameter)
- * - patientName: Tên hiển thị của bệnh nhân (từ URL query parameter, nếu là bệnh nhân)
- *
- * Kết quả:
- * - Hiển thị giao diện phòng khám với video call cho cả bác sĩ và bệnh nhân
- * - Chỉ bác sĩ thấy và quản lý được hàng đợi bệnh nhân
- * - Kết nối và liên lạc giữa bác sĩ và bệnh nhân qua socket.io
- *
- * Các tính năng chính:
- * - Video call sử dụng ZegoCloud
- * - Quản lý hàng đợi bệnh nhân
- * - Giao tiếp thời gian thực thông qua Socket.io
- * - Xử lý khác nhau theo vai trò người dùng
- */
 import * as React from "react";
 import { useState, useEffect } from "react";
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
@@ -59,20 +25,37 @@ interface Patient {
 }
 
 /**
- * ExaminationRoomPage - Giao diện phòng khám trực tuyến
- *
- * Page này phục vụ cho cả bác sĩ và bệnh nhân với giao diện khác nhau tùy theo vai trò:
- * - Bác sĩ: Xem danh sách hàng đợi bệnh nhân bên phải + giao diện video call
- * - Bệnh nhân: Chỉ xem giao diện video call
+ * Trang Phòng Khám dành cho bác sĩ và bệnh nhân
  *
  * Luồng hoạt động:
- * 1. Xác định vai trò người dùng từ URL parameter 'role'
- * 2. Kết nối socket.io theo vai trò (bác sĩ hoặc bệnh nhân)
- * 3. Bác sĩ: Nhận và quản lý hàng đợi bệnh nhân
- * 4. Bác sĩ tiếp nhận bệnh nhân và gửi link phòng khám
- * 5. Bệnh nhân và bác sĩ tham gia video call qua ZegoCloud
+ * 1. Người dùng truy cập vào phòng khám (examination room) dựa trên scheduleId
+ * 2. Vai trò được xác định qua tham số URL "role" (doctor hoặc patient)
+ * 3. Đối với bác sĩ:
+ *    - Hiển thị hàng đợi bệnh nhân bên phải màn hình
+ *    - Có thể tiếp nhận bệnh nhân từ hàng đợi vào phòng khám
+ *    - Gửi thông báo đến bệnh nhân thông qua socket.io khi được tiếp nhận
+ * 4. Đối với bệnh nhân:
+ *    - Hiển thị chỉ giao diện video call
+ *    - Tham gia cuộc gọi theo link được bác sĩ cung cấp
+ * 5. Cuộc gọi video diễn ra giữa bác sĩ và bệnh nhânư
  *
- * Lưu ý: Vai trò người dùng được xác định qua tham số URL "role"
+ * Dữ liệu đầu vào:
+ * - scheduleId: ID của lịch hẹn (từ URL params)
+ * - userId: ID của người dùng (từ Redux store)
+ * - userName: Tên của người dùng (từ Redux store)
+ * - role: Vai trò người dùng (từ URL query parameter)
+ * - patientName: Tên hiển thị của bệnh nhân (từ URL query parameter, nếu là bệnh nhân)
+ *
+ * Kết quả:
+ * - Hiển thị giao diện phòng khám với video call cho cả bác sĩ và bệnh nhân
+ * - Chỉ bác sĩ thấy và quản lý được hàng đợi bệnh nhân
+ * - Kết nối và liên lạc giữa bác sĩ và bệnh nhân qua socket.io
+ *
+ * Các tính năng chính:
+ * - Video call sử dụng ZegoCloud
+ * - Quản lý hàng đợi bệnh nhân
+ * - Giao tiếp thời gian thực thông qua Socket.io
+ * - Xử lý khác nhau theo vai trò người dùng
  */
 export default function ExaminationRoomPage() {
   const { scheduleId } = useParams<{ scheduleId: string }>();
