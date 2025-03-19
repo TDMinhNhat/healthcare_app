@@ -166,7 +166,11 @@ export default function ExaminationRoomPage() {
 
   // Remove patient from queue - Xóa bệnh nhân khỏi hàng đợi
   const removePatient = (id: number) => {
+    const data = patientQueue.filter((patient) => patient.id === id);
     setPatientQueue(patientQueue.filter((patient) => patient.id !== id));
+
+    // Gửi thông báo xóa bệnh nhân khỏi hàng đợi
+    socket.emit("removeWaitingQueue", data[0]);
   };
 
   // Cài đặt cuộc gọi Zego - Cập nhật để xử lý cho cả bác sĩ và bệnh nhân

@@ -111,6 +111,13 @@ export default function WaitingRoomPage() {
       }
     });
 
+    socket.on("removePatient", (data) => {
+      if(data.userId === userId) {
+        navigate(`${ROUTING.PATIENT}/${ROUTING.PATIENT_APPOINTMENT}`);
+        socket.disconnect();
+      }
+    })
+
     // // Xử lý lỗi kết nối
     // socketInstance.on("connect_error", (error) => {
     //   console.error("Socket connection error:", error);
