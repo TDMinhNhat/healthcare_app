@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
+import { LiveRole, ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { useParams } from "react-router";
 import { useSelector } from "react-redux";
 import { APP_ID, SERVER_SECRET } from "../constants/zegocloud";
@@ -202,21 +202,15 @@ export default function ExaminationRoomPage() {
         container: element,
         sharedLinks: [
           {
-            name: "Personal link",
-            url:
-              window.location.protocol +
-              "//" +
-              window.location.host +
-              window.location.pathname +
-              "?role=patient",
+            name: "Link phòng khám",
+            url: generateRoomLink(),
           },
         ],
         scenario: {
-          mode: ZegoUIKitPrebuilt.OneONoneCall,
+          mode: ZegoUIKitPrebuilt.GroupCall,
         },
-        showRemoveUserButton: !isPatient, // Chỉ bác sĩ mới có quyền kick người dùng
-        showWaitingCallAcceptAudioVideoView: true,
-        showPreJoinView: true,
+        showRemoveUserButton: !isPatient,
+        showPreJoinView: false,
       });
     } catch (error) {
       console.error("Error joining room:", error);
