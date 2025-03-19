@@ -82,13 +82,15 @@ export default function ExaminationRoomPage() {
   const [patientQueue, setPatientQueue] = useState<object[]>([]);
 
   // Kết nối socket cho giao tiếp thời gian thực
-  const [socket, setSocket] = useState<Socket>(io("ws://localhost:8081", {
-    path: "/chat",
-    transports: ["websocket", "polling"],
-    reconnection: true,
-    reconnectionAttempts: 10,
-    autoConnect: false,
-  }));
+  const [socket, setSocket] = useState<Socket>(
+    io("ws://localhost:8081", {
+      path: "/chat",
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      autoConnect: false,
+    })
+  );
 
   // Khởi tạo kết nối socket với xử lý riêng cho bác sĩ và bệnh nhân
   useEffect(() => {
@@ -147,9 +149,10 @@ export default function ExaminationRoomPage() {
 
   // Accept patient into examination - Tiếp nhận bệnh nhân vào khám
   const acceptPatient = (patient: Patient) => {
-    console.log(patient);
     // Đánh dấu bệnh nhân đã được tiếp nhận
-    const updatedQueue = patientQueue.filter((p) => p.userId !== patient.userId);
+    const updatedQueue = patientQueue.filter(
+      (p) => p.userId !== patient.userId
+    );
     setPatientQueue(updatedQueue);
 
     // Send notification to the patient with the room link
@@ -222,6 +225,10 @@ export default function ExaminationRoomPage() {
         },
         showRemoveUserButton: !isPatient,
         showPreJoinView: false,
+        onLeaveRoom() {
+          console.log("You have left the room");
+          socket.disconnect();
+        },
       });
     } catch (error) {
       console.error("Error joining room:", error);
