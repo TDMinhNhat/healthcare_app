@@ -28,6 +28,7 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import CloseIcon from "@mui/icons-material/Close";
 import HomeIcon from "@mui/icons-material/Home";
+import { ROUTING } from "../../constants/routing"; // Import ROUTING constants
 import {
   format,
   addDays, // Thêm số ngày vào ngày hiện tại
@@ -112,7 +113,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
   const [currentYear, setCurrentYear] = useState(getYear(new Date()));
 
   // Lấy thông tin người dùng
-  const user = JSON.parse((sessionStorage.getItem("user") as string) || "{}");
+  const user = JSON.parse((localStorage.getItem("user") as string) || "{}");
 
   // Tạo mảng các ngày trong tuần hiện tại
   const getDaysInWeek = () => {
@@ -317,10 +318,34 @@ const DoctorCurrentSchedulePage: React.FC = () => {
 
   // Handle navigation to examination room
   const handleExamination = (date: string, shift: number) => {
-    // Create an examination room ID (you can modify this according to your needs)
-    const roomId = `room-${date.replace(/-/g, "")}-${shift}`;
+    // Get the work schedule for the selected shift
+    const schedule =
+      shift === 1 ? getShift1Schedule(date) : getShift2Schedule(date);
+
     // Navigate to the virtual examination room
-    navigate(`/doctor/examination/${roomId}`);
+    if (schedule && schedule.id) {
+      console.log(
+        `Navigating to examination room with schedule ID: ${schedule.id}`
+      );
+
+      // Create the URL using ROUTING constant and replace the parameter
+      const examRoomPath = ROUTING.EXAMINATION_ROOM.replace(
+        ":scheduleId",
+        schedule.id.toString()
+      );
+
+      // Open the examination page in a new tab with the proper routing
+      window.open(examRoomPath, "_blank");
+    } else {
+      console.error(
+        "Không tìm thấy thông tin ca làm việc hoặc ID không hợp lệ",
+        schedule
+      );
+      // Show an alert to the user
+      alert(
+        "Không thể mở phòng khám do thiếu thông tin lịch làm việc. Vui lòng thử lại."
+      );
+    }
   };
 
   // Hiển thị trạng thái ca làm việc

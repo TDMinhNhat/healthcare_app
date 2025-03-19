@@ -7,7 +7,7 @@ interface UserState {
 // Try to get user from localStorage if available
 const getUserFromSessionStorage = (): any | null => {
   try {
-    const savedUser = sessionStorage.getItem("user");
+    const savedUser = localStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;
   } catch (error) {
     console.error("Failed to parse user from localStorage:", error);
@@ -28,7 +28,8 @@ const userSlice = createSlice({
     },
     logOut: (state) => {
       state.user = null;
-      sessionStorage.removeItem("user");
+      localStorage.removeItem("user");
+      localStorage.removeItem("role");
     },
   },
 });

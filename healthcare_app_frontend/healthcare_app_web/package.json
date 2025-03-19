@@ -19,6 +19,7 @@
     "@react-buddy/ide-toolbox": "^2.4.0",
     "@reduxjs/toolkit": "^2.5.1",
     "@types/node": "^22.13.5",
+    "@zegocloud/zego-uikit-prebuilt": "^2.14.1-beta",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
     "date-fns": "2",
@@ -37,15 +38,18 @@
     "react-webcam": "^7.2.0",
     "redux": "^5.0.1",
     "scss": "^0.2.4",
+    "simple-peer": "^9.11.1",
     "socket.io-client": "^4.8.1",
     "styled-components": "^6.1.15",
     "swiper": "^11.2.4",
-    "yup": "^1.6.1"
+    "yup": "^1.6.1",
+    "zego-zim-web": "2.16.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.20.0",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
+    "@types/simple-peer": "^9.11.8",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.20.0",
     "eslint-plugin-react-hooks": "^5.1.0",

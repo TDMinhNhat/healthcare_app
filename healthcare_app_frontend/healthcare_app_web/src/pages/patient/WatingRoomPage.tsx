@@ -1,0 +1,236 @@
+import {
+  Box,
+  Typography,
+  Container,
+  Paper,
+  Divider,
+  Avatar,
+  CircularProgress,
+} from "@mui/material";
+import { useSelector } from "react-redux";
+import { useLocation, useNavigate, useParams } from "react-router";
+import { useEffect, useState } from "react";
+import PersonIcon from "@mui/icons-material/Person";
+import { ROUTING } from "../../constants/routing";
+import { io, Socket } from "socket.io-client";
+
+/**
+ * Trang Phòng Chờ Khám Bệnh dành cho bệnh nhân
+ *
+ * Luồng hoạt động:
+ * 1. Hiển thị giao diện phòng chờ cho bệnh nhân với thông tin số thứ tự
+ * 2. Kết nối với server qua socket.io để nhận cập nhật thời gian thực về hàng đợi
+ * 3. Tự động cập nhật số thứ tự người đang được khám
+ * 4. Khi đến lượt bệnh nhân, được bác sĩ chấp nhận và tự động chuyển hướng đến phòng khám
+ *    với số thứ tự kèm theo trong tên người dùng
+ *
+ * Dữ liệu đầu vào:
+ * - scheduleId: ID của lịch hẹn (từ URL params)
+ * - doctorName: Tên bác sĩ (từ location state)
+ * - numericalOrder: Số thứ tự của bệnh nhân (từ location state)
+ * - userId: ID người dùng (từ Redux store)
+ *
+ * Kết quả:
+ * - Hiển thị trạng thái chờ khám cho bệnh nhân
+ * - Cập nhật số thứ tự đang được khám theo thời gian thực
+ * - Khi được bác sĩ tiếp nhận, chuyển hướng đến phòng khám thông qua đường link có số thứ tự
+ *
+ * Hướng dẫn kiểm thử:
+ * - Trang sử dụng kết nối socket.io để nhận thông báo thời gian thực
+ * - Nếu kết nối socket thất bại, sẽ chuyển sang chế độ mô phỏng (simulateQueueUpdate)
+ * - Trong chế độ mô phỏng, số thứ tự sẽ tự động tăng mỗi 10s và chuyển hướng khi đến lượt
+ */
+export default function WaitingRoomPage() {
+  const user = useSelector((state: any) => state.user.user);
+  const userId = user.userId;
+  const { scheduleId } = useParams<{ scheduleId: string }>();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Test nên dùng let để chỉnh numericalOrder
+  let { doctorName, numericalOrder } = location.state as {
+    doctorName: string;
+    numericalOrder: number;
+  };
+  numericalOrder = 2;
+
+  // Các trạng thái cho phòng chờ
+  const [currentExamNumber, setCurrentExamNumber] = useState<number>(0); // Số thứ tự đang được khám
+  const [loading, setLoading] = useState<boolean>(true); // Đang tải dữ liệu
+
+  // Dùng socket như state để tránh việc mất kết nối khi component re-render
+  // Hoặc tránh tạo kết nối mới mỗi khi component re-render
+  const [socket, setSocket] = useState<Socket | null>(null);
+
+  // Thiết lập kết nối socket và xử lý các sự kiện
+  useEffect(() => {
+    // Khởi tạo kết nối socket
+    const socketInstance = io("http://localhost:8000");
+    setSocket(socketInstance);
+
+    // Khi kết nối thành công
+    socketInstance.on("connect", () => {
+      console.log("Socket connected:", socketInstance.id);
+
+      // Gửi thông báo tham gia hàng đợi với số thứ tự trong tên
+      socketInstance.emit("joinWaitingQueue", {
+        scheduleId,
+        userId: userId,
+        numericalOrder,
+        name: `${numericalOrder}_${user.firstName} ${user.lastName}`,
+      });
+    });
+
+    // Lắng nghe sự kiện cập nhật số thứ tự hiện tại
+    socketInstance.on("queueUpdate", (data) => {
+      setLoading(false);
+      setCurrentExamNumber(data.currentExamNumber ?? 0);
+    });
+
+    // Lắng nghe sự kiện khi bác sĩ chấp nhận bệnh nhân này
+    socketInstance.on("patientAccepted", (data) => {
+      if (data.patientId === userId) {
+        console.log(
+          "You've been accepted by the doctor. Joining examination room..."
+        );
+        // Thêm số thứ tự vào URL khi chuyển hướng
+        const roomLink = new URL(data.roomLink);
+        roomLink.searchParams.append(
+          "patientName",
+          `${numericalOrder}_${user.firstName} ${user.lastName}`
+        );
+        // Chuyển trực tiếp đến phòng khám bằng đường link được cung cấp
+        window.location.href = roomLink.toString();
+      }
+    });
+
+    // Xử lý lỗi kết nối
+    socketInstance.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+      // Fallback sang chế độ mô phỏng nếu không thể kết nối socket
+      simulateQueueUpdate();
+    });
+
+    // Cleanup function
+    return () => {
+      if (socketInstance) {
+        socketInstance.disconnect();
+      }
+    };
+  }, [
+    navigate,
+    scheduleId,
+    numericalOrder,
+    userId,
+    user.firstName,
+    user.lastName,
+  ]);
+
+  // Hàm mô phỏng cập nhật hàng đợi (fallback nếu socket thất bại)
+  const simulateQueueUpdate = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setCurrentExamNumber(Math.floor(Math.random() * 2) + 1);
+      setLoading(false);
+    }, 1500);
+
+    const checkStatusInterval = setInterval(() => {
+      setCurrentExamNumber((prevNumber) => {
+        const newNumber = prevNumber + 1;
+        if (newNumber === numericalOrder) {
+          clearInterval(checkStatusInterval);
+          navigate(`${ROUTING.DASHBOARD}`);
+        }
+        return newNumber <= numericalOrder ? newNumber : prevNumber; // Giữ nguyên nếu vượt quá số thứ tự
+      });
+    }, 10000);
+
+    return () => clearInterval(checkStatusInterval);
+  };
+
+  return (
+    <Container maxWidth="lg">
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="h4" gutterBottom>
+          Phòng Chờ Khám Bệnh
+        </Typography>
+        <Typography variant="subtitle1">
+          {doctorName ? `Cuộc hẹn với Bác sĩ ${doctorName}` : "Đang chờ bác sĩ"}
+        </Typography>
+      </Box>
+
+      <Paper
+        elevation={3}
+        sx={{
+          p: 4,
+          textAlign: "center",
+          maxWidth: 600,
+          mx: "auto",
+          bgcolor: "background.paper",
+        }}
+      >
+        {loading ? (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              my: 4,
+            }}
+          >
+            <CircularProgress />
+            <Typography variant="h6" sx={{ mt: 2 }}>
+              Đang tải thông tin hàng đợi...
+            </Typography>
+          </Box>
+        ) : (
+          <>
+            <Avatar
+              sx={{
+                width: 80,
+                height: 80,
+                mx: "auto",
+                mb: 2,
+                bgcolor: "primary.main",
+              }}
+            >
+              <PersonIcon sx={{ fontSize: 50 }} />
+            </Avatar>
+
+            <Typography variant="h5" gutterBottom>
+              Vui lòng chờ đến lượt của bạn
+            </Typography>
+
+            <Box sx={{ my: 3 }}>
+              <Typography variant="body1" color="text.secondary">
+                Bác sĩ sẽ gặp bạn sớm. Vui lòng ở lại trang này.
+              </Typography>
+            </Box>
+
+            <Divider sx={{ my: 3 }} />
+
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}
+            >
+              <Typography variant="subtitle1">Số thứ tự của bạn:</Typography>
+              <Typography variant="h6" color="primary.main" fontWeight="bold">
+                {numericalOrder}
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}
+            >
+              <Typography variant="subtitle1">
+                Số thứ tự đang được khám:
+              </Typography>
+              <Typography variant="h6" color="text.primary" fontWeight="bold">
+                {currentExamNumber}
+              </Typography>
+            </Box>
+          </>
+        )}
+      </Paper>
+    </Container>
+  );
+}

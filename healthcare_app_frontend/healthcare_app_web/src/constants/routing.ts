@@ -4,6 +4,7 @@ export const ROUTING = {
   LOGIN: "/login",
   REGISTER: "/register",
   VERIFY_EMAIL: "/verify-email",
+  EXAMINATION_ROOM: "/examination/:scheduleId", // New standalone examination room route
 
   // Role root paths
   ADMIN: "/admin",
@@ -25,10 +26,10 @@ export const ROUTING = {
   PROFILE: "profile",
   SCHEDULE: "schedule",
   CURRENT_SCHEDULE: "current-schedule",
-  EXAMINATION_ROOM: "examination/:roomId", // New route for examination room
   MEDICAL_RECORDS: "medical-records", // This will be used for both doctor and patient
 
   // Patient routes (nested under /patient)
   FIND_DOCTOR: "find-doctor",
   PATIENT_APPOINTMENT_DETAILS: "appointments/:appointmentId", // New route for patient appointment details
+  WATING_ROOM: "wating-room/:scheduleId", // New route for patient examination room
 };

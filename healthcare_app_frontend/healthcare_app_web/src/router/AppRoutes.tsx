@@ -22,8 +22,8 @@ import AppointmentPage from "../pages/patient/AppointmentPage";
 import DoctorSchedulePage from "../pages/doctor/DoctorSchedulePage";
 import DoctorCurrentSchedulePage from "../pages/doctor/DoctorCurrentSchedulePage";
 import PatientMedicalRecordsListPage from "../pages/patient/PatientMedicalRecordsListPage";
-import PatientMedicalRecordPage from "../pages/patient/PatientMedicalRecordPage";
-import ExaminationRoomPage from "../pages/doctor/ExaminationRoomPage";
+import ExaminationRoomPage from "../pages/ExaminationRoomPage"; // Import from new location
+import WaitingRoomPage from "../pages/patient/WatingRoomPage";
 
 // const ChatPage = lazy(() => import("../pages/ChatPage"));
 
@@ -37,6 +37,12 @@ export const AppRoutes = () => {
           <Route path={ROUTING.REGISTER} element={<RegisterPage />} />
           <Route path={ROUTING.LOGIN} element={<LoginPage />} />
           <Route path={ROUTING.VERIFY_EMAIL} element={<VerifyEmailPage />} />
+
+          {/* Standalone Examination Room route */}
+          <Route
+            path={ROUTING.EXAMINATION_ROOM}
+            element={<ExaminationRoomPage />}
+          />
 
           {/* Admin routes */}
           {/* <Route path={ROUTING.ADMIN} element={<AdminLayout />}>
@@ -71,10 +77,11 @@ export const AppRoutes = () => {
               element={<div>Prescriptions</div>}
             />
             <Route path={ROUTING.CHAT} element={<div>Chat</div>} />
-            <Route
+            {/* Keep the nested route for backward compatibility */}
+            {/* <Route
               path={ROUTING.EXAMINATION_ROOM}
-              element={<ExaminationRoomPage />}
-            />
+              element={<DoctorExaminationRoomPage />}
+            /> */}
           </Route>
 
           {/* Patient routes */}
@@ -86,6 +93,10 @@ export const AppRoutes = () => {
             <Route
               path={ROUTING.PATIENT_APPOINTMENT_DETAILS}
               element={<PatientAppointmentDetailsPage />}
+            />
+            <Route
+              path={ROUTING.WATING_ROOM}
+              element={<WaitingRoomPage />} // This component is now correctly named WaitingRoom internally
             />
             <Route
               path={ROUTING.FIND_DOCTOR}

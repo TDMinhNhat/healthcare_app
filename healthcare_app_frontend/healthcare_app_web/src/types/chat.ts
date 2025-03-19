@@ -1,8 +1,10 @@
 import { Room } from "./room";
 
 export interface ChatMessage {
-  id: number;
+  sender: string;
   message: string;
+  timestamp: number;
+  id: number;
   room: Room;
   reply: ChatMessage | null;
   isRecall: boolean;

@@ -23,6 +23,7 @@ import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import CloseIcon from "@mui/icons-material/Close";
+import VideoCallIcon from "@mui/icons-material/VideoCall";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
@@ -51,6 +52,7 @@ import {
   formatTime,
   formatTimeFromTimeString,
 } from "../../utils/dateUtils";
+import { ROUTING } from "../../constants/routing";
 
 // Định nghĩa TypeDay enum để phù hợp với mô hình UML
 enum TypeDay {
@@ -88,6 +90,7 @@ interface Appointment {
   doctorId?: number; // ID của bác sĩ
   typeDay?: TypeDay; // Ngày trong tuần
   shiftId?: number; // ID ca khám
+  numericalOrder?: number; // Số thứ tự
 }
 
 // Định nghĩa giao diện Shift để phù hợp với mô hình UML
@@ -184,6 +187,7 @@ const AppointmentPage = () => {
           reason: "Khám " + item.work_schedule.doctor.typeDisease.name,
           doctorId: item.work_schedule.doctor.userId,
           shiftId: item.work_schedule.shift.id,
+          numericalOrder: item.book_appointment.numericalOrder,
         }));
 
         console.log("Setting appointments for week:", {
@@ -336,6 +340,30 @@ const AppointmentPage = () => {
     navigate(`/patient/appointments/${appointmentId}`);
   };
 
+  // Determine if an appointment is eligible for video examination
+  const canJoinExamination = (status: string) => {
+    return status === "IN_PROGRESS" || status === "WAITING";
+  };
+
+  // Handle joining examination room
+  const handleJoinExamination = (
+    appointmentId: number,
+    event: React.MouseEvent,
+    doctorId?: number,
+    doctorName?: string,
+    numericalOrder?: number
+  ) => {
+    event.stopPropagation();
+
+    navigate(`${ROUTING.PATIENT}/wating-room/${appointmentId}`, {
+      state: {
+        doctorId: doctorId,
+        doctorName: doctorName,
+        numericalOrder: numericalOrder,
+      },
+    });
+  };
+
   // Hiển thị thông tin cuộc hẹn với ID, lý do khám và tên bác sĩ
   const renderAppointmentItem = (appointment: Appointment) => {
     // Lấy màu sắc tương ứng với trạng thái lịch hẹn
@@ -355,6 +383,7 @@ const AppointmentPage = () => {
     };
 
     const colors = getStatusColor();
+    const isExaminationEligible = canJoinExamination(appointment.status);
 
     // Hiển thị thông tin lịch hẹn với tooltip
     return (
@@ -388,25 +417,57 @@ const AppointmentPage = () => {
           }}
           onClick={() => handleAppointmentClick(appointment.id)}
         >
-          {/* Hiển thị ID và tên bác sĩ */}
-          <Typography
-            variant="body2"
-            sx={{ fontWeight: "bold", color: colors.text }}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+            }}
           >
-            STT: {appointment.id}
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{ color: colors.text, fontWeight: "medium" }}
-          >
-            BS: {appointment.doctorName.split(" ").pop()}
-          </Typography>
-          <Typography
-            variant="caption"
-            sx={{ display: "block", color: colors.text }}
-          >
-            {appointment.reason || "Không có lý do"}
-          </Typography>
+            <Box>
+              {/* Hiển thị ID và tên bác sĩ */}
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: "bold", color: colors.text }}
+              >
+                STT: {appointment.numericalOrder}
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ color: colors.text, fontWeight: "medium" }}
+              >
+                BS: {appointment.doctorName.split(" ").pop()}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{ display: "block", color: colors.text }}
+              >
+                {appointment.reason || "Không có lý do"}
+              </Typography>
+            </Box>
+
+            {isExaminationEligible && (
+              <IconButton
+                size="small"
+                color="primary"
+                onClick={(e) =>
+                  handleJoinExamination(
+                    appointment.id,
+                    e,
+                    appointment.doctorId,
+                    appointment.doctorName,
+                    appointment.numericalOrder
+                  )
+                }
+                sx={{
+                  bgcolor: "rgba(25, 118, 210, 0.1)",
+                  "&:hover": { bgcolor: "rgba(25, 118, 210, 0.2)" },
+                }}
+              >
+                <VideoCallIcon fontSize="small" />
+              </IconButton>
+            )}
+          </Box>
         </Paper>
       </Tooltip>
     );

@@ -67,7 +67,7 @@ interface ScheduleItem {
 }
 
 const DoctorSchedulePage = () => {
-  const user = JSON.parse(sessionStorage.getItem("user") || "{}");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
   const doctorId = user?.userId;
 
   // Lưu trữ ngày hiện tại để tính toán giới hạn tuần
