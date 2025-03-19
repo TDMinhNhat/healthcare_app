@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "healthcare_app_mobile",
-    "slug": "healthcare_app_mobile",
+    "slug": "healthcareappmobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
@@ -36,6 +36,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "943ad564-9ebc-4d59-9cdc-db103e1105c0"
+      }
+    },
+    "owner": "tdminhnhat"
   }
 }
