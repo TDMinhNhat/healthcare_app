@@ -21,6 +21,11 @@ const run = (server) => {
         socket.on("acceptPatient", (data) => {
             socket.to("waiting: " + data.scheduleId).emit("patientAccepted", data);
         })
+
+        //The doctor rejects a patient join the call room
+        socket.on("removeWaitingQueue", (data) => {
+            socket.to("waiting: " + data.scheduleId).emit("removePatient", data);
+        })
     }
 
     const patient = (socket) => {
