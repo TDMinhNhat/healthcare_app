@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { getAppointmentPatientDetail } from "./../services/appointment/booking_service";
 
 // Patient interface for queue - Giao diện cho bệnh nhân trong hàng đợi
 interface Patient {
@@ -80,6 +81,7 @@ export default function ExaminationRoomPage() {
 
   // State for patient queue - Trạng thái cho hàng đợi bệnh nhân
   const [patientQueue, setPatientQueue] = useState<object[]>([]);
+  const [bookAppointment, setBookAppointment] = useState<object>();
 
   // Kết nối socket cho giao tiếp thời gian thực
   const [socket, setSocket] = useState<Socket>(
@@ -99,10 +101,21 @@ export default function ExaminationRoomPage() {
     socket.on("connect", () => {
       console.log("Kết nối socket thành công");
       if (isPatient) {
+        const fetchAppointmentDetails = async () => {
+          try {
+            const res = await getAppointmentPatientDetail(userId, scheduleId);
+            console.log(res.data.data);
+            setBookAppointment(res.data.data);
+          } catch (error) {
+            console.error("Error fetching appointment details:", error);
+          }
+        };
+        fetchAppointmentDetails();
+
         // Xử lý socket dành riêng cho bệnh nhân
-        console.log("Bệnh nhân đã kết nối với socket:", socket.id);
         socket.emit("patientJoinRoom", {
           scheduleId,
+          numericalOrder: bookAppointment?.book_appointment?.numericalOrder,
           patientId: userId,
           patientName: patientNameFromURL || userName,
         });
@@ -122,8 +135,18 @@ export default function ExaminationRoomPage() {
     // Chỉ thiết lập lắng nghe cập nhật hàng đợi cho bác sĩ
     if (!isPatient) {
       socket.on("patientQueueUpdate", (data) => {
-        console.log("Nhận được cập nhật hàng đợi bệnh nhân:", data);
-        setPatientQueue([...patientQueue, data]);
+        setPatientQueue((prev) => {
+          const existingIndex = prev.findIndex((patient) => patient.userId === data.userId);
+          if (existingIndex !== -1) {
+            // Replace the existing patient data
+            const updatedQueue = [...prev];
+            updatedQueue[existingIndex] = data;
+            return updatedQueue;
+          } else {
+            // Add new patient data
+            return [...prev, data];
+          }
+        });
       });
     }
 
@@ -148,7 +171,7 @@ export default function ExaminationRoomPage() {
   };
 
   // Accept patient into examination - Tiếp nhận bệnh nhân vào khám
-  const acceptPatient = (patient: Patient) => {
+  const acceptPatient = (patient) => {
     // Đánh dấu bệnh nhân đã được tiếp nhận
     const updatedQueue = patientQueue.filter(
       (p) => p.userId !== patient.userId
@@ -162,6 +185,7 @@ export default function ExaminationRoomPage() {
         patientId: patient.userId,
         scheduleId,
         roomLink,
+        numericalOrder: patient.numericalOrder,
         patientName: patient.name, // Đảm bảo tên bệnh nhân (có số thứ tự) được gửi đi
       });
     }

@@ -9,10 +9,11 @@ import {
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import PersonIcon from "@mui/icons-material/Person";
 import { ROUTING } from "../../constants/routing";
 import { io, Socket } from "socket.io-client";
+import { getAppointmentPatientDetail } from "../../services/appointment/booking_service";
 
 /**
  * Trang Phòng Chờ Khám Bệnh dành cho bệnh nhân
@@ -47,12 +48,10 @@ export default function WaitingRoomPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Test nên dùng let để chỉnh numericalOrder
   let { doctorName, numericalOrder } = location.state as {
     doctorName: string;
     numericalOrder: number;
   };
-  numericalOrder = 2;
 
   // Các trạng thái cho phòng chờ
   const [currentExamNumber, setCurrentExamNumber] = useState<number>(0); // Số thứ tự đang được khám
@@ -61,20 +60,16 @@ export default function WaitingRoomPage() {
   // Dùng socket như state để tránh việc mất kết nối khi component re-render
   // Hoặc tránh tạo kết nối mới mỗi khi component re-render
   const [socket, setSocket] = useState<Socket>(io("ws://localhost:8081", {
-      path: "/chat",
-      transports: ["websocket", "polling"],
-      reconnection: true,
-      reconnectionAttempts: 10,
-      autoConnect: false,
-    }));
+    path: "/chat",
+    transports: ["websocket", "polling"],
+    reconnection: true,
+    reconnectionAttempts: 10,
+    autoConnect: false,
+  }));
 
-  // Thiết lập kết nối socket và xử lý các sự kiện
   useEffect(() => {
     socket.connect();
-    // // Khởi tạo kết nối socket
-    // const socketInstance = io("http://localhost:8000");
-    // setSocket(socketInstance);
-    // // Khi kết nối thành công
+    // Khi kết nối thành công
     socket.on("connect", () => {
       console.log("Socket connected to the server");
 
@@ -82,20 +77,20 @@ export default function WaitingRoomPage() {
       socket.emit("joinWaitingQueue", {
         scheduleId,
         userId: userId,
-        numericalOrder,
+        numericalOrder: numericalOrder,
         name: `${numericalOrder}_${user.firstName} ${user.lastName}`,
       });
     });
 
-    // // Lắng nghe sự kiện cập nhật số thứ tự hiện tại
-    // socketInstance.on("queueUpdate", (data) => {
-    //   setLoading(false);
-    //   setCurrentExamNumber(data.currentExamNumber ?? 0);
-    // });
+    // Lắng nghe sự kiện cập nhật số thứ tự hiện tại
+    socket.on("queueUpdate", (data) => {
+      console.log(data);
+      setLoading(false);
+      setCurrentExamNumber(data.numericalOrder ?? currentExamNumber);
+    });
 
     // Lắng nghe sự kiện khi bác sĩ chấp nhận bệnh nhân này
     socket.on("patientAccepted", (data) => {
-      console.log(data);
       if (data.patientId === userId) {
         console.log(
           "You've been accepted by the doctor. Joining examination room..."
@@ -112,7 +107,7 @@ export default function WaitingRoomPage() {
     });
 
     socket.on("removePatient", (data) => {
-      if(data.userId === userId) {
+      if (data.userId === userId) {
         navigate(`${ROUTING.PATIENT}/${ROUTING.PATIENT_APPOINTMENT}`);
         socket.disconnect();
       }
@@ -131,36 +126,7 @@ export default function WaitingRoomPage() {
     //     socketInstance.disconnect();
     //   }
     // };
-  }, [
-    navigate,
-    scheduleId,
-    numericalOrder,
-    userId,
-    user.firstName,
-    user.lastName,
-  ]);
-
-  // Hàm mô phỏng cập nhật hàng đợi (fallback nếu socket thất bại)
-  const simulateQueueUpdate = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setCurrentExamNumber(Math.floor(Math.random() * 2) + 1);
-      setLoading(false);
-    }, 1500);
-
-    const checkStatusInterval = setInterval(() => {
-      setCurrentExamNumber((prevNumber) => {
-        const newNumber = prevNumber + 1;
-        if (newNumber === numericalOrder) {
-          clearInterval(checkStatusInterval);
-          navigate(`${ROUTING.DASHBOARD}`);
-        }
-        return newNumber <= numericalOrder ? newNumber : prevNumber; // Giữ nguyên nếu vượt quá số thứ tự
-      });
-    }, 10000);
-
-    return () => clearInterval(checkStatusInterval);
-  };
+  }, [])
 
   return (
     <Container maxWidth="lg">
@@ -169,7 +135,9 @@ export default function WaitingRoomPage() {
           Phòng Chờ Khám Bệnh
         </Typography>
         <Typography variant="subtitle1">
-          {doctorName ? `Cuộc hẹn với Bác sĩ ${doctorName}` : "Đang chờ bác sĩ"}
+          {doctorName
+            ? `Cuộc hẹn với Bác sĩ ${doctorName}`
+            : "Đang chờ bác sĩ"}
         </Typography>
       </Box>
 
