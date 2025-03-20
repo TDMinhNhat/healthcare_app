@@ -14,6 +14,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import { ROUTING } from "../../constants/routing";
 import { io, Socket } from "socket.io-client";
 import { getAppointmentPatientDetail } from "../../services/appointment/booking_service";
+import { set } from "date-fns";
 
 /**
  * Trang Phòng Chờ Khám Bệnh dành cho bệnh nhân
@@ -48,7 +49,7 @@ export default function WaitingRoomPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  let { doctorName, numericalOrder } = location.state as {
+  const { doctorName, numericalOrder } = location.state as {
     doctorName: string;
     numericalOrder: number;
   };
@@ -59,13 +60,15 @@ export default function WaitingRoomPage() {
 
   // Dùng socket như state để tránh việc mất kết nối khi component re-render
   // Hoặc tránh tạo kết nối mới mỗi khi component re-render
-  const [socket, setSocket] = useState<Socket>(io("ws://localhost:8081", {
-    path: "/chat",
-    transports: ["websocket", "polling"],
-    reconnection: true,
-    reconnectionAttempts: 10,
-    autoConnect: false,
-  }));
+  const [socket, setSocket] = useState<Socket>(
+    io("ws://localhost:8081", {
+      path: "/chat",
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      autoConnect: false,
+    })
+  );
 
   useEffect(() => {
     socket.connect();
@@ -80,6 +83,7 @@ export default function WaitingRoomPage() {
         numericalOrder: numericalOrder,
         name: `${numericalOrder}_${user.firstName} ${user.lastName}`,
       });
+      setLoading(false);
     });
 
     // Lắng nghe sự kiện cập nhật số thứ tự hiện tại
@@ -92,6 +96,7 @@ export default function WaitingRoomPage() {
     // Lắng nghe sự kiện khi bác sĩ chấp nhận bệnh nhân này
     socket.on("patientAccepted", (data) => {
       if (data.patientId === userId) {
+        setLoading(false);
         console.log(
           "You've been accepted by the doctor. Joining examination room..."
         );
@@ -108,25 +113,23 @@ export default function WaitingRoomPage() {
 
     socket.on("removePatient", (data) => {
       if (data.userId === userId) {
+        setLoading(false);
         navigate(`${ROUTING.PATIENT}/${ROUTING.PATIENT_APPOINTMENT}`);
         socket.disconnect();
       }
-    })
+    });
 
-    // // Xử lý lỗi kết nối
-    // socketInstance.on("connect_error", (error) => {
-    //   console.error("Socket connection error:", error);
-    //   // Fallback sang chế độ mô phỏng nếu không thể kết nối socket
-    //   simulateQueueUpdate();
-    // });
+    // Xử lý lỗi kết nối
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+      setLoading(false);
+    });
 
-    // // Cleanup function
-    // return () => {
-    //   if (socketInstance) {
-    //     socketInstance.disconnect();
-    //   }
-    // };
-  }, [])
+    // Cleanup function
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   return (
     <Container maxWidth="lg">
@@ -135,9 +138,7 @@ export default function WaitingRoomPage() {
           Phòng Chờ Khám Bệnh
         </Typography>
         <Typography variant="subtitle1">
-          {doctorName
-            ? `Cuộc hẹn với Bác sĩ ${doctorName}`
-            : "Đang chờ bác sĩ"}
+          {doctorName ? `Cuộc hẹn với Bác sĩ ${doctorName}` : "Đang chờ bác sĩ"}
         </Typography>
       </Box>
 

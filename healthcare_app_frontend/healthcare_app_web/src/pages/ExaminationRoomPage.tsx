@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState, useEffect, useCallback } from "react";
 import { LiveRole, ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router"; // Add useNavigate
 import { useSelector } from "react-redux";
 import { APP_ID, SERVER_SECRET } from "../constants/zegocloud";
 import { io, Socket } from "socket.io-client";
@@ -17,13 +17,9 @@ import {
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { getAppointmentPatientDetail } from "./../services/appointment/booking_service";
+import { ROUTING } from "../constants/routing";
 
 // Patient interface for queue - Giao diện cho bệnh nhân trong hàng đợi
-interface Patient {
-  id: number;
-  name: string;
-  status: string;
-}
 
 /**
  * Trang Phòng Khám dành cho bác sĩ và bệnh nhân
@@ -58,8 +54,11 @@ interface Patient {
  * - Giao tiếp thời gian thực thông qua Socket.io
  * - Xử lý khác nhau theo vai trò người dùng
  */
+
 export default function ExaminationRoomPage() {
   const { scheduleId } = useParams<{ scheduleId: string }>();
+  // Add navigate function
+  const navigate = useNavigate();
   // Thay đổi: kiểm tra role thay vì roomID
   const [searchParams] = React.useState(
     new URLSearchParams(window.location.search)
@@ -82,6 +81,8 @@ export default function ExaminationRoomPage() {
   // State for patient queue - Trạng thái cho hàng đợi bệnh nhân
   const [patientQueue, setPatientQueue] = useState<object[]>([]);
   const [bookAppointment, setBookAppointment] = useState<object>();
+  // Add state to track if room has been initialized
+  const [isRoomInitialized, setIsRoomInitialized] = useState<boolean>(false);
 
   // Kết nối socket cho giao tiếp thời gian thực
   const [socket, setSocket] = useState<Socket>(
@@ -104,21 +105,28 @@ export default function ExaminationRoomPage() {
         const fetchAppointmentDetails = async () => {
           try {
             const res = await getAppointmentPatientDetail(userId, scheduleId);
-            console.log(res.data.data);
+            // console.log(res.data.data);
             setBookAppointment(res.data.data);
+
+            // Emit socket event with the data we just received
+            socket.emit("patientJoinRoom", {
+              scheduleId,
+              numericalOrder: res.data.data?.book_appointment?.numericalOrder,
+              userId: userId,
+              name: patientNameFromURL || userName,
+            });
           } catch (error) {
             console.error("Error fetching appointment details:", error);
+            // Emit socket event even if there's an error, just without numerical order
+            socket.emit("patientJoinRoom", {
+              scheduleId,
+              numericalOrder: undefined,
+              userId: userId,
+              name: patientNameFromURL || userName,
+            });
           }
         };
         fetchAppointmentDetails();
-
-        // Xử lý socket dành riêng cho bệnh nhân
-        socket.emit("patientJoinRoom", {
-          scheduleId,
-          numericalOrder: bookAppointment?.book_appointment?.numericalOrder,
-          patientId: userId,
-          patientName: patientNameFromURL || userName,
-        });
       } else {
         // Xử lý socket dành riêng cho bác sĩ
         console.log("Bác sĩ đã kết nối với socket:", socket.id);
@@ -136,27 +144,32 @@ export default function ExaminationRoomPage() {
     if (!isPatient) {
       socket.on("patientQueueUpdate", (data) => {
         setPatientQueue((prev) => {
-          const existingIndex = prev.findIndex((patient) => patient.userId === data.userId);
+          // Tìm vị trí của bệnh nhân trong hàng đợi
+          const existingIndex = prev.findIndex(
+            (patient) => patient.userId === data.userId
+          );
+          // Nếu đã tồn tại, thì cập nhật thông tin bệnh nhân
           if (existingIndex !== -1) {
-            // Replace the existing patient data
+            // Tạo bản sao mới của hàng đợi
             const updatedQueue = [...prev];
+            // Cập nhật thông tin bệnh nhân
             updatedQueue[existingIndex] = data;
             return updatedQueue;
           } else {
-            // Add new patient data
+            // Thêm bệnh nhân mới vào cuối hàng đợi
             return [...prev, data];
           }
         });
       });
     }
 
-    // socketInstance.on("connect_error", (error) => {
-    //   console.error("Lỗi kết nối socket:", error);
-    // });
+    socket.on("connect_error", (error) => {
+      console.error("Lỗi kết nối socket:", error);
+    });
 
-    // return () => {
-    //   socketInstance.disconnect();
-    // };
+    return () => {
+      socket.disconnect();
+    };
   }, [scheduleId, userId, isPatient, patientNameFromURL, userName]);
 
   // Tạo đường link phòng khám cho bệnh nhân sử dụng role thay vì roomID
@@ -193,71 +206,97 @@ export default function ExaminationRoomPage() {
 
   // Remove patient from queue - Xóa bệnh nhân khỏi hàng đợi
   const removePatient = (id: number) => {
-    const data = patientQueue.filter((patient) => patient.id === id);
-    setPatientQueue(patientQueue.filter((patient) => patient.id !== id));
+    const data = patientQueue.filter((patient) => patient.userId === id);
+    setPatientQueue(patientQueue.filter((patient) => patient.userId !== id));
 
     // Gửi thông báo xóa bệnh nhân khỏi hàng đợi
     socket.emit("removeWaitingQueue", data[0]);
   };
 
   // Cài đặt cuộc gọi Zego - Cập nhật để xử lý cho cả bác sĩ và bệnh nhân
-  const myMeeting = useCallback(async (element) => {
-    if (!element) return;
+  const myMeeting = useCallback(
+    async (element) => {
+      if (!element) return;
+      // TRánh khởi tạo phòng nếu user out room
+      if (isRoomInitialized) return;
 
-    try {
-      // Tạo Kit Token
-      const appID = APP_ID;
-      const serverSecret = SERVER_SECRET;
+      try {
+        // Tạo Kit Token
+        const appID = APP_ID;
+        const serverSecret = SERVER_SECRET;
 
-      // Xác định tên hiển thị - sử dụng tên có số thứ tự nếu là bệnh nhân
-      const displayName =
-        isPatient && patientNameFromURL ? patientNameFromURL : userName;
+        // Xác định tên hiển thị - sử dụng tên có số thứ tự nếu là bệnh nhân
+        const displayName =
+          isPatient && patientNameFromURL ? patientNameFromURL : userName;
 
-      console.log("Preparing to join room with:", {
-        appID,
-        roomID,
-        userId,
-        displayName,
-      });
+        console.log("Preparing to join room with:", {
+          appID,
+          roomID,
+          userId,
+          displayName,
+        });
 
-      const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
-        appID,
-        serverSecret,
-        roomID ?? "",
-        userId,
-        displayName
-      );
+        const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
+          appID,
+          serverSecret,
+          roomID ?? "",
+          userId,
+          displayName
+        );
 
-      // Tạo đối tượng instance từ Kit Token
-      const zp = ZegoUIKitPrebuilt.create(kitToken);
-      if (!zp) {
-        console.error("Failed to create ZegoUIKitPrebuilt instance");
-        return;
-      }
+        // Tạo đối tượng instance từ Kit Token
+        const zp = ZegoUIKitPrebuilt.create(kitToken);
+        if (!zp) {
+          console.error("Failed to create ZegoUIKitPrebuilt instance");
+          return;
+        }
 
-      // Bắt đầu cuộc gọi
-      zp.joinRoom({
-        container: element,
-        sharedLinks: [
-          {
-            name: "Link phòng khám",
-            url: generateRoomLink(),
+        // Bắt đầu cuộc gọi
+        zp.joinRoom({
+          container: element,
+          sharedLinks: [
+            {
+              name: "Link phòng khám",
+              url: generateRoomLink(),
+            },
+          ],
+          scenario: {
+            mode: ZegoUIKitPrebuilt.GroupCall,
           },
-        ],
-        scenario: {
-          mode: ZegoUIKitPrebuilt.GroupCall,
-        },
-        showRemoveUserButton: !isPatient,
-        showPreJoinView: false,
-        onLeaveRoom() {
-          console.log("You have left the room");
-          socket.disconnect();
-        },
-      });
-    } catch (error) {
-      console.error("Error joining room:", error);
-    }
-  }, []);
+          showRemoveUserButton: !isPatient,
+          showPreJoinView: false,
+          onLeaveRoom() {
+            console.log("You have left the room");
+            socket.disconnect();
+
+            if (isPatient) {
+              navigate(`${ROUTING.PATIENT}/${ROUTING.APPOINTMENTS}`);
+            }
+          },
+          onYouRemovedFromRoom() {
+            console.log("You have been removed from the room");
+            socket.disconnect();
+            navigate(`${ROUTING.PATIENT}/${ROUTING.APPOINTMENTS}`);
+          },
+        });
+
+        // Mark the room as initialized
+        setIsRoomInitialized(true);
+      } catch (error) {
+        console.error("Error joining room:", error);
+      }
+    },
+    [
+      isPatient,
+      patientNameFromURL,
+      userName,
+      userId,
+      roomID,
+      isRoomInitialized,
+      socket,
+      navigate, // Add navigate to dependency array
+    ]
+  );
 
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
@@ -287,9 +326,9 @@ export default function ExaminationRoomPage() {
           {/* Danh sách bệnh nhân trong hàng đợi */}
           <Box>
             {patientQueue.length > 0 ? (
-              patientQueue.map((patient) => (
+              patientQueue.map((patient, index) => (
                 <Paper
-                  key={patient.id}
+                  key={index}
                   elevation={1}
                   sx={{
                     p: 2,
@@ -330,7 +369,7 @@ export default function ExaminationRoomPage() {
                     <IconButton
                       size="small"
                       color="error"
-                      onClick={() => removePatient(patient.id)}
+                      onClick={() => removePatient(patient.userId)}
                       title="Xóa khỏi hàng đợi"
                     >
                       <DeleteIcon />
