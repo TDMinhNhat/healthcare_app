@@ -7,12 +7,17 @@ import dev.skyherobrine.admin.models.mariadb.Drug;
 import dev.skyherobrine.admin.models.mongodb.MedicalRecord;
 import dev.skyherobrine.admin.models.mongodb.MedicalRecordDrug;
 import dev.skyherobrine.admin.repositories.mariadb.DrugRepository;
+import dev.skyherobrine.admin.repositories.mongodb.BookAppointmentRepository;
 import dev.skyherobrine.admin.repositories.mongodb.MedicalRecordDrugRepository;
 import dev.skyherobrine.admin.repositories.mongodb.MedicalRecordRepository;
+import dev.skyherobrine.admin.utils.ObjectParser;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Component
 @Slf4j
@@ -21,11 +26,13 @@ public class MedicalRecordConsumer {
     private final MedicalRecordRepository medicalRecordRepository;
     private final MedicalRecordDrugRepository medicalRecordDrugRepository;
     private final DrugRepository drugRepository;
+    private final BookAppointmentRepository bookAppointmentRepository;
 
-    public MedicalRecordConsumer(MedicalRecordRepository medicalRecordRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, DrugRepository drugRepository) {
+    public MedicalRecordConsumer(MedicalRecordRepository medicalRecordRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, DrugRepository drugRepository, BookAppointmentRepository bookAppointmentRepository) {
         this.medicalRecordRepository = medicalRecordRepository;
         this.medicalRecordDrugRepository = medicalRecordDrugRepository;
         this.drugRepository = drugRepository;
+        this.bookAppointmentRepository = bookAppointmentRepository;
     }
 
     @KafkaListener(topics = "insert_medical_record", groupId = "admin_insert_medical_record")
@@ -34,14 +41,20 @@ public class MedicalRecordConsumer {
             log.info("Medical Record Consumer: listening insert medical record message");
             log.info("Medical Record Consumer: {}", message);
 
-//            JsonNode node = new ObjectMapper().readTree(message);
-//            Appointment appointment = appointmentRepository.findAppointmentByRoomId(node.get("roomId").asText()).orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
-//            String getDiagnosisDisease = node.get("diagnosisDisease").asText();
-//            String getNote = node.get("note").asText();
-//            String getReExaminationDate = node.get("reExaminationDate").asText();
-//
-//            MedicalRecord medicalRecord = new MedicalRecord(appointment, getDiagnosisDisease, getNote, LocalDate.parse(getReExaminationDate, DateTimeFormatter.ofPattern("dd-MM-yyyy")));
-//            medicalRecordRepository.save(medicalRecord);
+            JsonNode node = new ObjectMapper().readTree(message);
+            Long getBookAppointmentId = node.get("bookAppointmentId").asLong();
+            String getDiagnosisDisease = node.get("diagnosisDisease").asText();
+            String getNote = node.get("note").asText();
+            String getReExaminationDate = node.get("reExaminationDate").asText();
+
+            MedicalRecord medicalRecord = new MedicalRecord(
+                    getMaxId(),
+                    bookAppointmentRepository.findById(getBookAppointmentId).orElseThrow(() -> new EntityNotFoundException("Can't found the book appointment")),
+                    getDiagnosisDisease,
+                    getNote,
+                    LocalDate.parse(getReExaminationDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+            );
+            medicalRecordRepository.save(medicalRecord);
             log.info("Medical Record Consumer: inserted medical record into database");
         } catch (Exception e) {
             log.error("Medical Record Consumer: can't insert medical record into database");
@@ -70,5 +83,9 @@ public class MedicalRecordConsumer {
             log.error("Medical Record Consumer: can't insert medical record drug into database");
             log.error(e.getMessage());
         }
+    }
+
+    private Long getMaxId() {
+        return (medicalRecordRepository.findTopByOrderByIdDesc().map(MedicalRecord::getId).orElse(0L)) + 1;
     }
 }

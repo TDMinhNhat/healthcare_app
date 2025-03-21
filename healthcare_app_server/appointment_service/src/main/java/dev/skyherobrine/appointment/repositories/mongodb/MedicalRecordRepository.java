@@ -9,4 +9,7 @@ import java.util.Optional;
 @Repository
 public interface MedicalRecordRepository extends MongoRepository<MedicalRecord,Long> {
     Optional<MedicalRecord> findTopByOrderByIdDesc();
+
+    Optional<MedicalRecord> findByBookAppointment_Id(Long id);
+
 }

@@ -9,7 +9,7 @@ import java.util.List;
 @Getter @Setter
 @AllArgsConstructor
 public class MedicalRecordDTO {
-    private String roomId;
+    private Long bookAppointmentId;
     private String diagnosisDisease;
     private String note;
     private String reExaminationDate;

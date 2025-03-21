@@ -33,7 +33,7 @@ public class MedicalRecord {
     @Field(name = "created_at")
     private LocalDateTime createdAt;
 
-    public MedicalRecord(Long id, BookAppointment bookAppointment, @NonNull String diagnosisDisease, String note, LocalDate reExaminationDate) {
+    public MedicalRecord(Long id, BookAppointment bookAppointment, String diagnosisDisease, String note, LocalDate reExaminationDate) {
         this.id = id;
         this.bookAppointment = bookAppointment;
         this.diagnosisDisease = diagnosisDisease;
