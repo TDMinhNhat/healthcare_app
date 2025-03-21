@@ -1,4 +1,4 @@
-import axiosConfig from "./axiosConfig";
+import axiosConfig from "../axiosConfig";
 const prefix = "/appointment/api/v1/drug";
 export const getAllDrugss = async () => {
   const response = await axiosConfig.get(`${prefix}`);

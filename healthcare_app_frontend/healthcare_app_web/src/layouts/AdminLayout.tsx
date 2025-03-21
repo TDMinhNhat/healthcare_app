@@ -14,11 +14,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import { useNavigate } from "react-router";
 import { Outlet } from "react-router";
 
-interface AdminLayoutProps {
-  children: ReactNode;
-}
-
-export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
+export const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
 
   const handleNavigation = (path: string) => {
@@ -32,41 +28,43 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           <ListItemIcon>
             <DashboardIcon />
           </ListItemIcon>
-          <ListItemText primary="Dashboard" />
+          <ListItemText primary="Thống kê" />
         </ListItemButton>
         <ListItemButton onClick={() => handleNavigation("/admin/users")}>
           <ListItemIcon>
             <PeopleIcon />
           </ListItemIcon>
-          <ListItemText primary="User Management" />
+          <ListItemText primary="Quản lí bệnh nhân" />
         </ListItemButton>
         <ListItemButton onClick={() => handleNavigation("/admin/doctors")}>
           <ListItemIcon>
             <LocalHospitalIcon />
           </ListItemIcon>
-          <ListItemText primary="Doctor Management" />
+          <ListItemText primary="Quản lí bác sĩ" />
+        </ListItemButton>
+        {/* Medical drug */}
+        <ListItemButton onClick={() => handleNavigation("/admin/drugs")}>
+          <ListItemIcon>
+            <LocalHospitalIcon />
+          </ListItemIcon>
+          <ListItemText primary="Quản lí thuốc" />
         </ListItemButton>
       </List>
       <Divider />
-      <List>
+      {/* <List>
         <ListItemButton onClick={() => handleNavigation("/admin/settings")}>
           <ListItemIcon>
             <SettingsIcon />
           </ListItemIcon>
           <ListItemText primary="Settings" />
         </ListItemButton>
-      </List>
+      </List> */}
     </>
   );
 
   return (
     <BaseLayout title="Admin Dashboard" sidebarContent={sidebarContent}>
-      <div className="admin-layout">
-        <div className="admin-content">
-          <Outlet />
-        </div>
-      </div>
-      {children}
+      <Outlet />
     </BaseLayout>
   );
 };

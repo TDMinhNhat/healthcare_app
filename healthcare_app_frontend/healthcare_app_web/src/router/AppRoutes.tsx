@@ -24,6 +24,7 @@ import DoctorCurrentSchedulePage from "../pages/doctor/DoctorCurrentSchedulePage
 import PatientMedicalRecordsListPage from "../pages/patient/PatientMedicalRecordsListPage";
 import ExaminationRoomPage from "../pages/ExaminationRoomPage"; // Import from new location
 import WaitingRoomPage from "../pages/patient/WatingRoomPage";
+import PatientManagementPage from "../pages/admin/PatientManagementPage";
 
 // const ChatPage = lazy(() => import("../pages/ChatPage"));
 
@@ -45,17 +46,17 @@ export const AppRoutes = () => {
           />
 
           {/* Admin routes */}
-          {/* <Route path={ROUTING.ADMIN} element={<AdminLayout />}>
-            <Route path={ROUTING.DASHBOARD} element={<AdminDashboard />} />
-            <Route index element={<AdminDashboard />} />
+          <Route path={ROUTING.ADMIN} element={<AdminLayout />}>
+            <Route path={ROUTING.DASHBOARD} element={<div>Dashboard</div>} />
+            <Route index element={<div>Dashboard</div>} />
             {/* Add other admin routes as needed */}
-          {/* <Route path={ROUTING.USERS} element={<div>Users Management</div>} />
+            <Route path={ROUTING.USERS} element={<PatientManagementPage />} />
             <Route
               path={ROUTING.DOCTORS}
               element={<div>Doctors Management</div>}
             />
-            <Route path={ROUTING.SETTINGS} element={<div>Settings</div>} />
-          </Route> */}
+            <Route path={ROUTING.DRUG} element={<div>Drug Management</div>} />
+          </Route>
 
           {/* Doctor routes */}
           <Route path={ROUTING.DOCTOR} element={<DoctorLayout />}>

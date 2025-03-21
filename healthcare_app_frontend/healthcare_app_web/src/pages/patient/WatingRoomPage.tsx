@@ -13,8 +13,6 @@ import { useEffect, useLayoutEffect, useState } from "react";
 import PersonIcon from "@mui/icons-material/Person";
 import { ROUTING } from "../../constants/routing";
 import { io, Socket } from "socket.io-client";
-import { getAppointmentPatientDetail } from "../../services/appointment/booking_service";
-import { set } from "date-fns";
 
 /**
  * Trang Phòng Chờ Khám Bệnh dành cho bệnh nhân
@@ -84,6 +82,18 @@ export default function WaitingRoomPage() {
         name: `${numericalOrder}_${user.firstName} ${user.lastName}`,
       });
       setLoading(false);
+    });
+
+    // Lắng nghe sự kiện khi bác sĩ vào phòng đợi
+    socket.on("doctorJoined", (data) => {
+      console.log("Doctor joined the waiting room:", data);
+      // Gửi lại thông tin của bệnh nhân để bác sĩ nhận được ngay lập tức
+      socket.emit("joinWaitingQueue", {
+        scheduleId,
+        userId: userId,
+        numericalOrder: numericalOrder,
+        name: `${numericalOrder}_${user.firstName} ${user.lastName}`,
+      });
     });
 
     // Lắng nghe sự kiện cập nhật số thứ tự hiện tại
