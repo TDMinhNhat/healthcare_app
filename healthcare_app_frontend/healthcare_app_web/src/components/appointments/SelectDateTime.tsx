@@ -19,7 +19,7 @@ import {
   formatDateToString,
   parseDateTimeFromString,
   formatTime,
-  formatTimeFromTimeString
+  formatTimeFromTimeString,
 } from "../../utils/dateUtils";
 import { getWorkScheduleByDoctorAndExactDate } from "../../services/authenticate/workSchedule_service";
 
@@ -31,7 +31,7 @@ import { getWorkScheduleByDoctorAndExactDate } from "../../services/authenticate
  */
 interface SelectDateTimeProps {
   doctor: any;
-  onSelect: (date: Date, shift: string, workScheduleTarget: object) => void;
+  onSelect: (date: Date, shift: any, workScheduleTarget: object) => void;
   onBack: () => void;
 }
 
@@ -57,6 +57,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
 
   // State lưu ca khám được chọn
   const [selectedShift, setSelectedShift] = useState<string>("");
+  const [selectedShiftInfo, setSelectedShiftInfo] = useState<any>(null);
 
   // State lưu danh sách các ca khám có sẵn
   const [availableShifts, setAvailableShifts] = useState<
@@ -100,11 +101,14 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
       setHasWorkSchedules(true); // Reset state khi bắt đầu fetch dữ liệu mới
 
       const result = await getWorkScheduleByDoctorAndExactDate(
-        doctor.userId, formatDateToString(date)
-      ).then(response => response.data.data).catch(error => {
-        console.log(error);
-        return null;
-      })
+        doctor.userId,
+        formatDateToString(date)
+      )
+        .then((response) => response.data.data)
+        .catch((error) => {
+          console.log(error);
+          return null;
+        });
 
       setWorkSchedules(result);
 
@@ -174,13 +178,18 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
    * Xử lý khi người dùng chọn một ca khám
    * @param shift - Ca khám được chọn
    */
-  const handleShiftSelect = (shift: string) => {
-    if(shift === "Ca 1") {
-      setWorkScheduleTarget(workSchedules.find((item: object) => item.shift.id === 1));
+  const handleShiftSelect = (shift: string, shiftInfo: any) => {
+    if (shift === "Ca 1") {
+      setWorkScheduleTarget(
+        workSchedules.find((item: object) => item.shift.id === 1)
+      );
     } else {
-      setWorkScheduleTarget(workSchedules.find((item: object) => item.shift.id === 2));
+      setWorkScheduleTarget(
+        workSchedules.find((item: object) => item.shift.id === 2)
+      );
     }
     setSelectedShift(shift);
+    setSelectedShiftInfo(shiftInfo);
   };
 
   /**
@@ -189,7 +198,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
    */
   const handleContinue = () => {
     if (selectedDate && selectedShift) {
-      onSelect(selectedDate, selectedShift, workScheduleTarget);
+      onSelect(selectedDate, selectedShiftInfo, workScheduleTarget);
     }
   };
 
@@ -326,7 +335,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
                           }}
                           onClick={() =>
                             !isShiftDisabled(shift) &&
-                            handleShiftSelect(shift.shift)
+                            handleShiftSelect(shift.shift, shift)
                           }
                         >
                           <CardContent>

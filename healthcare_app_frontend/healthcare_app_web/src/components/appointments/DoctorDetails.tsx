@@ -20,7 +20,7 @@ import SchoolIcon from "@mui/icons-material/School";
 import WorkIcon from "@mui/icons-material/Work";
 import StarIcon from "@mui/icons-material/Star";
 import { useTranslation } from "react-i18next";
-import { getDoctorInfo } from "../../services/user_service";
+import { getDoctorInfo } from "../../services/authenticate/user_service";
 
 interface DoctorDetailsProps {
   doctor: any;

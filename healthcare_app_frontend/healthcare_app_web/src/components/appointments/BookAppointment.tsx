@@ -63,7 +63,11 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
     handleNext();
   };
 
-  const handleDateTimeSelect = (date: Date, time: string, workSchedule: object) => {
+  const handleDateTimeSelect = (
+    date: Date,
+    time: string,
+    workSchedule: object
+  ) => {
     setSelectedDate(date);
     setSelectedTime(time);
     setWorkSchedule(workSchedule);
@@ -149,7 +153,10 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
               {selectedDate ? selectedDate.toLocaleDateString() : ""}
             </Typography>
             <Typography variant="body1">
-              {t("patient.appointments.time")}: {selectedTime.time}
+              {t("patient.appointments.time")}:{" "}
+              {selectedTime
+                ? `${selectedTime.start} - ${selectedTime.end}`
+                : ""}
             </Typography>
             <Typography variant="body1">
               {t("patient.appointments.service")}: {selectedService.name}

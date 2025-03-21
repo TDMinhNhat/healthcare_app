@@ -11,7 +11,7 @@ import { Doctor } from "../../types/doctor";
 import { useTranslation } from "react-i18next";
 import { Diploma } from "../../types";
 import { useSelector } from "react-redux";
-import { getDoctorInfo } from "../../services/user_service";
+import { getDoctorInfo } from "../../services/authenticate/user_service";
 import { log } from "console";
 
 // Mock data - would normally come from API

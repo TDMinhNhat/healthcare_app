@@ -61,7 +61,7 @@ const DAYS_OF_WEEK = [
 
 // Interface định nghĩa cấu trúc dữ liệu cho một ngày trong lịch làm việc
 interface ScheduleItem {
-  dayIndex: number;
+  dayIndex: number; // Index of the day in the week (0-6)
   date: Date;
   selectedShifts: number[]; // Array of selected shift numbers (1, 2)
 }
@@ -121,13 +121,13 @@ const DoctorSchedulePage = () => {
           );
 
           const data = response?.data?.data || [];
-          console.log(
-            "Data fetched for week:",
-            formatDateToString(weekStart),
-            "to",
-            formatDateToString(weekEnd),
-            data
-          );
+          // console.log(
+          //   "Data fetched for week:",
+          //   formatDateToString(weekStart),
+          //   "to",
+          //   formatDateToString(weekEnd),
+          //   data
+          // );
 
           // Cập nhật lịch làm việc với dữ liệu từ API
           if (data.length > 0) {
@@ -212,10 +212,10 @@ const DoctorSchedulePage = () => {
 
       // Cập nhật tuần mới
       setCurrentWeekStart(startOfWeek(today, { weekStartsOn: 1 }));
-      console.log(
-        "Navigating to previous week:",
-        format(startOfWeek(today, { weekStartsOn: 1 }), "dd/MM/yyyy")
-      );
+      // console.log(
+      //   "Navigating to previous week:",
+      //   format(startOfWeek(today, { weekStartsOn: 1 }), "dd/MM/yyyy")
+      // );
     }
   };
 
@@ -231,10 +231,10 @@ const DoctorSchedulePage = () => {
         weekStartsOn: 1,
       });
       setCurrentWeekStart(nextWeekStart);
-      console.log(
-        "Navigating to next week:",
-        format(nextWeekStart, "dd/MM/yyyy")
-      );
+      // console.log(
+      //   "Navigating to next week:",
+      //   format(nextWeekStart, "dd/MM/yyyy")
+      // );
     }
   };
 

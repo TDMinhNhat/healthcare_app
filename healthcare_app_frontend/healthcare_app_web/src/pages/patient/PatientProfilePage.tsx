@@ -6,7 +6,7 @@ import { PersonalInfoSection } from "../../components/profile/PersonalInfoSectio
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
 import AvatarUploadModal from "../../components/profile/AvatarUploadModal";
 import { useTranslation } from "react-i18next";
-import { getPatientInfo } from "../../services/user_service";
+import { getPatientInfo } from "../../services/authenticate/user_service";
 import { useSelector } from "react-redux";
 
 const PatientProfilePage: React.FC = () => {

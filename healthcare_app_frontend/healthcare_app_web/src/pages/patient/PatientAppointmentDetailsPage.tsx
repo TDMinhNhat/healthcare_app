@@ -20,9 +20,12 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PersonIcon from "@mui/icons-material/Person";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import DescriptionIcon from "@mui/icons-material/Description";
+import VideoCallIcon from "@mui/icons-material/VideoCall";
 import MedicalRecordModal from "../../components/medical/MedicalRecordModal";
 import { getAppointmentPatientDetail } from "../../services/appointment/booking_service";
 import { formatTimeFromTimeString } from "../../utils/dateUtils";
+import { useNavigate } from "react-router";
+import { ROUTING } from "../../constants/routing";
 
 /**
  * Trang hiển thị chi tiết cuộc hẹn khám bệnh của bệnh nhân
@@ -39,6 +42,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
   const [isMedicalRecordOpen, setIsMedicalRecordOpen] =
     useState<boolean>(false);
   const user = useSelector((state: any) => state.user.user);
+  const navigate = useNavigate();
 
   const getStatus = (status: string) => {
     switch (status) {
@@ -79,20 +83,16 @@ const PatientAppointmentDetailsPage: React.FC = () => {
             result.work_schedule.shift.end,
             "string"
           )}`,
-          location: "Phòng 302, Tòa nhà chính",
+          // location: "Phòng 302, Tòa nhà chính",
           status: getStatus(result.book_appointment.status),
           patientInfo: {
-            id: 1,
-            medicalId: result.book_appointment.numericalOrder,
-            name: "Nguyễn Văn A",
-            age: 45,
-            gender: "Nam",
-            reason: "Khám định kỳ",
+            id: result.book_appointment.patientId,
+            numericalOrder: result.book_appointment.numericalOrder,
           },
           doctorInfo: {
             id: result.work_schedule.doctor.userId,
             name: `${result.work_schedule.doctor.firstName} ${result.work_schedule.doctor.lastName}`,
-            specialization: result.work_schedule.doctor.specialization,
+            typeDisease: result.work_schedule.doctor.typeDisease.name,
             avatar: result.work_schedule.doctor.avatar,
           },
           hasMedicalRecord: true,
@@ -165,6 +165,27 @@ const PatientAppointmentDetailsPage: React.FC = () => {
     setIsMedicalRecordOpen(false);
   };
 
+  /**
+   * Xác định xem một cuộc hẹn có đủ điều kiện để tham gia phòng khám trực tuyến hay không
+   * Chỉ các cuộc hẹn có trạng thái "ĐANG CHỜ" hoặc "ĐANG KHÁM" mới có thể tham gia
+   */
+  const canJoinExamination = (status: string) => {
+    return status === "Đang khám" || status === "Đang chờ";
+  };
+
+  /**
+   * Xử lý sự kiện khi người dùng muốn tham gia phòng khám trực tuyến
+   */
+  const handleJoinExamination = () => {
+    navigate(`${ROUTING.PATIENT}/wating-room/${appointment.id}`, {
+      state: {
+        doctorId: appointment.doctorInfo.id,
+        doctorName: appointment.doctorInfo.name,
+        numericalOrder: appointment.patientInfo.numericalOrder,
+      },
+    });
+  };
+
   return (
     <Box p={3}>
       {/* Tiêu đề trang */}
@@ -195,7 +216,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
           {/* Hiển thị ID khám bệnh của bệnh nhân */}
           <Box mb={2}>
             <Chip
-              label={`Số Thứ Tự Khám: ${appointment.patientInfo.medicalId}`}
+              label={`Số Thứ Tự Khám: ${appointment.patientInfo.numericalOrder}`}
               color="primary"
               sx={{
                 fontWeight: "medium",
@@ -251,13 +272,23 @@ const PatientAppointmentDetailsPage: React.FC = () => {
               Lý do khám bệnh
             </Typography>
             <Typography variant="body1">
-              {appointment.patientInfo.reason}
+              {appointment.doctorInfo.typeDisease}
             </Typography>
           </Box>
 
-          {/* Nút xem hồ sơ y tế */}
-          {appointment.hasMedicalRecord && (
-            <Box mt={3} display="flex" justifyContent="flex-end">
+          {/* Nút xem hồ sơ y tế và tham gia khám */}
+          <Box mt={3} display="flex" justifyContent="flex-end" gap={2}>
+            {canJoinExamination(appointment.status) && (
+              <Button
+                variant="contained"
+                color="success"
+                startIcon={<VideoCallIcon />}
+                onClick={handleJoinExamination}
+              >
+                Tham gia khám
+              </Button>
+            )}
+            {appointment.hasMedicalRecord && (
               <Button
                 variant="contained"
                 startIcon={<DescriptionIcon />}
@@ -265,8 +296,8 @@ const PatientAppointmentDetailsPage: React.FC = () => {
               >
                 Xem hồ sơ bệnh án
               </Button>
-            </Box>
-          )}
+            )}
+          </Box>
         </CardContent>
       </Card>
 

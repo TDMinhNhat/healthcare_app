@@ -1,4 +1,4 @@
-import axiosConfig from "./axiosConfig";
+import axiosConfig from "../axiosConfig";
 const prefix = "/authenticate/api/v1/user";
 export const getPatientInfo = async (userId: string) => {
   const response = await axiosConfig.get(`${prefix}/patient`, {

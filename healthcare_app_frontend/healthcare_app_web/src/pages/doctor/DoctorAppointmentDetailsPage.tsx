@@ -30,8 +30,9 @@ import MedicalRecordModal from "../../components/medical/MedicalRecordModal";
 import { useNavigate } from "react-router";
 import { getDetailDoctorAppointment } from "../../services/appointment/booking_service";
 import { useSelector } from "react-redux";
+import { ROUTING } from "../../constants/routing"; // Add this import
 
-// Helper function to calculate age from birthdate (dd-MM-yyyy format)
+// Tính tuổi (dd-MM-yyyy format)
 const calculateAge = (dobString: string) => {
   const parts = dobString.split("-");
   if (parts.length !== 3) return 0;
@@ -110,21 +111,11 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
         );
         const today = new Date();
 
-        let status = "Sắp tới";
-        if (
-          appointmentDate.getDate() === today.getDate() &&
-          appointmentDate.getMonth() === today.getMonth() &&
-          appointmentDate.getFullYear() === today.getFullYear()
-        ) {
-          status = "Đang diễn ra";
-        } else if (appointmentDate < today) {
-          status = "Đã kết thúc";
-        }
-
         // Map patients data
         const transformedPatients = responseData.patients.map(
           (patient: any) => ({
-            id: patient.user_info.id,
+            id: patient.user_info.userId,
+            numericalOrder: patient.book_appointment.numericalOrder.toString(),
             medicalId: patient.user_info.userId.substring(0, 10),
             name: `${patient.user_info.lastName} ${patient.user_info.firstName}`,
             age: calculateAge(patient.user_info.dob),
@@ -178,24 +169,6 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
   }
 
   /**
-   * Xác định màu cho trạng thái ca khám
-   * @param status - Trạng thái ca khám
-   * @returns Màu tương ứng với trạng thái
-   */
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Đang diễn ra":
-        return "success";
-      case "Đã kết thúc":
-        return "default";
-      case "Sắp tới":
-        return "info";
-      default:
-        return "default";
-    }
-  };
-
-  /**
    * Lọc danh sách bệnh nhân theo ID khám
    * @returns Danh sách bệnh nhân đã được lọc theo ID khám
    */
@@ -203,7 +176,9 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
     searchQuery.trim() === ""
       ? appointment.registeredPatients
       : appointment.registeredPatients.filter((patient: any) =>
-          patient.medicalId.toLowerCase().includes(searchQuery.toLowerCase())
+          patient.numericalOrder
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
         );
 
   /**
@@ -231,14 +206,52 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
   };
 
   /**
+   * Kiểm tra xem một ngày đã qua hay chưa (dùng để kiểm soát nút "Khám")
+   */
+  const isPastDate = (dateString: string): boolean => {
+    // Chuyển đổi chuỗi ngày thành đối tượng Date
+    const parts = dateString.split("-");
+    const date = new Date(
+      parseInt(parts[2]), // year
+      parseInt(parts[1]) - 1, // month (0-based)
+      parseInt(parts[0]) // day
+    );
+    // So sánh với ngày hiện tại (loại bỏ giờ, phút, giây)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date < today;
+  };
+
+  /**
    * Xử lý chuyển đến phòng khám trực tuyến
-   * @param patientId - ID của bệnh nhân
    */
   const handleStartExamination = (patientId: number) => {
-    // Create an examination room ID using appointment and patient information
-    const roomId = `${appointmentId}-patient-${patientId}`;
-    // Navigate to the virtual examination room
-    navigate(`/doctor/examination/${roomId}`);
+    if (!appointment || !appointmentId) {
+      console.error("Không có thông tin ca khám hợp lệ");
+      alert(
+        "Không thể mở phòng khám do thiếu thông tin ca khám. Vui lòng thử lại."
+      );
+      return;
+    }
+
+    // Kiểm tra xem ngày khám đã qua chưa
+    const isDateInPast = isPastDate(appointment.date);
+    if (isDateInPast) {
+      // console.error("Không thể khám cho ngày đã qua");
+      alert("Không thể bắt đầu khám do ngày đã qua");
+      return;
+    }
+
+    // Tạo URL phòng khám với ID lịch và ID bệnh nhân
+    const examRoomPath = ROUTING.EXAMINATION_ROOM.replace(
+      ":scheduleId",
+      appointmentId.toString()
+    );
+
+    // console.log(`Đang chuyển hướng đến phòng khám: ${examRoomPath}`);
+
+    // Mở trang khám bệnh trong tab mới
+    window.open(examRoomPath, "_blank");
   };
 
   return (
@@ -258,12 +271,6 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
             mb={2}
           >
             <Typography variant="h5">Thông tin ca khám</Typography>
-            {/* Hiển thị trạng thái ca khám */}
-            <Chip
-              label={appointment.status}
-              color={getStatusColor(appointment.status) as any}
-              sx={{ fontWeight: "bold" }}
-            />
           </Box>
 
           {/* Thông tin chi tiết ca khám: ngày, giờ, địa điểm */}
@@ -311,7 +318,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
               variant="contained"
               color="success"
               startIcon={<VideocamIcon />}
-              onClick={() => navigate(`/doctor/examination/${appointmentId}`)}
+              onClick={handleStartExamination}
             >
               Bắt đầu ca khám
             </Button>
@@ -344,7 +351,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
               fullWidth
               variant="outlined"
               size="small"
-              placeholder="Tìm kiếm theo ID khám bệnh nhân (VD: BN001)"
+              placeholder="Tìm kiếm theo stt bệnh nhân"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               InputProps={{
@@ -392,7 +399,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
                             color="primary"
                             sx={{ fontWeight: "medium" }}
                           >
-                            ID khám: {patient.medicalId}
+                            Số thứ tự: {patient.numericalOrder}
                           </Typography>
                           {/* Thông tin cơ bản của bệnh nhân */}
                           <Typography component="span" variant="body2">
@@ -434,7 +441,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
             // Hiển thị khi không có bệnh nhân nào đăng ký hoặc không tìm thấy kết quả
             <Typography variant="body1" textAlign="center" py={3}>
               {searchQuery.trim() !== ""
-                ? "Không tìm thấy bệnh nhân nào với ID khám này"
+                ? "Không tìm thấy bệnh nhân nào với stt khám này"
                 : "Chưa có bệnh nhân đăng ký ca khám này"}
             </Typography>
           )}

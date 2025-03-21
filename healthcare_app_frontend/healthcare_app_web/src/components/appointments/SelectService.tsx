@@ -13,7 +13,7 @@ import {
 import { useTranslation } from "react-i18next";
 // import { getSpecialties } from "../../services/specialty_service";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
-import { getAllTypeDiseases } from "../../services/typeDisease_service.ts";
+import { getAllTypeDiseases } from "../../services/authenticate/typeDisease_service.ts";
 
 interface SelectSpecialtyProps {
   onSelect: (specialty: any) => void;
@@ -33,10 +33,12 @@ const SelectService: React.FC<SelectSpecialtyProps> = ({ onSelect }) => {
         setError(null);
 
         // Simulate network delay
-        const result: object = await getAllTypeDiseases().then(response => response.data.data).catch(error => {
-          console.log(error);
-          return null;
-        })
+        const result: object = await getAllTypeDiseases()
+          .then((response) => response.data.data)
+          .catch((error) => {
+            console.log(error);
+            return null;
+          });
 
         // Use mock data instead of API call
         // const response = await getSpecialties();

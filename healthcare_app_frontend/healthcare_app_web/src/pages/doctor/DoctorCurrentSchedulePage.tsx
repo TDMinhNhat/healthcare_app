@@ -28,16 +28,13 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import CloseIcon from "@mui/icons-material/Close";
 import HomeIcon from "@mui/icons-material/Home";
-import { ROUTING } from "../../constants/routing"; // Import ROUTING constants
+import { ROUTING } from "../../constants/routing"; // Import hằng số ROUTING
 import {
   format,
   addDays, // Thêm số ngày vào ngày hiện tại
-  startOfWeek, // trả về ngày thứ 2 của tuần
+  startOfWeek, // Trả về ngày thứ 2 của tuần
   addWeeks,
   subWeeks,
-  getYear,
-  getMonth,
-  isSameDay,
 } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
@@ -48,7 +45,7 @@ import {
 } from "../../utils/dateUtils";
 import { getWorkScheduleBetweenDate } from "../../services/authenticate/workSchedule_service.ts";
 
-// Interface Shift - phù hợp với mô hình cơ sở dữ liệu
+// Giao diện Shift - phù hợp với mô hình cơ sở dữ liệu
 interface Shift {
   id: number;
   shift: number;
@@ -59,13 +56,13 @@ interface Shift {
   updatedAt?: string; // Thêm theo mô hình
 }
 
-// Interface Doctor - đơn giản hóa từ API
+// Giao diện Doctor - đơn giản hóa từ API
 interface Doctor {
   id: number;
   // Các thông tin khác của bác sĩ nếu cần
 }
 
-// Interface WorkSchedule - phù hợp với mô hình cơ sở dữ liệu
+// Giao diện WorkSchedule - phù hợp với mô hình cơ sở dữ liệu
 interface WorkSchedule {
   id: number;
   doctor: Doctor;
@@ -79,8 +76,18 @@ interface WorkSchedule {
   totalBook?: number; // Số lượng cuộc hẹn hiện tại
 }
 
-// Map date strings (dd-MM-yyyy) to arrays of work schedules - more efficient structure
+// Ánh xạ chuỗi ngày (dd-MM-yyyy) đến mảng lịch làm việc - cấu trúc hiệu quả hơn
 type ScheduleMap = Record<string, WorkSchedule[]>;
+
+// Kiểm tra xem một ngày đã qua hay chưa (dùng để kiểm soát nút "Khám")
+const isPastDate = (dateString: string): boolean => {
+  // Chuyển đổi chuỗi ngày thành đối tượng Date
+  const date = parseDateFromString(dateString);
+  // So sánh với ngày hiện tại (loại bỏ giờ, phút, giây)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Đặt giờ, phút, giây, mili giây về 0
+  return date < today;
+};
 
 // Định nghĩa các ngày trong tuần với nhãn
 const DAYS_OF_WEEK = [
@@ -103,15 +110,12 @@ const DoctorCurrentSchedulePage: React.FC = () => {
     startOfWeek(today, { weekStartsOn: 1 })
   );
 
-  // Replace DateSchedule[] with a more efficient mapping
+  // Thay thế DateSchedule[] bằng cách ánh xạ hiệu quả hơn
   const [scheduleMap, setScheduleMap] = useState<ScheduleMap>({});
 
-  // State cho modal calendar
+  // State cho modal lịch
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [currentMonth, setCurrentMonth] = useState(getMonth(new Date()));
-  const [currentYear, setCurrentYear] = useState(getYear(new Date()));
-
   // Lấy thông tin người dùng
   const user = JSON.parse((localStorage.getItem("user") as string) || "{}");
 
@@ -171,7 +175,8 @@ const DoctorCurrentSchedulePage: React.FC = () => {
         // Tính ngày bắt đầu và kết thúc của tuần hiện tại
         const startDate = format(currentWeekStart, "dd-MM-yyyy");
         const endDate = format(addDays(currentWeekStart, 6), "dd-MM-yyyy");
-
+        console.log("Ngày bắt đầu:", startDate);
+        console.log("Ngày kết thúc:", endDate);
         // Gọi API với khoảng thời gian của tuần
         const response = await getWorkScheduleBetweenDate(
           user.userId,
@@ -179,7 +184,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
           endDate
         );
         const result = response.data.data || [];
-        console.log("Work schedules:", result);
+        console.log("Lịch làm việc:", result);
 
         // Tạo object để lưu trữ lịch theo ngày - cấu trúc đơn giản hơn
         const newScheduleMap: ScheduleMap = {};
@@ -187,7 +192,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
         // Xử lý dữ liệu trả về từ API
         result.forEach((i: any) => {
           const item = i.workSchedule;
-          // console.log("Item:", item);
+          // console.log("Mục:", item);
           // Kiểm tra dữ liệu hợp lệ
           if (!item.dateAppointment) {
             console.error("Thiếu ngày hẹn trong mục lịch làm việc:", item);
@@ -197,7 +202,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
           // Chuyển đổi định dạng ngày từ API (yyyy-MM-dd) sang định dạng UI (dd-MM-yyyy)
           const dateFromAPI = item.dateAppointment;
           // Chuyển thành dd-MM-yyyy
-          // console.log("Date string:", dateFromAPI);
+          // console.log("Chuỗi ngày:", dateFromAPI);
           // Xử lý thông tin ca làm việc từ API
           const shiftData = item.shift;
 
@@ -245,7 +250,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
           }
           newScheduleMap[dateFromAPI].push(workSchedule);
         });
-        // console.log("New schedule map:", newScheduleMap);
+        // console.log("Bản đồ lịch mới:", newScheduleMap);
         setScheduleMap(newScheduleMap);
       } catch (error) {
         console.error("Lỗi khi lấy lịch làm việc:", error);
@@ -263,8 +268,8 @@ const DoctorCurrentSchedulePage: React.FC = () => {
   // Kiểm tra xem một ngày có ca 1 không
   const hasShift1 = (date: string): boolean => {
     const schedules = getSchedulesForDate(date);
-    // console.log("Checking shift 1 for date:", schedules);
-    // console.log("schedule map", scheduleMap);
+    // console.log("Kiểm tra ca 1 cho ngày:", schedules);
+    // console.log("Bản đồ lịch", scheduleMap);
     return schedules.some((schedule) => schedule.shift.shift === 1);
   };
 
@@ -304,44 +309,44 @@ const DoctorCurrentSchedulePage: React.FC = () => {
 
   // Xử lý chuyển hướng đến trang chi tiết ca khám
   const handleAppointmentClick = (date: string, shift: number) => {
-    // Get the work schedule for the selected shift
+    // Lấy lịch làm việc cho ca đã chọn
     const schedule =
       shift === 1 ? getShift1Schedule(date) : getShift2Schedule(date);
 
     if (schedule) {
-      // Navigate using the actual work schedule ID
+      // Điều hướng sử dụng ID lịch làm việc thực tế
       navigate(`/doctor/appointments/${schedule.id}`);
     } else {
       console.error("Không tìm thấy thông tin ca làm việc");
     }
   };
 
-  // Handle navigation to examination room
+  // Xử lý điều hướng đến phòng khám
   const handleExamination = (date: string, shift: number) => {
-    // Get the work schedule for the selected shift
+    // Lấy lịch làm việc cho ca đã chọn
     const schedule =
       shift === 1 ? getShift1Schedule(date) : getShift2Schedule(date);
 
-    // Navigate to the virtual examination room
+    // Điều hướng đến phòng khám ảo
     if (schedule && schedule.id) {
       console.log(
-        `Navigating to examination room with schedule ID: ${schedule.id}`
+        `Đang chuyển hướng đến phòng khám với ID lịch: ${schedule.id}`
       );
 
-      // Create the URL using ROUTING constant and replace the parameter
+      // Tạo URL sử dụng hằng số ROUTING và thay thế tham số
       const examRoomPath = ROUTING.EXAMINATION_ROOM.replace(
         ":scheduleId",
         schedule.id.toString()
       );
 
-      // Open the examination page in a new tab with the proper routing
+      // Mở trang khám bệnh trong tab mới với định tuyến phù hợp
       window.open(examRoomPath, "_blank");
     } else {
       console.error(
         "Không tìm thấy thông tin ca làm việc hoặc ID không hợp lệ",
         schedule
       );
-      // Show an alert to the user
+      // Hiển thị cảnh báo cho người dùng
       alert(
         "Không thể mở phòng khám do thiếu thông tin lịch làm việc. Vui lòng thử lại."
       );
@@ -385,15 +390,8 @@ const DoctorCurrentSchedulePage: React.FC = () => {
 
     if (!shiftSchedule) return null;
 
-    // Calculate fill rate for color indication
-    const fillRate = shiftSchedule.totalBook / shiftSchedule.maxSlots;
-    let statusColor = "success.main";
-
-    if (fillRate >= 0.8) {
-      statusColor = "error.main"; // Red when nearly full
-    } else if (fillRate >= 0.5) {
-      statusColor = "warning.main"; // Orange when half full
-    }
+    // Kiểm tra xem ngày đã qua chưa
+    const isDateInPast = isPastDate(date);
 
     return (
       <Box
@@ -407,14 +405,14 @@ const DoctorCurrentSchedulePage: React.FC = () => {
           gap: 0.75,
         }}
       >
-        {/* Appointment count chip - larger size */}
+        {/* Chip hiển thị số cuộc hẹn - kích thước lớn */}
         <Chip
           label={`${shiftSchedule.totalBook}/${shiftSchedule.maxSlots} cuộc hẹn`}
           size="small"
           sx={{
             bgcolor: "background.paper",
-            color: statusColor,
-            border: `1px solid ${statusColor}`,
+            color: "success.main",
+            border: `1px solid success.main`,
             fontSize: "0.8rem",
             fontWeight: "bold",
             width: "135px",
@@ -422,7 +420,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
           }}
         />
 
-        {/* Button container with vertical layout and larger buttons */}
+        {/* Container nút với bố cục dọc và nút lớn hơn */}
         <Stack
           direction="column"
           spacing={0.5}
@@ -448,51 +446,37 @@ const DoctorCurrentSchedulePage: React.FC = () => {
             size="small"
             color="success"
             onClick={() => handleExamination(date, shift)}
+            disabled={isDateInPast}
+            title={isDateInPast ? "Không thể khám cho ngày đã qua" : ""}
             sx={{
               fontSize: "0.8rem",
               py: 0.25,
               height: "28px",
               fontWeight: "bold",
+              ...(isDateInPast && {
+                opacity: 0.6,
+                cursor: "not-allowed", // Vô hiệu hóa nút
+              }),
             }}
           >
-            Khám
+            {isDateInPast ? "Đã qua" : "Khám"}
           </Button>
         </Stack>
       </Box>
     );
   };
 
-  // Mở calendar modal
+  // Mở modal lịch
   const handleOpenCalendar = () => {
     setCalendarOpen(true);
   };
 
-  // Đóng calendar modal
+  // Đóng modal lịch
   const handleCloseCalendar = () => {
     setCalendarOpen(false);
   };
 
-  // Chuyển đến tháng trước
-  const handlePrevMonth = () => {
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear(currentYear - 1);
-    } else {
-      setCurrentMonth(currentMonth - 1);
-    }
-  };
-
-  // Chuyển đến tháng sau
-  const handleNextMonth = () => {
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear(currentYear + 1);
-    } else {
-      setCurrentMonth(currentMonth + 1);
-    }
-  };
-
-  // Xử lý khi chọn ngày từ calendar
+  // Xử lý khi chọn ngày từ lịch
   const handleDateSelect = (date: Date) => {
     setCurrentDate(date);
     // Lấy tuần chứa ngày đã chọn (từ thứ 2)
@@ -571,7 +555,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
         </Stack>
       </Paper>
 
-      {/* Calendar Modal */}
+      {/* Modal lịch */}
       <Modal
         open={calendarOpen}
         onClose={handleCloseCalendar}

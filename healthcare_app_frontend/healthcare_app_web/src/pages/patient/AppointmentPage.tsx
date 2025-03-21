@@ -108,6 +108,27 @@ const SHIFTS: Record<string, Shift> = {
   CA2: { id: 2, shift: 2, start: "13:00", end: "17:00", status: true }, // Ca chiều
 };
 
+/**
+ * Trang Quản Lý Lịch Hẹn Khám Bệnh dành cho bệnh nhân
+ *
+ * Luồng hoạt động:
+ * 1. Hiển thị danh sách các lịch hẹn của bệnh nhân với trạng thái khác nhau (sắp tới, đã khám, đã hủy)
+ * 2. Cho phép bệnh nhân đặt lịch hẹn mới thông qua form đặt lịch
+ * 3. Cho phép bệnh nhân xem chi tiết lịch hẹn đã đặt
+ * 4. Cho phép bệnh nhân hủy lịch hẹn nếu lịch hẹn chưa diễn ra
+ * 5. Cho phép bệnh nhân vào phòng chờ khi đến thời gian hẹn
+ *
+ * Kết quả:
+ * - Hiển thị trạng thái lịch hẹn của bệnh nhân trong bảng lịch tuần
+ * - Đặt lịch mới thành công và hiển thị trong danh sách
+ *
+ * Xử lý dữ liệu:
+ * - Sử dụng React Query để quản lý việc gọi API và cache dữ liệu
+ * - Cập nhật trạng thái lịch hẹn theo thời gian thực qua socket.io (nếu cần)
+ * - Xử lý phân trang cho danh sách lịch hẹn khi quá nhiều
+ * - Lưu trữ form đặt lịch trong local storage để tránh mất dữ liệu khi reload
+ */
+
 const AppointmentPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -121,8 +142,6 @@ const AppointmentPage = () => {
   );
   const [calendarOpen, setCalendarOpen] = useState(false); // Trạng thái hiển thị modal calendar
   const [currentDate, setCurrentDate] = useState(new Date()); // Ngày hiện tại đang chọn
-  const [currentMonth, setCurrentMonth] = useState(getMonth(new Date())); // Tháng hiện tại
-  const [currentYear, setCurrentYear] = useState(getYear(new Date())); // Năm hiện tại
 
   // State quản lý dữ liệu lịch hẹn
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -321,11 +340,11 @@ const AppointmentPage = () => {
       if (appointment.date !== date) return false;
 
       // Kiểm tra xem lịch hẹn có thuộc ca đã chỉ định không
-      const hour = parseInt(appointment.startTime.split(":")[0]);
-      if (shift === 1 && hour >= 7 && hour <= 11) {
+      // const hour = parseInt(appointment.startTime.split(":")[0]);
+      if (shift === 1 && appointment.shiftId === 1) {
         return true;
       }
-      if (shift === 2 && hour >= 13 && hour <= 17) {
+      if (shift === 2 && appointment.shiftId === 2) {
         return true;
       }
 
@@ -335,17 +354,19 @@ const AppointmentPage = () => {
     return filtered;
   };
 
-  // Navigate to appointment details page
+  // Điều hướng đến trang chi tiết cuộc hẹn khi người dùng nhấp vào một cuộc hẹn cụ thể
   const handleAppointmentClick = (appointmentId: number) => {
     navigate(`/patient/appointments/${appointmentId}`);
   };
 
-  // Determine if an appointment is eligible for video examination
+  // Xác định xem một cuộc hẹn có đủ điều kiện để tham gia phòng khám trực tuyến hay không
+  // Chỉ các cuộc hẹn có trạng thái "ĐANG CHỜ" hoặc "ĐANG KHÁM" mới có thể tham gia
   const canJoinExamination = (status: string) => {
     return status === "IN_PROGRESS" || status === "WAITING";
   };
 
-  // Handle joining examination room
+  // Xử lý sự kiện khi người dùng muốn tham gia phòng khám trực tuyến
+  // Điều hướng người dùng đến phòng chờ khám với thông tin bác sĩ và số thứ tự
   const handleJoinExamination = (
     appointmentId: number,
     event: React.MouseEvent,
@@ -391,7 +412,7 @@ const AppointmentPage = () => {
         title={
           <>
             <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-              ID: {appointment.id}
+              STT: {appointment.numericalOrder}
             </Typography>
             <Typography variant="body2">
               Bác sĩ: {appointment.doctorName}
@@ -633,7 +654,8 @@ const AppointmentPage = () => {
                           display="block"
                           color="textSecondary"
                         >
-                          {SHIFTS.CA1.start} - {SHIFTS.CA1.end}
+                          {formatTime(SHIFTS.CA1.start)} -{" "}
+                          {formatTime(SHIFTS.CA1.end)}
                         </Typography>
                       </TableCell>
 
@@ -649,6 +671,7 @@ const AppointmentPage = () => {
                               minHeight: "100px",
                               display: "flex",
                               flexDirection: "column",
+                              justifyContent: "center",
                             }}
                           >
                             {getAppointmentsForDateAndShift(
@@ -667,7 +690,11 @@ const AppointmentPage = () => {
                               <Typography
                                 variant="caption"
                                 color="text.secondary"
-                                sx={{ fontStyle: "italic", py: 3 }}
+                                sx={{
+                                  fontStyle: "italic",
+                                  py: 3,
+                                  alignItems: "center",
+                                }}
                               >
                                 Không có lịch hẹn
                               </Typography>
@@ -686,7 +713,8 @@ const AppointmentPage = () => {
                           display="block"
                           color="textSecondary"
                         >
-                          {SHIFTS.CA2.start} - {SHIFTS.CA2.end}
+                          {formatTime(SHIFTS.CA2.start)} -{" "}
+                          {formatTime(SHIFTS.CA2.end)}
                         </Typography>
                       </TableCell>
 
