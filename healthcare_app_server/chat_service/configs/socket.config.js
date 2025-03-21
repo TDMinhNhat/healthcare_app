@@ -15,6 +15,8 @@ const run = (server) => {
         socket.on("doctorJoinRoom", (data) => {
             socket.join("clinic: " + data.scheduleId);
             socket.join("waiting: " + data.scheduleId);
+
+            socket.to("waiting: " + data.scheduleId).emit("doctorJoined", data);
         })
 
         //The doctor accepts a patient join the call room
