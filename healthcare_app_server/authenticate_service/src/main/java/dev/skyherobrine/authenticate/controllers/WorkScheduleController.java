@@ -96,8 +96,8 @@ public class WorkScheduleController {
         try {
             log.info("Work Schedule: Call the api get work schedule by between day");
             var result = workScheduleRepository.findByDateAppointmentBetween(
-                    LocalDate.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy")),
-                    LocalDate.parse(end, DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                    LocalDate.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy")).minusDays(1L),
+                    LocalDate.parse(end, DateTimeFormatter.ofPattern("dd-MM-yyyy")).plusDays(1L)
             );
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
@@ -126,8 +126,8 @@ public class WorkScheduleController {
             List<Map<String,Object>> result = new ArrayList<>();
             workScheduleRepository.findByDoctor_UserIdAndDateAppointmentBetween(
                     doctorId,
-                    LocalDate.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy")),
-                    LocalDate.parse(end, DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                    LocalDate.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy")).minusDays(1L),
+                    LocalDate.parse(end, DateTimeFormatter.ofPattern("dd-MM-yyyy")).plusDays(1L)
             ).forEach(workSchedule -> {
                 Map<String,Object> data = new HashMap<>();
                 data.put("workSchedule", workSchedule);

@@ -40,8 +40,8 @@ public class WorkScheduleRequestConsumer {
             String end = node.get("end").asText();
 
             List<WorkSchedule> result = workScheduleRepository.findByDateAppointmentBetween(
-                    LocalDate.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy")),
-                    LocalDate.parse(end, DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                    LocalDate.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy")).minusDays(1L),
+                    LocalDate.parse(end, DateTimeFormatter.ofPattern("dd-MM-yyyy")).plusDays(1L)
             );
             kafkaTemplate.send("response_get_work_schedule_by_between", ObjectParser.convertObjectToJson(result)).get();
             kafkaTemplate.flush();
