@@ -21,10 +21,10 @@ import PatientDashboard from "../pages/patient/PatientDashboard";
 import AppointmentPage from "../pages/patient/AppointmentPage";
 import DoctorSchedulePage from "../pages/doctor/DoctorSchedulePage";
 import DoctorCurrentSchedulePage from "../pages/doctor/DoctorCurrentSchedulePage";
-import PatientMedicalRecordsListPage from "../pages/patient/PatientMedicalRecordsListPage";
 import ExaminationRoomPage from "../pages/ExaminationRoomPage"; // Import from new location
 import WaitingRoomPage from "../pages/patient/WatingRoomPage";
 import PatientManagementPage from "../pages/admin/PatientManagementPage";
+import PatientMedicalRecord from "../pages/patient/PatientMedicalRecord";
 
 // const ChatPage = lazy(() => import("../pages/ChatPage"));
 
@@ -105,7 +105,7 @@ export const AppRoutes = () => {
             />
             <Route
               path={ROUTING.MEDICAL_RECORDS}
-              element={<PatientMedicalRecordsListPage />}
+              element={<PatientMedicalRecord />}
             />
             <Route path={ROUTING.CHAT} element={<div>Chat</div>} />
           </Route>

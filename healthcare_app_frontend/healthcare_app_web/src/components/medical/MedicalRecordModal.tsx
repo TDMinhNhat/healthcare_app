@@ -21,6 +21,8 @@ import {
   Divider,
   TextField,
   Autocomplete,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -28,10 +30,12 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
+import HistoryIcon from "@mui/icons-material/History";
+import MedicalInformationIcon from "@mui/icons-material/MedicalInformation";
 import { MedicalRecord, MedicalRecordDrug, Drug } from "../../types/medical";
 import { User } from "../../types/user";
 import { formatCreatedAtDate } from "../../utils/dateUtils";
-import { createMedicalRecord } from "../../services/medical_record_service";
+import { createMedicalRecord } from "../../services/appointment/medical_record_service";
 
 // Mock drugs data for the autocomplete
 const MOCK_DRUGS: Drug[] = [
@@ -73,12 +77,7 @@ const MOCK_PATIENT: User = {
 // Mock medical record data
 const MOCK_MEDICAL_RECORD: MedicalRecord = {
   id: 1,
-  appointment: {
-    id: 101,
-    patient: "patient-001",
-    doctor: "Dr. Nguyễn Bá Thành",
-    roomId: "room-101",
-  },
+  doctorName: "Dr. Nguyễn Bá Thành", // Single field replacing appointment object
   roomId: "room-101",
   diagnosisDisease: "Tăng huyết áp độ 1",
   note: "Bệnh nhân cần theo dõi huyết áp hàng ngày, giảm lượng muối trong khẩu phần ăn và tập thể dục đều đặn.",
@@ -109,11 +108,111 @@ const MOCK_MEDICAL_RECORD: MedicalRecord = {
   status: "DONE",
 };
 
+// Mock patient history data
+const MOCK_PATIENT_HISTORY = [
+  {
+    id: 1,
+    doctorName: "Dr. Nguyễn Bá Thành",
+    diagnosisDisease: "Tăng huyết áp độ 1",
+    createdAt: "20-07-2023-09-30-00",
+    status: "DONE",
+  },
+  {
+    id: 2,
+    doctorName: "Dr. Trần Minh Tuấn",
+    diagnosisDisease: "Nhiễm trùng họng",
+    createdAt: "15-06-2023-14-00-00",
+    status: "DONE",
+  },
+  {
+    id: 3,
+    doctorName: "Dr. Lê Thị Hương",
+    diagnosisDisease: "Đau lưng cấp tính",
+    createdAt: "02-05-2023-10-15-00",
+    status: "DONE",
+  },
+  {
+    id: 4,
+    doctorName: "Dr. Nguyễn Bá Thành",
+    diagnosisDisease: "Khám sức khỏe định kỳ",
+    createdAt: "10-01-2023-08-30-00",
+    status: "DONE",
+  },
+];
+
+// Simplified mock history detail (removed vitalSigns, clinicalSymptoms, testResults)
+const MOCK_HISTORY_DETAIL = {
+  id: 2,
+  doctorName: "Dr. Trần Minh Tuấn",
+  roomId: "room-103",
+  diagnosisDisease: "Nhiễm trùng họng",
+  note: "Bệnh nhân có triệu chứng đau họng, sốt nhẹ, và khó nuốt. Kết quả xét nghiệm chỉ ra nhiễm streptococcus.",
+  reExaminationDate: "2023-06-22",
+  createdAt: "15-06-2023-14-00-00",
+  drugs: [
+    {
+      drug: {
+        id: 2,
+        drugName: "Amoxicillin",
+        unit: "viên",
+      },
+      medicalRecord: null,
+      howUse: "Uống 1 viên, ngày 2 lần sau bữa ăn",
+      quantity: 20,
+    },
+    {
+      drug: {
+        id: 4,
+        drugName: "Cetirizine",
+        unit: "viên",
+      },
+      medicalRecord: null,
+      howUse: "Uống 1 viên mỗi tối trước khi ngủ",
+      quantity: 10,
+    },
+    {
+      drug: {
+        id: 10,
+        drugName: "Vitamin C",
+        unit: "viên",
+      },
+      medicalRecord: null,
+      howUse: "Uống 1 viên mỗi ngày sau bữa sáng",
+      quantity: 30,
+    },
+  ],
+  status: "DONE",
+};
+
 interface MedicalRecordModalProps {
   open: boolean;
   onClose: () => void;
   appointmentId: number | null;
   isDoctor?: boolean;
+  roomId?: string;
+}
+
+// Interface for TabPanel component
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`medical-tabpanel-${index}`}
+      aria-labelledby={`medical-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
+    </div>
+  );
 }
 
 const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
@@ -132,6 +231,10 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<number>(0);
+  const [selectedHistoryRecord, setSelectedHistoryRecord] = useState<
+    number | null
+  >(null);
 
   // Các trường dữ liệu chỉnh sửa
   const [diagnosisDisease, setDiagnosisDisease] = useState<string>("");
@@ -226,10 +329,12 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
         drugs,
       };
 
-      const result: object = await createMedicalRecord(updatedRecord).then(response => response.data.data).catch(error => {
-        console.error(error);
-        return null;
-      })
+      const result: object = await createMedicalRecord(updatedRecord)
+        .then((response) => response.data.data)
+        .catch((error) => {
+          console.error(error);
+          return null;
+        });
 
       console.log(result);
 
@@ -289,6 +394,22 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
       default:
         return status;
     }
+  };
+
+  // Handle tab change
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+    // Reset selected history record when switching to history tab
+    if (newValue === 1) {
+      setSelectedHistoryRecord(null);
+    }
+  };
+
+  // Handle history record selection
+  const handleSelectHistoryRecord = (recordId: number) => {
+    // In a real app, this would fetch the details of the selected record
+    setSelectedHistoryRecord(recordId);
+    // For demo purposes, we're showing mock data for record #2
   };
 
   return (
@@ -367,247 +488,444 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
 
             <Divider sx={{ my: 1 }} />
 
-            {/* Thông tin lịch hẹn (không chỉnh sửa được) */}
-            {medicalRecord && (
-              <>
-                <Typography
-                  variant="subtitle1"
-                  sx={{ fontWeight: "bold", mb: 1, mt: 2 }}
-                >
-                  THÔNG TIN LỊCH HẸN
-                </Typography>
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="body2">
-                      <strong>Ngày khám:</strong>{" "}
-                      {formatCreatedAtDate(medicalRecord.createdAt)}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="body2">
-                      <strong>Bác sĩ khám:</strong>{" "}
-                      {medicalRecord.appointment.doctor}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="body2">
-                      <strong>Phòng khám:</strong> {medicalRecord.roomId}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="body2">
-                      <strong>Trạng thái:</strong>{" "}
-                      <Chip
-                        label={getStatusLabel(medicalRecord.status)}
-                        size="small"
-                        color={
-                          medicalRecord.status === "DONE"
-                            ? "success"
-                            : "default"
-                        }
-                      />
-                    </Typography>
-                  </Grid>
-                </Grid>
+            {/* Tab Navigation */}
+            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+              <Tabs
+                value={activeTab}
+                onChange={handleTabChange}
+                aria-label="medical record tabs"
+                variant="fullWidth"
+              >
+                <Tab
+                  icon={<MedicalInformationIcon />}
+                  iconPosition="start"
+                  label="Ca Khám Hiện Tại"
+                  id="medical-tab-0"
+                />
+                <Tab
+                  icon={<HistoryIcon />}
+                  iconPosition="start"
+                  label="Lịch Sử Khám Bệnh"
+                  id="medical-tab-1"
+                />
+              </Tabs>
+            </Box>
 
-                <Divider sx={{ my: 1 }} />
-
-                {/* Phần chẩn đoán - có thể chỉnh sửa */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
+            {/* Current Record Tab */}
+            <TabPanel value={activeTab} index={0}>
+              {/* Thông tin lịch hẹn (không chỉnh sửa được) */}
+              {medicalRecord && (
+                <>
                   <Typography
                     variant="subtitle1"
                     sx={{ fontWeight: "bold", mb: 1, mt: 2 }}
                   >
-                    CHẨN ĐOÁN
+                    THÔNG TIN LỊCH HẸN
                   </Typography>
-                </Box>
-
-                {isEditing ? (
-                  // Chế độ chỉnh sửa
-                  <Box sx={{ mb: 2, px: 1 }}>
-                    <TextField
-                      fullWidth
-                      label="Bệnh được chẩn đoán"
-                      value={diagnosisDisease}
-                      onChange={(e) => setDiagnosisDisease(e.target.value)}
-                      margin="dense"
-                    />
-                    <TextField
-                      fullWidth
-                      label="Ghi chú"
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                      margin="dense"
-                      multiline
-                      rows={3}
-                    />
-                    <TextField
-                      fullWidth
-                      label="Ngày tái khám"
-                      type="date"
-                      value={reExaminationDate}
-                      onChange={(e) => setReExaminationDate(e.target.value)}
-                      margin="dense"
-                      InputLabelProps={{ shrink: true }}
-                    />
-                  </Box>
-                ) : (
-                  // Chế độ xem
-                  <Box sx={{ mb: 2, px: 1 }}>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      <strong>Bệnh được chẩn đoán:</strong>{" "}
-                      {diagnosisDisease || "-"}
-                    </Typography>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      <strong>Ghi chú:</strong> {note || "-"}
-                    </Typography>
-                    <Typography variant="body2">
-                      <strong>Ngày tái khám:</strong>{" "}
-                      {reExaminationDate || "Không có lịch tái khám"}
-                    </Typography>
-                  </Box>
-                )}
-
-                <Divider sx={{ my: 1 }} />
-
-                {/* Phần thuốc điều trị */}
-                <Typography
-                  variant="subtitle1"
-                  sx={{ fontWeight: "bold", mb: 1, mt: 2 }}
-                >
-                  THUỐC ĐIỀU TRỊ
-                </Typography>
-
-                {/* Phần thêm thuốc mới - chỉ hiện khi đang chỉnh sửa */}
-                {isEditing && isDoctor && (
-                  <Box
-                    sx={{ mb: 2, p: 1, bgcolor: "#f5f5f5", borderRadius: 1 }}
-                  >
-                    <Grid container spacing={2} alignItems="center">
-                      <Grid item xs={12} md={3}>
-                        <Autocomplete
-                          options={MOCK_DRUGS}
-                          getOptionLabel={(option) =>
-                            `${option.drugName} (${option.unit})`
-                          }
-                          value={selectedDrug}
-                          onChange={(_, newValue) => setSelectedDrug(newValue)}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              label="Tên thuốc"
-                              size="small"
-                              fullWidth
-                            />
-                          )}
-                        />
-                      </Grid>
-                      <Grid item xs={12} md={4}>
-                        <TextField
-                          label="Cách dùng"
-                          value={howUse}
-                          onChange={(e) => setHowUse(e.target.value)}
-                          size="small"
-                          fullWidth
-                        />
-                      </Grid>
-                      <Grid item xs={12} md={2}>
-                        <TextField
-                          label="Số lượng"
-                          type="number"
-                          value={drugQuantity}
-                          onChange={(e) =>
-                            setDrugQuantity(parseInt(e.target.value) || 1)
-                          }
-                          InputProps={{ inputProps: { min: 1 } }}
-                          size="small"
-                          fullWidth
-                        />
-                      </Grid>
-                      <Grid item xs={12} md={3}>
-                        <Button
-                          variant="contained"
-                          startIcon={<AddIcon />}
-                          onClick={handleAddDrug}
-                          disabled={!selectedDrug || !howUse.trim()}
-                          fullWidth
-                        >
-                          Thêm Thuốc
-                        </Button>
-                      </Grid>
+                  <Grid container spacing={2} sx={{ mb: 3 }}>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2">
+                        <strong>Ngày khám:</strong>{" "}
+                        {formatCreatedAtDate(medicalRecord.createdAt)}
+                      </Typography>
                     </Grid>
-                  </Box>
-                )}
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2">
+                        <strong>Bác sĩ khám:</strong> {medicalRecord.doctorName}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2">
+                        <strong>Phòng khám:</strong> {medicalRecord.roomId}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2">
+                        <strong>Trạng thái:</strong>{" "}
+                        <Chip
+                          label={getStatusLabel(medicalRecord.status)}
+                          size="small"
+                          color={
+                            medicalRecord.status === "DONE"
+                              ? "success"
+                              : "default"
+                          }
+                        />
+                      </Typography>
+                    </Grid>
+                  </Grid>
 
-                {/* Danh sách thuốc */}
-                {drugs.length > 0 ? (
-                  <TableContainer>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell sx={{ fontWeight: "bold" }}>
-                            Tên thuốc
-                          </TableCell>
-                          <TableCell sx={{ fontWeight: "bold" }}>
-                            Cách dùng
-                          </TableCell>
-                          <TableCell sx={{ fontWeight: "bold" }}>
-                            Số lượng
-                          </TableCell>
-                          <TableCell sx={{ fontWeight: "bold" }}>
-                            Đơn vị
-                          </TableCell>
-                          {isEditing && isDoctor && (
-                            <TableCell
-                              align="center"
-                              sx={{ fontWeight: "bold" }}
-                            >
-                              Thao tác
+                  <Divider sx={{ my: 1 }} />
+
+                  {/* Phần chẩn đoán - có thể chỉnh sửa */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ fontWeight: "bold", mb: 1, mt: 2 }}
+                    >
+                      CHẨN ĐOÁN
+                    </Typography>
+                  </Box>
+
+                  {isEditing ? (
+                    // Chế độ chỉnh sửa
+                    <Box sx={{ mb: 2, px: 1 }}>
+                      <TextField
+                        fullWidth
+                        label="Bệnh được chẩn đoán"
+                        value={diagnosisDisease}
+                        onChange={(e) => setDiagnosisDisease(e.target.value)}
+                        margin="dense"
+                      />
+                      <TextField
+                        fullWidth
+                        label="Ghi chú"
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        margin="dense"
+                        multiline
+                        rows={3}
+                      />
+                      <TextField
+                        fullWidth
+                        label="Ngày tái khám"
+                        type="date"
+                        value={reExaminationDate}
+                        onChange={(e) => setReExaminationDate(e.target.value)}
+                        margin="dense"
+                        InputLabelProps={{ shrink: true }}
+                      />
+                    </Box>
+                  ) : (
+                    // Chế độ xem
+                    <Box sx={{ mb: 2, px: 1 }}>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>Bệnh được chẩn đoán:</strong>{" "}
+                        {diagnosisDisease || "-"}
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>Ghi chú:</strong> {note || "-"}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Ngày tái khám:</strong>{" "}
+                        {reExaminationDate || "Không có lịch tái khám"}
+                      </Typography>
+                    </Box>
+                  )}
+
+                  <Divider sx={{ my: 1 }} />
+
+                  {/* Phần thuốc điều trị */}
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: "bold", mb: 1, mt: 2 }}
+                  >
+                    THUỐC ĐIỀU TRỊ
+                  </Typography>
+
+                  {/* Phần thêm thuốc mới - chỉ hiện khi đang chỉnh sửa */}
+                  {isEditing && isDoctor && (
+                    <Box
+                      sx={{ mb: 2, p: 1, bgcolor: "#f5f5f5", borderRadius: 1 }}
+                    >
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid item xs={12} md={3}>
+                          <Autocomplete
+                            options={MOCK_DRUGS}
+                            getOptionLabel={(option) =>
+                              `${option.drugName} (${option.unit})`
+                            }
+                            value={selectedDrug}
+                            onChange={(_, newValue) =>
+                              setSelectedDrug(newValue)
+                            }
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Tên thuốc"
+                                size="small"
+                                fullWidth
+                              />
+                            )}
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                          <TextField
+                            label="Cách dùng"
+                            value={howUse}
+                            onChange={(e) => setHowUse(e.target.value)}
+                            size="small"
+                            fullWidth
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={2}>
+                          <TextField
+                            label="Số lượng"
+                            type="number"
+                            value={drugQuantity}
+                            onChange={(e) =>
+                              setDrugQuantity(parseInt(e.target.value) || 1)
+                            }
+                            InputProps={{ inputProps: { min: 1 } }}
+                            size="small"
+                            fullWidth
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                          <Button
+                            variant="contained"
+                            startIcon={<AddIcon />}
+                            onClick={handleAddDrug}
+                            disabled={!selectedDrug || !howUse.trim()}
+                            fullWidth
+                          >
+                            Thêm Thuốc
+                          </Button>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  )}
+
+                  {/* Danh sách thuốc */}
+                  {drugs.length > 0 ? (
+                    <TableContainer>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell sx={{ fontWeight: "bold" }}>
+                              Tên thuốc
                             </TableCell>
-                          )}
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {drugs.map((drug, index) => (
-                          <TableRow key={index}>
-                            <TableCell>{drug.drug.drugName}</TableCell>
-                            <TableCell>{drug.howUse}</TableCell>
-                            <TableCell align="center">
-                              {drug.quantity}
+                            <TableCell sx={{ fontWeight: "bold" }}>
+                              Cách dùng
                             </TableCell>
-                            <TableCell>{drug.drug.unit}</TableCell>
+                            <TableCell sx={{ fontWeight: "bold" }}>
+                              Số lượng
+                            </TableCell>
+                            <TableCell sx={{ fontWeight: "bold" }}>
+                              Đơn vị
+                            </TableCell>
                             {isEditing && isDoctor && (
-                              <TableCell align="center">
-                                <IconButton
-                                  size="small"
-                                  color="error"
-                                  onClick={() => handleRemoveDrug(index)}
-                                >
-                                  <DeleteIcon />
-                                </IconButton>
+                              <TableCell
+                                align="center"
+                                sx={{ fontWeight: "bold" }}
+                              >
+                                Thao tác
                               </TableCell>
                             )}
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                ) : (
+                        </TableHead>
+                        <TableBody>
+                          {drugs.map((drug, index) => (
+                            <TableRow key={index}>
+                              <TableCell>{drug.drug.drugName}</TableCell>
+                              <TableCell>{drug.howUse}</TableCell>
+                              <TableCell align="center">
+                                {drug.quantity}
+                              </TableCell>
+                              <TableCell>{drug.drug.unit}</TableCell>
+                              {isEditing && isDoctor && (
+                                <TableCell align="center">
+                                  <IconButton
+                                    size="small"
+                                    color="error"
+                                    onClick={() => handleRemoveDrug(index)}
+                                  >
+                                    <DeleteIcon />
+                                  </IconButton>
+                                </TableCell>
+                              )}
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  ) : (
+                    <Typography
+                      color="text.secondary"
+                      sx={{ textAlign: "center", py: 2 }}
+                    >
+                      Không có thuốc nào được kê đơn
+                    </Typography>
+                  )}
+                </>
+              )}
+            </TabPanel>
+
+            {/* Patient History Tab */}
+            <TabPanel value={activeTab} index={1}>
+              <Typography
+                variant="subtitle1"
+                sx={{ fontWeight: "bold", mb: 1, mt: 2 }}
+              >
+                LỊCH SỬ KHÁM BỆNH
+              </Typography>
+
+              <TableContainer sx={{ mb: 3 }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: "bold" }}>
+                        Ngày khám
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: "bold" }}>Bác sĩ</TableCell>
+                      <TableCell sx={{ fontWeight: "bold" }}>
+                        Chẩn đoán
+                      </TableCell>
+                      {/* Status column removed */}
+                      <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                        Xem chi tiết
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {MOCK_PATIENT_HISTORY.map((record) => (
+                      <TableRow
+                        key={record.id}
+                        hover
+                        selected={selectedHistoryRecord === record.id}
+                      >
+                        <TableCell>
+                          {formatCreatedAtDate(record.createdAt)}
+                        </TableCell>
+                        <TableCell>{record.doctorName}</TableCell>
+                        <TableCell>{record.diagnosisDisease}</TableCell>
+                        {/* Status cell removed */}
+                        <TableCell align="center">
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => handleSelectHistoryRecord(record.id)}
+                          >
+                            Xem
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              {selectedHistoryRecord && (
+                <Box
+                  sx={{ border: "1px solid #e0e0e0", borderRadius: 1, p: 2 }}
+                >
                   <Typography
-                    color="text.secondary"
-                    sx={{ textAlign: "center", py: 2 }}
+                    variant="subtitle2"
+                    sx={{ fontWeight: "bold", mb: 2 }}
                   >
-                    Không có thuốc nào được kê đơn
+                    Chi tiết ca khám #{selectedHistoryRecord}
                   </Typography>
-                )}
-              </>
-            )}
+
+                  {selectedHistoryRecord === 2 ? (
+                    <>
+                      <Grid container spacing={2} sx={{ mb: 3 }}>
+                        <Grid item xs={12} sm={6}>
+                          <Typography variant="body2">
+                            <strong>Ngày khám:</strong>{" "}
+                            {formatCreatedAtDate(MOCK_HISTORY_DETAIL.createdAt)}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <Typography variant="body2">
+                            <strong>Bác sĩ khám:</strong>{" "}
+                            {MOCK_HISTORY_DETAIL.doctorName}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <Typography variant="body2">
+                            <strong>Phòng khám:</strong>{" "}
+                            {MOCK_HISTORY_DETAIL.roomId}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <Typography variant="body2">
+                            <strong>Ngày tái khám:</strong>{" "}
+                            {MOCK_HISTORY_DETAIL.reExaminationDate ||
+                              "Không có lịch tái khám"}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+
+                      <Divider sx={{ my: 1 }} />
+
+                      {/* Chẩn đoán - simplified compared to current examination */}
+                      <Box sx={{ mb: 2 }}>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{ fontWeight: "bold", mb: 1 }}
+                        >
+                          CHẨN ĐOÁN
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          <strong>Bệnh được chẩn đoán:</strong>{" "}
+                          {MOCK_HISTORY_DETAIL.diagnosisDisease}
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          <strong>Ghi chú:</strong> {MOCK_HISTORY_DETAIL.note}
+                        </Typography>
+                      </Box>
+
+                      <Divider sx={{ my: 1 }} />
+
+                      {/* Thuốc điều trị - simplified view */}
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ fontWeight: "bold", mb: 1 }}
+                      >
+                        THUỐC ĐIỀU TRỊ
+                      </Typography>
+                      <TableContainer>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell sx={{ fontWeight: "bold" }}>
+                                Tên thuốc
+                              </TableCell>
+                              <TableCell sx={{ fontWeight: "bold" }}>
+                                Cách dùng
+                              </TableCell>
+                              <TableCell sx={{ fontWeight: "bold" }}>
+                                Số lượng
+                              </TableCell>
+                              <TableCell sx={{ fontWeight: "bold" }}>
+                                Đơn vị
+                              </TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {MOCK_HISTORY_DETAIL.drugs.map((drug, index) => (
+                              <TableRow key={index}>
+                                <TableCell>{drug.drug.drugName}</TableCell>
+                                <TableCell>{drug.howUse}</TableCell>
+                                <TableCell align="center">
+                                  {drug.quantity}
+                                </TableCell>
+                                <TableCell>{drug.drug.unit}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </>
+                  ) : (
+                    <Typography variant="body2">
+                      Đang tải thông tin chi tiết...
+                      <br />
+                      <i>
+                        (Trong ứng dụng thực tế, đây sẽ hiển thị thông tin chi
+                        tiết của ca khám được chọn)
+                      </i>
+                    </Typography>
+                  )}
+                </Box>
+              )}
+            </TabPanel>
           </Box>
         )}
       </DialogContent>
@@ -615,6 +933,7 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
       <DialogActions>
         {isDoctor &&
           medicalRecord &&
+          activeTab === 0 &&
           (isEditing ? (
             <>
               <Button

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState, useEffect, useCallback } from "react";
 import { LiveRole, ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
-import { useParams, useNavigate } from "react-router"; // Add useNavigate
+import { useParams, useNavigate } from "react-router"; // Thêm useNavigate
 import { useSelector } from "react-redux";
 import { APP_ID, SERVER_SECRET } from "../constants/zegocloud";
 import { io, Socket } from "socket.io-client";
@@ -16,10 +16,14 @@ import {
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
+import MedicalInformationIcon from "@mui/icons-material/MedicalInformation";
+import DoneIcon from "@mui/icons-material/Done";
 import { getAppointmentPatientDetail } from "./../services/appointment/booking_service";
 import { ROUTING } from "../constants/routing";
+// Import component MedicalRecordModal
+import MedicalRecordModal from "../components/medical/MedicalRecordModal";
 
-// Patient interface for queue - Giao diện cho bệnh nhân trong hàng đợi
+// Giao diện cho bệnh nhân trong hàng đợi
 
 /**
  * Trang Phòng Khám dành cho bác sĩ và bệnh nhân
@@ -34,7 +38,7 @@ import { ROUTING } from "../constants/routing";
  * 4. Đối với bệnh nhân:
  *    - Hiển thị chỉ giao diện video call
  *    - Tham gia cuộc gọi theo link được bác sĩ cung cấp
- * 5. Cuộc gọi video diễn ra giữa bác sĩ và bệnh nhânư
+ * 5. Cuộc gọi video diễn ra giữa bác sĩ và bệnh nhân
  *
  * Dữ liệu đầu vào:
  * - scheduleId: ID của lịch hẹn (từ URL params)
@@ -57,7 +61,7 @@ import { ROUTING } from "../constants/routing";
 
 export default function ExaminationRoomPage() {
   const { scheduleId } = useParams<{ scheduleId: string }>();
-  // Add navigate function
+  // Thêm navigate function
   const navigate = useNavigate();
   // Thay đổi: kiểm tra role thay vì roomID
   const [searchParams] = React.useState(
@@ -81,8 +85,18 @@ export default function ExaminationRoomPage() {
   // State for patient queue - Trạng thái cho hàng đợi bệnh nhân
   const [patientQueue, setPatientQueue] = useState<object[]>([]);
   const [bookAppointment, setBookAppointment] = useState<object>();
-  // Add state to track if room has been initialized
+  // Thêm trạng thái để theo dõi nếu phòng đã được khởi tạo
   const [isRoomInitialized, setIsRoomInitialized] = useState<boolean>(false);
+
+  // Trạng thái cho bệnh nhân đang khám hiện tại
+  const [currentPatient, setCurrentPatient] = useState<object | null>(null);
+  // Trạng thái cho modal hồ sơ y tế
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<
+    number | null
+  >(null);
+  // Thêm trạng thái cho bệnh nhân đã khám
+  const [examinedPatients, setExaminedPatients] = useState<object[]>([]);
 
   // Kết nối socket cho giao tiếp thời gian thực
   const [socket, setSocket] = useState<Socket>(
@@ -127,6 +141,18 @@ export default function ExaminationRoomPage() {
           }
         };
         fetchAppointmentDetails();
+
+        // Lắng nghe sự kiện bác sĩ đã khám xong.
+        socket.on("finishExamination", (data) => {
+          console.log("Đã khám xong, chuyển về trang lịch hẹn");
+          navigate(`${ROUTING.PATIENT}/${ROUTING.APPOINTMENTS}`);
+        });
+
+        // Lắng nghe sự kiện bác sĩ rời khỏi phòng khám
+        socket.on("doctorLeaveRoom", () => {
+          console.log("Bác sĩ đã rời khỏi phòng khám");
+          navigate(`${ROUTING.PATIENT}/${ROUTING.APPOINTMENTS}`);
+        });
       } else {
         // Xử lý socket dành riêng cho bác sĩ
         console.log("Bác sĩ đã kết nối với socket:", socket.id);
@@ -170,7 +196,7 @@ export default function ExaminationRoomPage() {
     return () => {
       socket.disconnect();
     };
-  }, [scheduleId, userId, isPatient, patientNameFromURL, userName]);
+  }, [scheduleId, userId, isPatient, patientNameFromURL, userName, navigate]);
 
   // Tạo đường link phòng khám cho bệnh nhân sử dụng role thay vì roomID
   const generateRoomLink = () => {
@@ -191,6 +217,14 @@ export default function ExaminationRoomPage() {
     );
     setPatientQueue(updatedQueue);
 
+    // Set current patient in examination
+    setCurrentPatient(patient);
+
+    // Set appointment ID for medical record
+    // Vấn đề ở đây - cần đảm bảo chúng ta đang đặt một appointmentId hợp lệ
+    // Nếu bệnh nhân có thuộc tính bookAppointmentId, sử dụng nó; nếu không thì dùng userId làm phương án dự phòng
+    setSelectedAppointmentId(patient.bookAppointmentId || patient.userId);
+
     // Send notification to the patient with the room link
     if (socket) {
       const roomLink = generateRoomLink();
@@ -204,6 +238,17 @@ export default function ExaminationRoomPage() {
     }
   };
 
+  // Open medical record modal
+  const handleOpenMedicalRecord = () => {
+    if (currentPatient) {
+      // Đảm bảo chúng ta có một appointmentId hợp lệ trước khi mở modal
+      if (!selectedAppointmentId && currentPatient.userId) {
+        setSelectedAppointmentId(currentPatient.userId);
+      }
+      setIsModalOpen(true);
+    }
+  };
+
   // Remove patient from queue - Xóa bệnh nhân khỏi hàng đợi
   const removePatient = (id: number) => {
     const data = patientQueue.filter((patient) => patient.userId === id);
@@ -213,11 +258,36 @@ export default function ExaminationRoomPage() {
     socket.emit("removeWaitingQueue", data[0]);
   };
 
+  // xử lí hoàn thành khám bệnh, chuyển bệnh nhân vào danh sách đã khám
+  const finishExamination = () => {
+    if (currentPatient) {
+      // Thêm bệnh nhân vào danh sách đã khám
+      setExaminedPatients([
+        ...examinedPatients,
+        {
+          ...currentPatient,
+        },
+      ]);
+
+      socket.emit("finishExamination", {
+        currentPatient,
+      });
+
+      // Clear current patient
+      setCurrentPatient(null);
+
+      // Close medical record if open
+      if (isModalOpen) {
+        setIsModalOpen(false);
+      }
+    }
+  };
+
   // Cài đặt cuộc gọi Zego - Cập nhật để xử lý cho cả bác sĩ và bệnh nhân
   const myMeeting = useCallback(
     async (element) => {
       if (!element) return;
-      // TRánh khởi tạo phòng nếu user out room
+      // Tránh khởi tạo phòng nếu user out room
       if (isRoomInitialized) return;
 
       try {
@@ -265,14 +335,23 @@ export default function ExaminationRoomPage() {
           },
           showRemoveUserButton: !isPatient,
           showPreJoinView: false,
+          showLeavingView: false,
           onLeaveRoom() {
-            console.log("You have left the room");
-            socket.disconnect();
-
             if (isPatient) {
               navigate(`${ROUTING.PATIENT}/${ROUTING.APPOINTMENTS}`);
+            } else {
+              // bác sĩ rời phòng khám thì đóng luôn tab đang mở hiện tại
+              window.close();
+              // gửi sự kiện bác sĩ rời khỏi phòng khám
+              socket.emit("doctorLeaveRoom", {
+                scheduleId,
+                doctorId: userId,
+              });
             }
+            console.log("You have left the room");
+            socket.disconnect();
           },
+          // bác sĩ xoá bệnh nhân ra khỏi phòng dợi
           onYouRemovedFromRoom() {
             console.log("You have been removed from the room");
             socket.disconnect();
@@ -280,7 +359,7 @@ export default function ExaminationRoomPage() {
           },
         });
 
-        // Mark the room as initialized
+        // Đánh dấu phòng đã được khởi tạo
         setIsRoomInitialized(true);
       } catch (error) {
         console.error("Error joining room:", error);
@@ -318,6 +397,62 @@ export default function ExaminationRoomPage() {
             overflowY: "auto",
           }}
         >
+          {/* Bệnh nhân đang khám hiện tại */}
+          {currentPatient && (
+            <>
+              <Typography variant="h5" gutterBottom>
+                Bệnh Nhân Đang Khám
+              </Typography>
+              <Paper
+                elevation={1}
+                sx={{
+                  p: 2,
+                  mb: 3,
+                  borderRadius: 1,
+                  backgroundColor: "#f0f7ff",
+                  border: "1px solid #b3d8ff",
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  component="span"
+                  sx={{ fontWeight: "bold", display: "block", mb: 1 }}
+                >
+                  {currentPatient.name}
+                </Typography>
+                <Chip
+                  label="Đang khám"
+                  color="primary"
+                  variant="outlined"
+                  size="small"
+                  sx={{ mr: 1, mb: 1 }}
+                />
+                <Box sx={{ mt: 1, display: "flex", gap: 1 }}>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<MedicalInformationIcon fontSize="small" />}
+                    onClick={handleOpenMedicalRecord}
+                    sx={{ flex: 1, py: 0.5, fontSize: "0.8rem" }}
+                  >
+                    Hồ Sơ
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="success"
+                    size="small"
+                    startIcon={<DoneIcon fontSize="small" />}
+                    onClick={finishExamination}
+                    sx={{ flex: 1, py: 0.5, fontSize: "0.8rem" }}
+                  >
+                    Hoàn Tất
+                  </Button>
+                </Box>
+              </Paper>
+              <Divider sx={{ mb: 2 }} />
+            </>
+          )}
+
           <Typography variant="h5" gutterBottom>
             Hàng Đợi Bệnh Nhân
           </Typography>
@@ -383,6 +518,62 @@ export default function ExaminationRoomPage() {
               </Typography>
             )}
           </Box>
+
+          {/* Danh sách bệnh nhân đã khám */}
+          {examinedPatients.length > 0 && (
+            <>
+              <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
+                Đã Khám Xong
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+              <Box>
+                {examinedPatients.map((patient, index) => (
+                  <Paper
+                    key={`examined-${index}`}
+                    elevation={1}
+                    sx={{
+                      p: 2,
+                      mb: 1,
+                      borderRadius: 1,
+                      backgroundColor: "#f5fff5",
+                      border: "1px solid #c8e6c9",
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      component="span"
+                      sx={{ fontWeight: "bold", display: "block" }}
+                    >
+                      {patient.name}
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Chip
+                        label="Đã khám"
+                        color="success"
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Box>
+                  </Paper>
+                ))}
+              </Box>
+            </>
+          )}
+
+          {/* Modal hồ sơ y tế */}
+          <MedicalRecordModal
+            open={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            appointmentId={selectedAppointmentId}
+            isDoctor={true}
+            roomId={roomID}
+          />
         </Paper>
       )}
     </Box>
