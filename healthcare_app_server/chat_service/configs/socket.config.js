@@ -16,11 +16,14 @@ const run = (server) => {
         socket.on("doctorJoinRoom", (data) => {
             socket.join("clinic: " + data.scheduleId);
             socket.join("waiting: " + data.scheduleId);
+
+            socket.to("waiting: " + data.scheduleId).emit("doctorJoined", data);
         })
 
         //The doctor accepts a patient join the call room
         socket.on("acceptPatient", (data) => {
             socket.to("waiting: " + data.scheduleId).emit("patientAccepted", data);
+            socket.to("waiting: " + data.scheduleId).emit("queueUpdate", data);
         })
 
         //The doctor rejects a patient join the call room
@@ -44,6 +47,8 @@ const run = (server) => {
 
         //The patient joining the call room
         socket.on("patientJoinRoom", (data) => {
+            socket.to("waiting: " + data.scheduleId).emit("queueUpdate", data);
+
             socket.leave("waiting: " + data.scheduleId);
             socket.join("clinic: " + data.scheduleId);
         })
