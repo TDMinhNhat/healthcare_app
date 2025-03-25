@@ -1,4 +1,5 @@
 const {Server} = require("socket.io");
+const {updateBookAppointmentStatus} = require("../feigns/book-appointment.feign");
 
 const run = (server) => {
     const io = new Server(server, {
@@ -25,6 +26,12 @@ const run = (server) => {
         //The doctor rejects a patient join the call room
         socket.on("removeWaitingQueue", (data) => {
             socket.to("waiting: " + data.scheduleId).emit("removePatient", data);
+        })
+
+        //The doctor was finished the call room
+        socket.on("finishExamination", (data) => {
+            socket.to("clinic: " + data.scheduleId).emit("patientDone", data);
+            updateBookAppointmentStatus(data.bookAppointment.id, "DONE").catch((error) => { console.log(error) });
         })
     }
 
