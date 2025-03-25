@@ -20,7 +20,6 @@ import MedicalInformationIcon from "@mui/icons-material/MedicalInformation";
 import DoneIcon from "@mui/icons-material/Done";
 import { getAppointmentPatientDetail } from "./../services/appointment/booking_service";
 import { ROUTING } from "../constants/routing";
-// Import component MedicalRecordModal
 import MedicalRecordModal from "../components/medical/MedicalRecordModal";
 
 // Giao diện cho bệnh nhân trong hàng đợi
@@ -144,7 +143,7 @@ export default function ExaminationRoomPage() {
 
         // Lắng nghe sự kiện bác sĩ đã khám xong.
         socket.on("patientDone", (data) => {
-          if(data.currentPatient.userId === userId) {
+          if (data.currentPatient.userId === userId) {
             console.log("Đã khám xong, chuyển về trang lịch hẹn");
             navigate(`${ROUTING.PATIENT}/${ROUTING.APPOINTMENTS}`);
           }
@@ -339,17 +338,13 @@ export default function ExaminationRoomPage() {
           showPreJoinView: false,
           showLeavingView: false,
           onLeaveRoom() {
-            if (isPatient) {
-              navigate(`${ROUTING.PATIENT}/${ROUTING.APPOINTMENTS}`);
-            } else {
-              // bác sĩ rời phòng khám thì đóng luôn tab đang mở hiện tại
-              window.close();
-              // gửi sự kiện bác sĩ rời khỏi phòng khám
-              socket.emit("doctorLeaveRoom", {
-                scheduleId,
-                doctorId: userId,
-              });
-            }
+            // bác sĩ rời phòng khám thì đóng luôn tab đang mở hiện tại
+            window.close();
+            // gửi sự kiện bác sĩ rời khỏi phòng khám
+            // socket.emit("doctorLeaveRoom", {
+            //   scheduleId,
+            //   doctorId: userId,
+            // });
             console.log("You have left the room");
             socket.disconnect();
           },

@@ -79,10 +79,13 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   // State để kiểm tra xem có lịch làm việc nào trong ngày đã chọn không
   const [hasWorkSchedules, setHasWorkSchedules] = useState<boolean>(true);
 
+  // State lưu trữ thông tin lịch làm việc
   const [workSchedules, setWorkSchedules] = useState<any>(null);
   const [workScheduleTarget, setWorkScheduleTarget] = useState<any>(null);
 
-  // Gọi API để lấy danh sách ca khám mỗi khi ngày hoặc bác sĩ thay đổi
+  /**
+   * Gọi API để lấy danh sách ca khám mỗi khi ngày hoặc bác sĩ thay đổi
+   */
   useEffect(() => {
     if (selectedDate && doctor) {
       fetchAvailableShifts(selectedDate);
@@ -100,6 +103,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
       setError(null);
       setHasWorkSchedules(true); // Reset state khi bắt đầu fetch dữ liệu mới
 
+      // Gọi API lấy thông tin lịch làm việc của bác sĩ theo ngày
       const result = await getWorkScheduleByDoctorAndExactDate(
         doctor.userId,
         formatDateToString(date)
@@ -177,8 +181,10 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   /**
    * Xử lý khi người dùng chọn một ca khám
    * @param shift - Ca khám được chọn
+   * @param shiftInfo - Thông tin chi tiết của ca khám
    */
   const handleShiftSelect = (shift: string, shiftInfo: any) => {
+    // Tìm và lưu thông tin lịch làm việc tương ứng với ca được chọn
     if (shift === "Ca 1") {
       setWorkScheduleTarget(
         workSchedules.find((item: object) => item.shift.id === 1)
@@ -347,23 +353,11 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
                             <Typography variant="body2" color="text.secondary">
                               Thời gian: {shift.start} - {shift.end}
                             </Typography>
-                            {/* Trạng thái ca khám */}
-                            {/* <Typography
-                              variant="body2"
-                              color={
-                                shift.isAvailable
-                                  ? "success.main"
-                                  : "error.main"
-                              }
-                              sx={{ mt: 1 }}
-                            >
-                              {shift.isAvailable ? "Còn trống" : "Đã đặt lịch"}
-                            </Typography> */}
                           </CardContent>
                         </Card>
                       ))
                     ) : (
-                      // Hiển thị thông báo dựa trên trạng thái
+                      // Hiển thị thông báo khi không có ca khám nào khả dụng
                       <Typography
                         color="text.secondary"
                         sx={{ py: 3, textAlign: "center" }}

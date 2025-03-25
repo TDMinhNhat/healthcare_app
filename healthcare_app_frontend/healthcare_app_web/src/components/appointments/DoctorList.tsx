@@ -23,13 +23,19 @@ import { useTranslation } from "react-i18next";
 import MedicationIcon from "@mui/icons-material/Medication";
 import { getAllDoctorByTypeDiseaseName } from "../../services/authenticate/typeDisease_service.ts";
 
+/**
+ * Props cho component DoctorList
+ * @param specialty - Loại dịch vụ/chuyên khoa được chọn
+ * @param onSelect - Hàm callback khi người dùng chọn một bác sĩ
+ * @param onBack - Hàm callback khi người dùng quay lại bước trước
+ */
 interface DoctorListProps {
   specialty: any; // Now represents a service
   onSelect: (doctor: any) => void;
   onBack: () => void;
 }
 
-// Mock data for doctors by specialty
+// Dữ liệu mẫu cho danh sách bác sĩ theo chuyên khoa
 const mockDoctorsBySpecialty = {
   "1": [
     // Cardiology
@@ -159,35 +165,39 @@ const mockDoctorsBySpecialty = {
   ],
 };
 
-// Added state variables for pagination:
-// page (current page, 0-indexed)
-// rowsPerPage (doctors per page)
-// Added pagination logic:
-// handleChangePage to update the current page
-// handleChangeRowsPerPage to update rows per page
-// Logic to slice the doctors array for the current pag
-
+/**
+ * Component hiển thị danh sách bác sĩ theo chuyên khoa được chọn
+ * Cho phép người dùng chọn bác sĩ để đặt lịch khám
+ * Hỗ trợ phân trang để hiển thị danh sách dài
+ */
 const DoctorList: React.FC<DoctorListProps> = ({
   specialty, // Now represents a service
   onSelect,
   onBack,
 }) => {
   const { t } = useTranslation();
+  // State lưu trạng thái đang tải dữ liệu
   const [loading, setLoading] = useState(true);
+  // State lưu danh sách bác sĩ
   const [doctors, setDoctors] = useState<any[]>([]);
+  // State lưu thông báo lỗi nếu có
   const [error, setError] = useState<string | null>(null);
 
-  // Pagination states
+  // State cho phân trang
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(4);
 
+  /**
+   * Gọi API để lấy danh sách bác sĩ theo chuyên khoa khi component mount
+   * hoặc khi chuyên khoa được chọn thay đổi
+   */
   useEffect(() => {
     const fetchDoctorsByService = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Simulate network delay
+        // Gọi API lấy danh sách bác sĩ theo tên loại bệnh/dịch vụ
         const result = await getAllDoctorByTypeDiseaseName(specialty.name)
           .then((response) => response.data.data)
           .catch((error) => {
@@ -195,15 +205,8 @@ const DoctorList: React.FC<DoctorListProps> = ({
             return null;
           });
 
-        // Use mock data instead of API call
-        // const response = await getDoctorsBySpecialty(specialty.id);
-        // setDoctors(response.data.data || []);
-        setDoctors(
-          // mockDoctorsBySpecialty[
-          //     specialty.id as keyof typeof mockDoctorsBySpecialty
-          //     ] || []
-          result
-        );
+        // Cập nhật state với dữ liệu nhận được từ API
+        setDoctors(result);
       } catch (err) {
         console.error("Failed to fetch doctors by service:", err);
         setError("Failed to load available doctors. Please try again.");
@@ -214,11 +217,15 @@ const DoctorList: React.FC<DoctorListProps> = ({
     };
 
     fetchDoctorsByService();
-    // Reset to first page when specialty changes
+    // Reset về trang đầu tiên khi chuyên khoa thay đổi
     setPage(0);
   }, [specialty]);
 
-  // Handle page change
+  /**
+   * Xử lý khi người dùng chuyển trang
+   * @param event - Sự kiện click
+   * @param newPage - Số trang mới
+   */
   const handleChangePage = (
     event: React.MouseEvent<HTMLButtonElement> | null,
     newPage: number
@@ -226,7 +233,10 @@ const DoctorList: React.FC<DoctorListProps> = ({
     setPage(newPage);
   };
 
-  // Handle rows per page change
+  /**
+   * Xử lý khi người dùng thay đổi số lượng bác sĩ hiển thị trên mỗi trang
+   * @param event - Sự kiện thay đổi
+   */
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -234,21 +244,24 @@ const DoctorList: React.FC<DoctorListProps> = ({
     setPage(0);
   };
 
-  // Calculate pagination
+  // Tính toán chỉ số bắt đầu và kết thúc cho phân trang
   const startIndex = page * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const paginatedDoctors = doctors.slice(startIndex, endIndex);
 
   return (
     <Box>
+      {/* Tiêu đề trang */}
       <Typography variant="h6" gutterBottom>
         {t("patient.appointments.available_doctors")}
       </Typography>
 
+      {/* Tên dịch vụ/chuyên khoa đã chọn */}
       <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
-        {specialty.name} {/* Service name */}
+        {specialty.name}
       </Typography>
 
+      {/* Hiển thị trạng thái loading, lỗi, hoặc danh sách bác sĩ */}
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
           <CircularProgress />
@@ -284,6 +297,7 @@ const DoctorList: React.FC<DoctorListProps> = ({
             </Paper>
           ) : (
             <>
+              {/* Danh sách bác sĩ */}
               <Grid container spacing={3}>
                 {paginatedDoctors.map((doctor, index) => (
                   <Grid
@@ -379,7 +393,7 @@ const DoctorList: React.FC<DoctorListProps> = ({
                 ))}
               </Grid>
 
-              {/* Pagination controls */}
+              {/* Điều khiển phân trang */}
               <Box
                 sx={{ display: "flex", justifyContent: "center", mt: 3, mb: 2 }}
               >
@@ -397,6 +411,7 @@ const DoctorList: React.FC<DoctorListProps> = ({
         </>
       )}
 
+      {/* Nút quay lại */}
       <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
         <Button onClick={onBack}>{t("common.back")}</Button>
       </Box>

@@ -45,6 +45,32 @@ import {
 } from "../../utils/dateUtils";
 import { getWorkScheduleBetweenDate } from "../../services/authenticate/workSchedule_service.ts";
 
+/**
+ * DoctorCurrentSchedulePage - Trang hiển thị lịch làm việc của bác sĩ
+ *
+ * Luồng hiển thị ca khám:
+ * 1. Khi trang được tải, hệ thống sẽ hiển thị lịch làm việc của tuần hiện tại (bắt đầu từ thứ 2)
+ * 2. Dữ liệu lịch làm việc được lấy từ API getWorkScheduleBetweenDate với userId của bác sĩ
+ *    và khoảng thời gian của tuần hiện tại
+ * 3. Dữ liệu được chuyển đổi và lưu vào state scheduleMap, là một map ánh xạ từ ngày (string)
+ *    đến danh sách lịch làm việc (WorkSchedule[])
+ * 4. Bảng lịch hiển thị 2 ca làm việc (sáng và chiều) cho 7 ngày trong tuần
+ * 5. Với mỗi ngày và ca:
+ *    - Kiểm tra xem có lịch làm việc không (hasShift1, hasShift2)
+ *    - Nếu có, hiển thị số lượng cuộc hẹn (totalBook/maxSlots) và các nút thao tác
+ *    - Nếu không, hiển thị "Không có ca"
+ * 6. Người dùng có thể:
+ *    - Di chuyển giữa các tuần bằng nút điều hướng
+ *    - Chọn ngày cụ thể từ lịch để chuyển đến tuần chứa ngày đó
+ *    - Xem chi tiết cuộc hẹn cho từng ca
+ *    - Tiến hành khám bệnh (chỉ cho ngày hiện tại hoặc tương lai)
+ *
+ * Lưu ý: Trạng thái ca làm việc được xác định dựa trên:
+ * - Sự tồn tại của lịch làm việc cho ngày và ca đó
+ * - Ngày đã qua hay chưa (isPastDate)
+ * - Số lượng cuộc hẹn đã đặt và tổng số chỗ
+ */
+
 // Giao diện Shift - phù hợp với mô hình cơ sở dữ liệu
 interface Shift {
   id: number;
@@ -612,6 +638,23 @@ const DoctorCurrentSchedulePage: React.FC = () => {
 
       {/* Bảng lịch làm việc theo tuần */}
       <Paper sx={{ mb: 3, overflow: "auto" }}>
+        {/* 
+          Cấu trúc bảng lịch làm việc:
+          - Bảng được chia thành 2 hàng cho 2 ca làm việc (sáng và chiều)
+          - Mỗi cột đại diện cho một ngày trong tuần (từ thứ 2 đến chủ nhật)
+          
+          Luồng logic hiển thị:
+          1. Dữ liệu lịch làm việc được lưu trữ trong scheduleMap (object ánh xạ ngày → WorkSchedule[])
+          2. Với mỗi ô trong bảng (ngày + ca):
+             a. Kiểm tra ngày đó có ca tương ứng không (hasShift1/hasShift2)
+             b. Nếu không có ca → Hiển thị "Không có ca"
+             c. Nếu có ca → Lấy thông tin lịch làm việc (getShift1Schedule/getShift2Schedule)
+             d. Hiển thị thông tin số cuộc hẹn đã đặt và tổng số chỗ (shiftSchedule.totalBook/maxSlots)
+          3. Xử lý tương tác:
+             a. Nút "Chi tiết" → Điều hướng đến trang chi tiết ca khám
+             b. Nút "Khám" → Mở phòng khám ảo trong tab mới
+             c. Nếu ngày đã qua (isPastDate) → Vô hiệu hóa nút "Khám" và hiển thị "Đã qua"
+        */}
         <TableContainer>
           <Table>
             <TableHead>
@@ -620,7 +663,11 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                   Ca làm việc
                 </TableCell>
 
-                {/* Tiêu đề các ngày trong tuần */}
+                {/* 
+                  Tiêu đề các ngày trong tuần 
+                  - Mỗi cột hiển thị tên thứ và ngày tháng
+                  - weekDays là mảng chứa thông tin các ngày từ currentWeekStart
+                */}
                 {weekDays.map((day, index) => (
                   <TableCell
                     key={day.formattedDate}
@@ -637,7 +684,11 @@ const DoctorCurrentSchedulePage: React.FC = () => {
             </TableHead>
 
             <TableBody>
-              {/* Hàng cho ca 1 */}
+              {/* 
+                Hàng cho ca 1 (Sáng) 
+                - Hiển thị thời gian ca làm việc từ dữ liệu thực tế
+                - Thời gian được lấy từ hàm getShift1Time (tìm ca sáng đầu tiên trong tuần)
+              */}
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold" }}>
                   Ca 1 (Sáng)
@@ -646,7 +697,12 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                     display="block"
                     color="textSecondary"
                   >
-                    {/* Hiển thị thông tin ca 1 từ dữ liệu động */}
+                    {/* 
+                      Hiển thị thông tin ca 1 từ dữ liệu động:
+                      1. Tìm ngày đầu tiên trong tuần có ca 1
+                      2. Lấy thời gian bắt đầu và kết thúc từ ngày đó
+                      3. Nếu không tìm thấy ca nào, hiển thị rỗng
+                    */}
                     {weekDays.some((day) => hasShift1(day.formattedDate))
                       ? weekDays
                           .map((day) => getShift1Time(day.formattedDate))
@@ -661,7 +717,11 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                   </Typography>
                 </TableCell>
 
-                {/* Các ô trạng thái cho ca 1 của từng ngày */}
+                {/* 
+                  Các ô trạng thái cho ca 1 của từng ngày
+                  - Mỗi ô gọi renderShiftStatus để hiển thị trạng thái ca làm việc
+                  - Truyền vào: có lịch không, ngày nào, và số ca (1)
+                */}
                 {weekDays.map((day) => (
                   <TableCell
                     key={`${day.formattedDate}-shift1`}
@@ -677,7 +737,11 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                 ))}
               </TableRow>
 
-              {/* Hàng cho ca 2 */}
+              {/* 
+                Hàng cho ca 2 (Chiều)
+                - Tương tự như ca 1 nhưng áp dụng cho ca chiều
+                - Sử dụng hàm hasShift2 và getShift2Schedule để lấy thông tin
+              */}
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold" }}>
                   Ca 2 (Chiều)

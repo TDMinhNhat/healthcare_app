@@ -54,6 +54,38 @@ import {
 } from "../../utils/dateUtils";
 import { ROUTING } from "../../constants/routing";
 
+/**
+ * Trang Quản Lý Lịch Hẹn Khám Bệnh dành cho bệnh nhân
+ *
+ * Luồng hiển thị lịch hẹn khám bệnh:
+ * 1. Khi trang được tải, hệ thống sẽ hiển thị lịch hẹn của tuần hiện tại (bắt đầu từ thứ 2)
+ * 2. Dữ liệu lịch hẹn được lấy từ API getAppointmentPatientBookInWeek với userId của bệnh nhân
+ *    và khoảng thời gian của tuần hiện tại (từ thứ 2 đến chủ nhật)
+ * 3. Dữ liệu trả về được xử lý và chuyển đổi thành mảng appointments chứa các thông tin chi tiết:
+ *    - ID lịch hẹn, ngày hẹn, thời gian bắt đầu và kết thúc
+ *    - Trạng thái cuộc hẹn (WAITING, IN_PROGRESS, DONE, CANCELLED)
+ *    - Thông tin bác sĩ, chuyên khoa, lý do khám
+ *    - Số thứ tự khám và thông tin ca làm việc
+ * 4. Bảng lịch hiển thị 2 ca làm việc (sáng và chiều) cho 7 ngày trong tuần
+ * 5. Các cuộc hẹn được hiển thị với màu sắc khác nhau theo trạng thái:
+ *    - Xanh dương: Đang chờ khám (WAITING)
+ *    - Tím: Đang khám (IN_PROGRESS)
+ *    - Xanh lá: Đã khám xong (DONE)
+ *    - Đỏ: Đã hủy (CANCELLED)
+ * 6. Người dùng có thể:
+ *    - Di chuyển giữa các tuần bằng nút điều hướng
+ *    - Chọn ngày cụ thể từ lịch để xem lịch hẹn của tuần đó
+ *    - Đặt lịch hẹn mới thông qua form đặt lịch
+ *    - Xem chi tiết lịch hẹn bằng cách nhấp vào thẻ cuộc hẹn
+ *    - Vào phòng khám trực tuyến (nếu cuộc hẹn đang trong trạng thái chờ hoặc đang khám)
+ *
+ * Xử lý hiển thị:
+ * - Mỗi cuộc hẹn được hiển thị trong một thẻ (Paper) với thông tin ngắn gọn
+ * - Tooltip hiển thị thêm thông tin chi tiết khi di chuột qua thẻ cuộc hẹn
+ * - Nút video call chỉ hiển thị cho các cuộc hẹn đang chờ hoặc đang khám
+ * - Màu sắc và viền thẻ trực quan giúp phân biệt trạng thái cuộc hẹn
+ */
+
 // Định nghĩa TypeDay enum để phù hợp với mô hình UML
 enum TypeDay {
   MONDAY = "MONDAY",
@@ -621,6 +653,25 @@ const AppointmentPage = () => {
 
             {/* Weekly Calendar View */}
             <Paper sx={{ mb: 3, overflow: "auto" }}>
+              {/* 
+                Cấu trúc bảng lịch hẹn:
+                - Bảng được chia thành 2 hàng cho 2 ca khám (sáng và chiều) 
+                - Mỗi cột đại diện cho một ngày trong tuần (từ thứ 2 đến chủ nhật)
+                
+                Luồng logic hiển thị lịch hẹn:
+                1. Dữ liệu lịch hẹn được lưu trong mảng appointments (đã được phân loại theo ngày và ca)
+                2. Với mỗi ô trong bảng (ngày + ca):
+                   a. Gọi getAppointmentsForDateAndShift(date, shift) để lọc các cuộc hẹn thuộc ngày và ca đó
+                   b. Nếu không có cuộc hẹn → Hiển thị "Không có lịch hẹn"
+                   c. Nếu có cuộc hẹn → Hiển thị danh sách các cuộc hẹn bằng renderAppointmentItem()
+                3. Mỗi cuộc hẹn được hiển thị với:
+                   a. Màu sắc khác nhau tùy theo trạng thái (WAITING, IN_PROGRESS, DONE, CANCELLED)
+                   b. Số thứ tự, tên bác sĩ và lý do khám
+                   c. Nút tham gia phòng khám (chỉ hiển thị khi cuộc hẹn đang chờ hoặc đang khám)
+                4. Tương tác:
+                   a. Nhấp vào cuộc hẹn → Xem chi tiết cuộc hẹn
+                   b. Nhấp nút video call → Tham gia phòng khám trực tuyến
+              */}
               <TableContainer>
                 <Table>
                   <TableHead>
@@ -629,7 +680,11 @@ const AppointmentPage = () => {
                         sx={{ fontWeight: "bold", width: "100px" }}
                       ></TableCell>
 
-                      {/* Day column headers */}
+                      {/* 
+                        Tiêu đề các ngày trong tuần
+                        - Mỗi cột hiển thị tên thứ và ngày tháng
+                        - weekDays là mảng chứa thông tin các ngày từ currentWeekStart 
+                      */}
                       {weekDays.map((day, index) => (
                         <TableCell
                           key={day.formattedDate}
@@ -645,7 +700,11 @@ const AppointmentPage = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {/* Ca 1 appointments row */}
+                    {/* 
+                      Ca 1 appointments row
+                      - Hiển thị tất cả lịch hẹn của ca sáng cho mỗi ngày
+                      - Thời gian ca cố định lấy từ SHIFTS.CA1
+                    */}
                     <TableRow>
                       <TableCell sx={{ fontWeight: "bold" }}>
                         Ca 1
@@ -665,7 +724,18 @@ const AppointmentPage = () => {
                           align="center"
                           sx={{ verticalAlign: "top", p: 1 }}
                         >
-                          {/* Display Ca 1 appointments */}
+                          {/* 
+                            Hiển thị lịch hẹn ca 1:
+                            1. Gọi getAppointmentsForDateAndShift để lọc cuộc hẹn theo ngày và ca
+                            2. Nếu có cuộc hẹn → Map qua từng cuộc hẹn và render bằng renderAppointmentItem()
+                            3. Nếu không có → Hiển thị thông báo "Không có lịch hẹn"
+                            
+                            Mỗi thẻ cuộc hẹn hiển thị:
+                            - Số thứ tự và tên bác sĩ rút gọn
+                            - Lý do khám
+                            - Màu sắc tương ứng với trạng thái (xanh dương, tím, xanh lá, đỏ)
+                            - Nút tham gia (chỉ hiển thị nếu trạng thái là WAITING hoặc IN_PROGRESS)
+                          */}
                           <Box
                             sx={{
                               minHeight: "100px",
@@ -704,7 +774,12 @@ const AppointmentPage = () => {
                       ))}
                     </TableRow>
 
-                    {/* Ca 2 appointments row */}
+                    {/* 
+                      Ca 2 appointments row
+                      - Tương tự như ca 1 nhưng áp dụng cho ca chiều
+                      - Thời gian cố định lấy từ SHIFTS.CA2
+                      - Logic hiển thị tương tự ca 1
+                    */}
                     <TableRow>
                       <TableCell sx={{ fontWeight: "bold" }}>
                         Ca 2

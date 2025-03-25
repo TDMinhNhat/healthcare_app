@@ -2,24 +2,40 @@ import React, { useState } from "react";
 import {
   DataGrid,
   GridColDef,
-  GridValueGetter,
   GridRenderCellParams,
   GridToolbar,
 } from "@mui/x-data-grid";
-import {
-  Box,
-  Typography,
-  Chip,
-  Avatar,
-  IconButton,
-  Paper,
-} from "@mui/material";
-import { Edit, Delete, Visibility } from "@mui/icons-material";
-import { User, getAge } from "../../types/user";
+import { Box, Chip, Avatar, IconButton, Paper, Button } from "@mui/material";
+import { Edit, Delete, Add } from "@mui/icons-material";
+import { User } from "../../types/user";
+import { EditProfileModal } from "../../components/profile/EditProfileModal";
 
 const PatientManagementPage: React.FC = () => {
-  // State cho dữ liệu bệnh nhân
   const [patients, setPatients] = useState<User[]>(mockPatients);
+  const [selectedPatient, setSelectedPatient] = useState<User | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleEditClick = (patient: User) => {
+    setSelectedPatient(patient);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedPatient(null);
+  };
+
+  const handleSavePatient = (updatedData: any) => {
+    if (selectedPatient) {
+      setPatients(
+        patients.map((patient) =>
+          patient.id === selectedPatient.id
+            ? { ...patient, ...updatedData }
+            : patient
+        )
+      );
+    }
+  };
 
   // Định nghĩa các cột cho bảng dữ liệu
   const columns: GridColDef[] = [
@@ -27,11 +43,13 @@ const PatientManagementPage: React.FC = () => {
       field: "id",
       headerName: "ID",
       width: 70,
+      flex: 0.5,
     },
     {
       field: "avatar",
       headerName: "Ảnh",
-      width: 100,
+      width: 80,
+      flex: 0.5,
       renderCell: (params: GridRenderCellParams) => (
         <Avatar src={(params.value as string) || "/default-avatar.png"} />
       ),
@@ -40,22 +58,26 @@ const PatientManagementPage: React.FC = () => {
     {
       field: "userId",
       headerName: "Mã bệnh nhân",
-      width: 150,
+      width: 120,
+      flex: 0.8,
     },
     {
       field: "firstName",
       headerName: "Họ",
       width: 100,
+      flex: 0.8,
     },
     {
       field: "lastName",
       headerName: "Tên",
       width: 120,
+      flex: 0.8,
     },
     {
       field: "sex",
       headerName: "Giới tính",
-      width: 120,
+      width: 100,
+      flex: 0.7,
       renderCell: (params: GridRenderCellParams) => (
         <Chip
           label={params.value ? "Nam" : "Nữ"}
@@ -67,29 +89,27 @@ const PatientManagementPage: React.FC = () => {
     {
       field: "dob",
       headerName: "Ngày sinh",
-      width: 150,
-      valueGetter: (value) => {
-        try {
-          return new Date(value).toLocaleDateString("vi-VN");
-        } catch (error) {
-          return params.value;
-        }
-      },
+      width: 120,
+      flex: 0.8,
+      renderCell: (params: GridRenderCellParams) =>
+        new Date(params.row.dob).toLocaleDateString("vi-VN"),
     },
     {
       field: "phone",
       headerName: "Số điện thoại",
-      width: 150,
+      width: 130,
+      flex: 0.8,
     },
     {
       field: "email",
       headerName: "Email",
-      width: 220,
+      flex: 1,
     },
     {
       field: "status",
       headerName: "Trạng thái",
-      width: 150,
+      width: 130,
+      flex: 0.8,
       renderCell: (params: GridRenderCellParams) => (
         <Chip
           label={params.value ? "Đang hoạt động" : "Không hoạt động"}
@@ -101,14 +121,17 @@ const PatientManagementPage: React.FC = () => {
     {
       field: "actions",
       headerName: "Thao tác",
-      width: 150,
+      width: 120,
+      flex: 0.7,
       sortable: false,
       renderCell: (params: GridRenderCellParams) => (
         <Box sx={{ display: "flex", gap: 1 }}>
-          <IconButton size="small" color="primary" title="Xem chi tiết">
-            <Visibility fontSize="small" />
-          </IconButton>
-          <IconButton size="small" color="info" title="Chỉnh sửa">
+          <IconButton
+            size="small"
+            color="info"
+            title="Chỉnh sửa"
+            onClick={() => handleEditClick(params.row)}
+          >
             <Edit fontSize="small" />
           </IconButton>
           <IconButton size="small" color="error" title="Xóa">
@@ -120,15 +143,14 @@ const PatientManagementPage: React.FC = () => {
   ];
 
   return (
-    <Box sx={{ height: "100%", width: "100%", padding: 3 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Quản lý bệnh nhân
-      </Typography>
-      <Typography variant="body2" sx={{ mb: 2, color: "text.secondary" }}>
-        Danh sách bệnh nhân trong hệ thống
-      </Typography>
+    <Box sx={{ height: "100%", width: "100%", padding: 0 }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, gap: 2 }}>
+        <Button variant="contained" color="primary" startIcon={<Add />}>
+          Thêm bệnh nhân
+        </Button>
+      </Box>
 
-      <Paper sx={{ height: "calc(100vh - 180px)", width: "100%" }}>
+      <Paper sx={{ width: "100%" }}>
         <DataGrid
           rows={patients}
           columns={columns}
@@ -151,6 +173,23 @@ const PatientManagementPage: React.FC = () => {
           disableColumnSelector={false}
         />
       </Paper>
+
+      {selectedPatient && (
+        <EditProfileModal
+          open={isModalOpen}
+          onClose={handleCloseModal}
+          onSave={handleSavePatient}
+          userData={{
+            firstName: selectedPatient.firstName,
+            lastName: selectedPatient.lastName,
+            email: selectedPatient.email,
+            phone: selectedPatient.phone,
+            dob: selectedPatient.dob,
+            sex: selectedPatient.sex,
+            address: null, // Assuming patients don't have address in the current implementation
+          }}
+        />
+      )}
     </Box>
   );
 };

@@ -31,33 +31,43 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
   const [selectedService, setSelectedService] = useState<any>(null);
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  // State lưu trữ thời gian đã chọn
   const [selectedTime, setSelectedTime] = useState<string>("");
+  // State theo dõi trạng thái loading khi gửi request
   const [loading, setLoading] = useState(false);
+  // State lưu trữ thông báo lỗi nếu có
   const [error, setError] = useState<string | null>(null);
+  // State lưu trữ ghi chú của bệnh nhân
   const [note, setNote] = useState<string>("");
+  // State lưu trữ lịch làm việc của bác sĩ
   const [workSchedule, setWorkSchedule] = useState<any>(null);
 
+  // Định nghĩa các bước trong quá trình đặt lịch khám
   const steps = [
-    t("patient.appointments.steps.select_service"),
-    t("patient.appointments.steps.select_doctor"),
-    t("patient.appointments.steps.select_date_time"),
-    t("patient.appointments.steps.review"),
-    t("patient.appointments.steps.confirm"),
+    t("patient.appointments.steps.select_service"), // Bước 1: Chọn dịch vụ
+    t("patient.appointments.steps.select_doctor"), // Bước 2: Chọn bác sĩ
+    t("patient.appointments.steps.select_date_time"), // Bước 3: Chọn ngày giờ
+    t("patient.appointments.steps.review"), // Bước 4: Xem lại thông tin
+    t("patient.appointments.steps.confirm"), // Bước 5: Xác nhận đặt lịch
   ];
 
+  // Hàm chuyển đến bước tiếp theo
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
+  // Hàm quay lại bước trước
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
+  // Hàm xử lý khi chọn dịch vụ và chuyển sang bước tiếp theo
   const handleServiceSelect = (service: any) => {
     setSelectedService(service);
     handleNext();
   };
 
+  // Hàm xử lý khi chọn bác sĩ và chuyển sang bước tiếp theo
   const handleDoctorSelect = (doctor: any) => {
     setSelectedDoctor(doctor);
     handleNext();

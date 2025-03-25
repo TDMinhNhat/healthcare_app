@@ -116,15 +116,20 @@ export default function WaitingRoomPage() {
           "patientName",
           `${numericalOrder}_${user.firstName} ${user.lastName}`
         );
-        // Chuyển trực tiếp đến phòng khám bằng đường link được cung cấp
-        window.location.href = roomLink.toString();
+        const link = roomLink.toString();
+        // Mở phòng khám trong tab mới
+        window.open(link, "_blank");
+        // Chuyển tab hiện tại về trang dashboard của bệnh nhân
+        navigate(`${ROUTING.PATIENT}`);
       }
     });
 
+    // Lắng nghe sự kiện khi bị bác sĩ xoá khỏi phòng khám
     socket.on("removePatient", (data) => {
       if (data.userId === userId) {
         setLoading(false);
-        navigate(`${ROUTING.PATIENT}/${ROUTING.PATIENT_APPOINTMENT}`);
+        // navigate(`${ROUTING.PATIENT}/${ROUTING.PATIENT_APPOINTMENT}`);
+        window.close();
         socket.disconnect();
       }
     });

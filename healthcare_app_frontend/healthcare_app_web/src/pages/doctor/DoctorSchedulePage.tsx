@@ -66,6 +66,26 @@ interface ScheduleItem {
   selectedShifts: number[]; // Array of selected shift numbers (1, 2)
 }
 
+/**
+ * DoctorSchedulePage - Trang quản lý và đăng ký lịch làm việc của bác sĩ
+ *
+ * Luồng quản lý lịch làm việc:
+ * 1. Khi trang được tải, hệ thống sẽ hiển thị trang đăng ký lịch cho tuần hiện tại hoặc tuần kế tiếp
+ * 2. Dữ liệu lịch đã đăng ký được lấy từ API getWorkScheduleBetweenDate với userId của bác sĩ
+ *    và khoảng thời gian của tuần được chọn
+ * 3. Dữ liệu được chuyển đổi và lưu vào state weekSchedule chứa thông tin của 7 ngày với các ca đã chọn
+ * 4. Bảng lịch hiển thị 2 ca làm việc (sáng và chiều) cho 7 ngày trong tuần dưới dạng các checkbox
+ * 5. Bác sĩ có thể:
+ *    - Chọn/bỏ chọn từng ca làm việc cụ thể
+ *    - Sử dụng các nút thao tác hàng loạt (chọn tất cả ca 1, ca 2, hoặc bỏ chọn tất cả)
+ *    - Áp dụng lịch từ tuần trước nếu có
+ *    - Lưu lịch làm việc đã chọn vào hệ thống
+ *
+ * Giới hạn điều hướng:
+ * - Chỉ cho phép xem và chỉnh sửa lịch làm việc của tuần hiện tại và tuần kế tiếp
+ * - Không thể xem hoặc chỉnh sửa lịch làm việc của các tuần trước đó
+ */
+
 const DoctorSchedulePage = () => {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const doctorId = user?.userId;
@@ -559,6 +579,28 @@ const DoctorSchedulePage = () => {
 
       {/* Bảng lịch làm việc theo tuần */}
       <Paper sx={{ mb: 3, overflow: "auto" }}>
+        {/* 
+          Cấu trúc bảng đăng ký lịch làm việc:
+          - Bảng được chia thành 2 hàng cho 2 ca làm việc (sáng và chiều)
+          - Mỗi cột đại diện cho một ngày trong tuần (từ thứ 2 đến chủ nhật)
+          - Mỗi ô chứa một checkbox để bác sĩ có thể chọn/bỏ chọn ca làm việc
+          
+          Luồng logic hiển thị và tương tác:
+          1. Dữ liệu lịch làm việc được lưu trong state weekSchedule (mảng gồm 7 đối tượng ScheduleItem)
+          2. Mỗi ScheduleItem chứa:
+             a. dayIndex: chỉ số ngày trong tuần (0-6)
+             b. date: đối tượng Date chứa thông tin ngày đầy đủ
+             c. selectedShifts: mảng số ca đã chọn (1, 2 hoặc cả hai)
+          3. Việc chọn/bỏ chọn một ca:
+             a. Khi người dùng tích vào checkbox, hàm toggleShift được gọi
+             b. toggleShift cập nhật mảng selectedShifts trong ScheduleItem tương ứng
+             c. React render lại giao diện với checkbox được cập nhật trạng thái mới
+          4. Các thao tác hàng loạt:
+             a. selectAllShift1/selectAllShift2: chọn tất cả ca 1 hoặc ca 2
+             b. selectAllShifts: chọn tất cả các ca
+             c. clearAllSelections: bỏ chọn tất cả các ca
+             d. handleApplyPrevWeek: áp dụng lịch từ tuần trước đã lưu trong prevWeekSchedule
+        */}
         <TableContainer>
           <Table>
             <TableHead>
@@ -567,7 +609,11 @@ const DoctorSchedulePage = () => {
                   Ca
                 </TableCell>
 
-                {/* Tiêu đề các ngày trong tuần */}
+                {/* 
+                  Tiêu đề các ngày trong tuần 
+                  - Mỗi cột hiển thị tên thứ và ngày tháng
+                  - weekSchedule là mảng chứa thông tin của 7 ngày trong tuần đã chọn
+                */}
                 {weekSchedule.map((day) => (
                   <TableCell
                     key={`day-${day.dayIndex}`}
@@ -584,7 +630,12 @@ const DoctorSchedulePage = () => {
             </TableHead>
 
             <TableBody>
-              {/* Hàng cho ca 1 */}
+              {/* 
+                Hàng cho ca 1 (Sáng)
+                - Mỗi ô chứa một checkbox để chọn/bỏ chọn ca 1 cho ngày tương ứng
+                - Trạng thái checked được điều khiển bởi day.selectedShifts.includes(1)
+                - Khi click, hàm toggleShift được gọi với tham số là ngày và số ca
+              */}
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold" }}>
                   Ca 1
@@ -608,7 +659,11 @@ const DoctorSchedulePage = () => {
                 ))}
               </TableRow>
 
-              {/* Hàng cho ca 2 */}
+              {/* 
+                Hàng cho ca 2 (Chiều)
+                - Tương tự như ca 1 nhưng dành cho ca chiều
+                - Sử dụng cùng cấu trúc dữ liệu và logic hiển thị
+              */}
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold" }}>
                   Ca 2
