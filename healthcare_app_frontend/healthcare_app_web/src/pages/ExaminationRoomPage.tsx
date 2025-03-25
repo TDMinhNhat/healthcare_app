@@ -143,9 +143,11 @@ export default function ExaminationRoomPage() {
         fetchAppointmentDetails();
 
         // Lắng nghe sự kiện bác sĩ đã khám xong.
-        socket.on("finishExamination", (data) => {
-          console.log("Đã khám xong, chuyển về trang lịch hẹn");
-          navigate(`${ROUTING.PATIENT}/${ROUTING.APPOINTMENTS}`);
+        socket.on("patientDone", (data) => {
+          if(data.currentPatient.userId === userId) {
+            console.log("Đã khám xong, chuyển về trang lịch hẹn");
+            navigate(`${ROUTING.PATIENT}/${ROUTING.APPOINTMENTS}`);
+          }
         });
 
         // Lắng nghe sự kiện bác sĩ rời khỏi phòng khám
