@@ -2,10 +2,12 @@ package dev.skyherobrine.admin.messages.consumes;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.skyherobrine.admin.enums.AppointmentStatus;
 import dev.skyherobrine.admin.models.mongodb.BookAppointment;
 import dev.skyherobrine.admin.repositories.mariadb.PatientRepository;
 import dev.skyherobrine.admin.repositories.mongodb.BookAppointmentRepository;
 import dev.skyherobrine.admin.repositories.mongodb.WorkScheduleRepository;
+import dev.skyherobrine.admin.utils.ObjectParser;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -47,6 +49,23 @@ public class BookAppointmentConsumer {
             );
             bookAppointmentRepository.save(bookAppointment);
             log.info("Book Appointment Consumer: The book appointment has been inserted");
+        } catch (Exception e) {
+            log.error("Book Appointment Consumer: The consumer thrown an exception");
+            log.error(e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "cancel_appointment", groupId = "admin_cancel_bookAppointment")
+    public void cancelBookAppointment(String message) {
+        try {
+            log.info("Book Appointment Consumer: listen the message for canceling the book appointment");
+            log.info("Book Appointment Consumer: {}", message);
+
+            String getBookAppointmentId = ObjectParser.convertJsonToObject(message, String.class);
+            BookAppointment target = bookAppointmentRepository.findById(Long.parseLong(getBookAppointmentId)).orElseThrow(() -> new EntityNotFoundException("The book appointment was not found!"));
+            target.setStatus(AppointmentStatus.CANCELLED);
+            bookAppointmentRepository.save(target);
+            log.info("Book Appointment Consumer: set cancel the book appointment successfully!");
         } catch (Exception e) {
             log.error("Book Appointment Consumer: The consumer thrown an exception");
             log.error(e.getMessage());

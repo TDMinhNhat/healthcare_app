@@ -1,12 +1,15 @@
 package dev.skyherobrine.appointment.controllers;
 
 import dev.skyherobrine.appointment.dtos.AppointmentDTO;
+import dev.skyherobrine.appointment.enums.AppointmentStatus;
 import dev.skyherobrine.appointment.feigns.DoctorFeign;
 import dev.skyherobrine.appointment.feigns.UserFeign;
 import dev.skyherobrine.appointment.feigns.WorkScheduleFeign;
 import dev.skyherobrine.appointment.models.Response;
 import dev.skyherobrine.appointment.models.mongodb.BookAppointment;
 import dev.skyherobrine.appointment.repositories.mongodb.BookAppointmentRepository;
+import dev.skyherobrine.appointment.repositories.mongodb.MedicalRecordDrugRepository;
+import dev.skyherobrine.appointment.repositories.mongodb.MedicalRecordRepository;
 import dev.skyherobrine.appointment.services.BookingService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -31,14 +34,18 @@ public class BookingController {
     private final KafkaTemplate<String,String> kafkaTemplate;
     private final WorkScheduleFeign workScheduleFeign;
     private final UserFeign userFeign;
+    private final MedicalRecordRepository medicalRecordRepository;
+    private final MedicalRecordDrugRepository medicalRecordDrugRepository;
 
-    public BookingController(BookAppointmentRepository bar, BookingService bookingService, DoctorFeign doctorFeign, KafkaTemplate<String, String> kafkaTemplate, WorkScheduleFeign workScheduleFeign, UserFeign userFeign) {
+    public BookingController(BookAppointmentRepository bar, BookingService bookingService, DoctorFeign doctorFeign, KafkaTemplate<String, String> kafkaTemplate, WorkScheduleFeign workScheduleFeign, UserFeign userFeign, MedicalRecordRepository medicalRecordRepository, MedicalRecordDrugRepository medicalRecordDrugRepository) {
         this.bar = bar;
         this.bookingService = bookingService;
         this.doctorFeign = doctorFeign;
         this.kafkaTemplate = kafkaTemplate;
         this.workScheduleFeign = workScheduleFeign;
         this.userFeign = userFeign;
+        this.medicalRecordRepository = medicalRecordRepository;
+        this.medicalRecordDrugRepository = medicalRecordDrugRepository;
     }
 
     @PostMapping
@@ -64,20 +71,21 @@ public class BookingController {
 
     @PutMapping("/cancel")
     public ResponseEntity<Response> cancelAppointment(
-            @RequestParam("roomId") String roomId
+            @RequestParam("bookAppointmentId") String bookAppointmentId
     ) {
         try {
             log.info("Booking: Call the api cancel appointment");
-            kafkaTemplate.send("cancel_appointment", roomId);
-//            Appointment appointment = ar.findAppointmentByRoomId(roomId).orElseThrow(() -> new EntityNotFoundException("The appointment wasn't found!"));
-//            appointment.setStatus(AppointmentStatus.CANCELLED);
-//            Appointment result = ar.save(appointment);
+            kafkaTemplate.send("cancel_appointment", bookAppointmentId);
+
+            BookAppointment bookAppointment = bar.findById(Long.parseLong(bookAppointmentId)).orElseThrow(() -> new EntityNotFoundException("The book appointment was not found!"));
+            bookAppointment.setStatus(AppointmentStatus.CANCELLED);
+            BookAppointment result = bar.save(bookAppointment);
+
             log.info("Booking: The appointment was canceled");
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "Cancel appointment successfully",
-//                    result
-                    null
+                    result
             ));
         } catch (Exception e) {
             log.error("Booking: The api return an error");
@@ -185,6 +193,64 @@ public class BookingController {
             log.error(e.getMessage());
             return ResponseEntity.ok(new Response(
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @PutMapping("/status")
+    public ResponseEntity<Response> updateStatusBookAppointment(
+            @RequestParam String bookAppointmentId,
+            @RequestParam String status
+    ) {
+        try {
+            log.info("Booking: Call the api update status book appointment");
+            BookAppointment bookAppointment = bar.findById(Long.parseLong(bookAppointmentId)).orElseThrow(() -> new EntityNotFoundException("The book appointment wasn't found!"));
+            bookAppointment.setStatus(AppointmentStatus.valueOf(status));
+            bar.save(bookAppointment);
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Update status book appointment successfully",
+                    bookAppointment
+            ));
+        } catch (Exception e) {
+            log.error("Booking: The api thrown an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/previous")
+    public ResponseEntity<Response> getMedicalRecordPrevious(
+            @RequestParam String patientId,
+            @RequestParam String bookAppointmentId
+    ) {
+        try {
+            log.info("Booking: Call the api get the medical record previous");
+            List<Map<String,Object>> result = new ArrayList<>();
+            medicalRecordRepository.findByBookAppointment_PatientIdAndBookAppointment_IdNot(patientId, Long.parseLong(bookAppointmentId)).forEach(medicalRecord -> {
+                Map<String,Object> data = new HashMap<>();
+                data.put("medicalRecord", medicalRecord);
+                data.put("drugs", medicalRecordDrugRepository.findById_MedicalRecord_Id(medicalRecord.getId()));
+
+                result.add(data);
+            });
+
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Get the medical records previous",
+                    result
+            ));
+        } catch (Exception e) {
+            log.error("Booking: The api thrown an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
                     "The api thrown an error",
                     e.getMessage()
             ));
