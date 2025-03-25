@@ -1,6 +1,6 @@
 package dev.skyherobrine.admin.repositories.mongodb;
 
-import dev.skyherobrine.appointment.models.mongodb.Payment;
+import dev.skyherobrine.admin.models.mongodb.Payment;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
