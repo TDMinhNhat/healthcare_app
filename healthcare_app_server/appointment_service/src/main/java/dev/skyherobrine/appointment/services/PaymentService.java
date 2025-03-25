@@ -4,8 +4,10 @@ import dev.skyherobrine.appointment.dtos.PaymentDTO;
 import dev.skyherobrine.appointment.models.mongodb.Payment;
 import dev.skyherobrine.appointment.repositories.mongodb.BookAppointmentRepository;
 import dev.skyherobrine.appointment.repositories.mongodb.PaymentRepository;
+import dev.skyherobrine.appointment.utils.ObjectParser;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,13 +18,15 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final BookAppointmentRepository bookAppointmentRepository;
+    private final KafkaTemplate<String,String> kafkaTemplate;
 
-    public PaymentService(PaymentRepository paymentRepository, BookAppointmentRepository bookAppointmentRepository) {
+    public PaymentService(PaymentRepository paymentRepository, BookAppointmentRepository bookAppointmentRepository, KafkaTemplate<String, String> kafkaTemplate) {
         this.paymentRepository = paymentRepository;
         this.bookAppointmentRepository = bookAppointmentRepository;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
-    public Payment addPayment(PaymentDTO paymentDTO) {
+    public Payment addPayment(PaymentDTO paymentDTO) throws Exception {
         log.info("Payment Service: Call the service add the payment");
         Payment payment = new Payment(
                 getMaxId(),
@@ -33,6 +37,8 @@ public class PaymentService {
                 LocalDateTime.now()
         );
 
+        kafkaTemplate.send("insert_payment", ObjectParser.convertObjectToJson(payment));
+        Thread.sleep(1500);
         return paymentRepository.save(payment);
     }
 
