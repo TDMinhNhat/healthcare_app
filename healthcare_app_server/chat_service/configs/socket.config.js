@@ -1,5 +1,6 @@
 const {Server} = require("socket.io");
 const kafka = require("./kafka.config")
+const {Partitioners} = require("kafkajs");
 
 const run = (server) => {
     const io = new Server(server, {
@@ -35,6 +36,7 @@ const run = (server) => {
         socket.on("finishExamination", (data) => {
             const producer = kafka.producer({
                 allowAutoTopicCreation: true,
+                createPartitioner: Partitioners.LegacyPartitioner,
                 retry: { retries: 5 }
             });
             (async () => {
