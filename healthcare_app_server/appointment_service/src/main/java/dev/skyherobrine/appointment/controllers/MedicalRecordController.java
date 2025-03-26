@@ -1,6 +1,7 @@
 package dev.skyherobrine.appointment.controllers;
 
 import dev.skyherobrine.appointment.dtos.MedicalRecordDTO;
+import dev.skyherobrine.appointment.feigns.WorkScheduleFeign;
 import dev.skyherobrine.appointment.models.mongodb.MedicalRecord;
 import dev.skyherobrine.appointment.models.Response;
 import dev.skyherobrine.appointment.repositories.mongodb.MedicalRecordDrugRepository;
@@ -22,11 +23,13 @@ public class MedicalRecordController {
     private final MedicalRecordService medicalRecordService;
     private final MedicalRecordRepository medicalRecordRepository;
     private final MedicalRecordDrugRepository medicalRecordDrugRepository;
+    private final WorkScheduleFeign workScheduleFeign;
 
-    public MedicalRecordController(MedicalRecordService medicalRecordService, MedicalRecordRepository medicalRecordRepository, MedicalRecordDrugRepository medicalRecordDrugRepository) {
+    public MedicalRecordController(MedicalRecordService medicalRecordService, MedicalRecordRepository medicalRecordRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, WorkScheduleFeign workScheduleFeign) {
         this.medicalRecordService = medicalRecordService;
         this.medicalRecordRepository = medicalRecordRepository;
         this.medicalRecordDrugRepository = medicalRecordDrugRepository;
+        this.workScheduleFeign = workScheduleFeign;
     }
 
     @PostMapping
@@ -61,11 +64,35 @@ public class MedicalRecordController {
             if(target != null) {
                 result.put("medical_record", target);
                 result.put("drugs", medicalRecordDrugRepository.findById_MedicalRecord_Id(target.getId()));
+                result.put("doctor", workScheduleFeign.getById(target.getBookAppointment().getWorkSchedule()).getBody().getData());
             }
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "Get the medical record information",
                     result
+            ));
+        } catch (Exception e) {
+            log.error("Medical Record: The api thrown an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/book_appointment/previous")
+    public ResponseEntity<Response> getMedicalRecordPrevious(
+            @RequestParam String userId,
+            @RequestParam String bookAppointmentId
+    ) {
+        try {
+            log.info("Medical Record: Call the api the medical records previous");
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Get the medical records previous",
+                    medicalRecordService.getPreviousMedicalRecord(userId, bookAppointmentId)
             ));
         } catch (Exception e) {
             log.error("Medical Record: The api thrown an error");

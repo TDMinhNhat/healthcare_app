@@ -1,6 +1,7 @@
 package dev.skyherobrine.appointment.services;
 
 import dev.skyherobrine.appointment.dtos.MedicalRecordDTO;
+import dev.skyherobrine.appointment.feigns.WorkScheduleFeign;
 import dev.skyherobrine.appointment.keys.MedicalRecordDrugKey;
 import dev.skyherobrine.appointment.models.mongodb.MedicalRecord;
 import dev.skyherobrine.appointment.models.mongodb.MedicalRecordDrug;
@@ -17,7 +18,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -29,13 +32,15 @@ public class MedicalRecordService {
     private final MedicalRecordDrugRepository medicalRecordDrugRepository;
     private final MedicalRecordRepository medicalRecordRepository;
     private final KafkaTemplate<String,String> kafkaTemplate;
+    private final WorkScheduleFeign workScheduleFeign;
 
-    public MedicalRecordService(BookAppointmentRepository bookAppointmentRepository, DrugRepository drugRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, MedicalRecordRepository medicalRecordRepository, KafkaTemplate<String, String> kafkaTemplate) {
+    public MedicalRecordService(BookAppointmentRepository bookAppointmentRepository, DrugRepository drugRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, MedicalRecordRepository medicalRecordRepository, KafkaTemplate<String, String> kafkaTemplate, WorkScheduleFeign workScheduleFeign) {
         this.bookAppointmentRepository = bookAppointmentRepository;
         this.drugRepository = drugRepository;
         this.medicalRecordDrugRepository = medicalRecordDrugRepository;
         this.medicalRecordRepository = medicalRecordRepository;
         this.kafkaTemplate = kafkaTemplate;
+        this.workScheduleFeign = workScheduleFeign;
     }
 
     public MedicalRecord addMedicalRecord(MedicalRecordDTO medicalRecordDTO) throws Exception {
@@ -71,6 +76,21 @@ public class MedicalRecordService {
         }
         log.info("Medical Record Service: medical record drugs saved into database");
         return target;
+    }
+
+    public List<Map<String,Object>> getPreviousMedicalRecord(String patientId, String bookAppointmentId) {
+        log.info("Medical Record Service: get previous medical record");
+        List<Map<String,Object>> result = new ArrayList<>();
+
+        medicalRecordRepository.findByBookAppointment_PatientIdAndBookAppointment_IdNot(patientId, Long.parseLong(bookAppointmentId)).forEach(item -> {
+            Map<String,Object> data = new HashMap<>();
+            data.put("medicalRecord", item);
+            data.put("drugs", medicalRecordDrugRepository.findById_MedicalRecord_Id(item.getId()));
+            data.put("doctor", workScheduleFeign.getById(item.getBookAppointment().getWorkSchedule()).getBody().getData());
+            result.add(data);
+        });
+
+        return result;
     }
 
     private Long getMaxId() {
