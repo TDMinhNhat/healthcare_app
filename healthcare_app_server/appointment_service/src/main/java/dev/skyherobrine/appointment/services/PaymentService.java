@@ -28,6 +28,8 @@ public class PaymentService {
 
     public Payment addPayment(PaymentDTO paymentDTO) throws Exception {
         log.info("Payment Service: Call the service add the payment");
+        kafkaTemplate.send("insert_payment", ObjectParser.convertObjectToJson(paymentDTO));
+
         Payment payment = new Payment(
                 getMaxId(),
                 paymentDTO.getAuthorName(),
@@ -36,9 +38,6 @@ public class PaymentService {
                 bookAppointmentRepository.findById(Long.parseLong(paymentDTO.getBookAppointmentId())).orElseThrow(() -> new EntityNotFoundException("The book appointment was not found!")),
                 LocalDateTime.now()
         );
-
-        kafkaTemplate.send("insert_payment", ObjectParser.convertObjectToJson(payment));
-        Thread.sleep(1500);
         return paymentRepository.save(payment);
     }
 
