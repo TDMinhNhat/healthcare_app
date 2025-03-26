@@ -71,5 +71,27 @@ public class BookAppointmentConsumer {
             log.error(e.getMessage());
         }
     }
+
+    @KafkaListener(topics = "update_status_bookAppointment", groupId = "admin_update_status_bookAppointment")
+    public void updateStatusBookAppointment(String message) {
+        try {
+            log.info("Book Appointment Consumer: listen the message for updating status of the book appointment");
+            log.info("Book Appointment Consumer: {}", message);
+
+            JsonNode node = new ObjectMapper().readTree(message);
+            String getAppointmentId = node.get("data").get("currentPatient").get("scheduleId").asText();
+            String getUserId = node.get("data").get("currentPatient").get("userId").asText();
+            String getStatus = node.get("status").asText();
+
+            BookAppointment target = bookAppointmentRepository.findByPatient_UserIdAndWorkSchedule_Id(getUserId, Long.parseLong(getAppointmentId)).orElseThrow(() -> new EntityNotFoundException("The book appointment was not found!"));
+            target.setStatus(AppointmentStatus.valueOf(getStatus));
+            bookAppointmentRepository.save(target);
+
+            log.info("Book Appointment Consumer: update the status successfully!");
+        } catch (Exception e) {
+            log.error("Book Appointment Consumer: the consumer thrown an error");
+            log.error(e.getMessage());
+        }
+    }
 }
 

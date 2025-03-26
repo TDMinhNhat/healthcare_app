@@ -1,5 +1,5 @@
 const {Server} = require("socket.io");
-const {updateBookAppointmentStatus} = require("../feigns/book-appointment.feign");
+const kafka = require("./kafka.config")
 
 const run = (server) => {
     const io = new Server(server, {
@@ -33,8 +33,23 @@ const run = (server) => {
 
         //The doctor was finished the call room
         socket.on("finishExamination", (data) => {
-            socket.to("clinic: " + data.scheduleId).emit("patientDone", data);
-            updateBookAppointmentStatus(data.bookAppointment.id, "DONE").catch((error) => { console.log(error) });
+            const producer = kafka.producer({
+                allowAutoTopicCreation: true,
+                retry: { retries: 5 }
+            });
+            (async () => {
+                await producer.connect();
+
+                const message = {
+                    topic: "update_status_bookAppointment",
+                    messages: [{ value: JSON.stringify({ data, "status": "DONE" })}]
+                };
+
+                await producer.send(message);
+                await producer.disconnect();
+            })().catch((error) => { console.log(error) })
+
+            socket.to("clinic: " + data.currentPatient.scheduleId).emit("patientDone", data);
         })
     }
 
