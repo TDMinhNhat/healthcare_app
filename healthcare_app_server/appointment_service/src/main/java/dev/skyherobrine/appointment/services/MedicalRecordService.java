@@ -1,8 +1,11 @@
 package dev.skyherobrine.appointment.services;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import dev.skyherobrine.appointment.dtos.MedicalRecordDTO;
 import dev.skyherobrine.appointment.feigns.WorkScheduleFeign;
 import dev.skyherobrine.appointment.keys.MedicalRecordDrugKey;
+import dev.skyherobrine.appointment.messages.consumers.responses.WorkScheduleResponseConsumer;
+import dev.skyherobrine.appointment.models.mongodb.BookAppointment;
 import dev.skyherobrine.appointment.models.mongodb.MedicalRecord;
 import dev.skyherobrine.appointment.models.mongodb.MedicalRecordDrug;
 import dev.skyherobrine.appointment.repositories.mariadb.DrugRepository;
@@ -33,14 +36,16 @@ public class MedicalRecordService {
     private final MedicalRecordRepository medicalRecordRepository;
     private final KafkaTemplate<String,String> kafkaTemplate;
     private final WorkScheduleFeign workScheduleFeign;
+    private final WorkScheduleResponseConsumer workScheduleResponseConsumer;
 
-    public MedicalRecordService(BookAppointmentRepository bookAppointmentRepository, DrugRepository drugRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, MedicalRecordRepository medicalRecordRepository, KafkaTemplate<String, String> kafkaTemplate, WorkScheduleFeign workScheduleFeign) {
+    public MedicalRecordService(BookAppointmentRepository bookAppointmentRepository, DrugRepository drugRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, MedicalRecordRepository medicalRecordRepository, KafkaTemplate<String, String> kafkaTemplate, WorkScheduleFeign workScheduleFeign, WorkScheduleResponseConsumer workScheduleResponseConsumer) {
         this.bookAppointmentRepository = bookAppointmentRepository;
         this.drugRepository = drugRepository;
         this.medicalRecordDrugRepository = medicalRecordDrugRepository;
         this.medicalRecordRepository = medicalRecordRepository;
         this.kafkaTemplate = kafkaTemplate;
         this.workScheduleFeign = workScheduleFeign;
+        this.workScheduleResponseConsumer = workScheduleResponseConsumer;
     }
 
     public MedicalRecord addMedicalRecord(MedicalRecordDTO medicalRecordDTO) throws Exception {
@@ -90,6 +95,24 @@ public class MedicalRecordService {
             result.add(data);
         });
 
+        return result;
+    }
+
+    public List<Map<String,Object>> getAllMedicalRecords(String userId) throws Exception {
+        log.info("Medical Record Service: Get all medical records");
+        List<Map<String,Object>> result = new ArrayList<>();
+        List<MedicalRecord> medicalRecords = medicalRecordRepository.findByBookAppointment_PatientId(userId);
+        List<Long> workSchedules = medicalRecords.stream().map(MedicalRecord::getBookAppointment).map(BookAppointment::getWorkSchedule).toList();
+
+        kafkaTemplate.send("request_get_list_work_schedule_order", ObjectParser.convertObjectToJson(workSchedules));
+
+        JsonNode node = workScheduleResponseConsumer.getStorageData();
+        node.forEach(item -> {
+            Map<String,Object> data = new HashMap<>();
+            data.put("workSchedule", item);
+            data.put("medicalRecord", medicalRecords.stream().filter(medicalRecord -> medicalRecord.getBookAppointment().getWorkSchedule().equals(item.get("id").asLong())));
+            result.add(data);
+        });
         return result;
     }
 

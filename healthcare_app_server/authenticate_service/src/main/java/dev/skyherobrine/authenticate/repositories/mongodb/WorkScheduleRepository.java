@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,4 +21,6 @@ public interface WorkScheduleRepository extends MongoRepository<WorkSchedule,Lon
     List<WorkSchedule> findByDoctor_UserIdAndDateAppointmentBetween(String doctorId, LocalDate dateAppointmentStart, LocalDate dateAppointmentEnd);
 
     List<WorkSchedule> findByDoctor_UserIdAndDateAppointment(String doctorId, LocalDate dateAppointment);
+
+    List<WorkSchedule> findByIdInOrderByDateAppointmentDesc(Collection<Long> ids);
 }

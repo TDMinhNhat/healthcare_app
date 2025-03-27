@@ -12,4 +12,9 @@ public class WorkScheduleRequestProducer {
     public NewTopic requestGetWorkSchedule() {
         return TopicBuilder.name("request_get_work_schedule_by_between").build();
     }
+
+    @Bean
+    public NewTopic requestGetListWorkScheduleOrder() {
+        return TopicBuilder.name("request_get_list_work_schedule_order").build();
+    }
 }

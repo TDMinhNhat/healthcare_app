@@ -23,5 +23,5 @@ public interface BookAppointmentRepository extends MongoRepository<BookAppointme
 
     List<BookAppointment> findByWorkScheduleAndStatusNot(Long workSchedule, AppointmentStatus status);
 
-
+    List<BookAppointment> findByPatientId(String patientId);
 }

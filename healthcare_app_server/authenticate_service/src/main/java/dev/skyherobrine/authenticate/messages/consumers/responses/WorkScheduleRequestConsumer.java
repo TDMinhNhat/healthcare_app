@@ -51,4 +51,23 @@ public class WorkScheduleRequestConsumer {
             e.printStackTrace();
         }
     }
+
+    @KafkaListener(topics = "request_get_list_work_schedule_order", groupId = "authenticate_request_get_list_work_schedule_order")
+    public void responseGetListWorkScheduleOrder(String message) {
+        try {
+            log.info("Work Schedule Request Consumer: listen for getting the request");
+            log.info("Work Schedule Request Consumer: {}", message);
+
+            List<Object> list = ObjectParser.convertJsonToObject(message, List.class);
+            List<Long> ids = list.stream().map(item -> Long.parseLong(item.toString())).toList();
+            List<WorkSchedule> workSchedules = workScheduleRepository.findByIdInOrderByDateAppointmentDesc(ids);
+
+            kafkaTemplate.send("response_get_list_work_schedule_order", ObjectParser.convertObjectToJson(workSchedules)).get();
+            kafkaTemplate.flush();
+            log.info("Work Schedule Request Consumer: sent the response");
+        } catch (Exception e) {
+            log.info("Work Schedule Request Consumer: error when getting the request");
+            e.printStackTrace();
+        }
+    }
 }

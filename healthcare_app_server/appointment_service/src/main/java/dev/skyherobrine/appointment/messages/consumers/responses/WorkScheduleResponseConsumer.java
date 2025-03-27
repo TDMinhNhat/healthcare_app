@@ -25,6 +25,14 @@ public class WorkScheduleResponseConsumer {
         latch.countDown();
     }
 
+    @KafkaListener(topics = "response_get_list_work_schedule_order", groupId = "appointment_response_get_list_work_schedule_order")
+    public void responseGetAllWorkScheduleOrder(String message) throws Exception {
+        log.info("Work Schedule Response Consumer: listen for getting the request");
+        log.info("Work Schedule Response Consumer: {}", message);
+        node = new ObjectMapper().readTree(message);
+        latch.countDown();
+    }
+
     public JsonNode getStorageData() {
         try {
             latch.await();

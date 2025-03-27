@@ -104,4 +104,24 @@ public class MedicalRecordController {
             ));
         }
     }
+
+    @GetMapping
+    public ResponseEntity<Response> getAll(@RequestParam String userId) {
+        try {
+            log.info("Medical Record: Call the api get all medical records");
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Get all medical records",
+                    medicalRecordService.getAllMedicalRecords(userId)
+            ));
+        } catch (Exception e) {
+            log.error("Medical Record: The api thrown an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
+                    e.getMessage()
+            ));
+        }
+    }
 }

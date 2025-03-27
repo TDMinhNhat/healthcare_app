@@ -14,4 +14,6 @@ public interface MedicalRecordRepository extends MongoRepository<MedicalRecord,L
     List<MedicalRecord> findByBookAppointment_PatientIdAndBookAppointment_IdNot(String patientId, Long id);
 
     Optional<MedicalRecord> findByBookAppointment_Id(Long appointmentId);
+
+    List<MedicalRecord> findByBookAppointment_PatientId(String userId);
 }
