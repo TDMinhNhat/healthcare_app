@@ -64,7 +64,7 @@ export const AppRoutes = () => {
             <Route index element={<DoctorDashboard />} />
             <Route path={ROUTING.PROFILE} element={<DoctorProfilePage />} />
             <Route
-              path={ROUTING.APPOINTMENT_DETAILS}
+              path={ROUTING.SCHEDULE_DETAIL}
               element={<DoctorAppointmentDetailsPage />}
             />
             <Route path={ROUTING.SCHEDULE} element={<DoctorSchedulePage />} />

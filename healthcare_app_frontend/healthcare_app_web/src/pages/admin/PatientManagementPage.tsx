@@ -5,35 +5,60 @@ import {
   GridRenderCellParams,
   GridToolbar,
 } from "@mui/x-data-grid";
-import { Box, Chip, Avatar, IconButton, Paper, Button } from "@mui/material";
-import { Edit, Delete, Add } from "@mui/icons-material";
+import {
+  Box,
+  Chip,
+  Avatar,
+  IconButton,
+  Paper,
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+} from "@mui/material";
+import { Edit, Delete, Add, Save, Cancel } from "@mui/icons-material";
 import { User } from "../../types/user";
-import { EditProfileModal } from "../../components/profile/EditProfileModal";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { vi } from "date-fns/locale";
 
 const PatientManagementPage: React.FC = () => {
   const [patients, setPatients] = useState<User[]>(mockPatients);
-  const [selectedPatient, setSelectedPatient] = useState<User | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editRowId, setEditRowId] = useState<number | null>(null);
+  const [editedRow, setEditedRow] = useState<User | null>(null);
 
+  // Function to handle entering edit mode
   const handleEditClick = (patient: User) => {
-    setSelectedPatient(patient);
-    setIsModalOpen(true);
+    setEditRowId(patient.id);
+    setEditedRow({ ...patient });
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedPatient(null);
-  };
-
-  const handleSavePatient = (updatedData: any) => {
-    if (selectedPatient) {
+  // Function to handle saving changes
+  const handleSaveClick = () => {
+    if (editedRow) {
       setPatients(
         patients.map((patient) =>
-          patient.id === selectedPatient.id
-            ? { ...patient, ...updatedData }
-            : patient
+          patient.id === editRowId ? editedRow : patient
         )
       );
+      setEditRowId(null);
+      setEditedRow(null);
+    }
+  };
+
+  // Function to handle canceling edit mode
+  const handleCancelClick = () => {
+    setEditRowId(null);
+    setEditedRow(null);
+  };
+
+  // Function to handle field changes
+  const handleFieldChange = (field: keyof User, value: any) => {
+    if (editedRow) {
+      setEditedRow({ ...editedRow, [field]: value });
     }
   };
 
@@ -66,44 +91,124 @@ const PatientManagementPage: React.FC = () => {
       headerName: "Họ",
       width: 100,
       flex: 0.8,
+      renderCell: (params: GridRenderCellParams) => {
+        return editRowId === params.row.id ? (
+          <TextField
+            size="small"
+            value={editedRow?.firstName || ""}
+            onChange={(e) => handleFieldChange("firstName", e.target.value)}
+            fullWidth
+          />
+        ) : (
+          params.value
+        );
+      },
     },
     {
       field: "lastName",
       headerName: "Tên",
       width: 120,
       flex: 0.8,
+      renderCell: (params: GridRenderCellParams) => {
+        return editRowId === params.row.id ? (
+          <TextField
+            size="small"
+            value={editedRow?.lastName || ""}
+            onChange={(e) => handleFieldChange("lastName", e.target.value)}
+            fullWidth
+          />
+        ) : (
+          params.value
+        );
+      },
     },
     {
       field: "sex",
       headerName: "Giới tính",
       width: 100,
       flex: 0.7,
-      renderCell: (params: GridRenderCellParams) => (
-        <Chip
-          label={params.value ? "Nam" : "Nữ"}
-          color={params.value ? "info" : "secondary"}
-          size="small"
-        />
-      ),
+      renderCell: (params: GridRenderCellParams) => {
+        return editRowId === params.row.id ? (
+          <FormControl fullWidth size="small">
+            <Select
+              value={editedRow?.sex ?? false}
+              onChange={(e) => handleFieldChange("sex", e.target.value)}
+            >
+              <MenuItem value={true}>Nam</MenuItem>
+              <MenuItem value={false}>Nữ</MenuItem>
+            </Select>
+          </FormControl>
+        ) : (
+          <Chip
+            label={params.value ? "Nam" : "Nữ"}
+            color={params.value ? "info" : "secondary"}
+            size="small"
+          />
+        );
+      },
     },
     {
       field: "dob",
       headerName: "Ngày sinh",
       width: 120,
       flex: 0.8,
-      renderCell: (params: GridRenderCellParams) =>
-        new Date(params.row.dob).toLocaleDateString("vi-VN"),
+      renderCell: (params: GridRenderCellParams) => {
+        if (editRowId === params.row.id) {
+          return (
+            <LocalizationProvider
+              dateAdapter={AdapterDateFns}
+              adapterLocale={vi}
+            >
+              <DatePicker
+                value={new Date(editedRow?.dob || "")}
+                onChange={(newValue) => {
+                  if (newValue) {
+                    const dateStr = newValue.toISOString().split("T")[0];
+                    handleFieldChange("dob", dateStr);
+                  }
+                }}
+                slotProps={{ textField: { size: "small", fullWidth: true } }}
+              />
+            </LocalizationProvider>
+          );
+        }
+        return new Date(params.row.dob).toLocaleDateString("vi-VN");
+      },
     },
     {
       field: "phone",
       headerName: "Số điện thoại",
       width: 130,
       flex: 0.8,
+      renderCell: (params: GridRenderCellParams) => {
+        return editRowId === params.row.id ? (
+          <TextField
+            size="small"
+            value={editedRow?.phone || ""}
+            onChange={(e) => handleFieldChange("phone", e.target.value)}
+            fullWidth
+          />
+        ) : (
+          params.value
+        );
+      },
     },
     {
       field: "email",
       headerName: "Email",
       flex: 1,
+      renderCell: (params: GridRenderCellParams) => {
+        return editRowId === params.row.id ? (
+          <TextField
+            size="small"
+            value={editedRow?.email || ""}
+            onChange={(e) => handleFieldChange("email", e.target.value)}
+            fullWidth
+          />
+        ) : (
+          params.value
+        );
+      },
     },
     {
       field: "status",
@@ -126,17 +231,40 @@ const PatientManagementPage: React.FC = () => {
       sortable: false,
       renderCell: (params: GridRenderCellParams) => (
         <Box sx={{ display: "flex", gap: 1 }}>
-          <IconButton
-            size="small"
-            color="info"
-            title="Chỉnh sửa"
-            onClick={() => handleEditClick(params.row)}
-          >
-            <Edit fontSize="small" />
-          </IconButton>
-          <IconButton size="small" color="error" title="Xóa">
-            <Delete fontSize="small" />
-          </IconButton>
+          {editRowId === params.row.id ? (
+            <>
+              <IconButton
+                size="small"
+                color="success"
+                title="Lưu"
+                onClick={handleSaveClick}
+              >
+                <Save fontSize="small" />
+              </IconButton>
+              <IconButton
+                size="small"
+                color="warning"
+                title="Hủy"
+                onClick={handleCancelClick}
+              >
+                <Cancel fontSize="small" />
+              </IconButton>
+            </>
+          ) : (
+            <>
+              <IconButton
+                size="small"
+                color="info"
+                title="Chỉnh sửa"
+                onClick={() => handleEditClick(params.row)}
+              >
+                <Edit fontSize="small" />
+              </IconButton>
+              <IconButton size="small" color="error" title="Xóa">
+                <Delete fontSize="small" />
+              </IconButton>
+            </>
+          )}
         </Box>
       ),
     },
@@ -173,23 +301,6 @@ const PatientManagementPage: React.FC = () => {
           disableColumnSelector={false}
         />
       </Paper>
-
-      {selectedPatient && (
-        <EditProfileModal
-          open={isModalOpen}
-          onClose={handleCloseModal}
-          onSave={handleSavePatient}
-          userData={{
-            firstName: selectedPatient.firstName,
-            lastName: selectedPatient.lastName,
-            email: selectedPatient.email,
-            phone: selectedPatient.phone,
-            dob: selectedPatient.dob,
-            sex: selectedPatient.sex,
-            address: null, // Assuming patients don't have address in the current implementation
-          }}
-        />
-      )}
     </Box>
   );
 };

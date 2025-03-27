@@ -62,10 +62,10 @@ const calculateAge = (dobString: string) => {
  */
 const DoctorAppointmentDetailsPage: React.FC = () => {
   const navigate = useNavigate();
-  // Lấy ID ca khám từ URL params
-  const { appointmentId } = useParams<{ appointmentId: string }>();
+  // Lấy ID ca khám từ URL params này là scheduleId đúng hơn
+  const { scheduleId } = useParams<{ scheduleId: string }>();
   // State lưu trữ thông tin ca khám
-  const [appointment, setAppointment] = useState<any>(null);
+  const [workSchedule, setWorkSchedule] = useState<any>(null);
   // State xác định trạng thái đang tải dữ liệu
   const [loading, setLoading] = useState(true);
   // State lưu trữ từ khóa tìm kiếm
@@ -73,9 +73,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
   // Doctor ID would typically come from authentication context
   const doctorId = useSelector((state: any) => state.user.user).userId;
   // State for medical record modal
-  const [selectedPatientId, setSelectedPatientId] = useState<number | null>(
-    null
-  );
+  const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [isMedicalRecordOpen, setIsMedicalRecordOpen] =
     useState<boolean>(false);
 
@@ -85,7 +83,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
       try {
         setLoading(true);
         // Convert appointmentId from string to number
-        const workScheduleId = Number(appointmentId);
+        const workScheduleId = Number(scheduleId);
         if (isNaN(workScheduleId)) {
           throw new Error("Invalid appointment ID");
         }
@@ -94,7 +92,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
           doctorId,
           workScheduleId
         );
-
+        console.log("API response:", response);
         // Transform API response to match expected format
         const responseData = response.data.data;
         const workSchedule = responseData.work_schedule;
@@ -105,12 +103,6 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
           return `${parts[0]}:${parts[1]}`;
         };
 
-        // Determine appointment status based on date
-        const appointmentDate = new Date(
-          workSchedule.dateAppointment.split("-").reverse().join("-")
-        );
-        const today = new Date();
-
         // Map patients data
         const transformedPatients = responseData.patients.map(
           (patient: any) => ({
@@ -120,21 +112,23 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
             name: `${patient.user_info.lastName} ${patient.user_info.firstName}`,
             age: calculateAge(patient.user_info.dob),
             gender: patient.user_info.sex ? "Nữ" : "Nam",
+            bookAppointmentId: patient.book_appointment.id,
           })
         );
 
         const transformedData = {
           id: workSchedule.id.toString(),
+          doctorName: `${workSchedule.doctor.firstName} ${workSchedule.doctor.lastName}`,
           date: workSchedule.dateAppointment,
           time: `${formatTime(workSchedule.shift.start)} - ${formatTime(
             workSchedule.shift.end
           )}`,
-          status: status,
+          // status: status,
           totalSlots: workSchedule.maxSlots,
           registeredPatients: transformedPatients,
         };
 
-        setAppointment(transformedData);
+        setWorkSchedule(transformedData);
         setLoading(false);
       } catch (error) {
         console.error("Lỗi khi tải thông tin ca khám:", error);
@@ -143,7 +137,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
     };
 
     fetchAppointmentDetails();
-  }, [appointmentId, doctorId]);
+  }, [scheduleId, doctorId]);
 
   // Hiển thị trạng thái đang tải
   if (loading) {
@@ -160,7 +154,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
   }
 
   // Hiển thị thông báo khi không tìm thấy thông tin ca khám
-  if (!appointment) {
+  if (!workSchedule) {
     return (
       <Box p={3}>
         <Typography variant="h5">Không tìm thấy thông tin ca khám</Typography>
@@ -174,8 +168,8 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
    */
   const filteredPatients =
     searchQuery.trim() === ""
-      ? appointment.registeredPatients
-      : appointment.registeredPatients.filter((patient: any) =>
+      ? workSchedule.registeredPatients
+      : workSchedule.registeredPatients.filter((patient: any) =>
           patient.numericalOrder
             .toLowerCase()
             .includes(searchQuery.toLowerCase())
@@ -192,8 +186,8 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
    * Mở modal hồ sơ bệnh án cho bệnh nhân được chọn
    * @param patientId - ID của bệnh nhân
    */
-  const handleOpenMedicalRecord = (patientId: number) => {
-    setSelectedPatientId(patientId);
+  const handleOpenMedicalRecord = (patient) => {
+    setSelectedPatient(patient);
     setIsMedicalRecordOpen(true);
   };
 
@@ -202,7 +196,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
    */
   const handleCloseMedicalRecord = () => {
     setIsMedicalRecordOpen(false);
-    setSelectedPatientId(null);
+    setSelectedPatient(null);
   };
 
   /**
@@ -225,8 +219,8 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
   /**
    * Xử lý chuyển đến phòng khám trực tuyến
    */
-  const handleStartExamination = (patientId: number) => {
-    if (!appointment || !appointmentId) {
+  const handleStartExamination = () => {
+    if (!workSchedule || !scheduleId) {
       console.error("Không có thông tin ca khám hợp lệ");
       alert(
         "Không thể mở phòng khám do thiếu thông tin ca khám. Vui lòng thử lại."
@@ -235,7 +229,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
     }
 
     // Kiểm tra xem ngày khám đã qua chưa
-    const isDateInPast = isPastDate(appointment.date);
+    const isDateInPast = isPastDate(workSchedule.date);
     if (isDateInPast) {
       // console.error("Không thể khám cho ngày đã qua");
       alert("Không thể bắt đầu khám do ngày đã qua");
@@ -245,7 +239,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
     // Tạo URL phòng khám với ID lịch và ID bệnh nhân
     const examRoomPath = ROUTING.EXAMINATION_ROOM.replace(
       ":scheduleId",
-      appointmentId.toString()
+      scheduleId.toString()
     );
 
     // console.log(`Đang chuyển hướng đến phòng khám: ${examRoomPath}`);
@@ -282,7 +276,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
                   Ngày khám
                 </Typography>
                 <Typography variant="body1" fontWeight="medium">
-                  {appointment.date}
+                  {workSchedule.date}
                 </Typography>
               </Box>
             </Grid>
@@ -294,7 +288,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
                   Thời gian
                 </Typography>
                 <Typography variant="body1" fontWeight="medium">
-                  {appointment.time}
+                  {workSchedule.time}
                 </Typography>
               </Box>
             </Grid>
@@ -339,7 +333,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
             {/* Hiển thị số lượng bệnh nhân đã đăng ký trên tổng số slot */}
             <Box>
               <Chip
-                label={`${appointment.registeredPatients.length}/${appointment.totalSlots} bệnh nhân`}
+                label={`${workSchedule.registeredPatients.length}/${workSchedule.totalSlots} bệnh nhân`}
                 color="primary"
               />
             </Box>
@@ -424,7 +418,7 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
                           variant="outlined"
                           size="small"
                           startIcon={<VisibilityIcon />}
-                          onClick={() => handleOpenMedicalRecord(patient.id)}
+                          onClick={() => handleOpenMedicalRecord(patient)}
                           fullWidth
                         >
                           Xem hồ sơ
@@ -452,8 +446,13 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
       <MedicalRecordModal
         open={isMedicalRecordOpen}
         onClose={handleCloseMedicalRecord}
-        appointmentId={selectedPatientId}
-        roomId={appointment?.location}
+        appointmentId={selectedPatient?.bookAppointmentId ?? 0}
+        patientId={selectedPatient?.id ?? ""}
+        infoAppointment={{
+          doctorName: workSchedule.doctorName,
+          dateAppointment: workSchedule.date,
+          // roomId: workSchedule.id,
+        }}
         isDoctor={true}
       />
     </Box>

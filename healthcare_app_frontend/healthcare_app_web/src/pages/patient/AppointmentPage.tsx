@@ -401,6 +401,7 @@ const AppointmentPage = () => {
   // Điều hướng người dùng đến phòng chờ khám với thông tin bác sĩ và số thứ tự
   const handleJoinExamination = (
     appointmentId: number,
+    dateAppointment: string,
     event: React.MouseEvent,
     doctorId?: number,
     doctorName?: string,
@@ -411,6 +412,8 @@ const AppointmentPage = () => {
     navigate(`${ROUTING.PATIENT}/wating-room/${appointmentId}`, {
       state: {
         doctorId: doctorId,
+        appointmentId: appointmentId,
+        dateAppointment: dateAppointment,
         doctorName: doctorName,
         numericalOrder: numericalOrder,
       },
@@ -506,6 +509,7 @@ const AppointmentPage = () => {
                 onClick={(e) =>
                   handleJoinExamination(
                     appointment.id,
+                    appointment.date,
                     e,
                     appointment.doctorId,
                     appointment.doctorName,

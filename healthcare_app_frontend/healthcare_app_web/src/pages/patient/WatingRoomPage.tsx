@@ -13,6 +13,7 @@ import { useEffect, useLayoutEffect, useState } from "react";
 import PersonIcon from "@mui/icons-material/Person";
 import { ROUTING } from "../../constants/routing";
 import { io, Socket } from "socket.io-client";
+import { da } from "date-fns/locale";
 
 /**
  * Trang Phòng Chờ Khám Bệnh dành cho bệnh nhân
@@ -47,10 +48,13 @@ export default function WaitingRoomPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { doctorName, numericalOrder } = location.state as {
-    doctorName: string;
-    numericalOrder: number;
-  };
+  const { appointmentId, dateAppointment, doctorName, numericalOrder } =
+    location.state as {
+      appointmentId: string;
+      dateAppointment: string;
+      doctorName: string;
+      numericalOrder: number;
+    };
 
   // Các trạng thái cho phòng chờ
   const [currentExamNumber, setCurrentExamNumber] = useState<number>(0); // Số thứ tự đang được khám
@@ -73,6 +77,7 @@ export default function WaitingRoomPage() {
     // Khi kết nối thành công
     socket.on("connect", () => {
       console.log("Socket connected to the server");
+      console.log("param", dateAppointment, doctorName);
 
       // Gửi thông báo tham gia hàng đợi với số thứ tự trong tên
       socket.emit("joinWaitingQueue", {
@@ -80,6 +85,9 @@ export default function WaitingRoomPage() {
         userId: userId,
         numericalOrder: numericalOrder,
         name: `${numericalOrder}_${user.firstName} ${user.lastName}`,
+        doctorName: doctorName,
+        dateAppointment: dateAppointment,
+        appointmentId: appointmentId,
       });
       setLoading(false);
     });
@@ -93,6 +101,9 @@ export default function WaitingRoomPage() {
         userId: userId,
         numericalOrder: numericalOrder,
         name: `${numericalOrder}_${user.firstName} ${user.lastName}`,
+        doctorName: doctorName,
+        dateAppointment: dateAppointment,
+        appointmentId: appointmentId,
       });
     });
 

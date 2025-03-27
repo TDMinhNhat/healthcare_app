@@ -23,6 +23,15 @@ import { ROUTING } from "../constants/routing";
 import MedicalRecordModal from "../components/medical/MedicalRecordModal";
 
 // Giao diện cho bệnh nhân trong hàng đợi
+interface PatientQueueItem {
+  userId: string;
+  name: string;
+  appointmentId?: number;
+  numericalOrder?: number;
+  doctorName?: string;
+  dateAppointment?: string;
+  bookAppointmentId?: number;
+}
 
 /**
  * Trang Phòng Khám dành cho bác sĩ và bệnh nhân
@@ -81,21 +90,25 @@ export default function ExaminationRoomPage() {
   // Lấy tên hiển thị của bệnh nhân từ URL nếu có (bác sĩ thì không cần)
   const patientNameFromURL = searchParams.get("patientName");
 
-  // State for patient queue - Trạng thái cho hàng đợi bệnh nhân
-  const [patientQueue, setPatientQueue] = useState<object[]>([]);
+  // State cho hàng đợi bệnh nhân
+  const [patientQueue, setPatientQueue] = useState<PatientQueueItem[]>([]);
   const [bookAppointment, setBookAppointment] = useState<object>();
   // Thêm trạng thái để theo dõi nếu phòng đã được khởi tạo
   const [isRoomInitialized, setIsRoomInitialized] = useState<boolean>(false);
 
   // Trạng thái cho bệnh nhân đang khám hiện tại
-  const [currentPatient, setCurrentPatient] = useState<object | null>(null);
+  const [currentPatient, setCurrentPatient] = useState<PatientQueueItem | null>(
+    null
+  );
   // Trạng thái cho modal hồ sơ y tế
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<
     number | null
   >(null);
-  // Thêm trạng thái cho bệnh nhân đã khám
-  const [examinedPatients, setExaminedPatients] = useState<object[]>([]);
+  // Trạng thái cho danh sách bệnh nhân đã khám xong
+  const [examinedPatients, setExaminedPatients] = useState<PatientQueueItem[]>(
+    []
+  );
 
   // Kết nối socket cho giao tiếp thời gian thực
   const [socket, setSocket] = useState<Socket>(
@@ -118,7 +131,7 @@ export default function ExaminationRoomPage() {
         const fetchAppointmentDetails = async () => {
           try {
             const res = await getAppointmentPatientDetail(userId, scheduleId);
-            // console.log(res.data.data);
+            console.log("appointment detail", res.data.data);
             setBookAppointment(res.data.data);
 
             // Emit socket event with the data we just received
@@ -127,16 +140,21 @@ export default function ExaminationRoomPage() {
               numericalOrder: res.data.data?.book_appointment?.numericalOrder,
               userId: userId,
               name: patientNameFromURL || userName,
+              doctorName:
+                res.data.data?.work_schedule?.doctor?.firstName +
+                " " +
+                res.data.data?.work_schedule?.doctor?.lastName,
+              dateAppointment: res.data.data?.work_schedule?.dateAppointment,
             });
           } catch (error) {
             console.error("Error fetching appointment details:", error);
             // Emit socket event even if there's an error, just without numerical order
-            socket.emit("patientJoinRoom", {
-              scheduleId,
-              numericalOrder: undefined,
-              userId: userId,
-              name: patientNameFromURL || userName,
-            });
+            // socket.emit("patientJoinRoom", {
+            //   scheduleId,
+            //   numericalOrder: undefined,
+            //   userId: userId,
+            //   name: patientNameFromURL || userName,
+            // });
           }
         };
         fetchAppointmentDetails();
@@ -145,15 +163,17 @@ export default function ExaminationRoomPage() {
         socket.on("patientDone", (data) => {
           if (data.currentPatient.userId === userId) {
             console.log("Đã khám xong, chuyển về trang lịch hẹn");
-            navigate(`${ROUTING.PATIENT}/${ROUTING.APPOINTMENTS}`);
+            // navigate(`${ROUTING.PATIENT}/${ROUTING.APPOINTMENTS}`);
+            window.close();
+            socket.disconnect();
           }
         });
 
         // Lắng nghe sự kiện bác sĩ rời khỏi phòng khám
-        socket.on("doctorLeaveRoom", () => {
-          console.log("Bác sĩ đã rời khỏi phòng khám");
-          navigate(`${ROUTING.PATIENT}/${ROUTING.APPOINTMENTS}`);
-        });
+        // socket.on("doctorLeaveRoom", () => {
+        //   console.log("Bác sĩ đã rời khỏi phòng khám");
+        //   navigate(`${ROUTING.PATIENT}/${ROUTING.APPOINTMENTS}`);
+        // });
       } else {
         // Xử lý socket dành riêng cho bác sĩ
         console.log("Bác sĩ đã kết nối với socket:", socket.id);
@@ -210,8 +230,8 @@ export default function ExaminationRoomPage() {
     );
   };
 
-  // Accept patient into examination - Tiếp nhận bệnh nhân vào khám
-  const acceptPatient = (patient) => {
+  // Tiếp nhận bệnh nhân vào phòng khám
+  const acceptPatient = (patient: PatientQueueItem) => {
     // Đánh dấu bệnh nhân đã được tiếp nhận
     const updatedQueue = patientQueue.filter(
       (p) => p.userId !== patient.userId
@@ -220,11 +240,11 @@ export default function ExaminationRoomPage() {
 
     // Set current patient in examination
     setCurrentPatient(patient);
-
+    console.log("Patient accepted:", patient);
     // Set appointment ID for medical record
     // Vấn đề ở đây - cần đảm bảo chúng ta đang đặt một appointmentId hợp lệ
     // Nếu bệnh nhân có thuộc tính bookAppointmentId, sử dụng nó; nếu không thì dùng userId làm phương án dự phòng
-    setSelectedAppointmentId(patient.bookAppointmentId || patient.userId);
+    setSelectedAppointmentId(patient.appointmentId || 0);
 
     // Send notification to the patient with the room link
     if (socket) {
@@ -239,18 +259,40 @@ export default function ExaminationRoomPage() {
     }
   };
 
-  // Open medical record modal
+  // Mở modal hồ sơ y tế
   const handleOpenMedicalRecord = () => {
     if (currentPatient) {
-      // Đảm bảo chúng ta có một appointmentId hợp lệ trước khi mở modal
-      if (!selectedAppointmentId && currentPatient.userId) {
-        setSelectedAppointmentId(currentPatient.userId);
+      // Log all parameters being passed to modal to debug
+      console.log("Modal parameters:", {
+        appointmentId: selectedAppointmentId,
+        patientId: currentPatient.userId,
+        isDoctor: true,
+        infoAppointment: {
+          doctorName: currentPatient.doctorName,
+          dateAppointment: currentPatient.dateAppointment,
+        },
+      });
+
+      // Check for missing required values
+      if (!selectedAppointmentId) {
+        console.error("Missing appointmentId for medical record modal");
+        // Fallback to bookAppointmentId or set a default value
+        setSelectedAppointmentId(currentPatient.bookAppointmentId || 0);
       }
-      setIsModalOpen(true);
+
+      if (!currentPatient.userId) {
+        console.error("Missing patientId for medical record modal");
+        return; // Don't open modal if patient ID is missing
+      }
+    } else {
+      console.error("Cannot open medical record: No current patient selected");
+      return; // Don't open modal if no patient is selected
     }
+
+    setIsModalOpen(true);
   };
 
-  // Remove patient from queue - Xóa bệnh nhân khỏi hàng đợi
+  // Xóa bệnh nhân khỏi hàng đợi
   const removePatient = (id: number) => {
     const data = patientQueue.filter((patient) => patient.userId === id);
     setPatientQueue(patientQueue.filter((patient) => patient.userId !== id));
@@ -259,7 +301,7 @@ export default function ExaminationRoomPage() {
     socket.emit("removeWaitingQueue", data[0]);
   };
 
-  // xử lí hoàn thành khám bệnh, chuyển bệnh nhân vào danh sách đã khám
+  // Xử lý hoàn thành khám bệnh, chuyển bệnh nhân vào danh sách đã khám
   const finishExamination = () => {
     if (currentPatient) {
       // Thêm bệnh nhân vào danh sách đã khám
@@ -284,7 +326,7 @@ export default function ExaminationRoomPage() {
     }
   };
 
-  // Cài đặt cuộc gọi Zego - Cập nhật để xử lý cho cả bác sĩ và bệnh nhân
+  // Cài đặt cuộc gọi video Zego cho bác sĩ và bệnh nhân
   const myMeeting = useCallback(
     async (element) => {
       if (!element) return;
@@ -429,7 +471,7 @@ export default function ExaminationRoomPage() {
                     variant="contained"
                     size="small"
                     startIcon={<MedicalInformationIcon fontSize="small" />}
-                    onClick={handleOpenMedicalRecord}
+                    onClick={() => handleOpenMedicalRecord()}
                     sx={{ flex: 1, py: 0.5, fontSize: "0.8rem" }}
                   >
                     Hồ Sơ
@@ -562,15 +604,21 @@ export default function ExaminationRoomPage() {
               </Box>
             </>
           )}
-
           {/* Modal hồ sơ y tế */}
-          <MedicalRecordModal
-            open={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            appointmentId={selectedAppointmentId}
-            isDoctor={true}
-            roomId={roomID}
-          />
+          {currentPatient && (
+            <MedicalRecordModal
+              open={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              appointmentId={selectedAppointmentId || 0}
+              isDoctor={true}
+              patientId={currentPatient?.userId}
+              infoAppointment={{
+                doctorName: currentPatient?.doctorName || "Doctor",
+                dateAppointment:
+                  currentPatient?.dateAppointment || new Date().toISOString(),
+              }}
+            />
+          )}
         </Paper>
       )}
     </Box>

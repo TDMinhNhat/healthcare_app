@@ -341,7 +341,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
 
     if (schedule) {
       // Điều hướng sử dụng ID lịch làm việc thực tế
-      navigate(`/doctor/appointments/${schedule.id}`);
+      navigate(`${ROUTING.DOCTOR}/${ROUTING.SCHEDULE}/${schedule.id}`);
     } else {
       console.error("Không tìm thấy thông tin ca làm việc");
     }

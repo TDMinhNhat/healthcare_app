@@ -1,3 +1,4 @@
+import { use } from "react";
 import { MedicalRecord } from "../../types";
 import axiosConfig from "../axiosConfig";
 
@@ -12,5 +13,30 @@ export const getMedicalRecord = async (bookAppointmentId: number) => {
   const response = await axiosConfig.get(
     `${prefix}/book_appointment/${bookAppointmentId}`
   );
+  return response.data;
+};
+
+export const getMedicalRecordPrevious = async (
+  userId: string,
+  bookAppointmentId: number
+) => {
+  const response = await axiosConfig.get(
+    `${prefix}/book_appointment/previous`,
+    {
+      params: {
+        userId: userId,
+        bookAppointmentId: bookAppointmentId,
+      },
+    }
+  );
+  return response.data;
+};
+
+export const getAllMedicalRecord = async (userId: string) => {
+  const response = await axiosConfig.get(`${prefix}`, {
+    params: {
+      userId: userId,
+    },
+  });
   return response.data;
 };

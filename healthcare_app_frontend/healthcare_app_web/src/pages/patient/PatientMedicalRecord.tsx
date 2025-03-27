@@ -1,36 +1,44 @@
 import React, { useState, useEffect } from "react";
 import {
+  Container,
   Typography,
-  Grid,
   Box,
+  Paper,
+  Grid,
+  CircularProgress,
+  Alert,
   Chip,
+  Divider,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Collapse,
+  IconButton,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  CircularProgress,
-  Alert,
-  Divider,
-  Paper,
-  Tabs,
-  Tab,
-  Button,
+  Card,
+  CardContent,
 } from "@mui/material";
-import MedicalInformationIcon from "@mui/icons-material/MedicalInformation";
-import HistoryIcon from "@mui/icons-material/History";
-import { MedicalRecord, MedicalRecordDrug, Drug } from "../../types/medical";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { User } from "../../types/user";
 import { formatCreatedAtDate } from "../../utils/dateUtils";
+import { getAllMedicalRecord } from "../../services/appointment/medical_record_service";
+import { getPatientInfo } from "../../services/authenticate/user_service";
+import { useSelector } from "react-redux";
 
-// Reuse the mock data from MedicalRecordModal component
+// Dữ liệu bệnh nhân mẫu để kiểm thử
 const MOCK_PATIENT: User = {
   id: 1,
   userId: "patient-001",
   firstName: "Hùng",
   lastName: "Nguyễn Văn",
-  sex: true, // true = male, false = female
+  sex: true, // true = nam, false = nữ
   dob: "15-05-1985",
   address: {
     id: 1,
@@ -43,177 +51,96 @@ const MOCK_PATIENT: User = {
   },
   phone: "0901234567",
   email: "hung.nguyen@example.com",
-  password: "", // Never expose actual password
+  password: "", // Không bao giờ hiển thị mật khẩu thật
   status: true,
 };
 
-// Mock medical record data
-const MOCK_MEDICAL_RECORD: MedicalRecord = {
-  id: 1,
-  doctorName: "Dr. Nguyễn Bá Thành", // Single field replacing appointment object
-  roomId: "room-101",
-  diagnosisDisease: "Tăng huyết áp độ 1",
-  note: "Bệnh nhân cần theo dõi huyết áp hàng ngày, giảm lượng muối trong khẩu phần ăn và tập thể dục đều đặn.",
-  reExaminationDate: "2023-08-20",
-  createdAt: "20-07-2023-09-30-00",
-  drugs: [
-    {
-      drug: {
-        id: 1,
-        drugName: "Amlodipine",
-        unit: "tablet",
-      },
-      medicalRecord: null,
-      howUse: "Uống 1 viên mỗi ngày vào buổi sáng",
-      quantity: 30,
-    },
-    {
-      drug: {
-        id: 2,
-        drugName: "Losartan",
-        unit: "tablet",
-      },
-      medicalRecord: null,
-      howUse: "Uống 1 viên mỗi ngày vào buổi tối",
-      quantity: 30,
-    },
-  ],
-  status: "DONE",
-};
-
-// Mock patient history data
-const MOCK_PATIENT_HISTORY = [
-  {
-    id: 1,
-    doctorName: "Dr. Nguyễn Bá Thành",
-    diagnosisDisease: "Tăng huyết áp độ 1",
-    createdAt: "20-07-2023-09-30-00",
-    status: "DONE",
-  },
-  {
-    id: 2,
-    doctorName: "Dr. Trần Minh Tuấn",
-    diagnosisDisease: "Nhiễm trùng họng",
-    createdAt: "15-06-2023-14-00-00",
-    status: "DONE",
-  },
-  {
-    id: 3,
-    doctorName: "Dr. Lê Thị Hương",
-    diagnosisDisease: "Đau lưng cấp tính",
-    createdAt: "02-05-2023-10-15-00",
-    status: "DONE",
-  },
-  {
-    id: 4,
-    doctorName: "Dr. Nguyễn Bá Thành",
-    diagnosisDisease: "Khám sức khỏe định kỳ",
-    createdAt: "10-01-2023-08-30-00",
-    status: "DONE",
-  },
-];
-
-// Simplified mock history detail
-const MOCK_HISTORY_DETAIL = {
-  id: 2,
-  doctorName: "Dr. Trần Minh Tuấn",
-  roomId: "room-103",
-  diagnosisDisease: "Nhiễm trùng họng",
-  note: "Bệnh nhân có triệu chứng đau họng, sốt nhẹ, và khó nuốt. Kết quả xét nghiệm chỉ ra nhiễm streptococcus.",
-  reExaminationDate: "2023-06-22",
-  createdAt: "15-06-2023-14-00-00",
-  drugs: [
-    {
-      drug: {
-        id: 2,
-        drugName: "Amoxicillin",
-        unit: "viên",
-      },
-      medicalRecord: null,
-      howUse: "Uống 1 viên, ngày 2 lần sau bữa ăn",
-      quantity: 20,
-    },
-    {
-      drug: {
-        id: 4,
-        drugName: "Cetirizine",
-        unit: "viên",
-      },
-      medicalRecord: null,
-      howUse: "Uống 1 viên mỗi tối trước khi ngủ",
-      quantity: 10,
-    },
-    {
-      drug: {
-        id: 10,
-        drugName: "Vitamin C",
-        unit: "viên",
-      },
-      medicalRecord: null,
-      howUse: "Uống 1 viên mỗi ngày sau bữa sáng",
-      quantity: 30,
-    },
-  ],
-  status: "DONE",
-};
-
-// Interface for TabPanel component
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`medical-tabpanel-${index}`}
-      aria-labelledby={`medical-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
-    </div>
-  );
-}
-
 const PatientMedicalRecord: React.FC = () => {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [medicalRecord, setMedicalRecord] = useState<MedicalRecord | null>(
-    null
-  );
+  const user = useSelector((state: any) => state.user.user);
   const [patient, setPatient] = useState<User | null>(null);
-  const [activeTab, setActiveTab] = useState<number>(0);
-  const [selectedHistoryRecord, setSelectedHistoryRecord] = useState<
-    number | null
-  >(null);
+  const [patientLoading, setPatientLoading] = useState<boolean>(false); // Khởi tạo là false
+  const [patientError, setPatientError] = useState<string | null>(null);
+
+  const [medicalRecords, setMedicalRecords] = useState<any[]>([]);
+  const [recordsLoading, setRecordsLoading] = useState<boolean>(true);
+  const [recordsError, setRecordsError] = useState<string | null>(null);
+
+  const [expandedRecords, setExpandedRecords] = useState<number[]>([]);
 
   useEffect(() => {
-    const fetchMedicalRecord = async () => {
-      setLoading(true);
-      setError(null);
+    // Sử dụng dữ liệu người dùng từ Redux nếu có sẵn
+    if (user) {
+      setPatient(user);
+      // Lấy hồ sơ y tế bằng ID người dùng từ Redux
+      fetchMedicalRecords(user.userId);
+    } else {
+      console.error("User data not found in Redux store");
+    }
+  }, [user]);
 
-      try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        setMedicalRecord(MOCK_MEDICAL_RECORD);
-        setPatient(MOCK_PATIENT);
-      } catch (error) {
-        console.error("Error fetching medical record:", error);
-        setError("Không thể tải hồ sơ bệnh án");
-      } finally {
-        setLoading(false);
+  const fetchMedicalRecords = async (patientId: string) => {
+    setRecordsLoading(true);
+    setRecordsError(null);
+
+    try {
+      const response = await getAllMedicalRecord(patientId);
+      console.log("Medical records response:", response);
+
+      if (response.data && Array.isArray(response.data)) {
+        // Chuyển đổi dữ liệu API để phù hợp với định dạng mong muốn của component
+        const formattedRecords = response.data.map((item) => {
+          const doctor = item.workSchedule?.doctor || {};
+          const doctorFirstName = doctor.firstName || "";
+          const doctorLastName = doctor.lastName || "";
+          const doctorName = `Dr. ${doctorLastName} ${doctorFirstName}`.trim();
+
+          // Lấy dữ liệu hồ sơ y tế (xử lý cấu trúc mảng)
+          const medicalRecord =
+            item.medicalRecord && item.medicalRecord.length > 0
+              ? item.medicalRecord[0]
+              : {};
+
+          return {
+            id: medicalRecord.id || 0,
+            doctorName,
+            diagnosisDisease: medicalRecord.diagnosisDisease || "",
+            dateAppoinment: item.workSchedule?.dateAppointment
+              ? `${item.workSchedule.dateAppointment}`
+              : "",
+            status: medicalRecord.bookAppointment?.status || "",
+            appointmentId: medicalRecord.bookAppointment?.id,
+            drugs: item.drugs || [],
+            note: medicalRecord.note,
+            reExaminationDate: medicalRecord.reExaminationDate,
+            fullData: item,
+          };
+        });
+
+        setMedicalRecords(formattedRecords);
+      } else {
+        setMedicalRecords([]);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching medical records:", error);
+      setRecordsError("Không thể tải lịch sử khám bệnh");
+    } finally {
+      setRecordsLoading(false);
+    }
+  };
 
-    fetchMedicalRecord();
-  }, []);
+  const handleToggleRecord = (recordId: number) => {
+    setExpandedRecords((prev) => {
+      if (prev.includes(recordId)) {
+        // Nếu recordId đã tồn tại trong mảng, loại bỏ nó
+        return prev.filter((id) => id !== recordId);
+      } else {
+        // Nếu recordId không tồn tại trong mảng, thêm nó
+        return [...prev, recordId];
+      }
+    });
+  };
 
-  // Calculate age from date of birth
+  // Tính tuổi từ ngày sinh
   const calculateAge = (dateOfBirth: string) => {
     const dob = new Date(dateOfBirth.split("-").reverse().join("-"));
     const today = new Date();
@@ -245,316 +172,175 @@ const PatientMedicalRecord: React.FC = () => {
     }
   };
 
-  // Handle tab change
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
-    // Reset selected history record when switching to history tab
-    if (newValue === 1) {
-      setSelectedHistoryRecord(null);
-    }
-  };
-
-  // Handle history record selection
-  const handleSelectHistoryRecord = (recordId: number) => {
-    // In a real app, this would fetch the details of the selected record
-    setSelectedHistoryRecord(recordId);
-    // For demo purposes, we're showing mock data for record #2
-  };
-
   return (
-    <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-      <Typography variant="h5" sx={{ mb: 3, fontWeight: "bold" }}>
-        Hồ Sơ Bệnh Án
-      </Typography>
-
-      {loading ? (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            py: 4,
-          }}
-        >
-          <CircularProgress />
-        </Box>
-      ) : error ? (
-        <Alert severity="error">{error}</Alert>
-      ) : (
-        <Box sx={{ py: 1 }}>
-          {/* Patient Information */}
-          <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        {/* Thông tin bệnh nhân */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
             THÔNG TIN BỆNH NHÂN
           </Typography>
-          {patient && (
-            <Grid container spacing={2} sx={{ mb: 3 }}>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body2">
-                  <strong>Họ tên:</strong> {patient.lastName}{" "}
-                  {patient.firstName}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body2">
-                  <strong>Mã bệnh nhân:</strong> {patient.userId}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body2">
-                  <strong>Giới tính:</strong> {patient.sex ? "Nam" : "Nữ"}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body2">
-                  <strong>Ngày sinh:</strong> {patient.dob} (
-                  {calculateAge(patient.dob)} tuổi)
-                </Typography>
-              </Grid>
-            </Grid>
-          )}
 
-          <Divider sx={{ my: 1 }} />
-
-          {/* Tab Navigation */}
-          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <Tabs
-              value={activeTab}
-              onChange={handleTabChange}
-              aria-label="medical record tabs"
-              variant="fullWidth"
-            >
-              <Tab
-                icon={<MedicalInformationIcon />}
-                iconPosition="start"
-                label="Ca Khám Hiện Tại"
-                id="medical-tab-0"
-              />
-              <Tab
-                icon={<HistoryIcon />}
-                iconPosition="start"
-                label="Lịch Sử Khám Bệnh"
-                id="medical-tab-1"
-              />
-            </Tabs>
-          </Box>
-
-          {/* Current Record Tab */}
-          <TabPanel value={activeTab} index={0}>
-            {/* Appointment Information */}
-            {medicalRecord && (
-              <>
-                <Typography
-                  variant="subtitle1"
-                  sx={{ fontWeight: "bold", mb: 1, mt: 2 }}
-                >
-                  THÔNG TIN LỊCH HẸN
-                </Typography>
-                <Grid container spacing={2} sx={{ mb: 3 }}>
+          {patientLoading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+              <CircularProgress />
+            </Box>
+          ) : patientError ? (
+            <Alert severity="error">{patientError}</Alert>
+          ) : patient ? (
+            <Card variant="outlined" sx={{ mb: 3 }}>
+              <CardContent>
+                <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="body2">
-                      <strong>Ngày khám:</strong>{" "}
-                      {formatCreatedAtDate(medicalRecord.createdAt)}
+                    <Typography variant="body1">
+                      <strong>Họ tên:</strong> {patient.lastName}{" "}
+                      {patient.firstName}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="body2">
-                      <strong>Bác sĩ khám:</strong> {medicalRecord.doctorName}
+                    <Typography variant="body1">
+                      <strong>Mã bệnh nhân:</strong> {patient.userId}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="body2">
-                      <strong>Phòng khám:</strong> {medicalRecord.roomId}
+                    <Typography variant="body1">
+                      <strong>Giới tính:</strong> {patient.sex ? "Nam" : "Nữ"}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="body2">
-                      <strong>Trạng thái:</strong>{" "}
-                      <Chip
-                        label={getStatusLabel(medicalRecord.status)}
-                        size="small"
-                        color={
-                          medicalRecord.status === "DONE"
-                            ? "success"
-                            : "default"
-                        }
-                      />
+                    <Typography variant="body1">
+                      <strong>Ngày sinh:</strong> {patient.dob} (
+                      {calculateAge(patient.dob)} tuổi)
                     </Typography>
                   </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body1">
+                      <strong>Điện thoại:</strong> {patient.phone}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body1">
+                      <strong>Email:</strong> {patient.email}
+                    </Typography>
+                  </Grid>
+                  {/* Address display removed as requested */}
                 </Grid>
+              </CardContent>
+            </Card>
+          ) : (
+            <Alert severity="info">Không có thông tin bệnh nhân</Alert>
+          )}
+        </Box>
 
-                <Divider sx={{ my: 1 }} />
+        {/* Danh sách hồ sơ y tế */}
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+          LỊCH SỬ KHÁM BỆNH
+        </Typography>
 
-                {/* Diagnosis Section */}
-                <Box>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{ fontWeight: "bold", mb: 1, mt: 2 }}
-                  >
-                    CHẨN ĐOÁN
-                  </Typography>
-
-                  <Box sx={{ mb: 2, px: 1 }}>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      <strong>Bệnh được chẩn đoán:</strong>{" "}
-                      {medicalRecord.diagnosisDisease || "-"}
-                    </Typography>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      <strong>Ghi chú:</strong> {medicalRecord.note || "-"}
-                    </Typography>
-                    <Typography variant="body2">
-                      <strong>Ngày tái khám:</strong>{" "}
-                      {medicalRecord.reExaminationDate ||
-                        "Không có lịch tái khám"}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                <Divider sx={{ my: 1 }} />
-
-                {/* Medications Section */}
-                <Typography
-                  variant="subtitle1"
-                  sx={{ fontWeight: "bold", mb: 1, mt: 2 }}
-                >
-                  THUỐC ĐIỀU TRỊ
-                </Typography>
-
-                {/* Medications List */}
-                {medicalRecord.drugs.length > 0 ? (
-                  <TableContainer>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell sx={{ fontWeight: "bold" }}>
-                            Tên thuốc
-                          </TableCell>
-                          <TableCell sx={{ fontWeight: "bold" }}>
-                            Cách dùng
-                          </TableCell>
-                          <TableCell sx={{ fontWeight: "bold" }}>
-                            Số lượng
-                          </TableCell>
-                          <TableCell sx={{ fontWeight: "bold" }}>
-                            Đơn vị
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {medicalRecord.drugs.map((drug, index) => (
-                          <TableRow key={index}>
-                            <TableCell>{drug.drug.drugName}</TableCell>
-                            <TableCell>{drug.howUse}</TableCell>
-                            <TableCell align="center">
-                              {drug.quantity}
-                            </TableCell>
-                            <TableCell>{drug.drug.unit}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                ) : (
-                  <Typography
-                    color="text.secondary"
-                    sx={{ textAlign: "center", py: 2 }}
-                  >
-                    Không có thuốc nào được kê đơn
-                  </Typography>
-                )}
-              </>
-            )}
-          </TabPanel>
-
-          {/* Patient History Tab */}
-          <TabPanel value={activeTab} index={1}>
-            <Typography
-              variant="subtitle1"
-              sx={{ fontWeight: "bold", mb: 1, mt: 2 }}
-            >
-              LỊCH SỬ KHÁM BỆNH
-            </Typography>
-
-            <TableContainer sx={{ mb: 3 }}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: "bold" }}>Ngày khám</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Bác sĩ</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Chẩn đoán</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                      Xem chi tiết
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {MOCK_PATIENT_HISTORY.map((record) => (
-                    <TableRow
-                      key={record.id}
-                      hover
-                      selected={selectedHistoryRecord === record.id}
+        {recordsLoading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : recordsError ? (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {recordsError}
+          </Alert>
+        ) : medicalRecords.length === 0 ? (
+          <Alert severity="info">Không có lịch sử khám bệnh</Alert>
+        ) : (
+          <List sx={{ width: "100%", bgcolor: "background.paper" }}>
+            {medicalRecords.map((record) => (
+              <React.Fragment key={record.id}>
+                <ListItem
+                  disablePadding
+                  divider
+                  secondaryAction={
+                    <IconButton
+                      edge="end"
+                      onClick={() => handleToggleRecord(record.id)}
                     >
-                      <TableCell>
-                        {formatCreatedAtDate(record.createdAt)}
-                      </TableCell>
-                      <TableCell>{record.doctorName}</TableCell>
-                      <TableCell>{record.diagnosisDisease}</TableCell>
-                      <TableCell align="center">
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          onClick={() => handleSelectHistoryRecord(record.id)}
-                        >
-                          Xem
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-
-            {selectedHistoryRecord && (
-              <Paper elevation={1} sx={{ p: 2, mb: 2 }}>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ fontWeight: "bold", mb: 2 }}
+                      {expandedRecords.includes(record.id) ? (
+                        <ExpandLessIcon />
+                      ) : (
+                        <ExpandMoreIcon />
+                      )}
+                    </IconButton>
+                  }
                 >
-                  Chi tiết ca khám #{selectedHistoryRecord}
-                </Typography>
+                  {/* Nút cho phép người dùng nhấp vào để mở rộng/thu gọn chi tiết bệnh án */}
+                  <ListItemButton onClick={() => handleToggleRecord(record.id)}>
+                    <ListItemText
+                      primary={
+                        <Typography variant="subtitle1" fontWeight="medium">
+                          {/* Hiển thị ngày khám và chẩn đoán */}
+                          {formatCreatedAtDate(record.dateAppoinment)} -{" "}
+                          {record.diagnosisDisease || "Không có chẩn đoán"}
+                        </Typography>
+                      }
+                      secondary={
+                        <Box
+                          component="span"
+                          display="flex"
+                          alignItems="center"
+                          gap={1}
+                          mt={0.5}
+                        >
+                          {/* Hiển thị tên bác sĩ khám */}
+                          <span>Bác sĩ: {record.doctorName}</span>
+                        </Box>
+                      }
+                    />
+                  </ListItemButton>
+                </ListItem>
 
-                {selectedHistoryRecord === 2 ? (
-                  <>
+                {/* Component điều khiển hiển thị/ẩn nội dung chi tiết bệnh án */}
+                <Collapse
+                  in={expandedRecords.includes(record.id)} // Kiểm tra xem record này có được mở rộng không
+                  timeout="auto" // Thời gian mở rộng
+                  unmountOnExit // Ẩn nội dung khi không được mở rộng
+                >
+                  <Box
+                    sx={{
+                      p: 2,
+                      bgcolor: "#f8f8f8",
+                      borderRadius: 1,
+                      mb: 1,
+                    }}
+                  >
                     <Grid container spacing={2} sx={{ mb: 3 }}>
                       <Grid item xs={12} sm={6}>
                         <Typography variant="body2">
                           <strong>Ngày khám:</strong>{" "}
-                          {formatCreatedAtDate(MOCK_HISTORY_DETAIL.createdAt)}
+                          {formatCreatedAtDate(record.dateAppoinment)}
                         </Typography>
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <Typography variant="body2">
-                          <strong>Bác sĩ khám:</strong>{" "}
-                          {MOCK_HISTORY_DETAIL.doctorName}
+                          <strong>Bác sĩ khám:</strong> {record.doctorName}
                         </Typography>
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <Typography variant="body2">
-                          <strong>Phòng khám:</strong>{" "}
-                          {MOCK_HISTORY_DETAIL.roomId}
+                          <strong>Mã lịch khám:</strong> {record.appointmentId}
                         </Typography>
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <Typography variant="body2">
-                          <strong>Ngày tái khám:</strong>{" "}
-                          {MOCK_HISTORY_DETAIL.reExaminationDate ||
-                            "Không có lịch tái khám"}
+                          <strong>Trạng thái:</strong>{" "}
+                          <Chip
+                            label={getStatusLabel(record.status)}
+                            size="small"
+                            color={
+                              record.status === "DONE" ? "success" : "default"
+                            }
+                          />
                         </Typography>
                       </Grid>
                     </Grid>
 
                     <Divider sx={{ my: 1 }} />
 
-                    {/* Diagnosis */}
+                    {/* Chẩn đoán */}
                     <Box sx={{ mb: 2 }}>
                       <Typography
                         variant="subtitle2"
@@ -564,66 +350,73 @@ const PatientMedicalRecord: React.FC = () => {
                       </Typography>
                       <Typography variant="body2" sx={{ mb: 1 }}>
                         <strong>Bệnh được chẩn đoán:</strong>{" "}
-                        {MOCK_HISTORY_DETAIL.diagnosisDisease}
+                        {record.diagnosisDisease || "Không có chẩn đoán"}
                       </Typography>
                       <Typography variant="body2" sx={{ mb: 1 }}>
-                        <strong>Ghi chú:</strong> {MOCK_HISTORY_DETAIL.note}
+                        <strong>Ghi chú:</strong>{" "}
+                        {record.note || "Không có ghi chú"}
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>Ngày tái khám:</strong>{" "}
+                        {record.reExaminationDate || "Không có lịch tái khám"}
                       </Typography>
                     </Box>
 
                     <Divider sx={{ my: 1 }} />
 
-                    {/* Medications */}
+                    {/* Thuốc điều trị */}
                     <Typography
                       variant="subtitle2"
                       sx={{ fontWeight: "bold", mb: 1 }}
                     >
                       THUỐC ĐIỀU TRỊ
                     </Typography>
-                    <TableContainer>
-                      <Table size="small">
-                        <TableHead>
-                          <TableRow>
-                            <TableCell sx={{ fontWeight: "bold" }}>
-                              Tên thuốc
-                            </TableCell>
-                            <TableCell sx={{ fontWeight: "bold" }}>
-                              Cách dùng
-                            </TableCell>
-                            <TableCell sx={{ fontWeight: "bold" }}>
-                              Số lượng
-                            </TableCell>
-                            <TableCell sx={{ fontWeight: "bold" }}>
-                              Đơn vị
-                            </TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {MOCK_HISTORY_DETAIL.drugs.map((drug, index) => (
-                            <TableRow key={index}>
-                              <TableCell>{drug.drug.drugName}</TableCell>
-                              <TableCell>{drug.howUse}</TableCell>
-                              <TableCell align="center">
-                                {drug.quantity}
+                    {record.drugs && record.drugs.length > 0 ? (
+                      <TableContainer>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell sx={{ fontWeight: "bold" }}>
+                                Tên thuốc
                               </TableCell>
-                              <TableCell>{drug.drug.unit}</TableCell>
+                              <TableCell sx={{ fontWeight: "bold" }}>
+                                Cách dùng
+                              </TableCell>
+                              <TableCell sx={{ fontWeight: "bold" }}>
+                                Số lượng
+                              </TableCell>
+                              <TableCell sx={{ fontWeight: "bold" }}>
+                                Đơn vị
+                              </TableCell>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </>
-                ) : (
-                  <Typography variant="body2">
-                    Đang tải thông tin chi tiết...
-                  </Typography>
-                )}
-              </Paper>
-            )}
-          </TabPanel>
-        </Box>
-      )}
-    </Paper>
+                          </TableHead>
+                          <TableBody>
+                            {record.drugs.map((drug, index) => (
+                              <TableRow key={index}>
+                                <TableCell>{drug.id?.drug?.drugName}</TableCell>
+                                <TableCell>{drug.howUse}</TableCell>
+                                <TableCell align="center">
+                                  {drug.quantity}
+                                </TableCell>
+                                <TableCell>{drug.id?.drug?.unit}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    ) : (
+                      <Typography color="text.secondary" sx={{ py: 1 }}>
+                        Không có thuốc nào được kê đơn
+                      </Typography>
+                    )}
+                  </Box>
+                </Collapse>
+              </React.Fragment>
+            ))}
+          </List>
+        )}
+      </Paper>
+    </Container>
   );
 };
 

@@ -19,7 +19,7 @@ export const ROUTING = {
 
   // Doctor routes (nested under /doctor)
   APPOINTMENTS: "appointments",
-  APPOINTMENT_DETAILS: "appointments/:appointmentId", // New route for appointment details
+  SCHEDULE_DETAIL: "schedule/:scheduleId", // New route for appointment details
   PATIENTS: "patients",
   PRESCRIPTIONS: "prescriptions",
   CHAT: "chat",
