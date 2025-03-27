@@ -111,6 +111,9 @@ public class MedicalRecordService {
             Map<String,Object> data = new HashMap<>();
             data.put("workSchedule", item);
             data.put("medicalRecord", medicalRecords.stream().filter(medicalRecord -> medicalRecord.getBookAppointment().getWorkSchedule().equals(item.get("id").asLong())));
+            data.put("drugs", medicalRecordDrugRepository.findById_MedicalRecord_Id(
+                    medicalRecords.stream().filter(medicalRecord -> medicalRecord.getBookAppointment().getWorkSchedule().equals(item.get("id").asLong())).map(MedicalRecord::getId).toList().getFirst()
+            ));
             result.add(data);
         });
         return result;
