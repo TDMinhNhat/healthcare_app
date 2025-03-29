@@ -74,7 +74,8 @@ const PatientAppointmentDetailsPage: React.FC = () => {
           });
 
         const data = {
-          id: result.work_schedule.id,
+          id: result.book_appointment.id,
+          workScheduleId: result.work_schedule.id,
           date: result.work_schedule.dateAppointment,
           time: `${formatTimeFromTimeString(
             result.work_schedule.shift.start,
@@ -176,12 +177,24 @@ const PatientAppointmentDetailsPage: React.FC = () => {
   /**
    * Xử lý sự kiện khi người dùng muốn tham gia phòng khám trực tuyến
    */
-  const handleJoinExamination = () => {
-    navigate(`${ROUTING.PATIENT}/wating-room/${appointment.id}`, {
+  const handleJoinExamination = (
+    appointmentId: number,
+    workScheduleId: number,
+    dateAppointment: string,
+    event: React.MouseEvent,
+    doctorId?: number,
+    doctorName?: string,
+    numericalOrder?: number
+  ) => {
+    event.stopPropagation();
+
+    navigate(`${ROUTING.PATIENT}/wating-room/${workScheduleId}`, {
       state: {
-        doctorId: appointment.doctorInfo.id,
-        doctorName: appointment.doctorInfo.name,
-        numericalOrder: appointment.patientInfo.numericalOrder,
+        doctorId: doctorId,
+        appointmentId: appointmentId,
+        dateAppointment: dateAppointment,
+        doctorName: doctorName,
+        numericalOrder: numericalOrder,
       },
     });
   };
@@ -283,7 +296,17 @@ const PatientAppointmentDetailsPage: React.FC = () => {
                 variant="contained"
                 color="success"
                 startIcon={<VideoCallIcon />}
-                onClick={handleJoinExamination}
+                onClick={(event) =>
+                  handleJoinExamination(
+                    appointment.id,
+                    appointment.workScheduleId,
+                    appointment.date,
+                    event,
+                    appointment.doctorInfo.id,
+                    appointment.doctorInfo.name,
+                    appointment.patientInfo.numericalOrder
+                  )
+                }
               >
                 Tham gia khám
               </Button>
@@ -371,8 +394,12 @@ const PatientAppointmentDetailsPage: React.FC = () => {
       <MedicalRecordModal
         open={isMedicalRecordOpen}
         onClose={handleCloseMedicalRecord}
-        appointmentId={appointment?.patientInfo.id}
-        roomId={appointment?.location}
+        appointmentId={appointment?.id}
+        patientId={user.userId}
+        infoAppointment={{
+          doctorName: appointment?.doctorInfo.name,
+          dateAppointment: appointment?.date,
+        }}
         isDoctor={false}
       />
     </Box>

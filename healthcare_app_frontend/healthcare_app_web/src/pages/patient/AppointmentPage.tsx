@@ -219,7 +219,8 @@ const AppointmentPage = () => {
         }
 
         const appointmentsData = result.map((item: any) => ({
-          id: item.work_schedule.id,
+          id: item.book_appointment.id,
+          workScheduleId: item.work_schedule.id,
           date: item.work_schedule.dateAppointment,
           startTime: formatTimeFromTimeString(
             item.work_schedule.shift.start,
@@ -401,6 +402,7 @@ const AppointmentPage = () => {
   // Điều hướng người dùng đến phòng chờ khám với thông tin bác sĩ và số thứ tự
   const handleJoinExamination = (
     appointmentId: number,
+    workScheduleId: number,
     dateAppointment: string,
     event: React.MouseEvent,
     doctorId?: number,
@@ -409,7 +411,7 @@ const AppointmentPage = () => {
   ) => {
     event.stopPropagation();
 
-    navigate(`${ROUTING.PATIENT}/wating-room/${appointmentId}`, {
+    navigate(`${ROUTING.PATIENT}/wating-room/${workScheduleId}`, {
       state: {
         doctorId: doctorId,
         appointmentId: appointmentId,
@@ -471,7 +473,7 @@ const AppointmentPage = () => {
               opacity: 0.9,
             },
           }}
-          onClick={() => handleAppointmentClick(appointment.id)}
+          onClick={() => handleAppointmentClick(appointment.workScheduleId)}
         >
           <Box
             sx={{
@@ -509,6 +511,7 @@ const AppointmentPage = () => {
                 onClick={(e) =>
                   handleJoinExamination(
                     appointment.id,
+                    appointment.workScheduleId,
                     appointment.date,
                     e,
                     appointment.doctorId,

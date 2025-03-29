@@ -77,7 +77,13 @@ export default function WaitingRoomPage() {
     // Khi kết nối thành công
     socket.on("connect", () => {
       console.log("Socket connected to the server");
-      console.log("param", dateAppointment, doctorName);
+      console.log(
+        "param",
+        dateAppointment,
+        doctorName,
+        appointmentId,
+        scheduleId
+      );
 
       // Gửi thông báo tham gia hàng đợi với số thứ tự trong tên
       socket.emit("joinWaitingQueue", {
