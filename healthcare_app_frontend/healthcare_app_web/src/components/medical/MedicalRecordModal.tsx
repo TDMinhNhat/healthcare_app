@@ -23,7 +23,6 @@ import {
   Autocomplete,
   Tabs,
   Tab,
-  // Add these new imports
   List,
   ListItem,
   ListItemText,
@@ -38,7 +37,6 @@ import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
 import HistoryIcon from "@mui/icons-material/History";
 import MedicalInformationIcon from "@mui/icons-material/MedicalInformation";
-// Add these new imports
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { MedicalRecord, MedicalRecordDrug, Drug } from "../../types/medical";
@@ -50,20 +48,7 @@ import {
   getMedicalRecordPrevious,
 } from "../../services/appointment/medical_record_service";
 import { getPatientInfo } from "../../services/authenticate/user_service";
-
-// Dữ liệu mẫu thuốc cho autocomplete
-const MOCK_DRUGS: Drug[] = [
-  { id: 1, drugName: "Paracetamol", unit: "viên" },
-  { id: 2, drugName: "Amoxicillin", unit: "viên" },
-  { id: 3, drugName: "Ibuprofen", unit: "viên" },
-  { id: 4, drugName: "Cetirizine", unit: "viên" },
-  { id: 5, drugName: "Omeprazole", unit: "viên" },
-  { id: 6, drugName: "Losartan", unit: "viên" },
-  { id: 7, drugName: "Metformin", unit: "viên" },
-  { id: 8, drugName: "Atorvastatin", unit: "viên" },
-  { id: 9, drugName: "Salbutamol", unit: "ống xịt" },
-  { id: 10, drugName: "Vitamin C", unit: "viên" },
-];
+import { getAllDrugs } from "../../services/appointment/drug_service";
 
 // Dữ liệu mẫu bệnh nhân
 const MOCK_PATIENT: User = {
@@ -139,6 +124,11 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [patientError, setPatientError] = useState<string | null>(null);
 
+  // State cho danh sách thuốc từ API
+  const [availableDrugs, setAvailableDrugs] = useState<Drug[]>([]);
+  const [loadingDrugs, setLoadingDrugs] = useState<boolean>(false);
+  const [drugsError, setDrugsError] = useState<string | null>(null);
+
   // Dữ liệu chính
   const [medicalRecord, setMedicalRecord] = useState<MedicalRecord | null>(
     null
@@ -177,6 +167,39 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
   const [selectedHistoryData, setSelectedHistoryData] = useState<any | null>(
     null
   );
+
+  // Fetch available drugs from API
+  useEffect(() => {
+    const fetchDrugs = async () => {
+      if (!open) return;
+
+      setLoadingDrugs(true);
+      setDrugsError(null);
+
+      try {
+        const response = await getAllDrugs();
+        if (response.data && Array.isArray(response.data.data)) {
+          const formattedDrugs = response.data.data.map((drug: any) => ({
+            id: drug.id,
+            drugName: drug.drugName,
+            unit: drug.unit,
+          }));
+          setAvailableDrugs(formattedDrugs);
+        } else {
+          console.warn("Invalid drugs data format", response);
+          setAvailableDrugs([]);
+        }
+      } catch (error) {
+        console.error("Error fetching drugs:", error);
+        setDrugsError("Không thể tải danh sách thuốc");
+        setAvailableDrugs([]);
+      } finally {
+        setLoadingDrugs(false);
+      }
+    };
+
+    fetchDrugs();
+  }, [open]);
 
   useEffect(() => {
     const fetchMedicalRecord = async () => {
@@ -754,7 +777,7 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
                       <Grid container spacing={2} alignItems="center">
                         <Grid item xs={12} md={3}>
                           <Autocomplete
-                            options={MOCK_DRUGS}
+                            options={availableDrugs}
                             getOptionLabel={(option) =>
                               `${option.drugName} (${option.unit})`
                             }
@@ -770,6 +793,7 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
                                 fullWidth
                               />
                             )}
+                            loading={loadingDrugs}
                           />
                         </Grid>
                         <Grid item xs={12} md={4}>
@@ -839,7 +863,6 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
                         </TableHead>
                         <TableBody>
                           {drugs.map((drug, index) => (
-                            // console.log("drug", drug),
                             <TableRow key={index}>
                               <TableCell>{drug?.drug.drugName}</TableCell>
                               <TableCell>{drug.howUse}</TableCell>

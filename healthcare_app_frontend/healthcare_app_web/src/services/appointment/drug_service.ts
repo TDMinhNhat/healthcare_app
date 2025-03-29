@@ -13,3 +13,8 @@ export const getDrugByAbsouluteName = async (name: string) => {
   });
   return response;
 };
+
+export const getAllDrugs = async () => {
+  const response = await axiosConfig.get(`${prefix}`);
+  return response;
+};

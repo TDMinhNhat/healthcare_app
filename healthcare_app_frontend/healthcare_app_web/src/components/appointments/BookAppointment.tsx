@@ -9,12 +9,12 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
-import { useTranslation } from "react-i18next";
 import SelectService from "./SelectService";
 import DoctorList from "./DoctorList";
 import SelectDateTime from "./SelectDateTime";
 import DoctorDetails from "./DoctorDetails";
 import ConfirmAppointment from "./ConfirmAppointment";
+import PaymentCheckout from "./PaymentCheckout";
 import { createAppointment } from "../../services/appointment/booking_service";
 
 interface BookAppointmentProps {
@@ -26,48 +26,39 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
   onClose,
   patientId,
 }) => {
-  const { t } = useTranslation();
   const [activeStep, setActiveStep] = useState(0);
   const [selectedService, setSelectedService] = useState<any>(null);
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  // State lưu trữ thời gian đã chọn
   const [selectedTime, setSelectedTime] = useState<string>("");
-  // State theo dõi trạng thái loading khi gửi request
   const [loading, setLoading] = useState(false);
-  // State lưu trữ thông báo lỗi nếu có
   const [error, setError] = useState<string | null>(null);
-  // State lưu trữ ghi chú của bệnh nhân
   const [note, setNote] = useState<string>("");
-  // State lưu trữ lịch làm việc của bác sĩ
   const [workSchedule, setWorkSchedule] = useState<any>(null);
+  const [paymentCompleted, setPaymentCompleted] = useState<boolean>(false);
 
-  // Định nghĩa các bước trong quá trình đặt lịch khám
   const steps = [
-    t("patient.appointments.steps.select_service"), // Bước 1: Chọn dịch vụ
-    t("patient.appointments.steps.select_doctor"), // Bước 2: Chọn bác sĩ
-    t("patient.appointments.steps.select_date_time"), // Bước 3: Chọn ngày giờ
-    t("patient.appointments.steps.review"), // Bước 4: Xem lại thông tin
-    t("patient.appointments.steps.confirm"), // Bước 5: Xác nhận đặt lịch
+    "Chọn dịch vụ",
+    "Chọn bác sĩ",
+    "Chọn ngày giờ",
+    "Xem lại thông tin",
+    "Thanh toán",
+    "Xác nhận",
   ];
 
-  // Hàm chuyển đến bước tiếp theo
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
-  // Hàm quay lại bước trước
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  // Hàm xử lý khi chọn dịch vụ và chuyển sang bước tiếp theo
   const handleServiceSelect = (service: any) => {
     setSelectedService(service);
     handleNext();
   };
 
-  // Hàm xử lý khi chọn bác sĩ và chuyển sang bước tiếp theo
   const handleDoctorSelect = (doctor: any) => {
     setSelectedDoctor(doctor);
     handleNext();
@@ -84,24 +75,33 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
     handleNext();
   };
 
-  const handleConfirm = async () => {
-    if (!selectedDate || !selectedTime || !selectedDoctor || !patientId) {
-      setError("Missing required information for booking");
-      return;
-    }
-
+  const handlePaymentComplete = async () => {
     try {
       setLoading(true);
       setError(null);
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      setPaymentCompleted(true);
+
       await createAppointment(patientId, note, workSchedule.id);
 
-      handleNext(); // Move to confirmation step
+      handleNext();
     } catch (err) {
-      console.error("Failed to create appointment:", err);
-      setError("Failed to book appointment. Please try again.");
+      console.error("Failed to process payment:", err);
+      setError("Thanh toán thất bại. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleConfirm = async () => {
+    if (!selectedDate || !selectedTime || !selectedDoctor || !patientId) {
+      setError("Thông tin đặt lịch còn thiếu. Vui lòng kiểm tra lại.");
+      return;
+    }
+
+    handleNext();
   };
 
   const handleReset = () => {
@@ -118,11 +118,11 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
   const handleNoteChange = (value: string) => {
     setNote(value);
   };
-  console.log(patientId, note, selectedTime);
+
   return (
     <Box sx={{ width: "100%" }}>
       <Typography variant="h6" gutterBottom>
-        {t("patient.appointments.book_new")}
+        Đặt lịch khám bệnh
       </Typography>
 
       <Stepper activeStep={activeStep} sx={{ mb: 4 }} alternativeLabel>
@@ -156,25 +156,24 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
           <DoctorDetails doctor={selectedDoctor} />
           <Box sx={{ mt: 3 }}>
             <Typography variant="h6" gutterBottom>
-              {t("patient.appointments.appointment_details")}
+              Chi tiết lịch hẹn
             </Typography>
             <Typography variant="body1">
-              {t("patient.appointments.date")}:{" "}
-              {selectedDate ? selectedDate.toLocaleDateString() : ""}
+              Ngày: {selectedDate ? selectedDate.toLocaleDateString() : ""}
             </Typography>
             <Typography variant="body1">
-              {t("patient.appointments.time")}:{" "}
+              Thời gian:{" "}
               {selectedTime
                 ? `${selectedTime.start} - ${selectedTime.end}`
                 : ""}
             </Typography>
             <Typography variant="body1">
-              {t("patient.appointments.service")}: {selectedService.name}
+              Dịch vụ: {selectedService.name}
             </Typography>
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
             <Button onClick={handleBack} disabled={loading}>
-              {t("common.back")}
+              Quay lại
             </Button>
             <Button
               variant="contained"
@@ -182,15 +181,21 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
               onClick={handleConfirm}
               disabled={loading}
             >
-              {loading
-                ? t("patient.appointments.confirming")
-                : t("patient.appointments.confirm")}
+              {loading ? "Đang xử lý..." : "Tiến hành thanh toán"}
             </Button>
           </Box>
         </Box>
       )}
 
       {activeStep === 4 && (
+        <PaymentCheckout
+          onPaymentComplete={handlePaymentComplete}
+          onBack={handleBack}
+          loading={loading}
+        />
+      )}
+
+      {activeStep === 5 && (
         <ConfirmAppointment
           date={selectedDate!}
           time={selectedTime}
@@ -200,10 +205,10 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
         />
       )}
 
-      {activeStep !== 0 && activeStep !== 4 && activeStep !== steps.length && (
+      {activeStep !== 0 && activeStep !== 5 && activeStep !== steps.length && (
         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           <Button onClick={onClose} sx={{ mr: 1 }} disabled={loading}>
-            {t("common.cancel")}
+            Hủy
           </Button>
         </Box>
       )}
