@@ -324,7 +324,7 @@ const PatientMedicalRecord: React.FC = () => {
                           <strong>Mã lịch khám:</strong> {record.appointmentId}
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      {/* <Grid item xs={12} sm={6}>
                         <Typography variant="body2">
                           <strong>Trạng thái:</strong>{" "}
                           <Chip
@@ -335,7 +335,7 @@ const PatientMedicalRecord: React.FC = () => {
                             }
                           />
                         </Typography>
-                      </Grid>
+                      </Grid> */}
                     </Grid>
 
                     <Divider sx={{ my: 1 }} />

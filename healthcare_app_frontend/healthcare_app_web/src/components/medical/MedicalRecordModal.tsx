@@ -679,7 +679,7 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
                         {medicalRecord.appointmentId}
                       </Typography>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    {/* <Grid item xs={12} sm={6}>
                       <Typography variant="body2">
                         <strong>Trạng thái:</strong>{" "}
                         <Chip
@@ -692,7 +692,7 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
                           }
                         />
                       </Typography>
-                    </Grid>
+                    </Grid> */}
                   </Grid>
 
                   <Divider sx={{ my: 1 }} />
