@@ -32,10 +32,12 @@ public class PaymentService {
 
         Payment payment = new Payment(
                 getMaxId(),
-                paymentDTO.getAuthorName(),
+                paymentDTO.getAccountNumber(),
+                paymentDTO.getSubAccount(),
                 paymentDTO.getBankingName(),
                 paymentDTO.getPrice(),
                 bookAppointmentRepository.findById(Long.parseLong(paymentDTO.getBookAppointmentId())).orElseThrow(() -> new EntityNotFoundException("The book appointment was not found!")),
+                paymentDTO.getContent(),
                 LocalDateTime.now()
         );
         return paymentRepository.save(payment);

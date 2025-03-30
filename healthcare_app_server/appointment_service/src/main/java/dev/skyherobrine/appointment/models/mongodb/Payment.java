@@ -17,13 +17,16 @@ public class Payment {
 
     @MongoId
     private Long id;
-    @Field(name = "author_name")
-    private String authorName;
+    @Field(name = "account_number")
+    private String accountNumber;
+    @Field(name = "sub_account")
+    private String subAccount;
     @Field(name = "banking_name")
     private String bankingName;
     private double price;
     @Field(name = "book_appointment")
     private BookAppointment bookAppointment;
+    private String content;
     @Field(name = "created_at")
     private LocalDateTime createdAt;
 }

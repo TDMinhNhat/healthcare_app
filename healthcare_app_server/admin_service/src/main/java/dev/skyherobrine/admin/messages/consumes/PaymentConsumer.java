@@ -31,17 +31,21 @@ public class PaymentConsumer {
             log.info("Payment Consumer: listen the message for insert payment");
 
             JsonNode node = new ObjectMapper().readTree(message);
-            String getAuthorName = node.get("authorName").asText();
+            String getAccountNumber = node.get("accountNumber").asText();
+            String getSubAccount = node.get("subAccount").asText();
             String getBankingName = node.get("bankingName").asText();
             double getPrice = node.get("price").asDouble();
             String getBookAppointmentId = node.get("bookAppointmentId").asText();
+            String getContent = node.get("content").asText();
 
             Payment target = new Payment(
                     paymentRepository.findTopByOrderByIdDesc().orElse(null) == null ? 1L : (paymentRepository.findTopByOrderByIdDesc().orElse(null).getId() + 1),
-                    getAuthorName,
+                    getAccountNumber,
+                    getSubAccount,
                     getBankingName,
                     getPrice,
                     bookAppointmentRepository.findById(Long.parseLong(getBookAppointmentId)).orElseThrow(() -> new EntityNotFoundException("The book appointment was not found!")),
+                    getContent,
                     LocalDateTime.now()
             );
             paymentRepository.save(target);
