@@ -20,13 +20,6 @@ interface PaymentCheckoutProps {
   loading: boolean; // Trạng thái đang xử lý
 }
 
-// Hàm tạo mã giao dịch duy nhất
-const generateUniqueCode = () => {
-  const timestamp = Date.now().toString();
-  const uniqueCode = uuidv4().substring(0, 8) + timestamp;
-  return uniqueCode;
-};
-
 const PaymentCheckout: React.FC<PaymentCheckoutProps> = ({
   onPaymentComplete, // gọi nó khi check thành công để tạo lịch hẹn
   workSchedule,
@@ -34,7 +27,7 @@ const PaymentCheckout: React.FC<PaymentCheckoutProps> = ({
 }) => {
   const user = useSelector((state: any) => state.user.user); // Lấy thông tin người dùng từ Redux store
   const appointmentFee = 5000; // Phí khám bệnh (đơn vị VND)
-  const code = workSchedule.id + user.userId; // Tạo mã giao dịch duy nhất
+  const code = workSchedule.id + user.userId.replace(/-/g, ""); // Tạo mã giao dịch duy nhất
   const acc = import.meta.env.VITE_ACC; // Số tài khoản từ biến môi trường
   const bank = import.meta.env.VITE_BANK; // Mã ngân hàng từ biến môi trường
   // Biến trạng thái cho việc xác minh thanh toán

@@ -21,15 +21,18 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { vi } from "date-fns/locale";
 
+// Interface định nghĩa các props cho component PatientForm
+// Cho phép sử dụng chung một form cho cả thêm mới và chỉnh sửa
 interface PatientFormProps {
-  open: boolean;
-  onClose: () => void;
-  onSubmit: (patient: Partial<User>) => void;
-  patient?: User | null; // Add this prop for editing
-  mode: "add" | "edit"; // Add mode to determine whether we're adding or editing
+  open: boolean; // Trạng thái hiển thị của modal
+  onClose: () => void; // Hàm xử lý khi đóng modal
+  onSubmit: (patient: Partial<User>) => void; // Hàm xử lý khi submit form
+  patient?: User | null; // Thông tin bệnh nhân (khi chỉnh sửa)
+  mode: "add" | "edit"; // Chế độ form: thêm mới hoặc chỉnh sửa
 }
 
-// Schema validation với Yup
+// Schema validation sử dụng Yup
+// Định nghĩa các quy tắc kiểm tra dữ liệu nhập vào
 const validationSchema = Yup.object({
   firstName: Yup.string()
     .required("Họ là bắt buộc")
@@ -57,6 +60,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
   patient,
   mode,
 }) => {
+  // Sử dụng formik để quản lý form và validation
   const formik = useFormik({
     initialValues: {
       firstName: "",
@@ -73,7 +77,8 @@ const PatientForm: React.FC<PatientFormProps> = ({
     },
   });
 
-  // Set form values when patient prop changes (for edit mode)
+  // Effect để cập nhật giá trị form khi chuyển sang chế độ chỉnh sửa
+  // Hoặc reset form khi chuyển sang chế độ thêm mới
   useEffect(() => {
     if (patient && mode === "edit") {
       formik.setValues({
@@ -90,12 +95,13 @@ const PatientForm: React.FC<PatientFormProps> = ({
     }
   }, [patient, mode]);
 
+  // Xử lý đóng modal và reset form
   const handleClose = () => {
     formik.resetForm();
     onClose();
   };
 
-  // Determine title and button text based on mode
+  // Xác định tiêu đề và nút bấm dựa trên chế độ form
   const title =
     mode === "add" ? "Thêm bệnh nhân mới" : "Chỉnh sửa thông tin bệnh nhân";
   const buttonText = mode === "add" ? "Thêm bệnh nhân" : "Lưu thay đổi";
@@ -106,6 +112,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
       <form onSubmit={formik.handleSubmit}>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
+            {/* Form nhập thông tin bệnh nhân */}
             <Grid item xs={12} md={6}>
               <TextField
                 name="firstName"
