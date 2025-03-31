@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -12,6 +12,7 @@ import { checkPayment } from "../../services/appointment/payment_service";
 import { v4 as uuidv4 } from "uuid";
 import { format, subHours } from "date-fns"; // Import date-fns functions
 import { useSelector } from "react-redux";
+import { Client } from "@stomp/stompjs";
 
 interface PaymentCheckoutProps {
   onPaymentComplete: () => Promise<void>; // Hàm gọi khi thanh toán hoàn tất
@@ -40,6 +41,21 @@ const PaymentCheckout: React.FC<PaymentCheckoutProps> = ({
   const [verifyingPayment, setVerifyingPayment] = useState(false);
   // Thêm state để hiển thị thông báo lỗi
   const [paymentError, setPaymentError] = useState<string | null>(null);
+
+  const client = new Client({
+    brokerURL: "ws://localhost:8081/appointment/socket",
+    onConnect: () => {
+        client.subscribe("/topic", (message) => {
+          console.log(message);
+        })
+
+        client.publish({ destination: "/topic/greeting", message: "Hello World!" });
+    }
+  })
+
+  useEffect(() => {
+    client.activate();
+  })
 
   return (
     <Box>
