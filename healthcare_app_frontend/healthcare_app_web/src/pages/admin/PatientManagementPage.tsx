@@ -5,61 +5,77 @@ import {
   GridRenderCellParams,
   GridToolbar,
 } from "@mui/x-data-grid";
-import {
-  Box,
-  Chip,
-  Avatar,
-  IconButton,
-  Paper,
-  Button,
-  TextField,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-} from "@mui/material";
-import { Edit, Delete, Add, Save, Cancel } from "@mui/icons-material";
+import { Box, Chip, Avatar, IconButton, Paper, Button } from "@mui/material";
+import { Edit, Delete, Add } from "@mui/icons-material";
 import { User } from "../../types/user";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { vi } from "date-fns/locale";
+import AddPatientForm from "../../components/admin/AddPatientForm";
 
 const PatientManagementPage: React.FC = () => {
   const [patients, setPatients] = useState<User[]>(mockPatients);
-  const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [editedRow, setEditedRow] = useState<User | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
+  const [formMode, setFormMode] = useState<"add" | "edit">("add");
+  const [selectedPatient, setSelectedPatient] = useState<User | null>(null);
 
-  // Function to handle entering edit mode
+  // Function to handle opening the form for adding
+  const handleAddClick = () => {
+    setFormMode("add");
+    setSelectedPatient(null);
+    setIsFormOpen(true);
+  };
+
+  // Function to handle opening the form for editing
   const handleEditClick = (patient: User) => {
-    setEditRowId(patient.id);
-    setEditedRow({ ...patient });
+    setFormMode("edit");
+    setSelectedPatient(patient);
+    setIsFormOpen(true);
   };
 
-  // Function to handle saving changes
-  const handleSaveClick = () => {
-    if (editedRow) {
-      setPatients(
-        patients.map((patient) =>
-          patient.id === editRowId ? editedRow : patient
-        )
-      );
-      setEditRowId(null);
-      setEditedRow(null);
+  // Function to close the form
+  const handleFormClose = () => {
+    setIsFormOpen(false);
+  };
+
+  // Function to handle form submission (both add and edit)
+  const handleFormSubmit = (patientData: Partial<User>) => {
+    if (formMode === "add") {
+      // Add new patient
+      const lastId = Math.max(...patients.map((patient) => patient.id), 0);
+      const lastUserId =
+        patients.length > 0
+          ? parseInt(patients[patients.length - 1].userId.replace("BN", ""))
+          : 0;
+
+      const newId = lastId + 1;
+      const newUserId = `BN${String(lastUserId + 1).padStart(3, "0")}`;
+
+      const patientToAdd: User = {
+        ...(patientData as User),
+        id: newId,
+        userId: newUserId,
+        password: "defaultpassword",
+      };
+
+      setPatients([...patients, patientToAdd]);
+    } else {
+      // Edit existing patient
+      if (selectedPatient) {
+        setPatients(
+          patients.map((patient) =>
+            patient.id === selectedPatient.id
+              ? { ...selectedPatient, ...patientData }
+              : patient
+          )
+        );
+      }
     }
+    setIsFormOpen(false);
   };
 
-  // Function to handle canceling edit mode
-  const handleCancelClick = () => {
-    setEditRowId(null);
-    setEditedRow(null);
-  };
-
-  // Function to handle field changes
-  const handleFieldChange = (field: keyof User, value: any) => {
-    if (editedRow) {
-      setEditedRow({ ...editedRow, [field]: value });
-    }
+  // Function to handle deleting a patient
+  const handleDeleteClick = (id: number) => {
+    // Implement delete functionality here
+    // For example:
+    // setPatients(patients.filter(patient => patient.id !== id));
   };
 
   // Định nghĩa các cột cho bảng dữ liệu
@@ -91,124 +107,44 @@ const PatientManagementPage: React.FC = () => {
       headerName: "Họ",
       width: 100,
       flex: 0.8,
-      renderCell: (params: GridRenderCellParams) => {
-        return editRowId === params.row.id ? (
-          <TextField
-            size="small"
-            value={editedRow?.firstName || ""}
-            onChange={(e) => handleFieldChange("firstName", e.target.value)}
-            fullWidth
-          />
-        ) : (
-          params.value
-        );
-      },
     },
     {
       field: "lastName",
       headerName: "Tên",
       width: 120,
       flex: 0.8,
-      renderCell: (params: GridRenderCellParams) => {
-        return editRowId === params.row.id ? (
-          <TextField
-            size="small"
-            value={editedRow?.lastName || ""}
-            onChange={(e) => handleFieldChange("lastName", e.target.value)}
-            fullWidth
-          />
-        ) : (
-          params.value
-        );
-      },
     },
     {
       field: "sex",
       headerName: "Giới tính",
       width: 100,
       flex: 0.7,
-      renderCell: (params: GridRenderCellParams) => {
-        return editRowId === params.row.id ? (
-          <FormControl fullWidth size="small">
-            <Select
-              value={editedRow?.sex ?? false}
-              onChange={(e) => handleFieldChange("sex", e.target.value)}
-            >
-              <MenuItem value={true}>Nam</MenuItem>
-              <MenuItem value={false}>Nữ</MenuItem>
-            </Select>
-          </FormControl>
-        ) : (
-          <Chip
-            label={params.value ? "Nam" : "Nữ"}
-            color={params.value ? "info" : "secondary"}
-            size="small"
-          />
-        );
-      },
+      renderCell: (params: GridRenderCellParams) => (
+        <Chip
+          label={params.value ? "Nam" : "Nữ"}
+          color={params.value ? "info" : "secondary"}
+          size="small"
+        />
+      ),
     },
     {
       field: "dob",
       headerName: "Ngày sinh",
       width: 120,
       flex: 0.8,
-      renderCell: (params: GridRenderCellParams) => {
-        if (editRowId === params.row.id) {
-          return (
-            <LocalizationProvider
-              dateAdapter={AdapterDateFns}
-              adapterLocale={vi}
-            >
-              <DatePicker
-                value={new Date(editedRow?.dob || "")}
-                onChange={(newValue) => {
-                  if (newValue) {
-                    const dateStr = newValue.toISOString().split("T")[0];
-                    handleFieldChange("dob", dateStr);
-                  }
-                }}
-                slotProps={{ textField: { size: "small", fullWidth: true } }}
-              />
-            </LocalizationProvider>
-          );
-        }
-        return new Date(params.row.dob).toLocaleDateString("vi-VN");
-      },
+      renderCell: (params: GridRenderCellParams) =>
+        new Date(params.row.dob).toLocaleDateString("vi-VN"),
     },
     {
       field: "phone",
       headerName: "Số điện thoại",
       width: 130,
       flex: 0.8,
-      renderCell: (params: GridRenderCellParams) => {
-        return editRowId === params.row.id ? (
-          <TextField
-            size="small"
-            value={editedRow?.phone || ""}
-            onChange={(e) => handleFieldChange("phone", e.target.value)}
-            fullWidth
-          />
-        ) : (
-          params.value
-        );
-      },
     },
     {
       field: "email",
       headerName: "Email",
       flex: 1,
-      renderCell: (params: GridRenderCellParams) => {
-        return editRowId === params.row.id ? (
-          <TextField
-            size="small"
-            value={editedRow?.email || ""}
-            onChange={(e) => handleFieldChange("email", e.target.value)}
-            fullWidth
-          />
-        ) : (
-          params.value
-        );
-      },
     },
     {
       field: "status",
@@ -231,40 +167,22 @@ const PatientManagementPage: React.FC = () => {
       sortable: false,
       renderCell: (params: GridRenderCellParams) => (
         <Box sx={{ display: "flex", gap: 1 }}>
-          {editRowId === params.row.id ? (
-            <>
-              <IconButton
-                size="small"
-                color="success"
-                title="Lưu"
-                onClick={handleSaveClick}
-              >
-                <Save fontSize="small" />
-              </IconButton>
-              <IconButton
-                size="small"
-                color="warning"
-                title="Hủy"
-                onClick={handleCancelClick}
-              >
-                <Cancel fontSize="small" />
-              </IconButton>
-            </>
-          ) : (
-            <>
-              <IconButton
-                size="small"
-                color="info"
-                title="Chỉnh sửa"
-                onClick={() => handleEditClick(params.row)}
-              >
-                <Edit fontSize="small" />
-              </IconButton>
-              <IconButton size="small" color="error" title="Xóa">
-                <Delete fontSize="small" />
-              </IconButton>
-            </>
-          )}
+          <IconButton
+            size="small"
+            color="info"
+            title="Chỉnh sửa"
+            onClick={() => handleEditClick(params.row)}
+          >
+            <Edit fontSize="small" />
+          </IconButton>
+          <IconButton
+            size="small"
+            color="error"
+            title="Xóa"
+            onClick={() => handleDeleteClick(params.row.id)}
+          >
+            <Delete fontSize="small" />
+          </IconButton>
         </Box>
       ),
     },
@@ -273,7 +191,12 @@ const PatientManagementPage: React.FC = () => {
   return (
     <Box sx={{ height: "100%", width: "100%", padding: 0 }}>
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, gap: 2 }}>
-        <Button variant="contained" color="primary" startIcon={<Add />}>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<Add />}
+          onClick={handleAddClick}
+        >
           Thêm bệnh nhân
         </Button>
       </Box>
@@ -301,6 +224,15 @@ const PatientManagementPage: React.FC = () => {
           disableColumnSelector={false}
         />
       </Paper>
+
+      {/* Using the form component for both add and edit */}
+      <AddPatientForm
+        open={isFormOpen}
+        onClose={handleFormClose}
+        onSubmit={handleFormSubmit}
+        patient={selectedPatient}
+        mode={formMode}
+      />
     </Box>
   );
 };
