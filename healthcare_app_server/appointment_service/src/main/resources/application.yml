@@ -46,3 +46,4 @@ springdoc:
     path: /appointment/v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+bearer-sepay: XVEYDNH2M7OASF6LGIMAT13REWQOCAK9VYWBBGX90HRNS5N8TUQOXKGC15JJYOFC
