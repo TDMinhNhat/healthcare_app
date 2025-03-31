@@ -145,18 +145,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   // Lấy thông tin người dùng
   const user = JSON.parse((localStorage.getItem("user") as string) || "{}");
-
-  // Socket connection
-  const [socket, setSocket] = useState<Socket>(
-    io("ws://localhost:8081", {
-      path: "/schedule",
-      transports: ["websocket", "polling"],
-      reconnection: true,
-      reconnectionAttempts: 10,
-      autoConnect: false,
-    })
-  );
-
   // Tạo mảng các ngày trong tuần hiện tại
   const getDaysInWeek = () => {
     const days = [];
@@ -296,46 +284,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
   useEffect(() => {
     fetchScheduleData();
   }, [currentWeekStart, user?.userId]);
-
-  // Xử lý kết nối socket và lắng nghe các sự kiện
-  useEffect(() => {
-    if (!user?.userId) return;
-
-    socket.connect();
-
-    // Khi kết nối thành công
-    socket.on("connect", () => {
-      console.log("Socket connected to the server");
-
-      // Đăng ký nhận cập nhật về lịch làm việc cho bác sĩ này
-      socket.emit("joinDoctorSchedule", {
-        doctorId: user.userId,
-      });
-    });
-
-    // Lắng nghe sự kiện khi có cập nhật lịch làm việc
-    socket.on("scheduleUpdated", (data) => {
-      console.log("Cập nhật lịch từ server:", data);
-      // Làm mới dữ liệu khi nhận được thông báo
-      fetchScheduleData();
-    });
-
-    // Xử lý lỗi kết nối
-    socket.on("connect_error", (error) => {
-      console.error("Socket connection error:", error);
-    });
-
-    // Cleanup function khi component unmount
-    return () => {
-      if (socket) {
-        // socket.emit("leaveDoctorSchedule", {
-        //   doctorId: user.userId,
-        // });
-        socket.disconnect();
-        console.log("Socket disconnected");
-      }
-    };
-  }, [user?.userId]); // Chỉ kết nối lại khi userId thay đổi
 
   // Tìm tất cả các lịch làm việc cho một ngày cụ thể - truy cập nhanh O(1)
   const getSchedulesForDate = (date: string): WorkSchedule[] => {

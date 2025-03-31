@@ -169,17 +169,6 @@ const AppointmentPage = () => {
   const user = useSelector((state: any) => state.user.user);
   const getUserId = user.userId;
 
-  // Socket connection
-  const [socket, setSocket] = useState<Socket>(
-    io("ws://localhost:8081", {
-      path: "/schedule",
-      transports: ["websocket", "polling"],
-      reconnection: true,
-      reconnectionAttempts: 10,
-      autoConnect: false,
-    })
-  );
-
   // Các state quản lý hiển thị lịch
   const [today] = useState(new Date()); // Ngày hiện tại
   const [currentWeekStart, setCurrentWeekStart] = useState(
@@ -270,47 +259,6 @@ const AppointmentPage = () => {
   useEffect(() => {
     fetchAppointments();
   }, [currentWeekStart, getUserId]);
-
-  // Xử lý kết nối socket và lắng nghe các sự kiện
-  useEffect(() => {
-    if (!getUserId) return;
-
-    socket.connect();
-
-    // Khi kết nối thành công
-    socket.on("connect", () => {
-      console.log("Socket connected to the server");
-
-      // Đăng ký nhận cập nhật về lịch hẹn cho bệnh nhân này
-      socket.emit("joinPatientAppointments", {
-        patientId: getUserId,
-      });
-    });
-
-    // Lắng nghe sự kiện khi có lịch hẹn được cập nhật
-    socket.on("appointmentUpdated", (data) => {
-      console.log("Lịch hẹn được cập nhật:", data);
-      if (data.patientId === getUserId) {
-        fetchAppointments();
-      }
-    });
-
-    // Xử lý lỗi kết nối
-    socket.on("connect_error", (error) => {
-      console.error("Socket connection error:", error);
-    });
-
-    // Cleanup function khi component unmount
-    return () => {
-      if (socket) {
-        // socket.emit("leavePatientAppointments", {
-        //   patientId: getUserId,
-        // });
-        socket.disconnect();
-        console.log("Socket disconnected");
-      }
-    };
-  }, [getUserId]); // Chỉ kết nối lại khi userId thay đổi
 
   // Xử lý khi người dùng muốn đặt lịch hẹn mới
   const handleBookingClick = () => {
