@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
   Typography,
@@ -12,6 +12,7 @@ import { checkPayment } from "../../services/appointment/payment_service";
 import { v4 as uuidv4 } from "uuid";
 import { format, subHours } from "date-fns"; // Import date-fns functions
 import { useSelector } from "react-redux";
+import { Client } from "@stomp/stompjs";
 
 interface PaymentCheckoutProps {
   onPaymentComplete: () => Promise<void>; // Hàm gọi khi thanh toán hoàn tất
@@ -33,6 +34,40 @@ const PaymentCheckout: React.FC<PaymentCheckoutProps> = ({
   const [verifyingPayment, setVerifyingPayment] = useState(false);
   // Thêm state để hiển thị thông báo lỗi
   const [paymentError, setPaymentError] = useState<string | null>(null);
+
+  const getIntervalNumber = useRef<Timeout | null>(null);
+
+  const client = new Client({
+    brokerURL: "ws://localhost:8081/appointment/socket",
+    onConnect: () => {
+        client.subscribe("/patient/result_check_payment", () => {
+          setVerifyingPayment(true);
+        })
+    }
+  })
+
+  useEffect(() => {
+    client.activate();
+
+    getIntervalNumber.current = setInterval(() => {
+      client.publish({ destination: "/app/check_payment", body: JSON.stringify({
+        "amount_in": 5000,
+        "transaction_content": code
+      })});
+
+      if(verifyingPayment) {
+        onPaymentComplete().catch((error) => {
+          console.log(error);
+          setPaymentError("Có lỗi xảy ra trong quá trình xác minh thanh toán.");
+        });
+      } 
+    }, 1000);
+
+    return () => {
+      client.deactivate();
+      clearInterval(getIntervalNumber.current);
+    }
+  })
 
   return (
     <Box>
