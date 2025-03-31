@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
   Typography,
@@ -35,19 +35,38 @@ const PaymentCheckout: React.FC<PaymentCheckoutProps> = ({
   // Thêm state để hiển thị thông báo lỗi
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
+  const getIntervalNumber = useRef<Timeout | null>(null);
+
   const client = new Client({
     brokerURL: "ws://localhost:8081/appointment/socket",
     onConnect: () => {
-        client.subscribe("/topic", (message) => {
-          console.log(message);
+        client.subscribe("/patient/result_check_payment", () => {
+          setVerifyingPayment(true);
         })
-
-        client.publish({ destination: "/topic/greeting", message: "Hello World!" });
     }
   })
 
   useEffect(() => {
     client.activate();
+
+    getIntervalNumber.current = setInterval(() => {
+      client.publish({ destination: "/app/check_payment", body: JSON.stringify({
+        "amount_in": 5000,
+        "transaction_content": code
+      })});
+
+      if(verifyingPayment) {
+        onPaymentComplete().catch((error) => {
+          console.log(error);
+          setPaymentError("Có lỗi xảy ra trong quá trình xác minh thanh toán.");
+        });
+      } 
+    }, 1000);
+
+    return () => {
+      client.deactivate();
+      clearInterval(getIntervalNumber.current);
+    }
   })
 
   return (
