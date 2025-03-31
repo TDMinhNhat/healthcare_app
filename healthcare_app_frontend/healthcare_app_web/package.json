@@ -26,6 +26,7 @@
     "bootstrap": "^5.3.3",
     "date-fns": "2",
     "dayjs": "^1.11.13",
+    "dotenv": "^16.4.7",
     "formik": "^2.4.6",
     "i18next": "^24.2.2",
     "jquery": "^3.7.1",
@@ -44,6 +45,7 @@
     "socket.io-client": "^4.8.1",
     "styled-components": "^6.1.15",
     "swiper": "^11.2.4",
+    "uuid": "^11.1.0",
     "yup": "^1.6.1",
     "zego-zim-web": "2.16.0"
   },
@@ -52,6 +54,7 @@
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@types/simple-peer": "^9.11.8",
+    "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.20.0",
     "eslint-plugin-react-hooks": "^5.1.0",

@@ -29,6 +29,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import BookAppointment from "../../components/appointments/BookAppointment";
 import { getAppointmentPatientBookInWeek } from "../../services/appointment/booking_service";
+import { io, Socket } from "socket.io-client";
 
 // Import DatePicker components
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
@@ -167,6 +168,18 @@ const AppointmentPage = () => {
   const [showBooking, setShowBooking] = useState(false);
   const user = useSelector((state: any) => state.user.user);
   const getUserId = user.userId;
+
+  // Socket connection
+  const [socket, setSocket] = useState<Socket>(
+    io("ws://localhost:8081", {
+      path: "/schedule",
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      autoConnect: false,
+    })
+  );
+
   // Các state quản lý hiển thị lịch
   const [today] = useState(new Date()); // Ngày hiện tại
   const [currentWeekStart, setCurrentWeekStart] = useState(
@@ -178,84 +191,126 @@ const AppointmentPage = () => {
   // State quản lý dữ liệu lịch hẹn
   const [appointments, setAppointments] = useState<Appointment[]>([]);
 
-  // Lấy dữ liệu lịch hẹn khi component được render
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        // Calculate the end of week properly using date-fns for consistency
-        const weekEnd = addDays(currentWeekStart, 6);
+  // Fetch appointments function that can be reused
+  const fetchAppointments = async () => {
+    try {
+      // Calculate the end of week properly using date-fns for consistency
+      const weekEnd = addDays(currentWeekStart, 6);
 
-        console.log("Starting fetch for week:", {
-          start: formatDateToString(currentWeekStart),
-          end: formatDateToString(weekEnd),
-        });
+      console.log("Starting fetch for week:", {
+        start: formatDateToString(currentWeekStart),
+        end: formatDateToString(weekEnd),
+      });
 
-        // Clear appointments during loading
+      // Clear appointments during loading
+      setAppointments([]);
+
+      const response = await getAppointmentPatientBookInWeek(
+        getUserId,
+        formatDateToString(currentWeekStart),
+        formatDateToString(weekEnd)
+      );
+
+      if (!response?.data?.data) {
+        console.log("No appointments data received");
         setAppointments([]);
-
-        const response = await getAppointmentPatientBookInWeek(
-          getUserId,
-          formatDateToString(currentWeekStart),
-          formatDateToString(weekEnd)
-        );
-
-        if (!response?.data?.data) {
-          console.log("No appointments data received");
-          setAppointments([]);
-          return;
-        }
-
-        const result = response.data.data;
-        console.log("API response for week:", {
-          startDate: formatDateToString(currentWeekStart),
-          data: result,
-        });
-
-        // If no results, set empty array
-        if (!result || result.length === 0) {
-          console.log("No appointments found for this week");
-          setAppointments([]);
-          return;
-        }
-
-        const appointmentsData = result.map((item: any) => ({
-          id: item.book_appointment.id,
-          workScheduleId: item.work_schedule.id,
-          date: item.work_schedule.dateAppointment,
-          startTime: formatTimeFromTimeString(
-            item.work_schedule.shift.start,
-            "string"
-          ),
-          endTime: formatTimeFromTimeString(
-            item.work_schedule.shift.end,
-            "string"
-          ),
-          status: item.book_appointment.status,
-          doctorName:
-            item.work_schedule.doctor.lastName +
-            " " +
-            item.work_schedule.doctor.firstName,
-          specialization: item.work_schedule.doctor.specialization,
-          reason: "Khám " + item.work_schedule.doctor.typeDisease.name,
-          doctorId: item.work_schedule.doctor.userId,
-          shiftId: item.work_schedule.shift.id,
-          numericalOrder: item.book_appointment.numericalOrder,
-        }));
-
-        console.log("Setting appointments for week:", {
-          count: appointmentsData.length,
-          dates: appointmentsData.map((a) => a.date),
-        });
-
-        setAppointments(appointmentsData);
-      } catch (error) {
-        console.error("Error fetching appointments:", error);
-        setAppointments([]);
+        return;
       }
-    };
 
+      const result = response.data.data;
+      console.log("API response for week:", {
+        startDate: formatDateToString(currentWeekStart),
+        data: result,
+      });
+
+      // If no results, set empty array
+      if (!result || result.length === 0) {
+        console.log("No appointments found for this week");
+        setAppointments([]);
+        return;
+      }
+
+      const appointmentsData = result.map((item: any) => ({
+        id: item.book_appointment.id,
+        workScheduleId: item.work_schedule.id,
+        date: item.work_schedule.dateAppointment,
+        startTime: formatTimeFromTimeString(
+          item.work_schedule.shift.start,
+          "string"
+        ),
+        endTime: formatTimeFromTimeString(
+          item.work_schedule.shift.end,
+          "string"
+        ),
+        status: item.book_appointment.status,
+        doctorName:
+          item.work_schedule.doctor.lastName +
+          " " +
+          item.work_schedule.doctor.firstName,
+        specialization: item.work_schedule.doctor.specialization,
+        reason: "Khám " + item.work_schedule.doctor.typeDisease.name,
+        doctorId: item.work_schedule.doctor.userId,
+        shiftId: item.work_schedule.shift.id,
+        numericalOrder: item.book_appointment.numericalOrder,
+      }));
+
+      console.log("Setting appointments for week:", {
+        count: appointmentsData.length,
+        dates: appointmentsData.map((a) => a.date),
+      });
+
+      setAppointments(appointmentsData);
+    } catch (error) {
+      console.error("Error fetching appointments:", error);
+      setAppointments([]);
+    }
+  };
+
+  // Lấy dữ liệu lịch hẹn khi component được render hoặc tuần thay đổi
+  useEffect(() => {
     fetchAppointments();
   }, [currentWeekStart, getUserId]);
+
+  // Xử lý kết nối socket và lắng nghe các sự kiện
+  useEffect(() => {
+    if (!getUserId) return;
+
+    socket.connect();
+
+    // Khi kết nối thành công
+    socket.on("connect", () => {
+      console.log("Socket connected to the server");
+
+      // Đăng ký nhận cập nhật về lịch hẹn cho bệnh nhân này
+      socket.emit("joinPatientAppointments", {
+        patientId: getUserId,
+      });
+    });
+
+    // Lắng nghe sự kiện khi có lịch hẹn được cập nhật
+    socket.on("appointmentUpdated", (data) => {
+      console.log("Lịch hẹn được cập nhật:", data);
+      if (data.patientId === getUserId) {
+        fetchAppointments();
+      }
+    });
+
+    // Xử lý lỗi kết nối
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+    });
+
+    // Cleanup function khi component unmount
+    return () => {
+      if (socket) {
+        // socket.emit("leavePatientAppointments", {
+        //   patientId: getUserId,
+        // });
+        socket.disconnect();
+        console.log("Socket disconnected");
+      }
+    };
+  }, [getUserId]); // Chỉ kết nối lại khi userId thay đổi
 
   // Xử lý khi người dùng muốn đặt lịch hẹn mới
   const handleBookingClick = () => {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { io, Socket } from "socket.io-client";
 import {
   Box,
   Typography,
@@ -145,6 +146,17 @@ const DoctorCurrentSchedulePage: React.FC = () => {
   // Lấy thông tin người dùng
   const user = JSON.parse((localStorage.getItem("user") as string) || "{}");
 
+  // Socket connection
+  const [socket, setSocket] = useState<Socket>(
+    io("ws://localhost:8081", {
+      path: "/schedule",
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      autoConnect: false,
+    })
+  );
+
   // Tạo mảng các ngày trong tuần hiện tại
   const getDaysInWeek = () => {
     const days = [];
@@ -192,99 +204,138 @@ const DoctorCurrentSchedulePage: React.FC = () => {
     return currentWeekStart.getTime() === actualWeekStart;
   };
 
-  useEffect(() => {
-    // Gọi API để lấy lịch làm việc của bác sĩ trong khoảng thời gian của tuần hiện tại
-    async function fetchData() {
-      if (!user?.userId) return;
+  // Fetch data function to reuse
+  const fetchScheduleData = async () => {
+    if (!user?.userId) return;
 
-      try {
-        // Tính ngày bắt đầu và kết thúc của tuần hiện tại
-        const startDate = format(currentWeekStart, "dd-MM-yyyy");
-        const endDate = format(addDays(currentWeekStart, 6), "dd-MM-yyyy");
-        console.log("Ngày bắt đầu:", startDate);
-        console.log("Ngày kết thúc:", endDate);
-        // Gọi API với khoảng thời gian của tuần
-        const response = await getWorkScheduleBetweenDate(
-          user.userId,
-          startDate,
-          endDate
-        );
-        const result = response.data.data || [];
-        console.log("Lịch làm việc:", result);
+    try {
+      // Tính ngày bắt đầu và kết thúc của tuần hiện tại
+      const startDate = format(currentWeekStart, "dd-MM-yyyy");
+      const endDate = format(addDays(currentWeekStart, 6), "dd-MM-yyyy");
+      console.log("Ngày bắt đầu:", startDate);
+      console.log("Ngày kết thúc:", endDate);
+      // Gọi API với khoảng thời gian của tuần
+      const response = await getWorkScheduleBetweenDate(
+        user.userId,
+        startDate,
+        endDate
+      );
+      const result = response.data.data || [];
+      console.log("Lịch làm việc:", result);
 
-        // Tạo object để lưu trữ lịch theo ngày - cấu trúc đơn giản hơn
-        const newScheduleMap: ScheduleMap = {};
+      // Tạo object để lưu trữ lịch theo ngày - cấu trúc đơn giản hơn
+      const newScheduleMap: ScheduleMap = {};
 
-        // Xử lý dữ liệu trả về từ API
-        result.forEach((i: any) => {
-          const item = i.workSchedule;
-          // console.log("Mục:", item);
-          // Kiểm tra dữ liệu hợp lệ
-          if (!item.dateAppointment) {
-            console.error("Thiếu ngày hẹn trong mục lịch làm việc:", item);
-            return; // Bỏ qua mục này nếu thiếu ngày hẹn
+      // Xử lý dữ liệu trả về từ API
+      result.forEach((i: any) => {
+        const item = i.workSchedule;
+        // Kiểm tra dữ liệu hợp lệ
+        if (!item.dateAppointment) {
+          console.error("Thiếu ngày hẹn trong mục lịch làm việc:", item);
+          return; // Bỏ qua mục này nếu thiếu ngày hẹn
+        }
+
+        // Chuyển đổi định dạng ngày từ API (yyyy-MM-dd) sang định dạng UI (dd-MM-yyyy)
+        const dateFromAPI = item.dateAppointment;
+
+        // Xử lý thông tin ca làm việc từ API
+        const shiftData = item.shift;
+
+        // Kiểm tra dữ liệu ca làm việc tồn tại
+        if (!shiftData) {
+          console.error("Thiếu thông tin ca làm việc:", item);
+          return; // Bỏ qua mục này nếu thiếu thông tin ca
+        }
+
+        // Chuyển đổi định dạng thời gian nếu cần
+        const formatTimeString = (timeStr: string) => {
+          // Nếu định dạng là "hh-mm-ss", chuyển thành "hh:mm"
+          if (timeStr.includes("-")) {
+            return timeStr.split("-").slice(0, 2).join(":");
           }
+          return timeStr; // Giữ nguyên nếu đã đúng định dạng
+        };
 
-          // Chuyển đổi định dạng ngày từ API (yyyy-MM-dd) sang định dạng UI (dd-MM-yyyy)
-          const dateFromAPI = item.dateAppointment;
-          // Chuyển thành dd-MM-yyyy
-          // console.log("Chuỗi ngày:", dateFromAPI);
-          // Xử lý thông tin ca làm việc từ API
-          const shiftData = item.shift;
+        // Tạo đối tượng Shift (đảm bảo đúng theo cấu trúc mô hình)
+        const shift: Shift = {
+          id: shiftData.id,
+          shift: shiftData.shift,
+          start: formatTimeString(shiftData.start),
+          end: formatTimeString(shiftData.end),
+          status: shiftData.status,
+        };
 
-          // Kiểm tra dữ liệu ca làm việc tồn tại
-          if (!shiftData) {
-            console.error("Thiếu thông tin ca làm việc:", item);
-            return; // Bỏ qua mục này nếu thiếu thông tin ca
-          }
+        // Tính toán số chỗ trống còn lại (mô phỏng, thực tế sẽ từ API)
+        const totalBook = i?.detail?.information?.total_book ?? 0;
 
-          // Chuyển đổi định dạng thời gian nếu cần
-          const formatTimeString = (timeStr: string) => {
-            // Nếu định dạng là "hh-mm-ss", chuyển thành "hh:mm"
-            if (timeStr.includes("-")) {
-              return timeStr.split("-").slice(0, 2).join(":");
-            }
-            return timeStr; // Giữ nguyên nếu đã đúng định dạng
-          };
+        // Tạo đối tượng WorkSchedule phù hợp với mô hình và UI
+        const workSchedule: WorkSchedule = {
+          id: item.id,
+          doctor: item.doctor,
+          shift: shift,
+          maxSlots: item.maxSlots,
+          dateAppointment: item.dateAppointment,
+          status: item.status,
+          totalBook: totalBook,
+        };
 
-          // Tạo đối tượng Shift (đảm bảo đúng theo cấu trúc mô hình)
-          const shift: Shift = {
-            id: shiftData.id,
-            shift: shiftData.shift,
-            start: formatTimeString(shiftData.start),
-            end: formatTimeString(shiftData.end),
-            status: shiftData.status,
-          };
+        // Thêm vào map theo ngày - đơn giản và hiệu quả hơn
+        if (!newScheduleMap[dateFromAPI]) {
+          newScheduleMap[dateFromAPI] = [];
+        }
+        newScheduleMap[dateFromAPI].push(workSchedule);
+      });
 
-          // Tính toán số chỗ trống còn lại (mô phỏng, thực tế sẽ từ API)
-          const totalBook = i?.detail?.information?.total_book ?? 0;
-
-          // Tạo đối tượng WorkSchedule phù hợp với mô hình và UI
-          const workSchedule: WorkSchedule = {
-            id: item.id,
-            doctor: item.doctor,
-            shift: shift,
-            maxSlots: item.maxSlots,
-            dateAppointment: item.dateAppointment,
-            status: item.status,
-            totalBook: totalBook,
-          };
-
-          // Thêm vào map theo ngày - đơn giản và hiệu quả hơn
-          if (!newScheduleMap[dateFromAPI]) {
-            newScheduleMap[dateFromAPI] = [];
-          }
-          newScheduleMap[dateFromAPI].push(workSchedule);
-        });
-        // console.log("Bản đồ lịch mới:", newScheduleMap);
-        setScheduleMap(newScheduleMap);
-      } catch (error) {
-        console.error("Lỗi khi lấy lịch làm việc:", error);
-      }
+      setScheduleMap(newScheduleMap);
+    } catch (error) {
+      console.error("Lỗi khi lấy lịch làm việc:", error);
     }
+  };
 
-    fetchData();
+  // Gọi API để lấy lịch làm việc ban đầu và khi tuần thay đổi
+  useEffect(() => {
+    fetchScheduleData();
   }, [currentWeekStart, user?.userId]);
+
+  // Xử lý kết nối socket và lắng nghe các sự kiện
+  useEffect(() => {
+    if (!user?.userId) return;
+
+    socket.connect();
+
+    // Khi kết nối thành công
+    socket.on("connect", () => {
+      console.log("Socket connected to the server");
+
+      // Đăng ký nhận cập nhật về lịch làm việc cho bác sĩ này
+      socket.emit("joinDoctorSchedule", {
+        doctorId: user.userId,
+      });
+    });
+
+    // Lắng nghe sự kiện khi có cập nhật lịch làm việc
+    socket.on("scheduleUpdated", (data) => {
+      console.log("Cập nhật lịch từ server:", data);
+      // Làm mới dữ liệu khi nhận được thông báo
+      fetchScheduleData();
+    });
+
+    // Xử lý lỗi kết nối
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+    });
+
+    // Cleanup function khi component unmount
+    return () => {
+      if (socket) {
+        // socket.emit("leaveDoctorSchedule", {
+        //   doctorId: user.userId,
+        // });
+        socket.disconnect();
+        console.log("Socket disconnected");
+      }
+    };
+  }, [user?.userId]); // Chỉ kết nối lại khi userId thay đổi
 
   // Tìm tất cả các lịch làm việc cho một ngày cụ thể - truy cập nhanh O(1)
   const getSchedulesForDate = (date: string): WorkSchedule[] => {
@@ -294,8 +345,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
   // Kiểm tra xem một ngày có ca 1 không
   const hasShift1 = (date: string): boolean => {
     const schedules = getSchedulesForDate(date);
-    // console.log("Kiểm tra ca 1 cho ngày:", schedules);
-    // console.log("Bản đồ lịch", scheduleMap);
     return schedules.some((schedule) => schedule.shift.shift === 1);
   };
 
@@ -638,23 +687,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
 
       {/* Bảng lịch làm việc theo tuần */}
       <Paper sx={{ mb: 3, overflow: "auto" }}>
-        {/* 
-          Cấu trúc bảng lịch làm việc:
-          - Bảng được chia thành 2 hàng cho 2 ca làm việc (sáng và chiều)
-          - Mỗi cột đại diện cho một ngày trong tuần (từ thứ 2 đến chủ nhật)
-          
-          Luồng logic hiển thị:
-          1. Dữ liệu lịch làm việc được lưu trữ trong scheduleMap (object ánh xạ ngày → WorkSchedule[])
-          2. Với mỗi ô trong bảng (ngày + ca):
-             a. Kiểm tra ngày đó có ca tương ứng không (hasShift1/hasShift2)
-             b. Nếu không có ca → Hiển thị "Không có ca"
-             c. Nếu có ca → Lấy thông tin lịch làm việc (getShift1Schedule/getShift2Schedule)
-             d. Hiển thị thông tin số cuộc hẹn đã đặt và tổng số chỗ (shiftSchedule.totalBook/maxSlots)
-          3. Xử lý tương tác:
-             a. Nút "Chi tiết" → Điều hướng đến trang chi tiết ca khám
-             b. Nút "Khám" → Mở phòng khám ảo trong tab mới
-             c. Nếu ngày đã qua (isPastDate) → Vô hiệu hóa nút "Khám" và hiển thị "Đã qua"
-        */}
         <TableContainer>
           <Table>
             <TableHead>
@@ -663,11 +695,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                   Ca làm việc
                 </TableCell>
 
-                {/* 
-                  Tiêu đề các ngày trong tuần 
-                  - Mỗi cột hiển thị tên thứ và ngày tháng
-                  - weekDays là mảng chứa thông tin các ngày từ currentWeekStart
-                */}
                 {weekDays.map((day, index) => (
                   <TableCell
                     key={day.formattedDate}
@@ -684,11 +711,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
             </TableHead>
 
             <TableBody>
-              {/* 
-                Hàng cho ca 1 (Sáng) 
-                - Hiển thị thời gian ca làm việc từ dữ liệu thực tế
-                - Thời gian được lấy từ hàm getShift1Time (tìm ca sáng đầu tiên trong tuần)
-              */}
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold" }}>
                   Ca 1 (Sáng)
@@ -697,12 +719,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                     display="block"
                     color="textSecondary"
                   >
-                    {/* 
-                      Hiển thị thông tin ca 1 từ dữ liệu động:
-                      1. Tìm ngày đầu tiên trong tuần có ca 1
-                      2. Lấy thời gian bắt đầu và kết thúc từ ngày đó
-                      3. Nếu không tìm thấy ca nào, hiển thị rỗng
-                    */}
                     {weekDays.some((day) => hasShift1(day.formattedDate))
                       ? weekDays
                           .map((day) => getShift1Time(day.formattedDate))
@@ -717,11 +733,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                   </Typography>
                 </TableCell>
 
-                {/* 
-                  Các ô trạng thái cho ca 1 của từng ngày
-                  - Mỗi ô gọi renderShiftStatus để hiển thị trạng thái ca làm việc
-                  - Truyền vào: có lịch không, ngày nào, và số ca (1)
-                */}
                 {weekDays.map((day) => (
                   <TableCell
                     key={`${day.formattedDate}-shift1`}
@@ -737,11 +748,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                 ))}
               </TableRow>
 
-              {/* 
-                Hàng cho ca 2 (Chiều)
-                - Tương tự như ca 1 nhưng áp dụng cho ca chiều
-                - Sử dụng hàm hasShift2 và getShift2Schedule để lấy thông tin
-              */}
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold" }}>
                   Ca 2 (Chiều)
@@ -750,7 +756,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                     display="block"
                     color="textSecondary"
                   >
-                    {/* Hiển thị thông tin ca 2 từ dữ liệu động */}
                     {weekDays.some((day) => hasShift2(day.formattedDate))
                       ? weekDays
                           .map((day) => getShift2Time(day.formattedDate))
@@ -765,7 +770,6 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                   </Typography>
                 </TableCell>
 
-                {/* Các ô trạng thái cho ca 2 của từng ngày */}
                 {weekDays.map((day) => (
                   <TableCell
                     key={`${day.formattedDate}-shift2`}

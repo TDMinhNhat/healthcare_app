@@ -79,9 +79,6 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
     try {
       setLoading(true);
       setError(null);
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
       setPaymentCompleted(true);
 
       await createAppointment(patientId, note, workSchedule.id);
@@ -139,7 +136,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
         <DoctorList
           specialty={selectedService}
           onSelect={handleDoctorSelect}
-          onBack={handleBack}
+          // onBack={handleBack}
         />
       )}
 
@@ -147,11 +144,11 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
         <SelectDateTime
           doctor={selectedDoctor}
           onSelect={handleDateTimeSelect}
-          onBack={handleBack}
+          // onBack={handleBack}
         />
       )}
 
-      {activeStep === 3 && (
+      {/* {activeStep === 3 && (
         <Box>
           <DoctorDetails doctor={selectedDoctor} />
           <Box sx={{ mt: 3 }}>
@@ -171,10 +168,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
               Dịch vụ: {selectedService.name}
             </Typography>
           </Box>
-          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-            <Button onClick={handleBack} disabled={loading}>
-              Quay lại
-            </Button>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
             <Button
               variant="contained"
               color="primary"
@@ -185,17 +179,19 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
             </Button>
           </Box>
         </Box>
-      )}
+      )} */}
 
-      {activeStep === 4 && (
+      {activeStep === 3 && (
         <PaymentCheckout
           onPaymentComplete={handlePaymentComplete}
-          onBack={handleBack}
+          // onBack={handleBack}
+          // onReset={handleReset}
+          workSchedule={workSchedule}
           loading={loading}
         />
       )}
 
-      {activeStep === 5 && (
+      {activeStep === 4 && (
         <ConfirmAppointment
           date={selectedDate!}
           time={selectedTime}
@@ -205,8 +201,11 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
         />
       )}
 
-      {activeStep !== 0 && activeStep !== 5 && activeStep !== steps.length && (
-        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+      {activeStep !== 0 && activeStep !== 4 && activeStep !== steps.length && (
+        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Button onClick={handleBack} disabled={activeStep === 0 || loading}>
+            Quay lại
+          </Button>
           <Button onClick={onClose} sx={{ mr: 1 }} disabled={loading}>
             Hủy
           </Button>

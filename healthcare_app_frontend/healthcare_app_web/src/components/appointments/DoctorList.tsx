@@ -32,7 +32,7 @@ import { getAllDoctorByTypeDiseaseName } from "../../services/authenticate/typeD
 interface DoctorListProps {
   specialty: any; // Now represents a service
   onSelect: (doctor: any) => void;
-  onBack: () => void;
+  // onBack: () => void;
 }
 
 // Dữ liệu mẫu cho danh sách bác sĩ theo chuyên khoa
@@ -173,7 +173,7 @@ const mockDoctorsBySpecialty = {
 const DoctorList: React.FC<DoctorListProps> = ({
   specialty, // Now represents a service
   onSelect,
-  onBack,
+  // onBack,
 }) => {
   const { t } = useTranslation();
   // State lưu trạng thái đang tải dữ liệu
@@ -412,9 +412,9 @@ const DoctorList: React.FC<DoctorListProps> = ({
       )}
 
       {/* Nút quay lại */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
+      {/* <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
         <Button onClick={onBack}>{t("common.back")}</Button>
-      </Box>
+      </Box> */}
     </Box>
   );
 };

@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from "react";
 import { LiveRole, ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { useParams, useNavigate } from "react-router"; // Thêm useNavigate
 import { useSelector } from "react-redux";
-import { APP_ID, SERVER_SECRET } from "../constants/zegocloud";
 import { io, Socket } from "socket.io-client";
 import {
   Box,
@@ -335,8 +334,8 @@ export default function ExaminationRoomPage() {
 
       try {
         // Tạo Kit Token
-        const appID = APP_ID;
-        const serverSecret = SERVER_SECRET;
+        const appID = Number(import.meta.env.VITE_APP_ID);
+        const serverSecret = import.meta.env.VITE_SERVER_SECRET;
 
         // Xác định tên hiển thị - sử dụng tên có số thứ tự nếu là bệnh nhân
         const displayName =
@@ -344,6 +343,7 @@ export default function ExaminationRoomPage() {
 
         console.log("Preparing to join room with:", {
           appID,
+          serverSecret,
           roomID,
           userId,
           displayName,

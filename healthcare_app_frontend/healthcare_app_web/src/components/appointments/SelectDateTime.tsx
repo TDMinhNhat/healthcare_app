@@ -32,7 +32,7 @@ import { getWorkScheduleByDoctorAndExactDate } from "../../services/authenticate
 interface SelectDateTimeProps {
   doctor: any;
   onSelect: (date: Date, shift: any, workScheduleTarget: object) => void;
-  onBack: () => void;
+  // onBack: () => void;
 }
 
 // Định nghĩa các ca làm việc cố định của bác sĩ
@@ -48,7 +48,7 @@ const SHIFTS = {
 const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   doctor,
   onSelect,
-  onBack,
+  // onBack,
 }) => {
   const { t } = useTranslation();
 
@@ -376,9 +376,9 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
       </Grid>
 
       {/* Các nút điều hướng */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
         {/* Nút quay lại */}
-        <Button onClick={onBack}>{t("common.back")}</Button>
+        {/* <Button onClick={onBack}>{t("common.back")}</Button> */}
         {/* Nút tiếp tục - vô hiệu hóa nếu chưa chọn đủ thông tin */}
         <Button
           variant="contained"
