@@ -55,19 +55,21 @@ import { getWorkScheduleBetweenDate } from "../../services/authenticate/workSche
  *    và khoảng thời gian của tuần hiện tại
  * 3. Dữ liệu được chuyển đổi và lưu vào state scheduleMap, là một map ánh xạ từ ngày (string)
  *    đến danh sách lịch làm việc (WorkSchedule[])
- * 4. Bảng lịch hiển thị 2 ca làm việc (sáng và chiều) cho 7 ngày trong tuần
- * 5. Với mỗi ngày và ca:
- *    - Kiểm tra xem có lịch làm việc không (hasShift1, hasShift2)
- *    - Nếu có, hiển thị số lượng cuộc hẹn (totalBook/maxSlots) và các nút thao tác
+ * 4. Bảng lịch hiển thị theo khoảng thời gian (sáng và chiều) cho 7 ngày trong tuần:
+ *    - Mỗi ô có thể hiển thị nhiều ca làm việc trong cùng khoảng thời gian (sáng/chiều)
+ *    - Các ca được phân loại dựa vào thời gian bắt đầu hoặc ID ca
+ * 5. Với mỗi ngày và khoảng thời gian:
+ *    - Kiểm tra xem có ca làm việc không (hasShiftsForPeriod)
+ *    - Nếu có, hiển thị tất cả ca cho khoảng thời gian đó với số lượng cuộc hẹn và nút thao tác
  *    - Nếu không, hiển thị "Không có ca"
  * 6. Người dùng có thể:
  *    - Di chuyển giữa các tuần bằng nút điều hướng
  *    - Chọn ngày cụ thể từ lịch để chuyển đến tuần chứa ngày đó
- *    - Xem chi tiết cuộc hẹn cho từng ca
- *    - Tiến hành khám bệnh (chỉ cho ngày hiện tại hoặc tương lai)
+ *    - Click vào thẻ ca khám để xem chi tiết cuộc hẹn
+ *    - Nhấn nút "Khám" để tiến hành khám bệnh (chỉ cho ngày hiện tại hoặc tương lai)
  *
  * Lưu ý: Trạng thái ca làm việc được xác định dựa trên:
- * - Sự tồn tại của lịch làm việc cho ngày và ca đó
+ * - Sự tồn tại của lịch làm việc cho ngày và khoảng thời gian đó
  * - Ngày đã qua hay chưa (isPastDate)
  * - Số lượng cuộc hẹn đã đặt và tổng số chỗ
  */
@@ -126,6 +128,12 @@ const DAYS_OF_WEEK = [
   { key: "SATURDAY", label: "Thứ 7" },
   { key: "SUNDAY", label: "Chủ nhật" },
 ];
+
+// Enum để định nghĩa các khoảng thời gian trong ngày
+enum TimePeriod {
+  MORNING = "morning", // Buổi sáng
+  AFTERNOON = "afternoon", // Buổi chiều
+}
 
 const DoctorCurrentSchedulePage: React.FC = () => {
   const navigate = useNavigate();
@@ -290,95 +298,38 @@ const DoctorCurrentSchedulePage: React.FC = () => {
     return scheduleMap[date] || [];
   };
 
-  // Kiểm tra xem một ngày có ca 1 không
-  const hasShift1 = (date: string): boolean => {
+  // Xác định một ca làm việc thuộc về buổi sáng hay chiều
+  // Hỗ trợ cả cách phân loại theo ID ca và theo giờ bắt đầu
+  const getShiftPeriod = (shift: Shift): TimePeriod => {
+    // Cách 1: Dựa vào ID ca (1: sáng, 2: chiều)
+    // if (shift.shift === 1) return TimePeriod.MORNING;
+    // if (shift.shift === 2) return TimePeriod.AFTERNOON;
+
+    // Cách 2: Dựa vào thời gian (nếu thêm ca mới không theo quy tắc ID)
+    // Phân tích giờ từ chuỗi thời gian (VD: "08:00")
+    const startHour = parseInt(shift.start.split(":")[0]);
+    if (startHour < 12) return TimePeriod.MORNING;
+    return TimePeriod.AFTERNOON;
+  };
+
+  // Lấy tất cả ca làm việc cho một khoảng thời gian nhất định (sáng/chiều)
+  const getShiftsForPeriod = (
+    date: string,
+    period: TimePeriod
+  ): WorkSchedule[] => {
     const schedules = getSchedulesForDate(date);
-    return schedules.some((schedule) => schedule.shift.shift === 1);
+    return schedules.filter(
+      (schedule) => getShiftPeriod(schedule.shift) === period
+    );
   };
 
-  // Kiểm tra xem một ngày có ca 2 không
-  const hasShift2 = (date: string): boolean => {
-    const schedules = getSchedulesForDate(date);
-    return schedules.some((schedule) => schedule.shift.shift === 2);
-  };
+  // Hiển thị trạng thái các ca làm việc cho một khoảng thời gian (sáng/chiều)
+  // Hỗ trợ hiển thị nhiều ca trong cùng một khoảng thời gian
+  const renderPeriodStatus = (date: string, period: TimePeriod) => {
+    const shifts = getShiftsForPeriod(date, period);
 
-  // Lấy thông tin ca 1 cho ngày cụ thể
-  const getShift1Schedule = (date: string): WorkSchedule | undefined => {
-    const schedules = getSchedulesForDate(date);
-    return schedules.find((schedule) => schedule.shift.shift === 1);
-  };
-
-  // Lấy thông tin ca 2 cho ngày cụ thể
-  const getShift2Schedule = (date: string): WorkSchedule | undefined => {
-    const schedules = getSchedulesForDate(date);
-    return schedules.find((schedule) => schedule.shift.shift === 2);
-  };
-
-  // Lấy thông tin thời gian ca 1 (nếu có)
-  const getShift1Time = (
-    date: string
-  ): { start: string; end: string } | null => {
-    const shift1 = getShift1Schedule(date);
-    return shift1 ? { start: shift1.shift.start, end: shift1.shift.end } : null;
-  };
-
-  // Lấy thông tin thời gian ca 2 (nếu có)
-  const getShift2Time = (
-    date: string
-  ): { start: string; end: string } | null => {
-    const shift2 = getShift2Schedule(date);
-    return shift2 ? { start: shift2.shift.start, end: shift2.shift.end } : null;
-  };
-
-  // Xử lý chuyển hướng đến trang chi tiết ca khám
-  const handleAppointmentClick = (date: string, shift: number) => {
-    // Lấy lịch làm việc cho ca đã chọn
-    const schedule =
-      shift === 1 ? getShift1Schedule(date) : getShift2Schedule(date);
-
-    if (schedule) {
-      // Điều hướng sử dụng ID lịch làm việc thực tế
-      navigate(`${ROUTING.DOCTOR}/${ROUTING.SCHEDULE}/${schedule.id}`);
-    } else {
-      console.error("Không tìm thấy thông tin ca làm việc");
-    }
-  };
-
-  // Xử lý điều hướng đến phòng khám
-  const handleExamination = (date: string, shift: number) => {
-    // Lấy lịch làm việc cho ca đã chọn
-    const schedule =
-      shift === 1 ? getShift1Schedule(date) : getShift2Schedule(date);
-
-    // Điều hướng đến phòng khám ảo
-    if (schedule && schedule.id) {
-      console.log(
-        `Đang chuyển hướng đến phòng khám với ID lịch: ${schedule.id}`
-      );
-
-      // Tạo URL sử dụng hằng số ROUTING và thay thế tham số
-      const examRoomPath = ROUTING.EXAMINATION_ROOM.replace(
-        ":scheduleId",
-        schedule.id.toString()
-      );
-
-      // Mở trang khám bệnh trong tab mới với định tuyến phù hợp
-      window.open(examRoomPath, "_blank");
-    } else {
-      console.error(
-        "Không tìm thấy thông tin ca làm việc hoặc ID không hợp lệ",
-        schedule
-      );
-      // Hiển thị cảnh báo cho người dùng
-      alert(
-        "Không thể mở phòng khám do thiếu thông tin lịch làm việc. Vui lòng thử lại."
-      );
-    }
-  };
-
-  // Hiển thị trạng thái ca làm việc
-  const renderShiftStatus = (hasShift: boolean, date: string, shift: 1 | 2) => {
-    if (!hasShift) {
+    // Nếu không có ca nào trong khoảng thời gian này
+    if (shifts.length === 0) {
       return (
         <Box
           sx={{
@@ -407,84 +358,142 @@ const DoctorCurrentSchedulePage: React.FC = () => {
       );
     }
 
-    // Lấy thông tin ca làm việc
-    const shiftSchedule =
-      shift === 1 ? getShift1Schedule(date) : getShift2Schedule(date);
-
-    if (!shiftSchedule) return null;
-
-    // Kiểm tra xem ngày đã qua chưa
-    const isDateInPast = isPastDate(date);
-
+    // Hiển thị tất cả ca trong khoảng thời gian
     return (
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
+          gap: 1.5,
           width: "100%",
-          p: 0.5,
-          gap: 0.75,
         }}
       >
-        {/* Chip hiển thị số cuộc hẹn - kích thước lớn */}
-        <Chip
-          label={`${shiftSchedule.totalBook}/${shiftSchedule.maxSlots} cuộc hẹn`}
-          size="small"
-          sx={{
-            bgcolor: "background.paper",
-            color: "success.main",
-            border: `1px solid success.main`,
-            fontSize: "0.8rem",
-            fontWeight: "bold",
-            width: "135px",
-            height: "28px",
-          }}
-        />
+        {shifts.map((shiftSchedule, index) => {
+          // Lấy thông tin thời gian ca làm việc
+          const shiftTime = {
+            start: shiftSchedule.shift.start,
+            end: shiftSchedule.shift.end,
+          };
 
-        {/* Container nút với bố cục dọc và nút lớn hơn */}
-        <Stack
-          direction="column"
-          spacing={0.5}
-          sx={{ width: "100%", maxWidth: "135px" }}
-        >
-          <Button
-            variant="outlined"
-            size="small"
-            color="primary"
-            onClick={() => handleAppointmentClick(date, shift)}
-            sx={{
-              fontSize: "0.8rem",
-              py: 0.25,
-              height: "28px",
-              fontWeight: "bold",
-            }}
-          >
-            Chi tiết
-          </Button>
+          // Kiểm tra xem ngày đã qua chưa
+          const isDateInPast = isPastDate(date);
 
-          <Button
-            variant="contained"
-            size="small"
-            color="success"
-            onClick={() => handleExamination(date, shift)}
-            disabled={isDateInPast}
-            title={isDateInPast ? "Không thể khám cho ngày đã qua" : ""}
-            sx={{
-              fontSize: "0.8rem",
-              py: 0.25,
-              height: "28px",
-              fontWeight: "bold",
-              ...(isDateInPast && {
-                opacity: 0.6,
-                cursor: "not-allowed", // Vô hiệu hóa nút
-              }),
-            }}
-          >
-            {isDateInPast ? "Đã qua" : "Khám"}
-          </Button>
-        </Stack>
+          // Xử lý click vào card để xem chi tiết
+          const handleCardClick = (event: React.MouseEvent) => {
+            // Chỉ xử lý khi click vào card, không xử lý khi click vào nút khám
+            if ((event.target as HTMLElement).closest("button")) {
+              return;
+            }
+
+            // Điều hướng đến trang chi tiết ca khám
+            if (shiftSchedule) {
+              navigate(
+                `${ROUTING.DOCTOR}/${ROUTING.SCHEDULE}/${shiftSchedule.id}`
+              );
+            }
+          };
+
+          return (
+            <Box
+              key={`${date}-${shiftSchedule.id}`}
+              onClick={handleCardClick}
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+                p: 1,
+                gap: 1,
+                borderRadius: 1,
+                background:
+                  "linear-gradient(to bottom, rgba(236, 246, 253, 0.3), rgba(236, 246, 253, 0.8))",
+                border: "1px solid rgba(25, 118, 210, 0.12)",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                "&:hover": {
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                  transform: "translateY(-2px)",
+                },
+              }}
+            >
+              {/* Thời gian ca làm việc với style nổi bật hơn */}
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: "bold",
+                  color: "primary.main",
+                  bgcolor: "rgba(255, 255, 255, 0.8)",
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: 5,
+                  border: "1px solid rgba(25, 118, 210, 0.2)",
+                }}
+              >
+                {shiftTime.start} - {shiftTime.end}
+              </Typography>
+
+              {/* Chip hiển thị số cuộc hẹn - thiết kế mới */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <Typography
+                  variant="caption"
+                  sx={{ fontWeight: "medium", color: "text.secondary" }}
+                >
+                  Cuộc hẹn:
+                </Typography>
+                <Chip
+                  label={`${shiftSchedule.totalBook}/${shiftSchedule.maxSlots}`}
+                  size="small"
+                  color="success"
+                  sx={{
+                    fontWeight: "bold",
+                    height: "24px",
+                    minWidth: "60px",
+                  }}
+                />
+              </Box>
+
+              {/* Chỉ giữ lại nút Khám với thiết kế cải tiến */}
+              <Button
+                variant="contained"
+                size="small"
+                color="success"
+                fullWidth
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  // Điều hướng đến phòng khám ảo
+                  if (shiftSchedule && shiftSchedule.id) {
+                    const examRoomPath = ROUTING.EXAMINATION_ROOM.replace(
+                      ":scheduleId",
+                      shiftSchedule.id.toString()
+                    );
+                    window.open(examRoomPath, "_blank");
+                  } else {
+                    alert(
+                      "Không thể mở phòng khám do thiếu thông tin lịch làm việc. Vui lòng thử lại."
+                    );
+                  }
+                }}
+                disabled={isDateInPast}
+                title={isDateInPast ? "Không thể khám cho ngày đã qua" : ""}
+                sx={{
+                  borderRadius: 2,
+                  fontSize: "0.8rem",
+                  fontWeight: "bold",
+                  py: 0.5,
+                  ...(isDateInPast && {
+                    bgcolor: "grey.400",
+                    opacity: 0.8,
+                    cursor: "not-allowed",
+                  }),
+                }}
+              >
+                {isDateInPast ? "Đã qua" : "Khám"}
+              </Button>
+            </Box>
+          );
+        })}
       </Box>
     );
   };
@@ -660,74 +669,31 @@ const DoctorCurrentSchedulePage: React.FC = () => {
 
             <TableBody>
               <TableRow>
-                <TableCell sx={{ fontWeight: "bold" }}>
-                  Ca 1 (Sáng)
-                  <Typography
-                    variant="caption"
-                    display="block"
-                    color="textSecondary"
-                  >
-                    {weekDays.some((day) => hasShift1(day.formattedDate))
-                      ? weekDays
-                          .map((day) => getShift1Time(day.formattedDate))
-                          .filter(Boolean)[0]?.start
-                      : ""}{" "}
-                    -{" "}
-                    {weekDays.some((day) => hasShift1(day.formattedDate))
-                      ? weekDays
-                          .map((day) => getShift1Time(day.formattedDate))
-                          .filter(Boolean)[0]?.end
-                      : ""}
-                  </Typography>
-                </TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Sáng</TableCell>
 
                 {weekDays.map((day) => (
                   <TableCell
-                    key={`${day.formattedDate}-shift1`}
+                    key={`${day.formattedDate}-morning`}
                     align="center"
                     sx={{ verticalAlign: "center", p: 1 }}
                   >
-                    {renderShiftStatus(
-                      hasShift1(day.formattedDate),
-                      day.formattedDate,
-                      1
-                    )}
+                    {renderPeriodStatus(day.formattedDate, TimePeriod.MORNING)}
                   </TableCell>
                 ))}
               </TableRow>
 
               <TableRow>
-                <TableCell sx={{ fontWeight: "bold" }}>
-                  Ca 2 (Chiều)
-                  <Typography
-                    variant="caption"
-                    display="block"
-                    color="textSecondary"
-                  >
-                    {weekDays.some((day) => hasShift2(day.formattedDate))
-                      ? weekDays
-                          .map((day) => getShift2Time(day.formattedDate))
-                          .filter(Boolean)[0]?.start
-                      : ""}{" "}
-                    -{" "}
-                    {weekDays.some((day) => hasShift2(day.formattedDate))
-                      ? weekDays
-                          .map((day) => getShift2Time(day.formattedDate))
-                          .filter(Boolean)[0]?.end
-                      : ""}
-                  </Typography>
-                </TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Chiều</TableCell>
 
                 {weekDays.map((day) => (
                   <TableCell
-                    key={`${day.formattedDate}-shift2`}
+                    key={`${day.formattedDate}-afternoon`}
                     align="center"
                     sx={{ verticalAlign: "center", p: 1 }}
                   >
-                    {renderShiftStatus(
-                      hasShift2(day.formattedDate),
+                    {renderPeriodStatus(
                       day.formattedDate,
-                      2
+                      TimePeriod.AFTERNOON
                     )}
                   </TableCell>
                 ))}

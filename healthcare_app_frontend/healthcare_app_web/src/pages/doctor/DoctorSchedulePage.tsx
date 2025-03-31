@@ -29,15 +29,14 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SaveIcon from "@mui/icons-material/Save";
-import EventRepeatIcon from "@mui/icons-material/EventRepeat";
 import { formatDateToString } from "../../utils/dateUtils";
 import {
   getWorkScheduleBetweenDate,
   addMultipleWorkSchedule,
 } from "../../services/authenticate/workSchedule_service";
+import { getAllShift } from "../../services/authenticate/shift_service";
 import { parse } from "date-fns/esm";
 
-// Interface Shift - phù hợp với mô hình cơ sở dữ liệu
 interface Shift {
   id: number;
   shift: number;
@@ -48,7 +47,7 @@ interface Shift {
   updatedAt?: string;
 }
 
-// Định nghĩa các ngày trong tuần theo enum TypeDay trong schedule.md
+// Định nghĩa các ngày trong tuần theo enum TypeDay
 const DAYS_OF_WEEK = [
   { key: "MONDAY", label: "Thứ 2" },
   { key: "TUESDAY", label: "Thứ 3" },
@@ -61,34 +60,43 @@ const DAYS_OF_WEEK = [
 
 // Interface định nghĩa cấu trúc dữ liệu cho một ngày trong lịch làm việc
 interface ScheduleItem {
-  dayIndex: number; // Index of the day in the week (0-6)
+  dayIndex: number; // Chỉ số của ngày trong tuần (0-6)
   date: Date;
-  selectedShifts: number[]; // Array of selected shift numbers (1, 2)
+  selectedShifts: number[]; // Mảng chứa các ca đã được chọn (bao gồm luôn lockedShifts)
+  lockedShifts: number[]; // Mảng chứa các ca đã được đăng ký trước đó, không thể chỉnh sửa
 }
 
 /**
  * DoctorSchedulePage - Trang quản lý và đăng ký lịch làm việc của bác sĩ
  *
- * Luồng quản lý lịch làm việc:
- * 1. Khi trang được tải, hệ thống sẽ hiển thị trang đăng ký lịch cho tuần hiện tại hoặc tuần kế tiếp
- * 2. Dữ liệu lịch đã đăng ký được lấy từ API getWorkScheduleBetweenDate với userId của bác sĩ
- *    và khoảng thời gian của tuần được chọn
- * 3. Dữ liệu được chuyển đổi và lưu vào state weekSchedule chứa thông tin của 7 ngày với các ca đã chọn
- * 4. Bảng lịch hiển thị 2 ca làm việc (sáng và chiều) cho 7 ngày trong tuần dưới dạng các checkbox
- * 5. Bác sĩ có thể:
- *    - Chọn/bỏ chọn từng ca làm việc cụ thể
- *    - Sử dụng các nút thao tác hàng loạt (chọn tất cả ca 1, ca 2, hoặc bỏ chọn tất cả)
- *    - Áp dụng lịch từ tuần trước nếu có
- *    - Lưu lịch làm việc đã chọn vào hệ thống
+ * CÁCH HIỂN THỊ LỊCH:
+ * 1. Cấu trúc dữ liệu:
+ *    - Mỗi tuần bao gồm 7 ngày, mỗi ngày có thể có nhiều ca làm việc
+ *    - Mỗi ngày được biểu diễn qua đối tượng ScheduleItem gồm:
+ *      + dayIndex: vị trí của ngày trong tuần (0-6)
+ *      + date: đối tượng Date đại diện cho ngày
+ *      + selectedShifts: mảng các ca đã chọn (bao gồm cả ca đã khóa và sẽ đăng ký mới)
+ *      + lockedShifts: mảng các ca đã được đăng ký trước đó (không thể hủy chọn)
  *
- * Giới hạn điều hướng:
- * - Chỉ cho phép xem và chỉnh sửa lịch làm việc của tuần hiện tại và tuần kế tiếp
- * - Không thể xem hoặc chỉnh sửa lịch làm việc của các tuần trước đó
+ * 2. Hiển thị lịch đã tồn tại:
+ *    - Khi component được tải, hệ thống gọi API getWorkScheduleBetweenDate để lấy lịch đã đăng ký
+ *    - Các ca làm việc đã đăng ký được chuyển thành lockedShifts và selectedShifts
+ *    - Trên giao diện, các ca này được hiển thị dưới dạng checkbox đã được chọn và bị khóa
+ *
+ * 3. Thêm lịch mới:
+ *    - Người dùng có thể chọn các ca trống (không có trong lockedShifts) bằng cách click vào checkbox
+ *    - Các ca được chọn sẽ được thêm vào selectedShifts nhưng không có trong lockedShifts
+ *    - Khi lưu lịch, chỉ các ca trong selectedShifts mà không có trong lockedShifts sẽ được gửi lên server
+ *    - Sau khi lưu thành công, các ca mới sẽ được thêm vào lockedShifts
+ *    - Chỉ lưu được 1 tuần mỗi lần
  */
 
 const DoctorSchedulePage = () => {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const doctorId = user?.userId;
+
+  // Lưu trữ danh sách các ca làm việc từ API
+  const [shifts, setShifts] = useState<Shift[]>([]);
 
   // Lưu trữ ngày hiện tại để tính toán giới hạn tuần
   const [today] = useState(new Date());
@@ -107,8 +115,28 @@ const DoctorSchedulePage = () => {
   // State lưu trữ thông báo lỗi để hiển thị cho người dùng
   const [errorMessage, setErrorMessage] = useState("");
 
-  // State lưu trữ lịch làm việc của tuần trước để có thể áp dụng lại
-  const [prevWeekSchedule, setPrevWeekSchedule] = useState<ScheduleItem[]>([]);
+  // Gọi API để lấy thông tin về các ca làm việc khi component được tạo
+  useEffect(() => {
+    const fetchShifts = async () => {
+      try {
+        const response = await getAllShift();
+        if (response.data && response.data.data) {
+          setShifts(response.data.data);
+          console.log("Fetched shifts:", response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching shifts:", error);
+      }
+    };
+
+    fetchShifts();
+  }, []);
+
+  // Hàm định dạng thời gian từ "07-00-00" sang "07:00"
+  const formatShiftTime = (time: string) => {
+    if (!time) return "";
+    return time.replace(/-/g, ":").substring(0, 5);
+  };
 
   // Khởi tạo lịch làm việc khi tuần hiện tại thay đổi
   useEffect(() => {
@@ -120,7 +148,8 @@ const DoctorSchedulePage = () => {
         newWeekSchedule.push({
           dayIndex: i,
           date: currentDate,
-          selectedShifts: [], // Empty array for selected shifts
+          selectedShifts: [],
+          lockedShifts: [],
         });
       }
 
@@ -133,7 +162,6 @@ const DoctorSchedulePage = () => {
         const weekEnd = addDays(currentWeekStart, 6);
 
         try {
-          // Gọi API để lấy lịch làm việc từ fromDate đến toDate
           const response = await getWorkScheduleBetweenDate(
             doctorId,
             formatDateToString(weekStart),
@@ -141,29 +169,26 @@ const DoctorSchedulePage = () => {
           );
 
           const data = response?.data?.data || [];
-          // console.log(
-          //   "Data fetched for week:",
-          //   formatDateToString(weekStart),
-          //   "to",
-          //   formatDateToString(weekEnd),
-          //   data
-          // );
 
-          // Cập nhật lịch làm việc với dữ liệu từ API
           if (data.length > 0) {
             const updatedSchedule = [...newWeekSchedule];
             console.log("Update schedule with data:", updatedSchedule);
-            // Process each item in the response
+
             data.forEach((item: any) => {
-              // console.log("Processing item:", item);
-              // console.log("Date:", item.workSchedule.shift.shift);
-              // Extract date from the response
+              // Kiểm tra dữ liệu trả về có đầy đủ không
+              if (!item.workSchedule || !item.workSchedule.dateAppointment) {
+                console.error("Thiếu thông tin lịch làm việc:", item);
+                return;
+              }
+
+              // Parse chuỗi ngày thành đối tượng Date
               const appointmentDate = parse(
                 item.workSchedule.dateAppointment,
                 "dd-MM-yyyy",
                 new Date()
               );
-              // Find the day index in the week schedule
+
+              // Tìm ngày tương ứng trong lịch làm việc
               const dayIndex = updatedSchedule.findIndex(
                 (day) =>
                   day.date.getDate() === appointmentDate.getDate() &&
@@ -171,33 +196,41 @@ const DoctorSchedulePage = () => {
                   day.date.getFullYear() === appointmentDate.getFullYear()
               );
 
-              // If the day is found in current week schedule
-              if (dayIndex !== -1) {
-                // Check which shift is set in the response and update accordingly
-                if (
-                  item.workSchedule.shift &&
-                  item.workSchedule.shift.shift === 1
-                ) {
-                  if (!updatedSchedule[dayIndex].selectedShifts.includes(1)) {
-                    console.log("Shift 1 found for day:", dayIndex);
-                    updatedSchedule[dayIndex].selectedShifts.push(1);
+              // Nếu tìm thấy ngày tương ứng, cập nhật lịch làm việc
+              // Thêm vào danh sách đã chọn và đánh dấu là đã đăng ký
+              if (dayIndex !== -1 && item.workSchedule.shift) {
+                // Xử lý động với mọi số ca làm việc
+                const shiftNumber = item.workSchedule.shift.shift;
+                if (shiftNumber) {
+                  // Thêm ca làm việc vào danh sách đã chọn nếu chưa có
+                  if (
+                    !updatedSchedule[dayIndex].selectedShifts.includes(
+                      shiftNumber
+                    )
+                  ) {
+                    // console.log(
+                    //   `Tìm thấy ca ${shiftNumber} cho ngày:`,
+                    //   dayIndex
+                    // );
+                    updatedSchedule[dayIndex].selectedShifts.push(shiftNumber);
                   }
-                } else if (
-                  item.workSchedule.shift &&
-                  item.workSchedule.shift.shift === 2
-                ) {
-                  if (!updatedSchedule[dayIndex].selectedShifts.includes(2)) {
-                    updatedSchedule[dayIndex].selectedShifts.push(2);
+                  // Đánh dấu ca làm việc đã được đăng ký (không thể hủy)
+                  if (
+                    !updatedSchedule[dayIndex].lockedShifts.includes(
+                      shiftNumber
+                    )
+                  ) {
+                    updatedSchedule[dayIndex].lockedShifts.push(shiftNumber);
                   }
                 }
               }
             });
-            console.log("Updated schedule with data:", updatedSchedule);
-            // Update the week schedule state with the fetched data
+
+            console.log("Đã cập nhật lịch làm việc:", updatedSchedule);
             setWeekSchedule(updatedSchedule);
           }
         } catch (error) {
-          console.error("Error fetching work schedule:", error);
+          console.error("Lỗi khi tải lịch làm việc:", error);
           setErrorMessage("Lỗi khi tải lịch làm việc");
           setTimeout(() => setErrorMessage(""), 3000);
         }
@@ -207,7 +240,6 @@ const DoctorSchedulePage = () => {
     initScheduleAndFetchData();
   }, [currentWeekStart, doctorId]);
 
-  // Kiểm tra xem có đang ở tuần hiện tại không (tuần có chứa ngày hôm nay)
   const isCurrentWeek = () => {
     const currentWeekStartTime = startOfWeek(today, {
       weekStartsOn: 1,
@@ -215,7 +247,6 @@ const DoctorSchedulePage = () => {
     return currentWeekStart.getTime() === currentWeekStartTime;
   };
 
-  // Kiểm tra xem có đang ở tuần kế tiếp không (tuần sau tuần hiện tại)
   const isNextWeek = () => {
     const nextWeekStartTime = startOfWeek(addWeeks(today, 1), {
       weekStartsOn: 1,
@@ -223,152 +254,147 @@ const DoctorSchedulePage = () => {
     return currentWeekStart.getTime() === nextWeekStartTime;
   };
 
-  // Chuyển đến tuần trước đó (bị giới hạn ở tuần hiện tại)
   const handlePrevWeek = () => {
-    // Chỉ cho phép chuyển về tuần hiện tại, không sớm hơn
     if (!isCurrentWeek()) {
-      // Lưu lịch làm việc hiện tại trước khi chuyển tuần
-      setPrevWeekSchedule([...weekSchedule]);
-
-      // Cập nhật tuần mới
       setCurrentWeekStart(startOfWeek(today, { weekStartsOn: 1 }));
-      // console.log(
-      //   "Navigating to previous week:",
-      //   format(startOfWeek(today, { weekStartsOn: 1 }), "dd/MM/yyyy")
-      // );
     }
   };
 
-  // Chuyển đến tuần tiếp theo (bị giới hạn ở tuần kế tiếp)
   const handleNextWeek = () => {
-    // Chỉ cho phép chuyển đến tuần kế tiếp, không xa hơn
     if (!isNextWeek()) {
-      // Lưu lịch làm việc hiện tại trước khi chuyển tuần
-      setPrevWeekSchedule([...weekSchedule]);
-
-      // Cập nhật tuần mới
       const nextWeekStart = startOfWeek(addWeeks(today, 1), {
         weekStartsOn: 1,
       });
       setCurrentWeekStart(nextWeekStart);
-      // console.log(
-      //   "Navigating to next week:",
-      //   format(nextWeekStart, "dd/MM/yyyy")
-      // );
     }
   };
 
-  // Áp dụng lịch làm việc của tuần trước cho tuần hiện tại
-  const handleApplyPrevWeek = () => {
-    if (prevWeekSchedule.length > 0) {
-      const newSchedule = weekSchedule.map((day, index) => ({
-        ...day,
-        selectedShifts: [...prevWeekSchedule[index].selectedShifts],
-      }));
-
-      setWeekSchedule(newSchedule);
-      setSuccessMessage("Áp dụng lịch tuần trước thành công");
-      setTimeout(() => setSuccessMessage(""), 3000);
-    } else {
-      setErrorMessage("Không có dữ liệu lịch tuần trước");
-      setTimeout(() => setErrorMessage(""), 3000);
-    }
-  };
-
-  // Bật/tắt một ca làm việc cụ thể cho một ngày
   const toggleShift = (dayIndex: number, shiftNumber: number) => {
-    const newSchedule = [...weekSchedule];
-    const daySchedule = newSchedule[dayIndex];
+    const newSchedule = [...weekSchedule]; // Tạo bản sao của lịch tuần hiện tại
+    const daySchedule = newSchedule[dayIndex]; // Lấy lịch của ngày hiện tại
+    // Kiểm tra xem ca đã bị khóa hay chưa
+    if (daySchedule.lockedShifts.includes(shiftNumber)) {
+      return; // Không thể thay đổi ca đã khóa
+    }
 
+    // Kiểm tra xem ca đã được chọn hay chưa
     if (daySchedule.selectedShifts.includes(shiftNumber)) {
-      // Remove shift if already selected
+      // Nếu đã chọn, bỏ chọn ca
       daySchedule.selectedShifts = daySchedule.selectedShifts.filter(
         (shift) => shift !== shiftNumber
       );
     } else {
-      // Add shift if not selected
+      // Nếu chưa chọn, thêm ca vào danh sách đã chọn
       daySchedule.selectedShifts.push(shiftNumber);
     }
 
     setWeekSchedule(newSchedule);
   };
 
-  // Chọn tất cả ca 1 cho mọi ngày trong tuần
-  const selectAllShift1 = () => {
-    const newSchedule = weekSchedule.map((day) => ({
-      ...day,
-      selectedShifts: [...new Set([...day.selectedShifts, 1])],
-    }));
-    setWeekSchedule(newSchedule);
-  };
-
-  // Chọn tất cả ca 2 cho mọi ngày trong tuần
-  const selectAllShift2 = () => {
-    const newSchedule = weekSchedule.map((day) => ({
-      ...day,
-      selectedShifts: [...new Set([...day.selectedShifts, 2])],
-    }));
-    setWeekSchedule(newSchedule);
-  };
-
-  // Chọn tất cả các ca làm việc cho mọi ngày trong tuần
+  /**
+   * Chọn tất cả các ca làm việc có thể chọn
+   *
+   * Quy trình:
+   * - Duyệt qua tất cả các ngày trong tuần
+   * - Với mỗi ngày, duyệt qua tất cả các ca làm việc từ API
+   * - Nếu ca làm việc chưa bị khóa và chưa được chọn, thêm vào danh sách đã chọn
+   * - Cách này hỗ trợ linh hoạt với số lượng ca không cố định
+   */
   const selectAllShifts = () => {
-    const newSchedule = weekSchedule.map((day) => ({
-      ...day,
-      selectedShifts: [1, 2],
-    }));
+    const newSchedule = weekSchedule.map((day) => {
+      // Tạo bản sao của danh sách ca đã chọn
+      const updatedShifts = [...day.selectedShifts];
+
+      // Duyệt qua mảng shifts
+      shifts.forEach((shift) => {
+        const shiftNumber = shift.shift;
+        // Kiểm tra xem ca làm việc đã bị khóa hay chưa
+        // Nếu chưa bị khóa và chưa được chọn, thêm vào danh sách đã chọn
+        if (
+          !day.lockedShifts.includes(shiftNumber) &&
+          !updatedShifts.includes(shiftNumber)
+        ) {
+          updatedShifts.push(shiftNumber);
+        }
+      });
+
+      // Trả về đối tượng ngày với danh sách ca đã chọn được cập nhật
+      return {
+        ...day,
+        selectedShifts: updatedShifts,
+      };
+    });
     setWeekSchedule(newSchedule);
   };
 
-  // Bỏ chọn tất cả các ca làm việc
   const clearAllSelections = () => {
+    // Duyệt qua từng ngày trong lịch tuần hiện tại
+    // Đặt lại danh sách ca đã chọn về danh sách ca đã khóa (không thể thay đổi)
     const newSchedule = weekSchedule.map((day) => ({
       ...day,
-      selectedShifts: [],
+      selectedShifts: [...day.lockedShifts],
     }));
     setWeekSchedule(newSchedule);
   };
 
-  // Xử lý lưu lịch làm việc vào database
   const handleSaveSchedule = async () => {
     try {
       if (!doctorId) {
         setErrorMessage("Không tìm thấy thông tin người dùng");
         return;
       }
-
-      // Tạo mảng chứa tất cả các ca làm việc cần lưu
+      // Tạo danh sách các ca làm việc cần lưu
       const schedulesToSave = [];
-
-      // Duyệt qua từng ngày trong tuần
+      // Duyệt qua từng ngày trong lịch tuần hiện tại
       for (const day of weekSchedule) {
-        // Định dạng ngày thành dd-MM-yyyy theo yêu cầu API
         const formattedDate = format(day.date, "dd-MM-yyyy");
 
-        // Thêm tất cả các ca được chọn vào danh sách cần lưu
+        // Duyệt qua từng ca đã chọn trong ngày
         for (const shiftNumber of day.selectedShifts) {
-          schedulesToSave.push({
-            doctorId: doctorId,
-            shift: shiftNumber,
-            maxSlots: 10, // Số lượng slot mặc định
-            dateAppointment: formattedDate,
-          });
+          // Nếu ca chưa bị khóa thêm vào danh sách cần lưu
+          if (!day.lockedShifts.includes(shiftNumber)) {
+            schedulesToSave.push({
+              doctorId: doctorId,
+              shift: shiftNumber,
+              maxSlots: 10,
+              dateAppointment: formattedDate,
+            });
+          }
         }
       }
 
-      // Kiểm tra nếu không có ca làm việc nào được chọn
       if (schedulesToSave.length === 0) {
-        setErrorMessage("Chưa chọn ca làm việc nào");
+        setSuccessMessage("Không có lịch mới cần lưu");
+        setTimeout(() => setSuccessMessage(""), 3000);
         return;
       }
 
-      // Gọi API để lưu tất cả các lịch làm việc một lúc
       const response = await addMultipleWorkSchedule(schedulesToSave);
 
-      // Kiểm tra kết quả trả về từ API
       if (response && response.data && response.data.code === 200) {
-        // Hiển thị thông báo thành công
-        setSuccessMessage("Lưu lịch làm việc thành công");
+        setSuccessMessage(
+          `Lưu ${schedulesToSave.length} ca làm việc mới thành công`
+        );
+
+        // Cập nhật lại lịch làm việc, chỉ cần nhập lokeckShifts, ko cần nhập lại selectedShifts
+        // Vì selectedShifts đã được cập nhật trước đó
+        const updatedSchedule = weekSchedule.map((day) => {
+          const newLockedShifts = [...day.lockedShifts]; // Bản sao của danh sách ca đã khóa
+          // Duyệt qua các ca đã chọn trong ngày, biến selectedShifts thành lockedShifts
+          day.selectedShifts.forEach((shift) => {
+            // Nếu ca chưa bị khóa, thêm vào danh sách đã khóa
+            if (!newLockedShifts.includes(shift)) {
+              newLockedShifts.push(shift);
+            }
+          });
+
+          return {
+            ...day,
+            lockedShifts: newLockedShifts,
+          };
+        });
+
+        setWeekSchedule(updatedSchedule);
         setTimeout(() => setSuccessMessage(""), 3000);
       } else {
         throw new Error("Không thể lưu lịch làm việc");
@@ -380,71 +406,6 @@ const DoctorSchedulePage = () => {
     }
   };
 
-  // Hàm tạo lại lịch làm việc cho tuần hiện tại (dùng cho nút hủy)
-  const resetWeekSchedule = async () => {
-    // Tạo lại lịch làm việc của tuần hiện tại
-    const weekStart = currentWeekStart;
-    const weekEnd = addDays(currentWeekStart, 6);
-
-    try {
-      // Tạo dữ liệu trống cho 7 ngày trong tuần
-      const newWeekSchedule: ScheduleItem[] = [];
-      for (let i = 0; i < 7; i++) {
-        const currentDate = addDays(currentWeekStart, i);
-        newWeekSchedule.push({
-          dayIndex: i,
-          date: currentDate,
-          selectedShifts: [],
-        });
-      }
-
-      setWeekSchedule(newWeekSchedule);
-
-      // Nếu có doctorId, tải lại dữ liệu từ API
-      if (doctorId) {
-        const response = await getWorkScheduleBetweenDate(
-          doctorId,
-          formatDateToString(weekStart),
-          formatDateToString(weekEnd)
-        );
-
-        const data = response?.data?.data || [];
-
-        if (data.length > 0) {
-          const updatedSchedule = [...newWeekSchedule];
-
-          data.forEach((item: any) => {
-            const appointmentDate = new Date(item.dateAppointment);
-
-            const dayIndex = updatedSchedule.findIndex(
-              (day) =>
-                day.date.getDate() === appointmentDate.getDate() &&
-                day.date.getMonth() === appointmentDate.getMonth() &&
-                day.date.getFullYear() === appointmentDate.getFullYear()
-            );
-
-            if (dayIndex !== -1) {
-              if (item.shift && item.shift.shift === 1) {
-                if (!updatedSchedule[dayIndex].selectedShifts.includes(1)) {
-                  updatedSchedule[dayIndex].selectedShifts.push(1);
-                }
-              } else if (item.shift && item.shift.shift === 2) {
-                if (!updatedSchedule[dayIndex].selectedShifts.includes(2)) {
-                  updatedSchedule[dayIndex].selectedShifts.push(2);
-                }
-              }
-            }
-          });
-          console.log("Reset schedule with data:", updatedSchedule);
-          setWeekSchedule(updatedSchedule);
-        }
-      }
-    } catch (error) {
-      console.error("Error resetting schedule:", error);
-    }
-  };
-
-  // Định dạng hiển thị khoảng thời gian của tuần hiện tại
   const formatWeekRange = () => {
     const weekEnd = addDays(currentWeekStart, 6);
     return `${format(currentWeekStart, "dd/MM/yyyy")} - ${format(
@@ -455,7 +416,6 @@ const DoctorSchedulePage = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* Tiêu đề trang */}
       <Typography
         variant="h4"
         component="h1"
@@ -466,7 +426,6 @@ const DoctorSchedulePage = () => {
         Thêm Lịch Làm Việc
       </Typography>
 
-      {/* Hiển thị thông báo thành công hoặc lỗi */}
       {successMessage && (
         <Alert severity="success" sx={{ mb: 2 }}>
           {successMessage}
@@ -479,10 +438,8 @@ const DoctorSchedulePage = () => {
         </Alert>
       )}
 
-      {/* Điều hướng tuần và các nút thao tác hàng loạt */}
       <Paper sx={{ mb: 3, p: 2 }}>
         <Grid container spacing={2} alignItems="center">
-          {/* Phần chọn tuần */}
           <Grid item xs={12} md={6}>
             <Stack direction="row" alignItems="center" spacing={1}>
               <IconButton
@@ -536,30 +493,12 @@ const DoctorSchedulePage = () => {
             </Stack>
           </Grid>
 
-          {/* Các nút thao tác hàng loạt */}
           <Grid item xs={12} md={6}>
             <Stack
               direction={{ xs: "column", sm: "row" }}
               spacing={1}
               justifyContent="flex-end"
             >
-              <Button
-                variant="outlined"
-                startIcon={<EventRepeatIcon />}
-                onClick={handleApplyPrevWeek}
-                size="small"
-              >
-                Áp dụng tuần trước
-              </Button>
-
-              <Button variant="outlined" onClick={selectAllShift1} size="small">
-                Chọn tất cả ca 1
-              </Button>
-
-              <Button variant="outlined" onClick={selectAllShift2} size="small">
-                Chọn tất cả ca 2
-              </Button>
-
               <Button variant="outlined" onClick={selectAllShifts} size="small">
                 Chọn tất cả
               </Button>
@@ -577,30 +516,7 @@ const DoctorSchedulePage = () => {
         </Grid>
       </Paper>
 
-      {/* Bảng lịch làm việc theo tuần */}
       <Paper sx={{ mb: 3, overflow: "auto" }}>
-        {/* 
-          Cấu trúc bảng đăng ký lịch làm việc:
-          - Bảng được chia thành 2 hàng cho 2 ca làm việc (sáng và chiều)
-          - Mỗi cột đại diện cho một ngày trong tuần (từ thứ 2 đến chủ nhật)
-          - Mỗi ô chứa một checkbox để bác sĩ có thể chọn/bỏ chọn ca làm việc
-          
-          Luồng logic hiển thị và tương tác:
-          1. Dữ liệu lịch làm việc được lưu trong state weekSchedule (mảng gồm 7 đối tượng ScheduleItem)
-          2. Mỗi ScheduleItem chứa:
-             a. dayIndex: chỉ số ngày trong tuần (0-6)
-             b. date: đối tượng Date chứa thông tin ngày đầy đủ
-             c. selectedShifts: mảng số ca đã chọn (1, 2 hoặc cả hai)
-          3. Việc chọn/bỏ chọn một ca:
-             a. Khi người dùng tích vào checkbox, hàm toggleShift được gọi
-             b. toggleShift cập nhật mảng selectedShifts trong ScheduleItem tương ứng
-             c. React render lại giao diện với checkbox được cập nhật trạng thái mới
-          4. Các thao tác hàng loạt:
-             a. selectAllShift1/selectAllShift2: chọn tất cả ca 1 hoặc ca 2
-             b. selectAllShifts: chọn tất cả các ca
-             c. clearAllSelections: bỏ chọn tất cả các ca
-             d. handleApplyPrevWeek: áp dụng lịch từ tuần trước đã lưu trong prevWeekSchedule
-        */}
         <TableContainer>
           <Table>
             <TableHead>
@@ -609,11 +525,6 @@ const DoctorSchedulePage = () => {
                   Ca
                 </TableCell>
 
-                {/* 
-                  Tiêu đề các ngày trong tuần 
-                  - Mỗi cột hiển thị tên thứ và ngày tháng
-                  - weekSchedule là mảng chứa thông tin của 7 ngày trong tuần đã chọn
-                */}
                 {weekSchedule.map((day) => (
                   <TableCell
                     key={`day-${day.dayIndex}`}
@@ -630,73 +541,51 @@ const DoctorSchedulePage = () => {
             </TableHead>
 
             <TableBody>
-              {/* 
-                Hàng cho ca 1 (Sáng)
-                - Mỗi ô chứa một checkbox để chọn/bỏ chọn ca 1 cho ngày tương ứng
-                - Trạng thái checked được điều khiển bởi day.selectedShifts.includes(1)
-                - Khi click, hàm toggleShift được gọi với tham số là ngày và số ca
-              */}
-              <TableRow>
-                <TableCell sx={{ fontWeight: "bold" }}>
-                  Ca 1
-                  <Typography
-                    variant="caption"
-                    display="block"
-                    color="textSecondary"
-                  >
-                    07:00 - 11:00
-                  </Typography>
-                </TableCell>
+              {shifts.length > 0 ? (
+                shifts.map((shift) => (
+                  <TableRow key={`shift-${shift.shift}`}>
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      Ca {shift.shift}
+                      <Typography
+                        variant="caption"
+                        display="block"
+                        color="textSecondary"
+                      >
+                        {`${formatShiftTime(shift.start)} - ${formatShiftTime(
+                          shift.end
+                        )}`}
+                      </Typography>
+                    </TableCell>
 
-                {/* Các ô checkbox cho ca 1 của từng ngày */}
-                {weekSchedule.map((day) => (
-                  <TableCell key={`${day.dayIndex}-shift1`} align="center">
-                    <Checkbox
-                      checked={day.selectedShifts.includes(1)}
-                      onChange={() => toggleShift(day.dayIndex, 1)}
-                    />
+                    {weekSchedule.map((day) => (
+                      <TableCell
+                        key={`${day.dayIndex}-shift${shift.shift}`}
+                        align="center"
+                      >
+                        <Checkbox
+                          checked={day.selectedShifts.includes(shift.shift)}
+                          onChange={() =>
+                            toggleShift(day.dayIndex, shift.shift)
+                          }
+                          disabled={day.lockedShifts.includes(shift.shift)}
+                        />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={8} align="center">
+                    Không có ca làm việc nào được cấu hình
                   </TableCell>
-                ))}
-              </TableRow>
-
-              {/* 
-                Hàng cho ca 2 (Chiều)
-                - Tương tự như ca 1 nhưng dành cho ca chiều
-                - Sử dụng cùng cấu trúc dữ liệu và logic hiển thị
-              */}
-              <TableRow>
-                <TableCell sx={{ fontWeight: "bold" }}>
-                  Ca 2
-                  <Typography
-                    variant="caption"
-                    display="block"
-                    color="textSecondary"
-                  >
-                    13:00 - 17:00
-                  </Typography>
-                </TableCell>
-
-                {/* Các ô checkbox cho ca 2 của từng ngày */}
-                {weekSchedule.map((day) => (
-                  <TableCell key={`${day.dayIndex}-shift2`} align="center">
-                    <Checkbox
-                      checked={day.selectedShifts.includes(2)}
-                      onChange={() => toggleShift(day.dayIndex, 2)}
-                    />
-                  </TableCell>
-                ))}
-              </TableRow>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
       </Paper>
 
-      {/* Các nút tác vụ chính */}
       <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-        <Button variant="outlined" onClick={resetWeekSchedule}>
-          Hủy
-        </Button>
-
         <Button
           variant="contained"
           color="primary"

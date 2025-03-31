@@ -30,14 +30,10 @@ import { useNavigate } from "react-router";
 import BookAppointment from "../../components/appointments/BookAppointment";
 import { getAppointmentPatientBookInWeek } from "../../services/appointment/booking_service";
 import { io, Socket } from "socket.io-client";
-
-// Import DatePicker components
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { viVN } from "@mui/x-date-pickers/locales";
-
-// Import date-fns functions
 import {
   format,
   addDays,
@@ -55,38 +51,6 @@ import {
 } from "../../utils/dateUtils";
 import { ROUTING } from "../../constants/routing";
 
-/**
- * Trang Quản Lý Lịch Hẹn Khám Bệnh dành cho bệnh nhân
- *
- * Luồng hiển thị lịch hẹn khám bệnh:
- * 1. Khi trang được tải, hệ thống sẽ hiển thị lịch hẹn của tuần hiện tại (bắt đầu từ thứ 2)
- * 2. Dữ liệu lịch hẹn được lấy từ API getAppointmentPatientBookInWeek với userId của bệnh nhân
- *    và khoảng thời gian của tuần hiện tại (từ thứ 2 đến chủ nhật)
- * 3. Dữ liệu trả về được xử lý và chuyển đổi thành mảng appointments chứa các thông tin chi tiết:
- *    - ID lịch hẹn, ngày hẹn, thời gian bắt đầu và kết thúc
- *    - Trạng thái cuộc hẹn (WAITING, IN_PROGRESS, DONE, CANCELLED)
- *    - Thông tin bác sĩ, chuyên khoa, lý do khám
- *    - Số thứ tự khám và thông tin ca làm việc
- * 4. Bảng lịch hiển thị 2 ca làm việc (sáng và chiều) cho 7 ngày trong tuần
- * 5. Các cuộc hẹn được hiển thị với màu sắc khác nhau theo trạng thái:
- *    - Xanh dương: Đang chờ khám (WAITING)
- *    - Tím: Đang khám (IN_PROGRESS)
- *    - Xanh lá: Đã khám xong (DONE)
- *    - Đỏ: Đã hủy (CANCELLED)
- * 6. Người dùng có thể:
- *    - Di chuyển giữa các tuần bằng nút điều hướng
- *    - Chọn ngày cụ thể từ lịch để xem lịch hẹn của tuần đó
- *    - Đặt lịch hẹn mới thông qua form đặt lịch
- *    - Xem chi tiết lịch hẹn bằng cách nhấp vào thẻ cuộc hẹn
- *    - Vào phòng khám trực tuyến (nếu cuộc hẹn đang trong trạng thái chờ hoặc đang khám)
- *
- * Xử lý hiển thị:
- * - Mỗi cuộc hẹn được hiển thị trong một thẻ (Paper) với thông tin ngắn gọn
- * - Tooltip hiển thị thêm thông tin chi tiết khi di chuột qua thẻ cuộc hẹn
- * - Nút video call chỉ hiển thị cho các cuộc hẹn đang chờ hoặc đang khám
- * - Màu sắc và viền thẻ trực quan giúp phân biệt trạng thái cuộc hẹn
- */
-
 // Định nghĩa TypeDay enum để phù hợp với mô hình UML
 enum TypeDay {
   MONDAY = "MONDAY",
@@ -96,6 +60,12 @@ enum TypeDay {
   FRIDAY = "FRIDAY",
   SATURDAY = "SATURDAY",
   SUNDAY = "SUNDAY",
+}
+
+// Enum để định nghĩa các khoảng thời gian trong ngày - giống DoctorCurrentSchedulePage
+enum TimePeriod {
+  MORNING = "morning", // Buổi sáng
+  AFTERNOON = "afternoon", // Buổi chiều
 }
 
 // Định nghĩa các ngày trong tuần sử dụng enum TypeDay
@@ -112,6 +82,7 @@ const DAYS_OF_WEEK = [
 // Định nghĩa giao diện Appointment - lịch hẹn khám bệnh của bệnh nhân
 interface Appointment {
   id: number;
+  workScheduleId: number; // ID của lịch làm việc
   date: string; // Định dạng: dd-MM-yyyy
   startTime: string; // Định dạng: HH:mm
   endTime: string; // Định dạng: HH:mm
@@ -135,33 +106,6 @@ interface Shift {
   status: boolean; // Trạng thái hoạt động của ca
 }
 
-// Định nghĩa các ca làm việc cố định để khớp với lịch của bác sĩ
-const SHIFTS: Record<string, Shift> = {
-  CA1: { id: 1, shift: 1, start: "07:00", end: "11:00", status: true }, // Ca sáng
-  CA2: { id: 2, shift: 2, start: "13:00", end: "17:00", status: true }, // Ca chiều
-};
-
-/**
- * Trang Quản Lý Lịch Hẹn Khám Bệnh dành cho bệnh nhân
- *
- * Luồng hoạt động:
- * 1. Hiển thị danh sách các lịch hẹn của bệnh nhân với trạng thái khác nhau (sắp tới, đã khám, đã hủy)
- * 2. Cho phép bệnh nhân đặt lịch hẹn mới thông qua form đặt lịch
- * 3. Cho phép bệnh nhân xem chi tiết lịch hẹn đã đặt
- * 4. Cho phép bệnh nhân hủy lịch hẹn nếu lịch hẹn chưa diễn ra
- * 5. Cho phép bệnh nhân vào phòng chờ khi đến thời gian hẹn
- *
- * Kết quả:
- * - Hiển thị trạng thái lịch hẹn của bệnh nhân trong bảng lịch tuần
- * - Đặt lịch mới thành công và hiển thị trong danh sách
- *
- * Xử lý dữ liệu:
- * - Sử dụng React Query để quản lý việc gọi API và cache dữ liệu
- * - Cập nhật trạng thái lịch hẹn theo thời gian thực qua socket.io (nếu cần)
- * - Xử lý phân trang cho danh sách lịch hẹn khi quá nhiều
- * - Lưu trữ form đặt lịch trong local storage để tránh mất dữ liệu khi reload
- */
-
 const AppointmentPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -180,18 +124,18 @@ const AppointmentPage = () => {
   // State quản lý dữ liệu lịch hẹn
   const [appointments, setAppointments] = useState<Appointment[]>([]);
 
-  // Fetch appointments function that can be reused
+  // Hàm lấy lịch hẹn có thể sử dụng lại
   const fetchAppointments = async () => {
     try {
-      // Calculate the end of week properly using date-fns for consistency
+      // Tính toán ngày cuối tuần một cách chính xác sử dụng date-fns để đảm bảo tính nhất quán
       const weekEnd = addDays(currentWeekStart, 6);
 
-      console.log("Starting fetch for week:", {
+      console.log("Bắt đầu lấy dữ liệu cho tuần:", {
         start: formatDateToString(currentWeekStart),
         end: formatDateToString(weekEnd),
       });
 
-      // Clear appointments during loading
+      // Xóa lịch hẹn trong khi đang tải
       setAppointments([]);
 
       const response = await getAppointmentPatientBookInWeek(
@@ -201,20 +145,20 @@ const AppointmentPage = () => {
       );
 
       if (!response?.data?.data) {
-        console.log("No appointments data received");
+        console.log("Không nhận được dữ liệu lịch hẹn");
         setAppointments([]);
         return;
       }
 
       const result = response.data.data;
-      console.log("API response for week:", {
+      console.log("Phản hồi API cho tuần:", {
         startDate: formatDateToString(currentWeekStart),
         data: result,
       });
 
-      // If no results, set empty array
+      // Nếu không có kết quả, đặt mảng rỗng
       if (!result || result.length === 0) {
-        console.log("No appointments found for this week");
+        console.log("Không tìm thấy lịch hẹn nào trong tuần này");
         setAppointments([]);
         return;
       }
@@ -243,14 +187,14 @@ const AppointmentPage = () => {
         numericalOrder: item.book_appointment.numericalOrder,
       }));
 
-      console.log("Setting appointments for week:", {
+      console.log("Đặt lịch hẹn cho tuần:", {
         count: appointmentsData.length,
         dates: appointmentsData.map((a) => a.date),
       });
 
       setAppointments(appointmentsData);
     } catch (error) {
-      console.error("Error fetching appointments:", error);
+      console.error("Lỗi khi lấy lịch hẹn:", error);
       setAppointments([]);
     }
   };
@@ -288,42 +232,45 @@ const AppointmentPage = () => {
   // Lấy danh sách các ngày trong tuần
   const weekDays = getDaysInWeek();
 
-  // Xử lý chuyển đến tuần trước - handle more safely
+  // Xử lý chuyển đến tuần trước - xử lý an toàn hơn
   const handlePrevWeek = () => {
-    console.log("Moving to previous week");
+    console.log("Di chuyển đến tuần trước");
     const newWeekStart = subWeeks(currentWeekStart, 1);
-    console.log("New week start:", formatDateToString(newWeekStart));
+    console.log("Ngày bắt đầu tuần mới:", formatDateToString(newWeekStart));
 
-    // Clear current appointments to avoid showing stale data
+    // Xóa lịch hẹn hiện tại để tránh hiển thị dữ liệu cũ
     setAppointments([]);
 
-    // Update week start - use the actual date object, not a function
+    // Cập nhật ngày bắt đầu tuần - sử dụng đối tượng ngày thực tế, không phải hàm
     setCurrentWeekStart(newWeekStart);
   };
 
-  // Xử lý chuyển đến tuần sau - handle more safely
+  // Xử lý chuyển đến tuần sau - xử lý an toàn hơn
   const handleNextWeek = () => {
-    console.log("Moving to next week");
+    console.log("Di chuyển đến tuần tiếp theo");
     const newWeekStart = addWeeks(currentWeekStart, 1);
-    console.log("New week start:", formatDateToString(newWeekStart));
+    console.log("Ngày bắt đầu tuần mới:", formatDateToString(newWeekStart));
 
-    // Clear current appointments
+    // Xóa lịch hẹn hiện tại
     setAppointments([]);
 
-    // Update week start
+    // Cập nhật ngày bắt đầu tuần
     setCurrentWeekStart(newWeekStart);
   };
 
-  // Xử lý quay về tuần hiện tại - handle more safely
+  // Xử lý quay về tuần hiện tại - xử lý an toàn hơn
   const handleGoToCurrentWeek = () => {
-    console.log("Moving to current week");
+    console.log("Di chuyển đến tuần hiện tại");
     const newWeekStart = startOfWeek(today, { weekStartsOn: 1 });
-    console.log("Current week start:", formatDateToString(newWeekStart));
+    console.log(
+      "Ngày bắt đầu tuần hiện tại:",
+      formatDateToString(newWeekStart)
+    );
 
-    // Clear current appointments
+    // Xóa lịch hẹn hiện tại
     setAppointments([]);
 
-    // Update week start
+    // Cập nhật ngày bắt đầu tuần
     setCurrentWeekStart(newWeekStart);
   };
 
@@ -353,52 +300,34 @@ const AppointmentPage = () => {
     setCalendarOpen(false);
   };
 
-  // Xử lý khi người dùng chọn một ngày từ lịch - fix this too
+  // Xử lý khi người dùng chọn một ngày từ lịch - sửa chữa đoạn này
   const handleDateSelect = (date: Date) => {
     setCurrentDate(date);
 
     // Lấy tuần chứa ngày đã chọn (bắt đầu từ thứ 2)
     const weekStart = startOfWeek(date, { weekStartsOn: 1 });
-    console.log("Selected date week start:", formatDateToString(weekStart));
+    console.log(
+      "Ngày bắt đầu tuần của ngày được chọn:",
+      formatDateToString(weekStart)
+    );
 
-    // Clear appointments
+    // Xóa lịch hẹn
     setAppointments([]);
 
-    // Set new week start
+    // Đặt ngày bắt đầu tuần mới
     setCurrentWeekStart(weekStart);
     setCalendarOpen(false);
-  };
-
-  // Lọc lịch hẹn cho một ngày và ca cụ thể
-  const getAppointmentsForDateAndShift = (date: string, shift: 1 | 2) => {
-    const filtered = appointments.filter((appointment) => {
-      // Kiểm tra xem lịch hẹn có phải trên ngày đã chỉ định không
-      if (appointment.date !== date) return false;
-
-      // Kiểm tra xem lịch hẹn có thuộc ca đã chỉ định không
-      // const hour = parseInt(appointment.startTime.split(":")[0]);
-      if (shift === 1 && appointment.shiftId === 1) {
-        return true;
-      }
-      if (shift === 2 && appointment.shiftId === 2) {
-        return true;
-      }
-
-      return false;
-    });
-
-    return filtered;
-  };
-
-  // Điều hướng đến trang chi tiết cuộc hẹn khi người dùng nhấp vào một cuộc hẹn cụ thể
-  const handleAppointmentClick = (appointmentId: number) => {
-    navigate(`/patient/appointments/${appointmentId}`);
   };
 
   // Xác định xem một cuộc hẹn có đủ điều kiện để tham gia phòng khám trực tuyến hay không
   // Chỉ các cuộc hẹn có trạng thái "ĐANG CHỜ" hoặc "ĐANG KHÁM" mới có thể tham gia
   const canJoinExamination = (status: string) => {
     return status === "IN_PROGRESS" || status === "WAITING";
+  };
+
+  // Điều hướng đến trang chi tiết cuộc hẹn khi người dùng nhấp vào một cuộc hẹn cụ thể
+  const handleAppointmentClick = (appointmentId: number) => {
+    navigate(`/patient/appointments/${appointmentId}`);
   };
 
   // Xử lý sự kiện khi người dùng muốn tham gia phòng khám trực tuyến
@@ -423,6 +352,74 @@ const AppointmentPage = () => {
         numericalOrder: numericalOrder,
       },
     });
+  };
+
+  // Xác định một ca làm việc thuộc về buổi sáng hay chiều - giống DoctorCurrentSchedulePage
+  const getShiftPeriod = (startTime: string): TimePeriod => {
+    // Phân tích giờ từ chuỗi thời gian (VD: "08:00")
+    const startHour = parseInt(startTime.split(":")[0]);
+    if (startHour < 12) return TimePeriod.MORNING;
+    return TimePeriod.AFTERNOON;
+  };
+
+  // Lấy tất cả lịch hẹn cho một khoảng thời gian nhất định (sáng/chiều)
+  const getAppointmentsForDateAndPeriod = (
+    date: string,
+    period: TimePeriod
+  ): Appointment[] => {
+    return appointments.filter((appointment) => {
+      // Kiểm tra xem lịch hẹn có phải trên ngày đã chỉ định không
+      if (appointment.date !== date) return false;
+
+      // Kiểm tra xem lịch hẹn có thuộc khoảng thời gian đã chỉ định không
+      return getShiftPeriod(appointment.startTime) === period;
+    });
+  };
+
+  // Hiển thị lịch hẹn cho một ngày và khoảng thời gian cụ thể
+  const renderPeriodAppointments = (date: string, period: TimePeriod) => {
+    const filteredAppointments = getAppointmentsForDateAndPeriod(date, period);
+
+    // Nếu không có lịch hẹn trong khoảng thời gian này
+    if (filteredAppointments.length === 0) {
+      return (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+            width: "100%",
+            py: 2,
+          }}
+        >
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ fontStyle: "italic" }}
+          >
+            Không có lịch hẹn
+          </Typography>
+        </Box>
+      );
+    }
+
+    // Hiển thị tất cả lịch hẹn trong khoảng thời gian
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.5,
+          width: "100%",
+          py: 1,
+        }}
+      >
+        {filteredAppointments.map((appointment) =>
+          renderAppointmentItem(appointment)
+        )}
+      </Box>
+    );
   };
 
   // Hiển thị thông tin cuộc hẹn với ID, lý do khám và tên bác sĩ
@@ -456,6 +453,9 @@ const AppointmentPage = () => {
             </Typography>
             <Typography variant="body2">
               Bác sĩ: {appointment.doctorName}
+            </Typography>
+            <Typography variant="body2">
+              Thời gian: {appointment.startTime} - {appointment.endTime}
             </Typography>
             <Typography variant="body2">
               Lý do: {appointment.reason || "Không có"}
@@ -503,6 +503,12 @@ const AppointmentPage = () => {
                 variant="caption"
                 sx={{ display: "block", color: colors.text }}
               >
+                {appointment.startTime} - {appointment.endTime}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{ display: "block", color: colors.text }}
+              >
                 {appointment.reason || "Không có lý do"}
               </Typography>
             </Box>
@@ -533,40 +539,6 @@ const AppointmentPage = () => {
           </Box>
         </Paper>
       </Tooltip>
-    );
-  };
-
-  // Hiển thị chip trạng thái cuộc hẹn
-  const renderAppointmentStatus = (status: string) => {
-    let color = "default";
-    let label = "Không xác định";
-
-    switch (status) {
-      case "WAITING":
-        color = "primary";
-        label = "Chờ khám";
-        break;
-      case "IN_PROGRESS":
-        color = "info";
-        label = "Đang khám";
-        break;
-      case "DONE":
-        color = "success";
-        label = "Đã khám";
-        break;
-      case "CANCELLED":
-        color = "error";
-        label = "Đã hủy";
-        break;
-    }
-
-    return (
-      <Chip
-        color={color as any}
-        label={label}
-        size="small"
-        sx={{ fontSize: "0.625rem", height: "20px" }}
-      />
     );
   };
 
@@ -608,7 +580,7 @@ const AppointmentPage = () => {
       ) : (
         <Paper sx={{ width: "100%", mb: 3 }}>
           <Box sx={{ p: 3 }}>
-            {/* Calendar Navigation */}
+            {/* Điều hướng lịch */}
             <Paper sx={{ mb: 3, p: 2 }}>
               <Stack
                 direction="row"
@@ -661,27 +633,8 @@ const AppointmentPage = () => {
               </Stack>
             </Paper>
 
-            {/* Weekly Calendar View */}
+            {/* Hiển thị lịch tuần */}
             <Paper sx={{ mb: 3, overflow: "auto" }}>
-              {/* 
-                Cấu trúc bảng lịch hẹn:
-                - Bảng được chia thành 2 hàng cho 2 ca khám (sáng và chiều) 
-                - Mỗi cột đại diện cho một ngày trong tuần (từ thứ 2 đến chủ nhật)
-                
-                Luồng logic hiển thị lịch hẹn:
-                1. Dữ liệu lịch hẹn được lưu trong mảng appointments (đã được phân loại theo ngày và ca)
-                2. Với mỗi ô trong bảng (ngày + ca):
-                   a. Gọi getAppointmentsForDateAndShift(date, shift) để lọc các cuộc hẹn thuộc ngày và ca đó
-                   b. Nếu không có cuộc hẹn → Hiển thị "Không có lịch hẹn"
-                   c. Nếu có cuộc hẹn → Hiển thị danh sách các cuộc hẹn bằng renderAppointmentItem()
-                3. Mỗi cuộc hẹn được hiển thị với:
-                   a. Màu sắc khác nhau tùy theo trạng thái (WAITING, IN_PROGRESS, DONE, CANCELLED)
-                   b. Số thứ tự, tên bác sĩ và lý do khám
-                   c. Nút tham gia phòng khám (chỉ hiển thị khi cuộc hẹn đang chờ hoặc đang khám)
-                4. Tương tác:
-                   a. Nhấp vào cuộc hẹn → Xem chi tiết cuộc hẹn
-                   b. Nhấp nút video call → Tham gia phòng khám trực tuyến
-              */}
               <TableContainer>
                 <Table>
                   <TableHead>
@@ -710,135 +663,56 @@ const AppointmentPage = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {/* 
-                      Ca 1 appointments row
-                      - Hiển thị tất cả lịch hẹn của ca sáng cho mỗi ngày
-                      - Thời gian ca cố định lấy từ SHIFTS.CA1
-                    */}
+                    {/* Ca sáng - Buổi sáng */}
                     <TableRow>
                       <TableCell sx={{ fontWeight: "bold" }}>
-                        Ca 1
-                        <Typography
+                        Sáng
+                        {/* <Typography
                           variant="caption"
                           display="block"
                           color="textSecondary"
                         >
-                          {formatTime(SHIFTS.CA1.start)} -{" "}
-                          {formatTime(SHIFTS.CA1.end)}
-                        </Typography>
+                          7:00 - 12:00
+                        </Typography> */}
                       </TableCell>
 
                       {weekDays.map((day) => (
                         <TableCell
-                          key={`${day.formattedDate}-ca1`}
+                          key={`${day.formattedDate}-morning`}
                           align="center"
                           sx={{ verticalAlign: "top", p: 1 }}
                         >
-                          {/* 
-                            Hiển thị lịch hẹn ca 1:
-                            1. Gọi getAppointmentsForDateAndShift để lọc cuộc hẹn theo ngày và ca
-                            2. Nếu có cuộc hẹn → Map qua từng cuộc hẹn và render bằng renderAppointmentItem()
-                            3. Nếu không có → Hiển thị thông báo "Không có lịch hẹn"
-                            
-                            Mỗi thẻ cuộc hẹn hiển thị:
-                            - Số thứ tự và tên bác sĩ rút gọn
-                            - Lý do khám
-                            - Màu sắc tương ứng với trạng thái (xanh dương, tím, xanh lá, đỏ)
-                            - Nút tham gia (chỉ hiển thị nếu trạng thái là WAITING hoặc IN_PROGRESS)
-                          */}
-                          <Box
-                            sx={{
-                              minHeight: "100px",
-                              display: "flex",
-                              flexDirection: "column",
-                              justifyContent: "center",
-                            }}
-                          >
-                            {getAppointmentsForDateAndShift(
-                              day.formattedDate,
-                              1
-                            ).length > 0 ? (
-                              getAppointmentsForDateAndShift(
-                                day.formattedDate,
-                                1
-                              ).map((appointment) => (
-                                <Box key={appointment.id}>
-                                  {renderAppointmentItem(appointment)}
-                                </Box>
-                              ))
-                            ) : (
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
-                                sx={{
-                                  fontStyle: "italic",
-                                  py: 3,
-                                  alignItems: "center",
-                                }}
-                              >
-                                Không có lịch hẹn
-                              </Typography>
-                            )}
-                          </Box>
+                          {renderPeriodAppointments(
+                            day.formattedDate,
+                            TimePeriod.MORNING
+                          )}
                         </TableCell>
                       ))}
                     </TableRow>
 
-                    {/* 
-                      Ca 2 appointments row
-                      - Tương tự như ca 1 nhưng áp dụng cho ca chiều
-                      - Thời gian cố định lấy từ SHIFTS.CA2
-                      - Logic hiển thị tương tự ca 1
-                    */}
+                    {/* Ca chiều - Buổi chiều */}
                     <TableRow>
                       <TableCell sx={{ fontWeight: "bold" }}>
-                        Ca 2
-                        <Typography
+                        Chiều
+                        {/* <Typography
                           variant="caption"
                           display="block"
                           color="textSecondary"
                         >
-                          {formatTime(SHIFTS.CA2.start)} -{" "}
-                          {formatTime(SHIFTS.CA2.end)}
-                        </Typography>
+                          13:00 - 17:00
+                        </Typography> */}
                       </TableCell>
 
                       {weekDays.map((day) => (
                         <TableCell
-                          key={`${day.formattedDate}-ca2`}
+                          key={`${day.formattedDate}-afternoon`}
                           align="center"
                           sx={{ verticalAlign: "top", p: 1 }}
                         >
-                          {/* Display Ca 2 appointments */}
-                          <Box
-                            sx={{
-                              minHeight: "100px",
-                              display: "flex",
-                              flexDirection: "column",
-                            }}
-                          >
-                            {getAppointmentsForDateAndShift(
-                              day.formattedDate,
-                              2
-                            ).length > 0 ? (
-                              getAppointmentsForDateAndShift(
-                                day.formattedDate,
-                                2
-                              ).map((appointment) => (
-                                <Box key={appointment.id}>
-                                  {renderAppointmentItem(appointment)}
-                                </Box>
-                              ))
-                            ) : (
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
-                                sx={{ fontStyle: "italic", py: 3 }}
-                              >
-                                Không có lịch hẹn
-                              </Typography>
-                            )}
-                          </Box>
+                          {renderPeriodAppointments(
+                            day.formattedDate,
+                            TimePeriod.AFTERNOON
+                          )}
                         </TableCell>
                       ))}
                     </TableRow>
@@ -847,7 +721,7 @@ const AppointmentPage = () => {
               </TableContainer>
             </Paper>
 
-            {/* Calendar Modal */}
+            {/* Modal Lịch */}
             <Modal
               open={calendarOpen}
               onClose={handleCloseCalendar}
@@ -961,11 +835,6 @@ const AppointmentPage = () => {
                 </Box>
               </Stack>
             </Box>
-
-            {/* <Alert severity="info" sx={{ mt: 2 }}>
-              Đây là lịch hẹn khám của bạn. Bạn có thể xem các cuộc hẹn với đủ
-              trạng thái trên lịch.
-            </Alert> */}
           </Box>
         </Paper>
       )}
