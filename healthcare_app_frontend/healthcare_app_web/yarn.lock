@@ -991,6 +991,11 @@
   resolved "https://registry.npmjs.org/@socket.io/component-emitter/-/component-emitter-3.1.2.tgz"
   integrity sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==
 
+"@stomp/stompjs@^7.1.0":
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/@stomp/stompjs/-/stompjs-7.1.0.tgz#021be3bbffaf625910cfd5a3d0b13bc359eaf178"
+  integrity sha512-73myzb9gKUIu6hq/NoN8yvR2hPnFfWcxDAZ3/wp4UQ1+JXaX7LR3CDJHx68BNYrFpuC0NgXry1krIb3q3SHUOg==
+
 "@types/babel__core@^7.20.5":
   version "7.20.5"
   resolved "https://registry.npmjs.org/@types/babel__core/-/babel__core-7.20.5.tgz"

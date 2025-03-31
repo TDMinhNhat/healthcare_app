@@ -20,6 +20,7 @@
     "@mui/x-date-pickers": "^7.26.0",
     "@react-buddy/ide-toolbox": "^2.4.0",
     "@reduxjs/toolkit": "^2.5.1",
+    "@stomp/stompjs": "^7.1.0",
     "@types/node": "^22.13.5",
     "@zegocloud/zego-uikit-prebuilt": "^2.14.1-beta",
     "axios": "^1.7.9",
