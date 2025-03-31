@@ -8,43 +8,45 @@ import {
 import { Box, Chip, Avatar, IconButton, Paper, Button } from "@mui/material";
 import { Edit, Delete, Add } from "@mui/icons-material";
 import { User } from "../../types/user";
-import AddPatientForm from "../../components/admin/AddPatientForm";
+import PatientForm from "../../components/admin/PatientForm";
 
 const PatientManagementPage: React.FC = () => {
-  const [patients, setPatients] = useState<User[]>(mockPatients);
-  const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
-  const [formMode, setFormMode] = useState<"add" | "edit">("add");
-  const [selectedPatient, setSelectedPatient] = useState<User | null>(null);
+  // Khai báo state để quản lý dữ liệu và trạng thái UI
+  const [patients, setPatients] = useState<User[]>(mockPatients); // Danh sách bệnh nhân
+  const [isFormOpen, setIsFormOpen] = useState<boolean>(false); // Trạng thái hiển thị form
+  const [formMode, setFormMode] = useState<"add" | "edit">("add"); // Chế độ form: thêm mới/chỉnh sửa
+  const [selectedPatient, setSelectedPatient] = useState<User | null>(null); // Bệnh nhân đang được chọn
 
-  // Function to handle opening the form for adding
+  // Hàm mở form thêm bệnh nhân mới
   const handleAddClick = () => {
     setFormMode("add");
     setSelectedPatient(null);
     setIsFormOpen(true);
   };
 
-  // Function to handle opening the form for editing
+  // Hàm mở form chỉnh sửa thông tin bệnh nhân
   const handleEditClick = (patient: User) => {
     setFormMode("edit");
     setSelectedPatient(patient);
     setIsFormOpen(true);
   };
 
-  // Function to close the form
+  // Hàm đóng form
   const handleFormClose = () => {
     setIsFormOpen(false);
   };
 
-  // Function to handle form submission (both add and edit)
+  // Hàm xử lý khi submit form (áp dụng cho cả thêm mới và chỉnh sửa)
   const handleFormSubmit = (patientData: Partial<User>) => {
     if (formMode === "add") {
-      // Add new patient
+      // Xử lý thêm mới bệnh nhân
       const lastId = Math.max(...patients.map((patient) => patient.id), 0);
       const lastUserId =
         patients.length > 0
           ? parseInt(patients[patients.length - 1].userId.replace("BN", ""))
           : 0;
 
+      // Tạo ID và mã bệnh nhân mới
       const newId = lastId + 1;
       const newUserId = `BN${String(lastUserId + 1).padStart(3, "0")}`;
 
@@ -57,7 +59,7 @@ const PatientManagementPage: React.FC = () => {
 
       setPatients([...patients, patientToAdd]);
     } else {
-      // Edit existing patient
+      // Xử lý chỉnh sửa thông tin bệnh nhân
       if (selectedPatient) {
         setPatients(
           patients.map((patient) =>
@@ -71,14 +73,13 @@ const PatientManagementPage: React.FC = () => {
     setIsFormOpen(false);
   };
 
-  // Function to handle deleting a patient
+  // Hàm xử lý xóa bệnh nhân
   const handleDeleteClick = (id: number) => {
-    // Implement delete functionality here
-    // For example:
-    // setPatients(patients.filter(patient => patient.id !== id));
+    // TODO: Thêm xác nhận trước khi xóa
+    setPatients(patients.filter((patient) => patient.id !== id));
   };
 
-  // Định nghĩa các cột cho bảng dữ liệu
+  // Định nghĩa cấu trúc các cột cho bảng dữ liệu
   const columns: GridColDef[] = [
     {
       field: "id",
@@ -190,6 +191,7 @@ const PatientManagementPage: React.FC = () => {
 
   return (
     <Box sx={{ height: "100%", width: "100%", padding: 0 }}>
+      {/* Phần header với nút thêm bệnh nhân */}
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, gap: 2 }}>
         <Button
           variant="contained"
@@ -201,6 +203,7 @@ const PatientManagementPage: React.FC = () => {
         </Button>
       </Box>
 
+      {/* Bảng dữ liệu bệnh nhân */}
       <Paper sx={{ width: "100%" }}>
         <DataGrid
           rows={patients}
@@ -225,8 +228,8 @@ const PatientManagementPage: React.FC = () => {
         />
       </Paper>
 
-      {/* Using the form component for both add and edit */}
-      <AddPatientForm
+      {/* Form thêm mới/chỉnh sửa bệnh nhân */}
+      <PatientForm
         open={isFormOpen}
         onClose={handleFormClose}
         onSubmit={handleFormSubmit}
@@ -237,7 +240,7 @@ const PatientManagementPage: React.FC = () => {
   );
 };
 
-// Dữ liệu mẫu cho bệnh nhân
+// Dữ liệu mẫu cho danh sách bệnh nhân
 const mockPatients: User[] = [
   {
     id: 1,
