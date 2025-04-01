@@ -34,7 +34,7 @@ import {
   getWorkScheduleBetweenDate,
   addMultipleWorkSchedule,
 } from "../../services/authenticate/workSchedule_service";
-import { getAllShift } from "../../services/authenticate/shift_service";
+import { getShiftByStatusTrue } from "../../services/authenticate/shift_service";
 import { parse } from "date-fns/esm";
 
 interface Shift {
@@ -119,7 +119,7 @@ const DoctorSchedulePage = () => {
   useEffect(() => {
     const fetchShifts = async () => {
       try {
-        const response = await getAllShift();
+        const response = await getShiftByStatusTrue();
         if (response.data && response.data.data) {
           setShifts(response.data.data);
           console.log("Fetched shifts:", response.data.data);
