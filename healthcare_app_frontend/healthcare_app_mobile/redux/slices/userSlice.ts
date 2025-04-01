@@ -1,20 +1,23 @@
-import { createSlice } from '@reduxjs/toolkit';
-
+import { createSlice } from "@reduxjs/toolkit";
+import {
+  setUserAsyncStorage,
+  removeUserAsyncStorage,
+} from "../../utils/asyncStorage";
 const userSlice = createSlice({
-    name: "user",
-    initialState: {
-        user: null
+  name: "user",
+  initialState: {
+    user: null,
+  },
+  reducers: {
+    setUser: (state, action) => {
+      state.user = action.payload;
+      setUserAsyncStorage(action.payload);
     },
-    reducers: {
-        setUser: (state, action) => {
-            state.user = action.payload;
-            sessionStorage.setItem("user", JSON.stringify(action.payload));
-        },
-        logOut: (state) => {
-            state.user = null;
-            sessionStorage.removeItem("user");
-        }
-    }
+    logOut: (state) => {
+      state.user = null;
+      removeUserAsyncStorage();
+    },
+  },
 });
 
 export const { setUser, logOut } = userSlice.actions;

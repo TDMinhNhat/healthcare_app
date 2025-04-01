@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const hostIp = "192.168.100.8"
-const API_URL = `http://${hostIp}:8081`;
+// const hostIp = "192.168.100.8"
+const API_URL = `http://${process.env.EXPO_PUBLIC_HOST_ID}:8081`;
 const axiosConfig = axios.create({
   baseURL: API_URL,
   headers: {
