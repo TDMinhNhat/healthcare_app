@@ -30,6 +30,20 @@ export default function Layout() {
             headerShown: false,
           }}
         />
+        <Stack.Screen
+          name={"appointment-details"}
+          options={{
+            headerShown: false,
+            presentation: "card",
+          }}
+        />
+        <Stack.Screen
+          name={"waiting-room"}
+          options={{
+            headerShown: false,
+            presentation: "modal",
+          }}
+        />
       </Stack>
     </Provider>
   );
