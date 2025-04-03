@@ -148,7 +148,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
         />
       )}
 
-      {/* {activeStep === 3 && (
+      {activeStep === 3 && (
         <Box>
           <DoctorDetails doctor={selectedDoctor} />
           <Box sx={{ mt: 3 }}>
@@ -172,15 +172,15 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
             <Button
               variant="contained"
               color="primary"
-              onClick={handleConfirm}
+              onClick={handlePaymentComplete}
               disabled={loading}
             >
               {loading ? "Đang xử lý..." : "Tiến hành thanh toán"}
             </Button>
           </Box>
         </Box>
-      )} */}
-
+      )}
+      {/* 
       {activeStep === 3 && (
         <PaymentCheckout
           onPaymentComplete={handlePaymentComplete}
@@ -189,7 +189,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
           workSchedule={workSchedule}
           loading={loading}
         />
-      )}
+      )} */}
 
       {activeStep === 4 && (
         <ConfirmAppointment
