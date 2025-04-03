@@ -13,13 +13,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getAppointmentPatientDetail } from "@/services/appointment/booking_service";
-import { format } from "date-fns";
 import {
   AntDesign,
   Ionicons,
   MaterialIcons,
   FontAwesome,
 } from "@expo/vector-icons";
+import { formatTimeFromTimeString } from "@/utils/dateUtils";
 
 export default function AppointmentDetailsScreen() {
   const params = useLocalSearchParams();
@@ -32,24 +32,16 @@ export default function AppointmentDetailsScreen() {
   // Get user from Redux store
   const user = useSelector((state: any) => state.user.user);
 
-  // Format time from time string
-  const formatTimeFromTimeString = (timeStr: string): string => {
+  // Format time helper that converts "HH:MM" format to "HH-MM" for use with formatTimeFromTimeString
+  const formatTimeForDisplay = (timeStr: string): string => {
     try {
       if (!timeStr) return "00:00";
-
-      // Parse HH:mm format
-      const [hours, minutes] = timeStr.split(":").map(Number);
-
-      // Create a new date and set hours and minutes
-      const date = new Date();
-      date.setHours(hours);
-      date.setMinutes(minutes);
-
-      // Format as 12-hour time (hh:mm a)
-      return format(date, "hh:mm a");
+      // Convert HH:MM to HH-MM-00 format for the existing utility
+      const [hours, minutes] = timeStr.split(":");
+      return formatTimeFromTimeString(`${hours}-${minutes}-00`, "string");
     } catch (error) {
       console.error("Error formatting time:", error);
-      return "00:00"; // Default time if parsing fails
+      return "00:00";
     }
   };
 
@@ -147,9 +139,9 @@ export default function AppointmentDetailsScreen() {
           id: result.book_appointment.id,
           workScheduleId: result.work_schedule.id,
           date: result.work_schedule.dateAppointment,
-          time: `${formatTimeFromTimeString(
+          time: `${formatTimeForDisplay(
             result.work_schedule.shift.start
-          )} - ${formatTimeFromTimeString(result.work_schedule.shift.end)}`,
+          )} - ${formatTimeForDisplay(result.work_schedule.shift.end)}`,
           status: getStatus(result.book_appointment.status),
           patientInfo: {
             id: result.book_appointment.patientId,

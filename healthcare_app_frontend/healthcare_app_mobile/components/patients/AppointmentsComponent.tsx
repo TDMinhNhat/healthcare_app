@@ -30,6 +30,11 @@ import {
   parse,
 } from "date-fns";
 import { vi } from "date-fns/locale";
+import {
+  formatDateToString,
+  formatTime,
+  formatTimeFromTimeString,
+} from "@/utils/dateUtils";
 
 // Định nghĩa enum TypeDay - Các ngày trong tuần
 enum TypeDay {
@@ -93,43 +98,6 @@ export default function AppointmentsComponent() {
   );
   const [showDatePicker, setShowDatePicker] = useState(false); // Hiển thị date picker
   const [selectedDate, setSelectedDate] = useState(new Date()); // Ngày đã chọn
-
-  // Chuyển đổi đối tượng Date thành chuỗi định dạng dd-MM-yyyy
-  const formatDateToString = (date: Date): string => {
-    return format(date, "dd-MM-yyyy");
-  };
-
-  // Hàm hỗ trợ định dạng thời gian từ chuỗi
-  const formatTime = (time: string): string => {
-    try {
-      if (time.length <= 1) {
-        return `0${time}`; // Thêm số 0 phía trước nếu chỉ có 1 chữ số
-      } else {
-        return time;
-      }
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return time;
-    }
-  };
-
-  // Định dạng thời gian từ chuỗi dạng hh-mm-ss thành hh:mm
-  const formatTimeFromTimeString = (
-    timeString: string,
-    type: string = "string"
-  ): any => {
-    if (type === "string") {
-      const time = timeString.split("-");
-      return `${formatTime(time[0])}:${formatTime(time[1])}`;
-    } else {
-      const time = timeString.split("-");
-      const date = new Date();
-      date.setHours(parseInt(time[0]));
-      date.setMinutes(parseInt(time[1]));
-      date.setSeconds(parseInt(time[2]));
-      return date;
-    }
-  };
 
   // Lấy danh sách cuộc hẹn trong tuần hiện tại từ API
   const fetchAppointments = async () => {
@@ -393,8 +361,8 @@ export default function AppointmentsComponent() {
               BS: {appointment.doctorName.split(" ").pop()}
             </Text>
             <Text style={styles.appointmentTime}>
-              {formatTimeFromTimeString(appointment.startTime)} -{" "}
-              {formatTimeFromTimeString(appointment.endTime)}
+              {formatTimeFromTimeString(appointment.startTime, "string")} -{" "}
+              {formatTimeFromTimeString(appointment.endTime, "string")}
             </Text>
             <Text style={styles.reasonText}>
               {appointment.reason || "Không có lý do"}
