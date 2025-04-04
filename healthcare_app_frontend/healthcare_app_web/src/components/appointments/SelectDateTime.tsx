@@ -113,8 +113,9 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
           console.log(error);
           return null;
         });
-
-      setWorkSchedules(result);
+      // lọc ra lịch có status true
+      const filteredResult = result.filter((item: any) => item.status === true);
+      setWorkSchedules(filteredResult);
 
       // Kiểm tra dữ liệu trả về từ API
       if (!result || !Array.isArray(result)) {
