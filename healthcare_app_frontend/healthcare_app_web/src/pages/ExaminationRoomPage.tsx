@@ -74,20 +74,24 @@ export default function ExaminationRoomPage() {
   const [searchParams] = React.useState(
     new URLSearchParams(window.location.search)
   );
+  // Lấy tên hiển thị của bệnh nhân từ URL nếu có (bác sĩ thì không cần)
+  const patientNameFromURL = searchParams.get("patientName");
+  const userIdFromURL = searchParams.get("userId");
+
   // Sử dụng scheduleId làm roomID cho Zego
   const roomID = scheduleId;
 
   const user = useSelector((state) => state.user?.user);
-  const userId = user?.userId;
-  const userName = user?.firstName + " " + user?.lastName;
+  const userId = user?.userId || userIdFromURL; // Lấy userId từ Redux store hoặc từ URL nếu có
+  const userName =
+    user?.firstName + " " + user?.lastName ||
+    patientNameFromURL ||
+    "Người dùng";
 
   // Cập nhật: xác định vai trò người dùng từ tham số role
   const [isPatient, setIsPatient] = useState(
     searchParams.get("role") === "patient"
   );
-
-  // Lấy tên hiển thị của bệnh nhân từ URL nếu có (bác sĩ thì không cần)
-  const patientNameFromURL = searchParams.get("patientName");
 
   // State cho hàng đợi bệnh nhân
   const [patientQueue, setPatientQueue] = useState<PatientQueueItem[]>([]);
@@ -223,7 +227,8 @@ export default function ExaminationRoomPage() {
     return (
       window.location.protocol +
       "//" +
-      window.location.host +
+      // window.location.host +
+      `${import.meta.env.VITE_HOST}:5173` +
       window.location.pathname +
       "?role=patient"
     );

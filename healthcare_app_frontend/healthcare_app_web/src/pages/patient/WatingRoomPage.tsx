@@ -133,6 +133,7 @@ export default function WaitingRoomPage() {
           "patientName",
           `${numericalOrder}_${user.firstName} ${user.lastName}`
         );
+        roomLink.searchParams.append("userId", user.userId);
         const link = roomLink.toString();
         // Mở phòng khám trong tab mới
         window.open(link, "_blank");
