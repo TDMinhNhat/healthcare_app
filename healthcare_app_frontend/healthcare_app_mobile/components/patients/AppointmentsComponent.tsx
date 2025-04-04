@@ -384,9 +384,7 @@ export default function AppointmentsComponent() {
 
   // Xử lý khi nhấn nút đặt lịch mới
   const handleNewAppointment = () => {
-    // Sẽ điều hướng đến màn hình đặt lịch hẹn mới
-    // Hiện tại chỉ hiển thị thông báo
-    Alert.alert("Thông báo", "Tính năng đang được phát triển");
+    router.push("/book_appointment");
   };
 
   // Hiển thị một khoảng thời gian (sáng/chiều) của một ngày cụ thể

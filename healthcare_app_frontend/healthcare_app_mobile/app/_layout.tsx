@@ -44,6 +44,28 @@ export default function Layout() {
             presentation: "modal",
           }}
         />
+        <Stack.Screen
+          name={"book_appointment"}
+          options={{
+            title: "Đặt lịch khám bệnh",
+            headerShown: true,
+            presentation: "card",
+          }}
+        />
+        <Stack.Screen
+          name={"medical-records"}
+          options={{
+            title: "Hồ sơ bệnh án",
+            presentation: "card",
+          }}
+        />
+        <Stack.Screen
+          name={"medical-record-details"}
+          options={{
+            title: "Hồ sơ bệnh án",
+            presentation: "card",
+          }}
+        />
       </Stack>
     </Provider>
   );

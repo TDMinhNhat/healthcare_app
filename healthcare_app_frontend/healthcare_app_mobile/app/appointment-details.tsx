@@ -29,14 +29,14 @@ export default function AppointmentDetailsScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Get user from Redux store
+  // Lấy thông tin người dùng từ Redux store
   const user = useSelector((state: any) => state.user.user);
 
-  // Format time helper that converts "HH:MM" format to "HH-MM" for use with formatTimeFromTimeString
+  // Trợ giúp định dạng thời gian chuyển đổi từ định dạng "HH:MM" sang "HH-MM" để sử dụng với formatTimeFromTimeString
   const formatTimeForDisplay = (timeStr: string): string => {
     try {
       if (!timeStr) return "00:00";
-      // Convert HH:MM to HH-MM-00 format for the existing utility
+      // Chuyển đổi HH:MM sang định dạng HH-MM-00 cho tiện ích hiện tại
       const [hours, minutes] = timeStr.split(":");
       return formatTimeFromTimeString(`${hours}-${minutes}-00`, "string");
     } catch (error) {
@@ -45,7 +45,7 @@ export default function AppointmentDetailsScreen() {
     }
   };
 
-  // Convert status to display text
+  // Chuyển đổi trạng thái thành văn bản hiển thị
   const getStatus = (status: string) => {
     switch (status) {
       case "WAITING":
@@ -61,28 +61,28 @@ export default function AppointmentDetailsScreen() {
     }
   };
 
-  // Get color based on appointment status
+  // Lấy màu sắc dựa trên trạng thái lịch hẹn
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Đang chờ":
-        return "#ff9800"; // Warning/orange
+        return "#ff9800"; // Cảnh báo/màu cam
       case "Đang khám":
-        return "#4caf50"; // Success/green
+        return "#4caf50"; // Thành công/màu xanh lá
       case "Đã hoàn thành":
-        return "#2196f3"; // Info/blue
+        return "#2196f3"; // Thông tin/màu xanh dương
       case "Đã hủy":
-        return "#f44336"; // Error/red
+        return "#f44336"; // Lỗi/màu đỏ
       default:
-        return "#9e9e9e"; // Default/grey
+        return "#9e9e9e"; // Mặc định/màu xám
     }
   };
 
-  // Check if appointment is eligible for online consultation
+  // Kiểm tra xem lịch hẹn có đủ điều kiện tham gia tư vấn trực tuyến không
   const canJoinExamination = (status: string) => {
     return status === "Đang khám" || status === "Đang chờ";
   };
 
-  // Handle joining video call
+  // Xử lý tham gia cuộc gọi video
   const handleJoinExamination = () => {
     if (!appointment) return;
 
@@ -104,13 +104,27 @@ export default function AppointmentDetailsScreen() {
     }
   };
 
-  // Handle viewing medical record
+  /**
+   * Xử lý xem hồ sơ bệnh án
+   * Điều hướng đến màn hình chi tiết hồ sơ bệnh án khi người dùng nhấn vào nút "Hồ sơ bệnh án"
+   */
   const handleViewMedicalRecord = () => {
-    Alert.alert(
-      "Thông báo",
-      "Tính năng xem hồ sơ bệnh án đang được phát triển.",
-      [{ text: "Đóng" }]
-    );
+    if (!appointment) return;
+
+    try {
+      router.push({
+        pathname: "/medical-record-details",
+        params: {
+          appointmentId: appointment.id, // ID cuộc hẹn để lấy thông tin hồ sơ bệnh án
+          patientId: appointment.patientInfo.id, // ID bệnh nhân để lấy lịch sử khám bệnh
+          doctorName: appointment.doctorInfo.name, // Tên bác sĩ
+          dateAppointment: appointment.date, // Ngày khám
+        },
+      });
+    } catch (error) {
+      console.error("Navigation error:", error);
+      Alert.alert("Lỗi", "Không thể mở hồ sơ bệnh án.", [{ text: "Đóng" }]);
+    }
   };
 
   useEffect(() => {
@@ -155,7 +169,7 @@ export default function AppointmentDetailsScreen() {
             specialization:
               result.work_schedule.doctor.specialization || "Bác sĩ",
           },
-          hasMedicalRecord: true, // Assuming this for now
+          hasMedicalRecord: true, // Giả định điều này hiện tại
         };
 
         setAppointment(data);
@@ -170,7 +184,7 @@ export default function AppointmentDetailsScreen() {
     fetchAppointmentDetails();
   }, [appointmentId, user]);
 
-  // Render loading state
+  // Hiển thị trạng thái đang tải
   if (loading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
@@ -180,7 +194,7 @@ export default function AppointmentDetailsScreen() {
     );
   }
 
-  // Render error state
+  // Hiển thị trạng thái lỗi
   if (error || !appointment) {
     return (
       <SafeAreaView style={styles.errorContainer}>
@@ -199,7 +213,7 @@ export default function AppointmentDetailsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      {/* Header */}
+      {/* Tiêu đề */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -212,7 +226,7 @@ export default function AppointmentDetailsScreen() {
       </View>
 
       <ScrollView style={styles.scrollView}>
-        {/* Appointment Status Card */}
+        {/* Thẻ trạng thái lịch hẹn */}
         <View style={styles.card}>
           <View style={styles.appointmentHeader}>
             <Text style={styles.cardTitle}>
@@ -228,14 +242,14 @@ export default function AppointmentDetailsScreen() {
             </View>
           </View>
 
-          {/* Appointment numerical order */}
+          {/* Số thứ tự khám */}
           <View style={styles.numericalOrderContainer}>
             <Text style={styles.numericalOrderText}>
               Số Thứ Tự Khám: {appointment.patientInfo.numericalOrder}
             </Text>
           </View>
 
-          {/* Appointment details */}
+          {/* Chi tiết lịch hẹn */}
           <View style={styles.detailRow}>
             <Ionicons name="calendar" size={22} color="#2196f3" />
             <View style={styles.detailTextContainer}>
@@ -259,7 +273,7 @@ export default function AppointmentDetailsScreen() {
             </Text>
           </View>
 
-          {/* Action buttons */}
+          {/* Nút hành động */}
           <View style={styles.actionContainer}>
             {canJoinExamination(appointment.status) && (
               <TouchableOpacity
@@ -282,7 +296,7 @@ export default function AppointmentDetailsScreen() {
           </View>
         </View>
 
-        {/* Doctor Information Card */}
+        {/* Thẻ thông tin bác sĩ */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Thông tin bác sĩ phụ trách</Text>
 
@@ -314,7 +328,7 @@ export default function AppointmentDetailsScreen() {
           </View>
         </View>
 
-        {/* Important Notes */}
+        {/* Lưu ý quan trọng */}
         <View style={styles.notesCard}>
           <Text style={styles.notesTitle}>Lưu ý quan trọng:</Text>
 
