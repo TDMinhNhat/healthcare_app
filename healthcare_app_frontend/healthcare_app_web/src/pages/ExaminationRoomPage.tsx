@@ -20,6 +20,7 @@ import DoneIcon from "@mui/icons-material/Done";
 import { getAppointmentPatientDetail } from "./../services/appointment/booking_service";
 import { ROUTING } from "../constants/routing";
 import MedicalRecordModal from "../components/medical/MedicalRecordModal";
+import { set } from "date-fns";
 
 // Giao diện cho bệnh nhân trong hàng đợi
 interface PatientQueueItem {
@@ -385,8 +386,6 @@ export default function ExaminationRoomPage() {
           showPreJoinView: false,
           showLeavingView: false,
           onLeaveRoom() {
-            // bác sĩ rời phòng khám thì đóng luôn tab đang mở hiện tại
-            window.close();
             // gửi sự kiện bác sĩ rời khỏi phòng khám
             // socket.emit("doctorLeaveRoom", {
             //   scheduleId,
@@ -394,12 +393,19 @@ export default function ExaminationRoomPage() {
             // });
             console.log("You have left the room");
             socket.disconnect();
+            // setTimeout để thư viện nó xoá được user trong room
+            setTimeout(() => {
+              window.close();
+            }, 500);
           },
           // bác sĩ xoá bệnh nhân ra khỏi phòng dợi
           onYouRemovedFromRoom() {
             console.log("You have been removed from the room");
             socket.disconnect();
-            navigate(`${ROUTING.PATIENT}/${ROUTING.APPOINTMENTS}`);
+            // setTimeout để thư viện nó xoá được user trong room
+            setTimeout(() => {
+              window.close();
+            }, 500);
           },
         });
 

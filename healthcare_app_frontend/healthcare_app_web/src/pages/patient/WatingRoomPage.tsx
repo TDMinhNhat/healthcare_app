@@ -135,6 +135,7 @@ export default function WaitingRoomPage() {
         );
         roomLink.searchParams.append("userId", user.userId);
         const link = roomLink.toString();
+        console.log("Link to the room:", link);
         // Mở phòng khám trong tab mới
         window.open(link, "_blank");
         // Chuyển tab hiện tại về trang dashboard của bệnh nhân
