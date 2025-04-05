@@ -26,7 +26,7 @@ const PaymentCheckout = () => {
   const workScheduleId = parseInt(params.workScheduleId as string, 10);
   const userId = params.userId as string;
   const doctorName = params.doctorName as string;
-  const service = params.service as string;
+  const serviceName = params.serviceName as string;
   const dateAppointment = params.dateAppointment as string;
   const timeAppointment = params.timeAppointment as string;
 
@@ -52,7 +52,7 @@ const PaymentCheckout = () => {
         pathname: "/book_appointment/confirmation",
         params: {
           doctorName: doctorName,
-          service: service,
+          serviceName: serviceName,
           dateAppointment: dateAppointment,
           timeAppointment: timeAppointment,
         },

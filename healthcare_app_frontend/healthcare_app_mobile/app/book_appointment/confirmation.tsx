@@ -19,7 +19,7 @@ const AppointmentConfirmation = () => {
 
   // Lấy thông tin chi tiết lịch hẹn từ params
   const doctorName = params.doctorName as string; // Tên bác sĩ
-  const service = params.service as string; // Dịch vụ khám
+  const serviceName = params.serviceName as string; // Dịch vụ khám
   const dateAppointment = params.dateAppointment as string; // Ngày khám
   const timeAppointment = params.timeAppointment as string; // Giờ khám
 
@@ -59,7 +59,7 @@ const AppointmentConfirmation = () => {
           <View style={styles.detailRow}>
             <MaterialIcons name="medical-services" size={20} color="#26b9c8" />
             <Text style={styles.detailLabel}>Dịch vụ:</Text>
-            <Text style={styles.detailValue}>{service}</Text>
+            <Text style={styles.detailValue}>{serviceName}</Text>
           </View>
 
           <View style={styles.detailRow}>
@@ -73,13 +73,6 @@ const AppointmentConfirmation = () => {
             <Text style={styles.detailLabel}>Giờ khám:</Text>
             <Text style={styles.detailValue}>{timeAppointment}</Text>
           </View>
-        </View>
-
-        <View style={styles.reminderContainer}>
-          <MaterialIcons name="notifications" size={24} color="#26b9c8" />
-          <Text style={styles.reminderText}>
-            Bạn sẽ nhận được thông báo nhắc lịch trước thời gian khám 24 giờ.
-          </Text>
         </View>
       </ScrollView>
 
@@ -152,7 +145,7 @@ const styles = StyleSheet.create({
   detailLabel: {
     fontSize: 15,
     color: "#555",
-    marginLeft: 10,
+    marginLeft: 14,
     width: 90,
   },
   detailValue: {
