@@ -6,6 +6,7 @@ import {
   ListItemText,
   Divider,
   ListItemButton,
+  Badge,
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import EventNoteIcon from "@mui/icons-material/EventNote";
@@ -14,6 +15,7 @@ import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import ChatIcon from "@mui/icons-material/Chat";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import EmergencyIcon from "@mui/icons-material/LocalHospital";
 import { Outlet, useNavigate } from "react-router";
 
 interface DoctorLayoutProps {
@@ -23,6 +25,7 @@ interface DoctorLayoutProps {
 export default function DoctorLayout() {
   const navigate = useNavigate();
   const [currentTitle, setCurrentTitle] = useState("Dashboard");
+  const [emergencyCount, setEmergencyCount] = useState(0); // For emergency notification count
 
   const titleMap: Record<string, string> = {
     "/doctor/dashboard": "Dashboard",
@@ -30,6 +33,7 @@ export default function DoctorLayout() {
     "/doctor/schedule": "Schedule",
     "/doctor/current-schedule": "Current Schedule",
     "/doctor/prescriptions": "Prescriptions",
+    "/doctor/emergency": "Emergency Cases",
   };
 
   const handleNavigation = (path: string) => {
@@ -46,20 +50,14 @@ export default function DoctorLayout() {
           </ListItemIcon>
           <ListItemText primary="Thống kê" />
         </ListItemButton>
-        {/* <ListItemButton
-          onClick={() => handleNavigation("/doctor/appointments")}
-        >
-          <ListItemIcon>
-            <EventNoteIcon />
-          </ListItemIcon>
-          <ListItemText primary="Appointments" />
-        </ListItemButton> */}
+
         <ListItemButton onClick={() => handleNavigation("/doctor/schedule")}>
           <ListItemIcon>
             <CalendarMonthIcon />
           </ListItemIcon>
           <ListItemText primary="Thêm lịch khám" />
         </ListItemButton>
+
         <ListItemButton
           onClick={() => handleNavigation("/doctor/current-schedule")}
         >
@@ -68,12 +66,15 @@ export default function DoctorLayout() {
           </ListItemIcon>
           <ListItemText primary="Xem lịch khám" />
         </ListItemButton>
-        {/* <ListItemButton onClick={() => handleNavigation("/doctor/patients")}>
+
+        <ListItemButton onClick={() => handleNavigation("/doctor/emergency")}>
           <ListItemIcon>
-            <PersonIcon />
+            <Badge badgeContent={emergencyCount} color="error">
+              <EmergencyIcon />
+            </Badge>
           </ListItemIcon>
-          <ListItemText primary="My Patients" />
-        </ListItemButton> */}
+          <ListItemText primary="Cấp cứu" />
+        </ListItemButton>
       </List>
       <Divider />
       <List>

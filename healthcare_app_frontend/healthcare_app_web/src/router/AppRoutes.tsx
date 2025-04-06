@@ -7,6 +7,7 @@ import DoctorProfilePage from "../pages/doctor/DoctorProfilePage";
 import MedicalRecordPage from "../pages/doctor/MedicalRecordPage";
 import DoctorAppointmentDetailsPage from "../pages/doctor/DoctorAppointmentDetailsPage";
 import PatientAppointmentDetailsPage from "../pages/patient/PatientAppointmentDetailsPage";
+import EmergencyPage from "../pages/doctor/EmergencyPage"; // Import the new EmergencyPage
 
 // Import layout components
 import AdminLayout from "../layouts/AdminLayout";
@@ -73,6 +74,7 @@ export const AppRoutes = () => {
               path={ROUTING.CURRENT_SCHEDULE}
               element={<DoctorCurrentSchedulePage />}
             />
+            <Route path={ROUTING.EMERGENCY} element={<EmergencyPage />} />
             <Route path={ROUTING.PATIENTS} element={<div>Patients</div>} />
             <Route
               path={ROUTING.PRESCRIPTIONS}

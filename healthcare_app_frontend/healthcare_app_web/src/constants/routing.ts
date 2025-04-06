@@ -27,6 +27,7 @@ export const ROUTING = {
   SCHEDULE: "schedule",
   CURRENT_SCHEDULE: "current-schedule",
   MEDICAL_RECORDS: "medical-records", // This will be used for both doctor and patient
+  EMERGENCY: "emergency", // New route for emergency cases
 
   // Patient routes (nested under /patient)
   FIND_DOCTOR: "find-doctor",

@@ -64,7 +64,6 @@ const PatientMedicalRecord: React.FC = () => {
   const [medicalRecords, setMedicalRecords] = useState<any[]>([]);
   const [recordsLoading, setRecordsLoading] = useState<boolean>(true);
   const [recordsError, setRecordsError] = useState<string | null>(null);
-
   const [expandedRecords, setExpandedRecords] = useState<number[]>([]);
 
   useEffect(() => {
