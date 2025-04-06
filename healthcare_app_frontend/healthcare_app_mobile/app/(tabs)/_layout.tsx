@@ -56,7 +56,7 @@ export default function TabLayout() {
           href: "/(tabs)/appointments",
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name={"work_schedule"}
         options={{
           headerShown: false,
@@ -70,20 +70,20 @@ export default function TabLayout() {
           title: "Lịch Làm Việc",
           href: user.role === "doctor" ? "/(tabs)/work_schedule" : null,
         }}
-      />
+      /> */}
       <Tabs.Screen
-        name={"emergency"}
+        name={"medical-records"}
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons
               name="local-hospital"
               size={28}
-              color={tab === "emergency" ? "#26b9c8" : "black"}
+              color={tab === "medical-records" ? "#26b9c8" : "black"}
             />
           ),
-          title: "Cấp Cứu",
-          href: user.role === "patient" ? "/(tabs)/emergency" : null,
+          title: "Hồ Sơ Bệnh Án",
+          href: "/(tabs)/medical-records",
         }}
       />
       <Tabs.Screen

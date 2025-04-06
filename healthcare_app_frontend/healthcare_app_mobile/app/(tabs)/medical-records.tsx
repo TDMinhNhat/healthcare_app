@@ -12,10 +12,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
 import { useLocalSearchParams } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { getAllMedicalRecord } from "../services/appointment/medical_record_service";
-import { formatCreatedAtDate } from "../utils/dateUtils";
-import { MedicalHistoryRecord, ApiDrug } from "../types/medical";
-import { User } from "../types/user";
+import { getAllMedicalRecord } from "../../services/appointment/medical_record_service";
+import { formatCreatedAtDate } from "../../utils/dateUtils";
+import { MedicalHistoryRecord, ApiDrug } from "../../types/medical";
+import { User } from "../../types/user";
 
 /**
  * Màn hình hiển thị lịch sử khám bệnh đầy đủ của bệnh nhân

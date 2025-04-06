@@ -52,10 +52,18 @@ export default function Layout() {
             presentation: "card",
           }}
         />
-        <Stack.Screen
+        {/* <Stack.Screen
           name={"medical-records"}
           options={{
             title: "Hồ sơ bệnh án",
+            presentation: "card",
+          }}
+        /> */}
+        <Stack.Screen
+          name={"emergency"}
+          options={{
+            title: "Cấp cứu",
+            headerShown: true,
             presentation: "card",
           }}
         />
