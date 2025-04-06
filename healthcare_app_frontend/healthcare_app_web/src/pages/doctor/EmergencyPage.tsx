@@ -4,19 +4,25 @@ import {
   Typography,
   Container,
   Grid,
-  Card,
-  CardContent,
-  CardActionArea,
-  Avatar,
   Divider,
   CircularProgress,
   Alert,
   Paper,
-  Button,
   Chip,
-  TextField,
   InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
 } from "@mui/material";
+import {
+  DataGrid,
+  GridColDef,
+  GridRenderCellParams,
+  GridToolbar,
+} from "@mui/x-data-grid";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -26,6 +32,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import PatientMedicalRecordModal from "../../components/emergency/PatientMedicalRecordModal";
 import { User } from "../../types/user";
+import { Avatar } from "@mui/material";
 
 // Dữ liệu giả lập cho bệnh nhân cấp cứu
 const mockEmergencyPatients: (User & { received?: boolean })[] = [
@@ -78,6 +85,7 @@ const mockEmergencyPatients: (User & { received?: boolean })[] = [
     // Chưa tiếp nhận
   },
   {},
+  {},
 ];
 
 // Hàm API giả lập - sẽ được thay thế bằng dịch vụ thực tế
@@ -99,6 +107,15 @@ const EmergencyPage: React.FC = () => {
   const [selectedPatient, setSelectedPatient] = useState<User | null>(null);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // Mặc định là hôm nay
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    patientId: string;
+    patientName: string;
+  }>({
+    open: false,
+    patientId: "",
+    patientName: "",
+  });
 
   useEffect(() => {
     loadEmergencyPatients();
@@ -139,11 +156,35 @@ const EmergencyPage: React.FC = () => {
   const handleReceivePatient = (event: React.MouseEvent, patientId: string) => {
     event.stopPropagation(); // Ngăn chặn sự kiện click trên thẻ
 
+    // Tìm thông tin bệnh nhân để hiển thị trong dialog
+    const patient = patients.find((p) => p.userId === patientId);
+    const patientName = patient
+      ? `${patient.lastName || ""} ${patient.firstName || ""}`.trim() ||
+        "bệnh nhân này"
+      : "bệnh nhân này";
+
+    setConfirmDialog({
+      open: true,
+      patientId,
+      patientName,
+    });
+  };
+
+  // Xử lý xác nhận tiếp nhận
+  const handleConfirmReceive = () => {
     setPatients((prevPatients) =>
       prevPatients.map((patient) =>
-        patient.userId === patientId ? { ...patient, received: true } : patient
+        patient.userId === confirmDialog.patientId
+          ? { ...patient, received: true }
+          : patient
       )
     );
+    setConfirmDialog({ ...confirmDialog, open: false });
+  };
+
+  // Đóng dialog xác nhận
+  const handleCloseConfirm = () => {
+    setConfirmDialog({ ...confirmDialog, open: false });
   };
 
   // Tính tuổi từ ngày sinh
@@ -170,6 +211,100 @@ const EmergencyPage: React.FC = () => {
       setSelectedDate(date);
     }
   };
+
+  // Định nghĩa cấu trúc các cột cho bảng dữ liệu
+  const columns: GridColDef[] = [
+    {
+      field: "avatar",
+      headerName: "Ảnh",
+      width: 70,
+      renderCell: (params: GridRenderCellParams) => (
+        <Avatar src={(params.value as string) || "/default-avatar.png"} />
+      ),
+      sortable: false,
+    },
+    {
+      field: "lastName",
+      headerName: "Họ",
+      width: 120,
+      flex: 0.8,
+      renderCell: (params: GridRenderCellParams) =>
+        params.value || "Không xác định",
+    },
+    {
+      field: "firstName",
+      headerName: "Tên",
+      width: 100,
+      flex: 0.8,
+      renderCell: (params: GridRenderCellParams) =>
+        params.value || "Không xác định",
+    },
+    {
+      field: "userId",
+      headerName: "Mã BN",
+      width: 100,
+      renderCell: (params: GridRenderCellParams) =>
+        params.value || "Không xác định",
+    },
+    {
+      field: "sex",
+      headerName: "Giới tính",
+      width: 100,
+      renderCell: (params: GridRenderCellParams) =>
+        params.value !== undefined ? (
+          <Chip
+            label={params.value ? "Nam" : "Nữ"}
+            color={params.value ? "info" : "secondary"}
+            size="small"
+          />
+        ) : (
+          "Không xác định"
+        ),
+    },
+    {
+      field: "dob",
+      headerName: "Tuổi",
+      width: 80,
+      renderCell: (params: GridRenderCellParams) =>
+        params.value ? calculateAge(params.value as string) : "N/A",
+    },
+    {
+      field: "phone",
+      headerName: "SĐT",
+      width: 120,
+      renderCell: (params: GridRenderCellParams) =>
+        params.value || "Không xác định",
+    },
+    {
+      field: "address",
+      headerName: "Địa chỉ",
+      width: 200,
+      flex: 1,
+      renderCell: (params: GridRenderCellParams) =>
+        params.value || "Không xác định",
+    },
+    {
+      field: "received",
+      headerName: "Trạng thái",
+      width: 150,
+      renderCell: (params: GridRenderCellParams) => (
+        <Chip
+          label={params.value ? "Đã tiếp nhận" : "Chưa tiếp nhận"}
+          color={params.value ? "success" : "warning"}
+          icon={params.value ? <CheckCircleIcon /> : <PersonAddAlt1Icon />}
+          size="small"
+          onClick={
+            !params.value && params.row.userId
+              ? (event) => handleReceivePatient(event, params.row.userId)
+              : undefined
+          }
+          sx={{
+            cursor: !params.value && params.row.userId ? "pointer" : "default",
+          }}
+        />
+      ),
+    },
+  ];
 
   return (
     <Container maxWidth="xl">
@@ -245,203 +380,39 @@ const EmergencyPage: React.FC = () => {
             {error}
           </Alert>
         ) : (
-          <Grid container spacing={{ xs: 2, md: 3 }}>
-            {patients.length === 0 ? (
-              <Grid item xs={12}>
-                <Card
-                  elevation={2}
-                  sx={{
-                    borderRadius: 2,
-                    p: 4,
-                    textAlign: "center",
-                  }}
-                >
-                  <Typography variant="body1">
-                    Không có bệnh nhân cấp cứu nào.
-                  </Typography>
-                </Card>
-              </Grid>
-            ) : (
-              patients.map((patient) => (
-                <Grid
-                  item
-                  xs={12}
-                  sm={6}
-                  md={4}
-                  lg={3}
-                  key={patient.userId || `unknown-${Math.random()}`}
-                >
-                  <Card
-                    elevation={2}
-                    sx={{
-                      borderRadius: 2,
-                      height: "100%",
-                      transition: "transform 0.2s, box-shadow 0.2s",
-                      "&:hover": {
-                        transform: "translateY(-4px)",
-                        boxShadow: 8,
-                      },
-                      // position: "relative",
-                      display: "flex",
-                      flexDirection: "column",
-                    }}
-                  >
-                    <CardActionArea
-                      onClick={() => handlePatientClick(patient)}
-                      sx={{
-                        height: "100%",
-                        display: "flex",
-                        flexDirection: "column",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          p: 2,
-                          pb: 0, // Luôn đặt padding bottom là 0 vì chúng ta có khu vực nút/trạng thái bên dưới
-                          display: "flex",
-                          flexDirection: "column",
-                          height: "100%",
-                        }}
-                      >
-                        {/* Thông tin tiêu đề bệnh nhân với avatar và tên */}
-                        <Box
-                          sx={{
-                            display: "flex",
-                            mb: 1.5,
-                            alignItems: "center",
-                          }}
-                        >
-                          <Avatar
-                            src={patient.avatar || ""}
-                            alt={`${patient.lastName || ""} ${
-                              patient.firstName || ""
-                            }`}
-                            sx={{
-                              width: 56,
-                              height: 56,
-                              mr: 2,
-                              border: "1px solid #eee",
-                            }}
-                          />
-                          <Box sx={{ minWidth: 0, flexGrow: 1 }}>
-                            <Typography
-                              variant="subtitle1"
-                              fontWeight="bold"
-                              noWrap
-                            >
-                              {patient.lastName || ""} {patient.firstName || ""}
-                              {!patient.lastName &&
-                                !patient.firstName &&
-                                "Không xác định"}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              ID: {patient.userId || "Không xác định"}
-                            </Typography>
-                          </Box>
-                        </Box>
-
-                        {/* Chi tiết bệnh nhân - gọn hơn */}
-                        <Box sx={{ mb: 1 }}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              gap: 2, // Thêm khoảng cách giữa các mục
-                              mb: 0.5,
-                            }}
-                          >
-                            <Typography
-                              variant="body2"
-                              component="div"
-                              sx={{ minWidth: "80px" }}
-                            >
-                              <strong>Tuổi:</strong>{" "}
-                              {patient.dob
-                                ? calculateAge(patient.dob)
-                                : "Không xác định"}
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              component="div"
-                              sx={{ minWidth: "80px" }}
-                            >
-                              <strong>Giới tính:</strong>{" "}
-                              {patient.sex !== undefined
-                                ? patient.sex
-                                  ? "Nam"
-                                  : "Nữ"
-                                : "Không xác định"}
-                            </Typography>
-                          </Box>
-
-                          <Typography variant="body2" sx={{ mb: 0.5 }}>
-                            <strong>SĐT:</strong>{" "}
-                            {patient.phone || "Không xác định"}
-                          </Typography>
-
-                          <Typography variant="body2" noWrap>
-                            <strong>Địa chỉ:</strong>{" "}
-                            {patient.address || "Không xác định"}
-                          </Typography>
-                        </Box>
-                      </Box>
-
-                      {/* Thay thế nút điều kiện bằng container luôn hiển thị */}
-                      <Box
-                        sx={{
-                          mt: "auto",
-                          px: 2,
-                          py: 1.5,
-                          bgcolor: "rgba(0,0,0,0.02)",
-                          borderTop: "1px solid rgba(0,0,0,0.05)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        {patient.received ? (
-                          // Hiển thị trạng thái đã tiếp nhận thay vì nút
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              color: "success.main",
-                              fontWeight: 500,
-                            }}
-                          >
-                            <CheckCircleIcon
-                              fontSize="small"
-                              sx={{ mr: 0.5 }}
-                            />
-                            <Typography variant="body2" fontWeight="medium">
-                              Đã tiếp nhận
-                            </Typography>
-                          </Box>
-                        ) : (
-                          // Hiển thị nút tiếp nhận cho bệnh nhân chưa tiếp nhận
-                          patient.userId && (
-                            <Button
-                              variant="contained"
-                              color="success"
-                              size="small"
-                              startIcon={<PersonAddAlt1Icon />}
-                              onClick={(e) =>
-                                handleReceivePatient(e, patient.userId || "")
-                              }
-                              fullWidth
-                              sx={{ fontWeight: 500 }}
-                            >
-                              Tiếp nhận
-                            </Button>
-                          )
-                        )}
-                      </Box>
-                    </CardActionArea>
-                  </Card>
-                </Grid>
-              ))
-            )}
-          </Grid>
+          <Box sx={{ height: 500, width: "100%" }}>
+            <DataGrid
+              rows={patients.map((p, index) => ({
+                ...p,
+                id: p.userId || `unknown-${index}`,
+              }))}
+              columns={columns}
+              pageSizeOptions={[5, 10, 25, 50, 100]}
+              slots={{
+                toolbar: GridToolbar,
+              }}
+              slotProps={{
+                toolbar: {
+                  showQuickFilter: true, // search
+                  // tắt export
+                  printOptions: { disableToolbarButton: true },
+                  csvOptions: { disableToolbarButton: true },
+                  quickFilterProps: { debounceMs: 500 },
+                },
+              }}
+              // tắt mấy filter khác
+              disableRowSelectionOnClick
+              disableColumnFilter={true}
+              disableDensitySelector={true}
+              disableColumnSelector={true}
+              onRowClick={(params) => {
+                // Chỉ mở modal cho bệnh nhân có thông tin xác định (có userId)
+                if (params.row.userId) {
+                  handlePatientClick(params.row);
+                }
+              }}
+            />
+          </Box>
         )}
       </Paper>
 
@@ -450,6 +421,36 @@ const EmergencyPage: React.FC = () => {
         onClose={handleCloseModal}
         patient={selectedPatient}
       />
+
+      {/* Dialog xác nhận tiếp nhận */}
+      <Dialog
+        open={confirmDialog.open}
+        onClose={handleCloseConfirm}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Xác nhận tiếp nhận bệnh nhân"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Bạn có chắc chắn muốn tiếp nhận {confirmDialog.patientName}?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirm} color="inherit">
+            Hủy
+          </Button>
+          <Button
+            onClick={handleConfirmReceive}
+            color="primary"
+            variant="contained"
+            autoFocus
+          >
+            Xác nhận tiếp nhận
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
