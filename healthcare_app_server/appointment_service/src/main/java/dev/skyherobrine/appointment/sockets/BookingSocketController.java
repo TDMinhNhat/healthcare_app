@@ -30,7 +30,7 @@ public class BookingSocketController {
     }
 
     @MessageMapping("/check_payment")
-    public void checkPayment(String data) {
+    public void checkPaymentBookAppointment(String data) {
         try {
             log.info("Booking Socket: listen the request check payment");
             log.info("Booking Socket: data: " + data);
