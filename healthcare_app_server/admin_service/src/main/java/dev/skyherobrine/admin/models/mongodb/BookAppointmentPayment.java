@@ -11,8 +11,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class BookAppointmentPayment extends Payment {
     private String bookAppointmentId;
 
-    public BookAppointmentPayment(Long id, String userId, Double price, String content, String bookAppointmentId) {
-        super(id, userId, price, content);
+    public BookAppointmentPayment(Long id, Double price, String content, String bookAppointmentId) {
+        super(id, price, content);
         this.bookAppointmentId = bookAppointmentId;
     }
 }
