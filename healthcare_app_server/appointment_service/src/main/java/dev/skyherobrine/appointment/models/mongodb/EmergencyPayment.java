@@ -13,9 +13,11 @@ import java.time.LocalDateTime;
 public class EmergencyPayment extends Payment{
 
     private LocalDateTime emergencyTime;
+    private String patientId;
 
-    public EmergencyPayment(Long id, String userId, Double price, String content) {
-        super(id, userId, price, content);
+    public EmergencyPayment(Long id, Double price, String content, String patientId) {
+        super(id, price, content);
+        this.patientId = patientId;
         this.emergencyTime = LocalDateTime.now();
     }
 }
