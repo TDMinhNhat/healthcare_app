@@ -49,8 +49,6 @@ class KafkaConsumer(threading.Thread):
         match topic:
             case "insert_user":
                 self.__insert_user__(data)
-            case "insert_type_detect":
-                self.__insert_type_detect__(data)
             case _:
                 print("There're no matched topic")
 
@@ -60,22 +58,9 @@ class KafkaConsumer(threading.Thread):
 
             user = User(
                 user_id = data_json['userId'],
-                face_detect_data = data_json['faceImageEncode']
+                face_encode_value = data_json['faceEncodeValue']
             )
 
             user.save()
-        except Exception as e:
-            print(f"Exception: {e}")
-
-    def __insert_type_detect__(self, data) -> None:
-        try:
-            data_json = json.loads(data)
-
-            type_detect = TypeDetect(
-                type_name = data_json["typeName"]
-            )
-
-            type_detect.save()
-
         except Exception as e:
             print(f"Exception: {e}")
