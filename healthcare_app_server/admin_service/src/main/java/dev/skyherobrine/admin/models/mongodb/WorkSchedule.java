@@ -1,7 +1,6 @@
 package dev.skyherobrine.admin.models.mongodb;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import dev.skyherobrine.admin.enums.TypeDay;
 import dev.skyherobrine.admin.models.mariadb.Doctor;
 import dev.skyherobrine.admin.models.mariadb.Shift;
 import lombok.*;
@@ -27,9 +26,9 @@ public class WorkSchedule {
     @Field(name = "date_appointment")
     private LocalDate dateAppointment;
     @Field(name = "created_at")
-    private String createdAt;
+    private LocalDateTime createdAt;
     @Field(name = "updated_at")
-    private String updatedAt;
+    private LocalDateTime updatedAt;
     private boolean status;
 
     public WorkSchedule(Long id, Doctor doctor, Shift shift, int maxSlots, String dateAppointment) {
@@ -38,7 +37,7 @@ public class WorkSchedule {
         this.shift = shift;
         this.maxSlots = maxSlots;
         this.dateAppointment = LocalDate.parse(dateAppointment, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-        this.createdAt = this.updatedAt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss"));
+        this.createdAt = this.updatedAt = LocalDateTime.now();
         this.status = true;
     }
 }
