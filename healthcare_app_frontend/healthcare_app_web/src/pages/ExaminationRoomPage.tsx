@@ -100,10 +100,13 @@ export default function ExaminationRoomPage() {
   // Thêm trạng thái để theo dõi nếu phòng đã được khởi tạo
   const [isRoomInitialized, setIsRoomInitialized] = useState<boolean>(false);
 
-  // Trạng thái cho bệnh nhân đang khám hiện tại
+  // Trạng thái cho bệnh nhân đang khám hiện tại. hiển thị UI bệnh nhân đang khám
   const [currentPatient, setCurrentPatient] = useState<PatientQueueItem | null>(
     null
   );
+  // Để sử dụng cho callback onUserJoin
+  // Để đồng bộ giữa việc bệnh nhân vào phòng và hiển thị UI.
+  const [isShowCurrentPatient, setIsShowCurrentPatient] = useState(false);
   // Trạng thái cho modal hồ sơ y tế
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<
@@ -116,7 +119,7 @@ export default function ExaminationRoomPage() {
 
   // Kết nối socket cho giao tiếp thời gian thực
   const [socket, setSocket] = useState<Socket>(
-    io("ws://localhost:8081", {
+    io(`ws://${import.meta.env.VITE_HOST}:8081`, {
       path: "/chat",
       transports: ["websocket", "polling"],
       reconnection: true,
@@ -163,14 +166,12 @@ export default function ExaminationRoomPage() {
         };
         fetchAppointmentDetails();
 
-        // Lắng nghe sự kiện bác sĩ đã khám xong.
         socket.on("patientDone", (data) => {
-          if (data.currentPatient.userId === userId) {
-            console.log("Đã khám xong, chuyển về trang lịch hẹn");
-            // navigate(`${ROUTING.PATIENT}/${ROUTING.APPOINTMENTS}`);
-            window.close();
-            socket.disconnect();
-          }
+          console.log("Bác sĩ đã hoàn tất khám bệnh:", data);
+
+          // Solution 2: Try delayed disconnect and close
+          // socket.disconnect();
+          // window.close();
         });
 
         // Lắng nghe sự kiện bác sĩ rời khỏi phòng khám
@@ -188,6 +189,15 @@ export default function ExaminationRoomPage() {
 
         // Chỉ bác sĩ mới cần yêu cầu danh sách hàng đợi bệnh nhân
         socket.emit("getPatientQueue", { scheduleId });
+
+        // Lắng nghe sự kiện khi bệnh nhân huỷ tham gia hàng đợi
+        socket.on("cancelWaitingQueue", (data) => {
+          console.log("Bệnh nhân huỷ tham gia:", data);
+          // Xoá bệnh nhân khỏi hàng đợi
+          setPatientQueue((prevQueue) =>
+            prevQueue.filter((patient) => patient.userId !== data.userId)
+          );
+        });
       }
     });
 
@@ -221,7 +231,15 @@ export default function ExaminationRoomPage() {
     return () => {
       socket.disconnect();
     };
-  }, [scheduleId, userId, isPatient, patientNameFromURL, userName, navigate]);
+  }, [
+    scheduleId,
+    userId,
+    isPatient,
+    patientNameFromURL,
+    userName,
+    navigate,
+    socket,
+  ]);
 
   // Tạo đường link phòng khám cho bệnh nhân sử dụng role thay vì roomID
   const generateRoomLink = () => {
@@ -246,6 +264,7 @@ export default function ExaminationRoomPage() {
     // Set current patient in examination
     setCurrentPatient(patient);
     console.log("Patient accepted:", patient);
+
     // Set appointment ID for medical record
     // Vấn đề ở đây - cần đảm bảo chúng ta đang đặt một appointmentId hợp lệ
     // Nếu bệnh nhân có thuộc tính bookAppointmentId, sử dụng nó; nếu không thì dùng userId làm phương án dự phòng
@@ -369,7 +388,6 @@ export default function ExaminationRoomPage() {
           console.error("Failed to create ZegoUIKitPrebuilt instance");
           return;
         }
-
         // Bắt đầu cuộc gọi
         zp.joinRoom({
           container: element,
@@ -382,9 +400,11 @@ export default function ExaminationRoomPage() {
           scenario: {
             mode: ZegoUIKitPrebuilt.GroupCall,
           },
+          maxUsers: 2,
           showRemoveUserButton: !isPatient,
           showPreJoinView: false,
           showLeavingView: false,
+          // tự ra khỏi phòng
           onLeaveRoom() {
             // gửi sự kiện bác sĩ rời khỏi phòng khám
             // socket.emit("doctorLeaveRoom", {
@@ -398,17 +418,25 @@ export default function ExaminationRoomPage() {
               window.close();
             }, 500);
           },
-          // bác sĩ xoá bệnh nhân ra khỏi phòng dợi
+          // bệnh nhân bị xoá khỏi phòng (run khi bạn bị xoá khỏi phòng)
           onYouRemovedFromRoom() {
             console.log("You have been removed from the room");
             socket.disconnect();
-            // setTimeout để thư viện nó xoá được user trong room
             setTimeout(() => {
               window.close();
             }, 500);
           },
+          onUserJoin: (userList) => {
+            console.log("User joined:", userList);
+            setIsShowCurrentPatient(true);
+          },
+          // khi bệnh nhân rời khỏi phòng thì set null cho currentPatient
+          onUserLeave: (userList) => {
+            setCurrentPatient(null);
+            setIsShowCurrentPatient(false);
+            console.log("User left:", userList);
+          },
         });
-
         // Đánh dấu phòng đã được khởi tạo
         setIsRoomInitialized(true);
       } catch (error) {
@@ -448,7 +476,7 @@ export default function ExaminationRoomPage() {
           }}
         >
           {/* Bệnh nhân đang khám hiện tại */}
-          {currentPatient && (
+          {currentPatient && isShowCurrentPatient && (
             <>
               <Typography variant="h5" gutterBottom>
                 Bệnh Nhân Đang Khám
@@ -548,6 +576,7 @@ export default function ExaminationRoomPage() {
                       startIcon={<CheckCircleIcon />}
                       title="Tiếp nhận bệnh nhân"
                       sx={{ mr: 1 }}
+                      disabled={currentPatient !== null && isShowCurrentPatient}
                     >
                       Tiếp nhận
                     </Button>

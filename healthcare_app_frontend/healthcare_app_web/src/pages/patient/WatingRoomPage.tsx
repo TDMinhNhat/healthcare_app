@@ -6,6 +6,12 @@ import {
   Divider,
   Avatar,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router";
@@ -72,6 +78,41 @@ export default function WaitingRoomPage() {
     })
   );
 
+  // State for dialog control
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [roomLinkData, setRoomLinkData] = useState<string>("");
+
+  // Handle joining the room
+  const handleJoinRoom = () => {
+    window.open(roomLinkData, "_blank");
+    navigate(`${ROUTING.PATIENT}`);
+    setDialogOpen(false);
+  };
+
+  // Handle dialog close without joining
+  const handleClose = () => {
+    setDialogOpen(false);
+    navigate(`${ROUTING.PATIENT}`);
+  };
+
+  // Handle canceling participation in the waiting queue
+  const handleCancelParticipation = () => {
+    // Emit event to notify server that patient is canceling
+    socket.emit("cancelWaitingQueue", {
+      scheduleId,
+      userId: userId,
+      numericalOrder: numericalOrder,
+      name: `${numericalOrder}_${user.firstName} ${user.lastName}`,
+      doctorName: doctorName,
+      dateAppointment: dateAppointment,
+      appointmentId: appointmentId,
+    });
+    socket.disconnect();
+    setDialogOpen(false);
+    // Navigate back to patient dashboard
+    navigate(`${ROUTING.PATIENT}`);
+  };
+
   useEffect(() => {
     socket.connect();
     // Khi kết nối thành công
@@ -127,6 +168,7 @@ export default function WaitingRoomPage() {
         console.log(
           "You've been accepted by the doctor. Joining examination room..."
         );
+
         // Thêm số thứ tự vào URL khi chuyển hướng
         const roomLink = new URL(data.roomLink);
         roomLink.searchParams.append(
@@ -136,20 +178,21 @@ export default function WaitingRoomPage() {
         roomLink.searchParams.append("userId", user.userId);
         const link = roomLink.toString();
         console.log("Link to the room:", link);
-        // Mở phòng khám trong tab mới
-        window.open(link, "_blank");
-        // Chuyển tab hiện tại về trang dashboard của bệnh nhân
-        navigate(`${ROUTING.PATIENT}`);
+
+        // Lưu link và mở dialog thay vì dùng alert
+        setRoomLinkData(link);
+        setDialogOpen(true);
       }
     });
 
-    // Lắng nghe sự kiện khi bị bác sĩ xoá khỏi phòng khám
+    // Lắng nghe sự kiện khi bị bác sĩ xoá khỏi phòng chờ
     socket.on("removePatient", (data) => {
       if (data.userId === userId) {
         setLoading(false);
+        navigate(`${ROUTING.PATIENT}`);
         // navigate(`${ROUTING.PATIENT}/${ROUTING.PATIENT_APPOINTMENT}`);
-        window.close();
-        socket.disconnect();
+        // window.close();
+        // socket.disconnect();
       }
     });
 
@@ -245,9 +288,44 @@ export default function WaitingRoomPage() {
                 {currentExamNumber}
               </Typography>
             </Box>
+
+            {/* Thêm nút huỷ tham gia hàng chờ */}
+            <Box sx={{ mt: 4 }}>
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={handleCancelParticipation}
+                fullWidth
+              >
+                Huỷ tham gia hàng chờ
+              </Button>
+            </Box>
           </>
         )}
       </Paper>
+
+      {/* Dialog xác nhận tham gia phòng khám */}
+      <Dialog
+        open={dialogOpen}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Thông báo từ phòng khám"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Bác sĩ đã sẵn sàng để khám cho bạn. Bạn sẽ được chuyển đến phòng
+            khám ngay bây giờ.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleJoinRoom} color="primary" autoFocus>
+            Tham gia ngay
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }
