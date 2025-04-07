@@ -133,7 +133,7 @@ export default function Emergency() {
             text: "OK",
             onPress: () => {
               // Quay về màn hình trước đó
-              router.back();
+              router.replace("/(tabs)/appointments");
             },
           },
         ]

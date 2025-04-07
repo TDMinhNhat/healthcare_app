@@ -23,6 +23,8 @@ export default function WaitingRoomScreen() {
   const [currentExamNumber, setCurrentExamNumber] = useState<number>(0); // Số thứ tự đang khám
   const [loading, setLoading] = useState<boolean>(true); // Trạng thái đang tải
   const [socket, setSocket] = useState<any>(null); // Kết nối socket
+  // Thêm state để lưu trữ liên kết phòng khám
+  const [roomLink, setRoomLink] = useState<string>("");
 
   // Lấy các thông tin cần thiết từ tham số URL
   const {
@@ -97,7 +99,7 @@ export default function WaitingRoomScreen() {
         setLoading(false);
         console.log("You've been accepted by the doctor");
 
-        // Chuyển hướng đến phòng khám với các tham số
+        // Thay vì mở link ngay lập tức, lưu link và hiện dialog xác nhận
         if (data.roomLink) {
           const roomLink = new URL(data.roomLink);
           roomLink.searchParams.append(
@@ -107,12 +109,28 @@ export default function WaitingRoomScreen() {
           roomLink.searchParams.append("userId", user.userId);
           const link = roomLink.toString();
 
-          // Mở đường dẫn trực tiếp trong trình duyệt
-          Linking.openURL(link).catch((err) => {
-            console.error("Không thể mở đường dẫn:", err);
-            Alert.alert("Lỗi", "Không thể mở phòng khám trực tuyến");
-          });
-          router.back();
+          // Lưu link và hiển thị dialog
+          setRoomLink(link);
+
+          // Hiển thị alert xác nhận tham gia phòng khám
+          Alert.alert(
+            "Thông báo từ phòng khám",
+            "Bác sĩ đã sẵn sàng để khám cho bạn. Bạn sẽ được chuyển đến phòng khám ngay bây giờ.",
+            [
+              {
+                text: "Tham gia ngay",
+                onPress: () => {
+                  // Mở đường dẫn trực tiếp trong trình duyệt
+                  Linking.openURL(link).catch((err) => {
+                    console.error("Không thể mở đường dẫn:", err);
+                    Alert.alert("Lỗi", "Không thể mở phòng khám trực tuyến");
+                  });
+                  router.replace("/(tabs)/appointments");
+                },
+              },
+            ],
+            { cancelable: false }
+          );
         }
       }
     });
@@ -121,7 +139,7 @@ export default function WaitingRoomScreen() {
     newSocket.on("removePatient", (data) => {
       if (data.userId === user.userId) {
         setLoading(false);
-        router.back();
+        router.replace("/(tabs)/appointments"); // Điều hướng về trang danh sách lịch hẹn
         newSocket.disconnect();
       }
     });
@@ -144,9 +162,18 @@ export default function WaitingRoomScreen() {
   // Xử lý rời khỏi phòng chờ
   const handleLeaveRoom = () => {
     if (socket) {
+      socket.emit("cancelWaitingQueue", {
+        workScheduleId,
+        userId: user.userId,
+        numericalOrder: numericalOrder,
+        name: `${numericalOrder}_${user.firstName} ${user.lastName}`,
+        doctorName: doctorName,
+        dateAppointment: dateAppointment,
+        appointmentId: appointmentId,
+      });
       socket.disconnect();
     }
-    router.back();
+    router.replace("/(tabs)/appointments"); // Điều hướng về trang danh sách lịch hẹn
   };
 
   return (
