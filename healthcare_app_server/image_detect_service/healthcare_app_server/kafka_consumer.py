@@ -4,7 +4,7 @@ from healthcare_app_server.models import *
 import json
 import logging as log
 
-topics = ["insert_user", "insert_type_detect"]
+topics = ["insert_patient"]
 
 class KafkaConsumer(threading.Thread):
 
