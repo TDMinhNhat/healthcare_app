@@ -42,15 +42,16 @@ class FaceDetectService:
         i = np.argmax(detections[0, 0, :, 2])
         confidence = detections[0, 0, i, 2]
 
-        if confidence >= 0.95:
+        if confidence >= 0.98:
             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
             (startX, startY, endX, endY) = box.astype("int")
 
             roi = image[startY:endY, startX:endX]
-            faceBlob = cv2.dnn.blobFromImage(roi, 1/255, (96, 96), (0, 0, 0), swapRB = True, crop = True)
+            # faceBlob = cv2.dnn.blobFromImage(roi, 1/255, (96, 96), (0, 0, 0), swapRB = True, crop = True)
 
-            self.descriptor_model.setInput(faceBlob)
-            vector = self.descriptor_model.forward().flatten()
+            # self.descriptor_model.setInput(faceBlob)
+            # vector = self.descriptor_model.forward().flatten()
+            vector = self.__get_average_embedding__(roi)
             vector_str = ",".join(map(str, vector.tolist()))
             return vector_str
 
@@ -80,7 +81,7 @@ class FaceDetectService:
         i = np.argmax(detections[0, 0, :, 2])
         confidence = detections[0, 0, i, 2]
 
-        if confidence >= 0.95:
+        if confidence >= 0.98:
             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
             (startX, startY, endX, endY) = box.astype("int")
 
@@ -103,11 +104,33 @@ class FaceDetectService:
         users = User.objects.all()
 
         for user in users:
-            vector_check = np.array(list(map(float, user.face_detect_data.split(","))))
+            vector_check = np.array(list(map(float, user.face_encode_value.split(","))))
             similarity = 1 - cosine(vector_check, vector)
-            if similarity >= 0.5:
+            if similarity >= 0.9:
                 return self.__get_user_by_userid__(user.user_id)
         return None
+
+    def __rotate_image__(self, image, angle):
+        (h, w) = image.shape[:2]
+        center = (w // 2, h // 2)
+        M = cv2.getRotationMatrix2D(center, angle, 1.0)
+        return cv2.warpAffine(image, M, (w, h))
+
+    def __get_average_embedding__(self, roi):
+        angles = [-45, -30, -15, 0, 15, 30, 45]
+        embeddings = []
+
+        for angle in angles:
+            rotated_face = self.__rotate_image__(roi, angle)
+            faceBlob = cv2.dnn.blobFromImage(rotated_face, 1/255, (96, 96), (0, 0, 0), swapRB=True, crop=True)
+
+            self.descriptor_model.setInput(faceBlob)
+            vec = self.descriptor_model.forward().flatten()
+            embeddings.append(vec)
+
+        mean_embedding = np.mean(embeddings, axis=0)
+        mean_embedding = mean_embedding / np.linalg.norm(mean_embedding)  # Optional normalization
+        return mean_embedding
 
     def __get_user_by_userid__(self, user_id):
         response = requests.get(f"http://localhost:9000/authenticate/api/v1/user/user_id/{user_id.split('#')[1]}")

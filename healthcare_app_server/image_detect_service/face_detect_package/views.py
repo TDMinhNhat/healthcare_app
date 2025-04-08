@@ -9,7 +9,7 @@ def register_face(request: HttpRequest) -> JsonResponse:
     try:
         get_image = request.FILES["file"]
         image = get_image.read()
-        result = FaceDetectService(image).detect_face_register();
+        result = FaceDetectService(image).detect_face_register()
 
         if result == "No Detect":
             response = Response(400, "Can't detect the face", None)
