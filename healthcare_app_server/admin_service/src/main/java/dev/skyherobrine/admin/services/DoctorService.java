@@ -25,19 +25,17 @@ public class DoctorService {
     private final DoctorEducationRepository doctorEducationRepository;
     private final DoctorExperienceRepository doctorExperienceRepository;
     private final AuthenticateProviderRepository authenticateProviderRepository;
-    private final PatientFaceEncodeRepository patientFaceEncodeRepository;
     private final TypeDiseaseRepository typeDiseaseRepository;
     private final WorkScheduleRepository workScheduleRepository;
     private final KafkaTemplate<String,String> kafkaTemplate;
 
-    public DoctorService(AddressRepository addressRepository, DoctorRepository doctorRepository, DoctorCertificateRepository doctorCertificateRepository, DoctorEducationRepository doctorEducationRepository, DoctorExperienceRepository doctorExperienceRepository, AuthenticateProviderRepository authenticateProviderRepository, PatientFaceEncodeRepository patientFaceEncodeRepository, TypeDiseaseRepository typeDiseaseRepository, WorkScheduleRepository workScheduleRepository, KafkaTemplate<String, String> kafkaTemplate) {
+    public DoctorService(AddressRepository addressRepository, DoctorRepository doctorRepository, DoctorCertificateRepository doctorCertificateRepository, DoctorEducationRepository doctorEducationRepository, DoctorExperienceRepository doctorExperienceRepository, AuthenticateProviderRepository authenticateProviderRepository, TypeDiseaseRepository typeDiseaseRepository, WorkScheduleRepository workScheduleRepository, KafkaTemplate<String, String> kafkaTemplate) {
         this.addressRepository = addressRepository;
         this.doctorRepository = doctorRepository;
         this.doctorCertificateRepository = doctorCertificateRepository;
         this.doctorEducationRepository = doctorEducationRepository;
         this.doctorExperienceRepository = doctorExperienceRepository;
         this.authenticateProviderRepository = authenticateProviderRepository;
-        this.patientFaceEncodeRepository = patientFaceEncodeRepository;
         this.typeDiseaseRepository = typeDiseaseRepository;
         this.workScheduleRepository = workScheduleRepository;
         this.kafkaTemplate = kafkaTemplate;
