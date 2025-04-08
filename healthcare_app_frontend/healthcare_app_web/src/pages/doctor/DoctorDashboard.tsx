@@ -141,23 +141,7 @@ const DoctorDashboard: React.FC = () => {
     fetchYearlyData();
     fetchTotalPatients();
     fetchTodayAppointments();
-
-    // Trong thực tế, bạn có thể sử dụng axios hoặc fetch như sau:
-    /*
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('https://api.example.com/patient-visits/weekly');
-        setWeeklyPatientVisits(response.data);
-        
-        // Các API call khác tương tự...
-      } catch (error) {
-        console.error("Lỗi khi lấy dữ liệu:", error);
-      }
-    };
-    
-    fetchData();
-    */
-  }, []); // Mảng dependencies rỗng để chỉ gọi API một lần khi component mount
+  }, []);
 
   // Xử lý thay đổi chế độ xem thời gian
   const handleTimeViewChange = (
