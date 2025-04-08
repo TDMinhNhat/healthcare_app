@@ -9,9 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface PaymentRepository extends MongoRepository<Payment,Long> {
-    Optional<Payment> findByBookAppointment_Id(Long id);
-
     Optional<Payment> findTopByOrderByIdDesc();
-
-    List<Payment> findByBookAppointment_PatientId(String patientId);
 }
