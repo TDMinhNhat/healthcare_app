@@ -6,35 +6,35 @@
     "_id": {
       "$numberLong": "1"
     },
-    "specialization": "",
+    "specialization": "TÂM LÝ HỌC TÂM THẦN",
     "typeDisease": {
       "_id": {
-        "$numberLong": "6"
+        "$numberLong": "4"
       },
-      "name": "MÒN RĂNG",
+      "name": "TÂM THẦN PHÂN LIỆT",
       "createdAt": {
-        "$date": "2025-03-04T10:07:44.660Z"
+        "$date": "2025-04-08T17:09:15.830Z"
       },
       "status": true
     },
-    "userId": "20250304180516-62345-19950810",
-    "firstName": "Truman",
-    "lastName": "Spinka",
-    "sex": true,
+    "userId": "20250409004925-20533-19900510",
+    "firstName": "Thư",
+    "lastName": "Lê",
+    "sex": false,
     "dob": {
-      "$date": "1995-08-09T17:00:00.000Z"
+      "$date": "1990-05-09T17:00:00.000Z"
     },
     "address": {
       "_id": {
         "$numberLong": "1"
       },
       "createdAt": {
-        "$date": "2025-03-04T11:05:17.431Z"
+        "$date": "2025-04-08T17:49:26.239Z"
       }
     },
-    "phone": "(812) 976-1981",
-    "email": "barbra.powlowski@yahoo.com",
-    "password": "6u5vjao881r1pjzl",
+    "phone": "0246813579",
+    "email": "minhthu281103@gmail.com",
+    "password": "123456789",
     "authedProvider": {
       "_id": {
         "$numberLong": "1"
@@ -42,10 +42,11 @@
       "authenName": "APPLICATION",
       "status": true
     },
-    "emailVerified": true,
+    "emailVerified": false,
+    "faceEncodeValue": "",
     "status": true,
     "createdAt": {
-      "$date": "2025-03-04T11:05:17.425Z"
+      "$date": "2025-04-08T17:49:26.224Z"
     }
   },
   "shift": {
@@ -54,25 +55,29 @@
     },
     "shift": 1,
     "start": {
-      "$date": "2025-03-10T00:00:00.000Z"
+      "$date": "2025-04-09T00:00:00.000Z"
     },
     "end": {
-      "$date": "2025-03-10T04:00:00.000Z"
+      "$date": "2025-04-09T04:00:00.000Z"
     },
     "createdAt": {
-      "$date": "2025-03-10T02:20:11.755Z"
+      "$date": "2025-04-08T17:07:02.184Z"
     },
     "updatedAt": {
-      "$date": "2025-03-10T02:20:11.755Z"
+      "$date": "2025-04-08T17:07:02.184Z"
     },
     "status": true
   },
-  "max_slots": 20,
+  "max_slots": 10,
   "date_appointment": {
-    "$date": "2025-03-10T17:00:00.000Z"
+    "$date": "2025-04-11T17:00:00.000Z"
   },
-  "created_at": "10-03-2025-19-51-45",
-  "updated_at": "10-03-2025-19-51-45",
+  "created_at": {
+    "$date": "2025-04-08T18:21:43.166Z"
+  },
+  "updated_at": {
+    "$date": "2025-04-08T18:21:43.166Z"
+  },
   "status": true,
   "_class": "dev.skyherobrine.authenticate.models.mongodb.WorkSchedule"
 },
@@ -84,35 +89,35 @@
     "_id": {
       "$numberLong": "1"
     },
-    "specialization": "",
+    "specialization": "TÂM LÝ HỌC TÂM THẦN",
     "typeDisease": {
       "_id": {
-        "$numberLong": "6"
+        "$numberLong": "4"
       },
-      "name": "MÒN RĂNG",
+      "name": "TÂM THẦN PHÂN LIỆT",
       "createdAt": {
-        "$date": "2025-03-04T10:07:44.660Z"
+        "$date": "2025-04-08T17:09:15.830Z"
       },
       "status": true
     },
-    "userId": "20250304180516-62345-19950810",
-    "firstName": "Truman",
-    "lastName": "Spinka",
-    "sex": true,
+    "userId": "20250409004925-20533-19900510",
+    "firstName": "Thư",
+    "lastName": "Lê",
+    "sex": false,
     "dob": {
-      "$date": "1995-08-09T17:00:00.000Z"
+      "$date": "1990-05-09T17:00:00.000Z"
     },
     "address": {
       "_id": {
         "$numberLong": "1"
       },
       "createdAt": {
-        "$date": "2025-03-04T11:05:17.431Z"
+        "$date": "2025-04-08T17:49:26.239Z"
       }
     },
-    "phone": "(812) 976-1981",
-    "email": "barbra.powlowski@yahoo.com",
-    "password": "6u5vjao881r1pjzl",
+    "phone": "0246813579",
+    "email": "minhthu281103@gmail.com",
+    "password": "123456789",
     "authedProvider": {
       "_id": {
         "$numberLong": "1"
@@ -120,88 +125,11 @@
       "authenName": "APPLICATION",
       "status": true
     },
-    "emailVerified": true,
+    "emailVerified": false,
+    "faceEncodeValue": "",
     "status": true,
     "createdAt": {
-      "$date": "2025-03-04T11:05:17.425Z"
-    }
-  },
-  "shift": {
-    "_id": {
-      "$numberLong": "2"
-    },
-    "shift": 2,
-    "start": {
-      "$date": "2025-03-10T06:00:00.000Z"
-    },
-    "end": {
-      "$date": "2025-03-10T10:00:00.000Z"
-    },
-    "createdAt": {
-      "$date": "2025-03-10T02:20:45.542Z"
-    },
-    "updatedAt": {
-      "$date": "2025-03-10T02:20:45.542Z"
-    },
-    "status": true
-  },
-  "max_slots": 20,
-  "date_appointment": {
-    "$date": "2025-03-10T17:00:00.000Z"
-  },
-  "created_at": "10-03-2025-19-52-21",
-  "updated_at": "10-03-2025-19-52-21",
-  "status": true,
-  "_class": "dev.skyherobrine.authenticate.models.mongodb.WorkSchedule"
-},
-{
-  "_id": {
-    "$numberLong": "3"
-  },
-  "doctor": {
-    "_id": {
-      "$numberLong": "1"
-    },
-    "specialization": "",
-    "typeDisease": {
-      "_id": {
-        "$numberLong": "6"
-      },
-      "name": "MÒN RĂNG",
-      "createdAt": {
-        "$date": "2025-03-04T10:07:44.660Z"
-      },
-      "status": true
-    },
-    "userId": "20250304180516-62345-19950810",
-    "firstName": "Truman",
-    "lastName": "Spinka",
-    "sex": true,
-    "dob": {
-      "$date": "1995-08-09T17:00:00.000Z"
-    },
-    "address": {
-      "_id": {
-        "$numberLong": "1"
-      },
-      "createdAt": {
-        "$date": "2025-03-04T11:05:17.431Z"
-      }
-    },
-    "phone": "(812) 976-1981",
-    "email": "barbra.powlowski@yahoo.com",
-    "password": "6u5vjao881r1pjzl",
-    "authedProvider": {
-      "_id": {
-        "$numberLong": "1"
-      },
-      "authenName": "APPLICATION",
-      "status": true
-    },
-    "emailVerified": true,
-    "status": true,
-    "createdAt": {
-      "$date": "2025-03-04T11:05:17.425Z"
+      "$date": "2025-04-08T17:49:26.224Z"
     }
   },
   "shift": {
@@ -210,649 +138,29 @@
     },
     "shift": 1,
     "start": {
-      "$date": "2025-03-10T00:00:00.000Z"
+      "$date": "2025-04-09T00:00:00.000Z"
     },
     "end": {
-      "$date": "2025-03-10T04:00:00.000Z"
+      "$date": "2025-04-09T04:00:00.000Z"
     },
     "createdAt": {
-      "$date": "2025-03-10T02:20:11.755Z"
+      "$date": "2025-04-08T17:07:02.184Z"
     },
     "updatedAt": {
-      "$date": "2025-03-10T02:20:11.755Z"
-    },
-    "status": true
-  },
-  "max_slots": 20,
-  "date_appointment": {
-    "$date": "2025-03-12T17:00:00.000Z"
-  },
-  "created_at": "10-03-2025-19-52-31",
-  "updated_at": "10-03-2025-19-52-31",
-  "status": true,
-  "_class": "dev.skyherobrine.authenticate.models.mongodb.WorkSchedule"
-},
-{
-  "_id": {
-    "$numberLong": "4"
-  },
-  "doctor": {
-    "_id": {
-      "$numberLong": "1"
-    },
-    "specialization": "",
-    "typeDisease": {
-      "_id": {
-        "$numberLong": "6"
-      },
-      "name": "MÒN RĂNG",
-      "createdAt": {
-        "$date": "2025-03-04T10:07:44.660Z"
-      },
-      "status": true
-    },
-    "userId": "20250304180516-62345-19950810",
-    "firstName": "Truman",
-    "lastName": "Spinka",
-    "sex": true,
-    "dob": {
-      "$date": "1995-08-09T17:00:00.000Z"
-    },
-    "address": {
-      "_id": {
-        "$numberLong": "1"
-      },
-      "createdAt": {
-        "$date": "2025-03-04T11:05:17.431Z"
-      }
-    },
-    "phone": "(812) 976-1981",
-    "email": "barbra.powlowski@yahoo.com",
-    "password": "6u5vjao881r1pjzl",
-    "authedProvider": {
-      "_id": {
-        "$numberLong": "1"
-      },
-      "authenName": "APPLICATION",
-      "status": true
-    },
-    "emailVerified": true,
-    "status": true,
-    "createdAt": {
-      "$date": "2025-03-04T11:05:17.425Z"
-    }
-  },
-  "shift": {
-    "_id": {
-      "$numberLong": "2"
-    },
-    "shift": 2,
-    "start": {
-      "$date": "2025-03-10T06:00:00.000Z"
-    },
-    "end": {
-      "$date": "2025-03-10T10:00:00.000Z"
-    },
-    "createdAt": {
-      "$date": "2025-03-10T02:20:45.542Z"
-    },
-    "updatedAt": {
-      "$date": "2025-03-10T02:20:45.542Z"
-    },
-    "status": true
-  },
-  "max_slots": 20,
-  "date_appointment": {
-    "$date": "2025-03-12T17:00:00.000Z"
-  },
-  "created_at": "10-03-2025-19-52-34",
-  "updated_at": "10-03-2025-19-52-34",
-  "status": true,
-  "_class": "dev.skyherobrine.authenticate.models.mongodb.WorkSchedule"
-},
-{
-  "_id": {
-    "$numberLong": "5"
-  },
-  "doctor": {
-    "_id": {
-      "$numberLong": "1"
-    },
-    "specialization": "",
-    "typeDisease": {
-      "_id": {
-        "$numberLong": "6"
-      },
-      "name": "MÒN RĂNG",
-      "createdAt": {
-        "$date": "2025-03-04T10:07:44.660Z"
-      },
-      "status": true
-    },
-    "userId": "20250304180516-62345-19950810",
-    "firstName": "Truman",
-    "lastName": "Spinka",
-    "sex": true,
-    "dob": {
-      "$date": "1995-08-09T17:00:00.000Z"
-    },
-    "address": {
-      "_id": {
-        "$numberLong": "1"
-      },
-      "createdAt": {
-        "$date": "2025-03-04T11:05:17.431Z"
-      }
-    },
-    "phone": "(812) 976-1981",
-    "email": "barbra.powlowski@yahoo.com",
-    "password": "6u5vjao881r1pjzl",
-    "authedProvider": {
-      "_id": {
-        "$numberLong": "1"
-      },
-      "authenName": "APPLICATION",
-      "status": true
-    },
-    "emailVerified": true,
-    "status": true,
-    "createdAt": {
-      "$date": "2025-03-04T11:05:17.425Z"
-    }
-  },
-  "shift": {
-    "_id": {
-      "$numberLong": "1"
-    },
-    "shift": 1,
-    "start": {
-      "$date": "2025-03-10T00:00:00.000Z"
-    },
-    "end": {
-      "$date": "2025-03-10T04:00:00.000Z"
-    },
-    "createdAt": {
-      "$date": "2025-03-10T02:20:11.755Z"
-    },
-    "updatedAt": {
-      "$date": "2025-03-10T02:20:11.755Z"
-    },
-    "status": true
-  },
-  "max_slots": 20,
-  "date_appointment": {
-    "$date": "2025-03-14T17:00:00.000Z"
-  },
-  "created_at": "10-03-2025-19-52-41",
-  "updated_at": "10-03-2025-19-52-41",
-  "status": true,
-  "_class": "dev.skyherobrine.authenticate.models.mongodb.WorkSchedule"
-},
-{
-  "_id": {
-    "$numberLong": "6"
-  },
-  "doctor": {
-    "_id": {
-      "$numberLong": "1"
-    },
-    "specialization": "",
-    "typeDisease": {
-      "_id": {
-        "$numberLong": "6"
-      },
-      "name": "MÒN RĂNG",
-      "createdAt": {
-        "$date": "2025-03-04T10:07:44.660Z"
-      },
-      "status": true
-    },
-    "userId": "20250304180516-62345-19950810",
-    "firstName": "Truman",
-    "lastName": "Spinka",
-    "sex": true,
-    "dob": {
-      "$date": "1995-08-09T17:00:00.000Z"
-    },
-    "address": {
-      "_id": {
-        "$numberLong": "1"
-      },
-      "createdAt": {
-        "$date": "2025-03-04T11:05:17.431Z"
-      }
-    },
-    "phone": "(812) 976-1981",
-    "email": "barbra.powlowski@yahoo.com",
-    "password": "6u5vjao881r1pjzl",
-    "authedProvider": {
-      "_id": {
-        "$numberLong": "1"
-      },
-      "authenName": "APPLICATION",
-      "status": true
-    },
-    "emailVerified": true,
-    "status": true,
-    "createdAt": {
-      "$date": "2025-03-04T11:05:17.425Z"
-    }
-  },
-  "shift": {
-    "_id": {
-      "$numberLong": "2"
-    },
-    "shift": 2,
-    "start": {
-      "$date": "2025-03-10T06:00:00.000Z"
-    },
-    "end": {
-      "$date": "2025-03-10T10:00:00.000Z"
-    },
-    "createdAt": {
-      "$date": "2025-03-10T02:20:45.542Z"
-    },
-    "updatedAt": {
-      "$date": "2025-03-10T02:20:45.542Z"
-    },
-    "status": true
-  },
-  "max_slots": 20,
-  "date_appointment": {
-    "$date": "2025-03-14T17:00:00.000Z"
-  },
-  "created_at": "10-03-2025-19-52-43",
-  "updated_at": "10-03-2025-19-52-43",
-  "status": true,
-  "_class": "dev.skyherobrine.authenticate.models.mongodb.WorkSchedule"
-},
-{
-  "_id": {
-    "$numberLong": "7"
-  },
-  "doctor": {
-    "_id": {
-      "$numberLong": "2"
-    },
-    "specialization": "",
-    "typeDisease": {
-      "_id": {
-        "$numberLong": "5"
-      },
-      "name": "VIÊM NHA CHU",
-      "createdAt": {
-        "$date": "2025-03-04T10:07:31.290Z"
-      },
-      "status": true
-    },
-    "userId": "20250304180517-42192-19871021",
-    "firstName": "Oda",
-    "lastName": "Wiza",
-    "sex": false,
-    "dob": {
-      "$date": "1987-10-20T17:00:00.000Z"
-    },
-    "address": {
-      "_id": {
-        "$numberLong": "5"
-      },
-      "createdAt": {
-        "$date": "2025-03-04T11:05:17.580Z"
-      }
-    },
-    "phone": "(730) 608-1762",
-    "email": "lee.durgan@gmail.com",
-    "password": "m9l4uc5j9r9qy3g",
-    "authedProvider": {
-      "_id": {
-        "$numberLong": "1"
-      },
-      "authenName": "APPLICATION",
-      "status": true
-    },
-    "emailVerified": true,
-    "status": true,
-    "createdAt": {
-      "$date": "2025-03-04T11:05:17.580Z"
-    }
-  },
-  "shift": {
-    "_id": {
-      "$numberLong": "1"
-    },
-    "shift": 1,
-    "start": {
-      "$date": "2025-03-10T00:00:00.000Z"
-    },
-    "end": {
-      "$date": "2025-03-10T04:00:00.000Z"
-    },
-    "createdAt": {
-      "$date": "2025-03-10T02:20:11.755Z"
-    },
-    "updatedAt": {
-      "$date": "2025-03-10T02:20:11.755Z"
+      "$date": "2025-04-08T17:07:02.184Z"
     },
     "status": true
   },
   "max_slots": 10,
   "date_appointment": {
-    "$date": "2025-03-09T17:00:00.000Z"
+    "$date": "2025-04-12T17:00:00.000Z"
   },
-  "created_at": "10-03-2025-19-53-02",
-  "updated_at": "10-03-2025-19-53-02",
-  "status": true,
-  "_class": "dev.skyherobrine.authenticate.models.mongodb.WorkSchedule"
-},
-{
-  "_id": {
-    "$numberLong": "8"
+  "created_at": {
+    "$date": "2025-04-08T18:21:54.459Z"
   },
-  "doctor": {
-    "_id": {
-      "$numberLong": "2"
-    },
-    "specialization": "",
-    "typeDisease": {
-      "_id": {
-        "$numberLong": "5"
-      },
-      "name": "VIÊM NHA CHU",
-      "createdAt": {
-        "$date": "2025-03-04T10:07:31.290Z"
-      },
-      "status": true
-    },
-    "userId": "20250304180517-42192-19871021",
-    "firstName": "Oda",
-    "lastName": "Wiza",
-    "sex": false,
-    "dob": {
-      "$date": "1987-10-20T17:00:00.000Z"
-    },
-    "address": {
-      "_id": {
-        "$numberLong": "5"
-      },
-      "createdAt": {
-        "$date": "2025-03-04T11:05:17.580Z"
-      }
-    },
-    "phone": "(730) 608-1762",
-    "email": "lee.durgan@gmail.com",
-    "password": "m9l4uc5j9r9qy3g",
-    "authedProvider": {
-      "_id": {
-        "$numberLong": "1"
-      },
-      "authenName": "APPLICATION",
-      "status": true
-    },
-    "emailVerified": true,
-    "status": true,
-    "createdAt": {
-      "$date": "2025-03-04T11:05:17.580Z"
-    }
+  "updated_at": {
+    "$date": "2025-04-08T18:21:54.459Z"
   },
-  "shift": {
-    "_id": {
-      "$numberLong": "1"
-    },
-    "shift": 1,
-    "start": {
-      "$date": "2025-03-10T00:00:00.000Z"
-    },
-    "end": {
-      "$date": "2025-03-10T04:00:00.000Z"
-    },
-    "createdAt": {
-      "$date": "2025-03-10T02:20:11.755Z"
-    },
-    "updatedAt": {
-      "$date": "2025-03-10T02:20:11.755Z"
-    },
-    "status": true
-  },
-  "max_slots": 10,
-  "date_appointment": {
-    "$date": "2025-03-11T17:00:00.000Z"
-  },
-  "created_at": "10-03-2025-19-53-05",
-  "updated_at": "10-03-2025-19-53-05",
-  "status": true,
-  "_class": "dev.skyherobrine.authenticate.models.mongodb.WorkSchedule"
-},
-{
-  "_id": {
-    "$numberLong": "9"
-  },
-  "doctor": {
-    "_id": {
-      "$numberLong": "2"
-    },
-    "specialization": "",
-    "typeDisease": {
-      "_id": {
-        "$numberLong": "5"
-      },
-      "name": "VIÊM NHA CHU",
-      "createdAt": {
-        "$date": "2025-03-04T10:07:31.290Z"
-      },
-      "status": true
-    },
-    "userId": "20250304180517-42192-19871021",
-    "firstName": "Oda",
-    "lastName": "Wiza",
-    "sex": false,
-    "dob": {
-      "$date": "1987-10-20T17:00:00.000Z"
-    },
-    "address": {
-      "_id": {
-        "$numberLong": "5"
-      },
-      "createdAt": {
-        "$date": "2025-03-04T11:05:17.580Z"
-      }
-    },
-    "phone": "(730) 608-1762",
-    "email": "lee.durgan@gmail.com",
-    "password": "m9l4uc5j9r9qy3g",
-    "authedProvider": {
-      "_id": {
-        "$numberLong": "1"
-      },
-      "authenName": "APPLICATION",
-      "status": true
-    },
-    "emailVerified": true,
-    "status": true,
-    "createdAt": {
-      "$date": "2025-03-04T11:05:17.580Z"
-    }
-  },
-  "shift": {
-    "_id": {
-      "$numberLong": "2"
-    },
-    "shift": 2,
-    "start": {
-      "$date": "2025-03-10T06:00:00.000Z"
-    },
-    "end": {
-      "$date": "2025-03-10T10:00:00.000Z"
-    },
-    "createdAt": {
-      "$date": "2025-03-10T02:20:45.542Z"
-    },
-    "updatedAt": {
-      "$date": "2025-03-10T02:20:45.542Z"
-    },
-    "status": true
-  },
-  "max_slots": 10,
-  "date_appointment": {
-    "$date": "2025-03-11T17:00:00.000Z"
-  },
-  "created_at": "10-03-2025-19-53-08",
-  "updated_at": "10-03-2025-19-53-08",
-  "status": true,
-  "_class": "dev.skyherobrine.authenticate.models.mongodb.WorkSchedule"
-},
-{
-  "_id": {
-    "$numberLong": "10"
-  },
-  "doctor": {
-    "_id": {
-      "$numberLong": "2"
-    },
-    "specialization": "",
-    "typeDisease": {
-      "_id": {
-        "$numberLong": "5"
-      },
-      "name": "VIÊM NHA CHU",
-      "createdAt": {
-        "$date": "2025-03-04T10:07:31.290Z"
-      },
-      "status": true
-    },
-    "userId": "20250304180517-42192-19871021",
-    "firstName": "Oda",
-    "lastName": "Wiza",
-    "sex": false,
-    "dob": {
-      "$date": "1987-10-20T17:00:00.000Z"
-    },
-    "address": {
-      "_id": {
-        "$numberLong": "5"
-      },
-      "createdAt": {
-        "$date": "2025-03-04T11:05:17.580Z"
-      }
-    },
-    "phone": "(730) 608-1762",
-    "email": "lee.durgan@gmail.com",
-    "password": "m9l4uc5j9r9qy3g",
-    "authedProvider": {
-      "_id": {
-        "$numberLong": "1"
-      },
-      "authenName": "APPLICATION",
-      "status": true
-    },
-    "emailVerified": true,
-    "status": true,
-    "createdAt": {
-      "$date": "2025-03-04T11:05:17.580Z"
-    }
-  },
-  "shift": {
-    "_id": {
-      "$numberLong": "1"
-    },
-    "shift": 1,
-    "start": {
-      "$date": "2025-03-10T00:00:00.000Z"
-    },
-    "end": {
-      "$date": "2025-03-10T04:00:00.000Z"
-    },
-    "createdAt": {
-      "$date": "2025-03-10T02:20:11.755Z"
-    },
-    "updatedAt": {
-      "$date": "2025-03-10T02:20:11.755Z"
-    },
-    "status": true
-  },
-  "max_slots": 10,
-  "date_appointment": {
-    "$date": "2025-03-13T17:00:00.000Z"
-  },
-  "created_at": "10-03-2025-19-53-13",
-  "updated_at": "10-03-2025-19-53-13",
-  "status": true,
-  "_class": "dev.skyherobrine.authenticate.models.mongodb.WorkSchedule"
-},
-{
-  "_id": {
-    "$numberLong": "11"
-  },
-  "doctor": {
-    "_id": {
-      "$numberLong": "2"
-    },
-    "specialization": "",
-    "typeDisease": {
-      "_id": {
-        "$numberLong": "5"
-      },
-      "name": "VIÊM NHA CHU",
-      "createdAt": {
-        "$date": "2025-03-04T10:07:31.290Z"
-      },
-      "status": true
-    },
-    "userId": "20250304180517-42192-19871021",
-    "firstName": "Oda",
-    "lastName": "Wiza",
-    "sex": false,
-    "dob": {
-      "$date": "1987-10-20T17:00:00.000Z"
-    },
-    "address": {
-      "_id": {
-        "$numberLong": "5"
-      },
-      "createdAt": {
-        "$date": "2025-03-04T11:05:17.580Z"
-      }
-    },
-    "phone": "(730) 608-1762",
-    "email": "lee.durgan@gmail.com",
-    "password": "m9l4uc5j9r9qy3g",
-    "authedProvider": {
-      "_id": {
-        "$numberLong": "1"
-      },
-      "authenName": "APPLICATION",
-      "status": true
-    },
-    "emailVerified": true,
-    "status": true,
-    "createdAt": {
-      "$date": "2025-03-04T11:05:17.580Z"
-    }
-  },
-  "shift": {
-    "_id": {
-      "$numberLong": "2"
-    },
-    "shift": 2,
-    "start": {
-      "$date": "2025-03-10T06:00:00.000Z"
-    },
-    "end": {
-      "$date": "2025-03-10T10:00:00.000Z"
-    },
-    "createdAt": {
-      "$date": "2025-03-10T02:20:45.542Z"
-    },
-    "updatedAt": {
-      "$date": "2025-03-10T02:20:45.542Z"
-    },
-    "status": true
-  },
-  "max_slots": 10,
-  "date_appointment": {
-    "$date": "2025-03-13T17:00:00.000Z"
-  },
-  "created_at": "10-03-2025-19-53-22",
-  "updated_at": "10-03-2025-19-53-22",
   "status": true,
   "_class": "dev.skyherobrine.authenticate.models.mongodb.WorkSchedule"
 }]

@@ -1,0 +1,90 @@
+[{
+  "_id": {
+    "medicalRecord": {
+      "_id": {
+        "$numberLong": "1"
+      },
+      "book_appointment": {
+        "_id": {
+          "$numberLong": "1"
+        },
+        "patient_id": "20250409000148-52838-19460614",
+        "work_schedule_id": {
+          "$numberLong": "1"
+        },
+        "numerical_order": 1,
+        "note": "",
+        "created_at": {
+          "$date": "2025-04-08T18:22:20.684Z"
+        },
+        "status": "WAITING"
+      },
+      "diagnosis_disease": "Tâm thần phân liệt",
+      "re_examination_date": {
+        "$date": "2025-04-15T17:00:00.000Z"
+      },
+      "created_at": {
+        "$date": "2025-04-08T18:33:41.163Z"
+      }
+    },
+    "drug": {
+      "_id": {
+        "$numberLong": "1"
+      },
+      "drugName": "Fluoxetine",
+      "drugType": "Thuốc Chống Trầm Cảm",
+      "unit": "20 mg/viên",
+      "createdAt": {
+        "$date": "2025-04-08T17:27:48.593Z"
+      }
+    }
+  },
+  "quantity": 14,
+  "how_use": "Uống buổi sáng và chiều 1 viên sau bữa ăn",
+  "_class": "dev.skyherobrine.appointment.models.mongodb.MedicalRecordDrug"
+},
+{
+  "_id": {
+    "medicalRecord": {
+      "_id": {
+        "$numberLong": "1"
+      },
+      "book_appointment": {
+        "_id": {
+          "$numberLong": "1"
+        },
+        "patient_id": "20250409000148-52838-19460614",
+        "work_schedule_id": {
+          "$numberLong": "1"
+        },
+        "numerical_order": 1,
+        "note": "",
+        "created_at": {
+          "$date": "2025-04-08T18:22:20.684Z"
+        },
+        "status": "WAITING"
+      },
+      "diagnosis_disease": "Tâm thần phân liệt",
+      "re_examination_date": {
+        "$date": "2025-04-15T17:00:00.000Z"
+      },
+      "created_at": {
+        "$date": "2025-04-08T18:33:41.163Z"
+      }
+    },
+    "drug": {
+      "_id": {
+        "$numberLong": "15"
+      },
+      "drugName": "Melatonin",
+      "drugType": "Thuốc Hỗ Trợ Giấc Ngủ",
+      "unit": "3mg/viên",
+      "createdAt": {
+        "$date": "2025-04-08T17:39:14.336Z"
+      }
+    }
+  },
+  "quantity": 14,
+  "how_use": "Uống buổi sáng và chiều 1 viên sau bữa ăn",
+  "_class": "dev.skyherobrine.appointment.models.mongodb.MedicalRecordDrug"
+}]

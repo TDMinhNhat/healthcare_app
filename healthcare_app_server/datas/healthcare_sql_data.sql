@@ -1,8 +1,8 @@
 -- --------------------------------------------------------
 -- Host:                         127.0.0.1
--- Server version:               11.5.2-MariaDB - mariadb.org binary distribution
+-- Server version:               11.7.2-MariaDB - mariadb.org binary distribution
 -- Server OS:                    Win64
--- HeidiSQL Version:             12.8.0.6908
+-- HeidiSQL Version:             12.10.0.7000
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -33,81 +33,14 @@ CREATE TABLE IF NOT EXISTS `addresses` (
   `updated_at` datetime(6) DEFAULT NULL,
   `ward` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=71 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table admin_service.addresses: ~70 rows (approximately)
+-- Dumping data for table admin_service.addresses: ~3 rows (approximately)
 DELETE FROM `addresses`;
 INSERT INTO `addresses` (`id`, `city`, `country`, `created_at`, `district`, `number`, `street`, `updated_at`, `ward`) VALUES
-	(1, NULL, NULL, '2025-03-04 18:05:17.431591', NULL, NULL, NULL, NULL, NULL),
-	(2, 'North Gertude', 'Cocos (Keeling) Islands', '2025-03-04 18:05:17.514413', 'Beahan Stream No District', '541', 'Beahan Stream', NULL, 'Beahan Stream No Ward'),
-	(3, 'South Aide', 'Paraguay', '2025-03-04 18:05:17.550407', 'Victor Trail No District', '273', 'Victor Trail', NULL, 'Victor Trail No Ward'),
-	(4, 'Reichelton', 'Guatemala', '2025-03-04 18:05:17.559946', 'Rempel Ramp No District', '497', 'Rempel Ramp', NULL, 'Rempel Ramp No Ward'),
-	(5, NULL, NULL, '2025-03-04 18:05:17.580475', NULL, NULL, NULL, NULL, NULL),
-	(6, 'North Rickyfort', 'Guernsey', '2025-03-04 18:05:17.586517', 'Hipolito Squares No District', '384', 'Hipolito Squares', NULL, 'Hipolito Squares No Ward'),
-	(7, 'Kamhaven', 'Pitcairn Islands', '2025-03-04 18:05:17.597067', 'Champlin Island No District', '458', 'Champlin Island', NULL, 'Champlin Island No Ward'),
-	(8, 'Hyattstad', 'Zimbabwe', '2025-03-04 18:05:17.605618', 'Norman Drive No District', '488', 'Norman Drive', NULL, 'Norman Drive No Ward'),
-	(9, NULL, NULL, '2025-03-04 18:05:17.624270', NULL, NULL, NULL, NULL, NULL),
-	(10, 'New Olympiamouth', 'Qatar', '2025-03-04 18:05:17.630263', 'Gerri Turnpike No District', '341', 'Gerri Turnpike', NULL, 'Gerri Turnpike No Ward'),
-	(11, 'Traceetown', 'Mauritius', '2025-03-04 18:05:17.638793', 'Connelly Key No District', '358', 'Connelly Key', NULL, 'Connelly Key No Ward'),
-	(12, 'Port Jaimeechester', 'Falkland Islands (Malvinas)', '2025-03-04 18:05:17.650326', 'Cristi Orchard No District', '516', 'Cristi Orchard', NULL, 'Cristi Orchard No Ward'),
-	(13, NULL, NULL, '2025-03-04 18:05:17.671418', NULL, NULL, NULL, NULL, NULL),
-	(14, 'Hortensiabury', 'Nauru', '2025-03-04 18:05:17.680477', 'Kenisha Crossroad No District', '844', 'Kenisha Crossroad', NULL, 'Kenisha Crossroad No Ward'),
-	(15, 'South Leifstad', 'Singapore', '2025-03-04 18:05:17.689002', 'Ankunding Road No District', '39', 'Ankunding Road', NULL, 'Ankunding Road No Ward'),
-	(16, 'West Vanitaborough', 'Liberia', '2025-03-04 18:05:17.698541', 'Gerardo Harbor No District', '749', 'Gerardo Harbor', NULL, 'Gerardo Harbor No Ward'),
-	(17, NULL, NULL, '2025-03-04 18:05:17.718136', NULL, NULL, NULL, NULL, NULL),
-	(18, 'Divinamouth', 'Japan', '2025-03-04 18:05:17.724209', 'Evelyne Flats No District', '66', 'Evelyne Flats', NULL, 'Evelyne Flats No Ward'),
-	(19, 'East Phylicia', 'Slovenia', '2025-03-04 18:05:17.733737', 'Tracey Stream No District', '891', 'Tracey Stream', NULL, 'Tracey Stream No Ward'),
-	(20, 'Lynnamouth', 'Singapore', '2025-03-04 18:05:17.741281', 'Langosh Spur No District', '634', 'Langosh Spur', NULL, 'Langosh Spur No Ward'),
-	(21, NULL, NULL, '2025-03-04 18:05:17.757917', NULL, NULL, NULL, NULL, NULL),
-	(22, 'Towneview', 'Republic of Korea', '2025-03-04 18:05:17.764454', 'Hermiston Canyon No District', '518', 'Hermiston Canyon', NULL, 'Hermiston Canyon No Ward'),
-	(23, 'Port Rogelioville', 'Vanuatu', '2025-03-04 18:05:17.770995', 'Hilton Pike No District', '621', 'Hilton Pike', NULL, 'Hilton Pike No Ward'),
-	(24, 'West Nikia', 'United States of America', '2025-03-04 18:05:17.781531', 'Ray Locks No District', '362', 'Ray Locks', NULL, 'Ray Locks No Ward'),
-	(25, NULL, NULL, '2025-03-04 18:05:17.798584', NULL, NULL, NULL, NULL, NULL),
-	(26, 'Goodwinberg', 'Saint Martin', '2025-03-04 18:05:17.804106', 'Jasmin Loaf No District', '984', 'Jasmin Loaf', NULL, 'Jasmin Loaf No Ward'),
-	(27, 'Willbury', 'Virgin Islands, British', '2025-03-04 18:05:17.813125', 'Georgine Valley No District', '336', 'Georgine Valley', NULL, 'Georgine Valley No Ward'),
-	(28, 'Bergstromfurt', 'Albania', '2025-03-04 18:05:17.820331', 'Schowalter Ridge No District', '930', 'Schowalter Ridge', NULL, 'Schowalter Ridge No Ward'),
-	(29, NULL, NULL, '2025-03-04 18:05:17.841450', NULL, NULL, NULL, NULL, NULL),
-	(30, 'East Adrianshire', 'Cocos (Keeling) Islands', '2025-03-04 18:05:17.848108', 'Demarcus Lock No District', '464', 'Demarcus Lock', NULL, 'Demarcus Lock No Ward'),
-	(31, 'Lake Norris', 'Antigua and Barbuda', '2025-03-04 18:05:17.858635', 'Ambrose Estates No District', '694', 'Ambrose Estates', NULL, 'Ambrose Estates No Ward'),
-	(32, 'New Dustybury', 'Samoa', '2025-03-04 18:05:17.866633', 'Norris Neck No District', '139', 'Norris Neck', NULL, 'Norris Neck No Ward'),
-	(33, NULL, NULL, '2025-03-04 18:05:17.885515', NULL, NULL, NULL, NULL, NULL),
-	(34, 'Noeport', 'Cape Verde', '2025-03-04 18:05:17.892846', 'Mayert Square No District', '385', 'Mayert Square', NULL, 'Mayert Square No Ward'),
-	(35, 'Bobbiehaven', 'Tuvalu', '2025-03-04 18:05:17.902358', 'Virgen Camp No District', '856', 'Virgen Camp', NULL, 'Virgen Camp No Ward'),
-	(36, 'Gordonfort', 'Tunisia', '2025-03-04 18:05:17.911889', 'Pagac Motorway No District', '383', 'Pagac Motorway', NULL, 'Pagac Motorway No Ward'),
-	(37, NULL, NULL, '2025-03-04 18:05:17.930439', NULL, NULL, NULL, NULL, NULL),
-	(38, 'West Vivianhaven', 'Anguilla', '2025-03-04 18:05:17.937526', 'Marquardt Plains No District', '987', 'Marquardt Plains', NULL, 'Marquardt Plains No Ward'),
-	(39, 'New Breann', 'Bhutan', '2025-03-04 18:05:17.946636', 'Schuster Fort No District', '24', 'Schuster Fort', NULL, 'Schuster Fort No Ward'),
-	(40, 'Port Solomonmouth', 'Ecuador', '2025-03-04 18:05:17.954708', 'Effertz Falls No District', '388', 'Effertz Falls', NULL, 'Effertz Falls No Ward'),
-	(41, NULL, NULL, '2025-03-04 18:20:50.458047', NULL, NULL, NULL, NULL, NULL),
-	(42, NULL, NULL, '2025-03-04 18:20:50.517828', NULL, NULL, NULL, NULL, NULL),
-	(43, NULL, NULL, '2025-03-04 18:20:50.527399', NULL, NULL, NULL, NULL, NULL),
-	(44, NULL, NULL, '2025-03-04 18:20:50.536901', NULL, NULL, NULL, NULL, NULL),
-	(45, NULL, NULL, '2025-03-04 18:20:50.547442', NULL, NULL, NULL, NULL, NULL),
-	(46, NULL, NULL, '2025-03-04 18:20:50.556452', NULL, NULL, NULL, NULL, NULL),
-	(47, NULL, NULL, '2025-03-04 18:20:50.565585', NULL, NULL, NULL, NULL, NULL),
-	(48, NULL, NULL, '2025-03-04 18:20:50.576123', NULL, NULL, NULL, NULL, NULL),
-	(49, NULL, NULL, '2025-03-04 18:20:50.585693', NULL, NULL, NULL, NULL, NULL),
-	(50, NULL, NULL, '2025-03-04 18:20:50.594227', NULL, NULL, NULL, NULL, NULL),
-	(51, NULL, NULL, '2025-03-04 18:20:50.604747', NULL, NULL, NULL, NULL, NULL),
-	(52, NULL, NULL, '2025-03-04 18:20:50.615807', NULL, NULL, NULL, NULL, NULL),
-	(53, NULL, NULL, '2025-03-04 18:20:50.628338', NULL, NULL, NULL, NULL, NULL),
-	(54, NULL, NULL, '2025-03-04 18:20:50.638873', NULL, NULL, NULL, NULL, NULL),
-	(55, NULL, NULL, '2025-03-04 18:20:50.650415', NULL, NULL, NULL, NULL, NULL),
-	(56, NULL, NULL, '2025-03-04 18:20:50.660941', NULL, NULL, NULL, NULL, NULL),
-	(57, NULL, NULL, '2025-03-04 18:20:50.671026', NULL, NULL, NULL, NULL, NULL),
-	(58, NULL, NULL, '2025-03-04 18:20:50.680071', NULL, NULL, NULL, NULL, NULL),
-	(59, NULL, NULL, '2025-03-04 18:20:50.690126', NULL, NULL, NULL, NULL, NULL),
-	(60, NULL, NULL, '2025-03-04 18:20:50.699103', NULL, NULL, NULL, NULL, NULL),
-	(61, NULL, NULL, '2025-03-04 18:20:50.707619', NULL, NULL, NULL, NULL, NULL),
-	(62, NULL, NULL, '2025-03-04 18:20:50.714633', NULL, NULL, NULL, NULL, NULL),
-	(63, NULL, NULL, '2025-03-04 18:20:50.723166', NULL, NULL, NULL, NULL, NULL),
-	(64, NULL, NULL, '2025-03-04 18:20:50.730111', NULL, NULL, NULL, NULL, NULL),
-	(65, NULL, NULL, '2025-03-04 18:20:50.738105', NULL, NULL, NULL, NULL, NULL),
-	(66, NULL, NULL, '2025-03-04 18:20:50.746613', NULL, NULL, NULL, NULL, NULL),
-	(67, NULL, NULL, '2025-03-04 18:20:50.756140', NULL, NULL, NULL, NULL, NULL),
-	(68, NULL, NULL, '2025-03-04 18:20:50.763485', NULL, NULL, NULL, NULL, NULL),
-	(69, NULL, NULL, '2025-03-04 18:20:50.771483', NULL, NULL, NULL, NULL, NULL),
-	(70, NULL, NULL, '2025-03-04 18:20:50.781057', NULL, NULL, NULL, NULL, NULL);
+	(1, NULL, NULL, '2025-04-09 00:49:25.922132', NULL, NULL, NULL, NULL, NULL),
+	(2, 'Hồ Chí Minh', 'Việt Nam', '2025-04-09 00:49:32.136136', 'Gò Vấp', '123/321', 'Dương Quảng Hàm', NULL, '10'),
+	(3, NULL, NULL, '2025-04-09 01:09:33.085097', NULL, NULL, NULL, NULL, NULL);
 
 -- Dumping structure for table admin_service.admins
 DROP TABLE IF EXISTS `admins`;
@@ -118,6 +51,7 @@ CREATE TABLE IF NOT EXISTS `admins` (
   `dob` date NOT NULL,
   `email` varchar(200) NOT NULL,
   `email_verified` bit(1) NOT NULL,
+  `face_encode_value` varchar(5000) DEFAULT NULL,
   `first_name` varchar(100) NOT NULL,
   `last_name` varchar(100) NOT NULL,
   `password` varchar(100) NOT NULL,
@@ -140,26 +74,6 @@ CREATE TABLE IF NOT EXISTS `admins` (
 -- Dumping data for table admin_service.admins: ~0 rows (approximately)
 DELETE FROM `admins`;
 
--- Dumping structure for table admin_service.appointments
-DROP TABLE IF EXISTS `appointments`;
-CREATE TABLE IF NOT EXISTS `appointments` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `created_at` datetime(6) NOT NULL,
-  `note` varchar(500) DEFAULT NULL,
-  `room_id` varchar(50) NOT NULL,
-  `status` tinyint(4) NOT NULL CHECK (`status` between 0 and 3),
-  `work_schedule_id` bigint(20) NOT NULL,
-  `patient_id` bigint(20) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK8exap5wmg8kmb1g1rx3by21yt` (`patient_id`),
-  CONSTRAINT `FK8exap5wmg8kmb1g1rx3by21yt` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
-
--- Dumping data for table admin_service.appointments: ~0 rows (approximately)
-DELETE FROM `appointments`;
-INSERT INTO `appointments` (`id`, `created_at`, `note`, `room_id`, `status`, `work_schedule_id`, `patient_id`) VALUES
-	(1, '2025-03-05 00:12:48.033277', 'null', '763722-05032025001247', 0, 1, 4);
-
 -- Dumping structure for table admin_service.authenticate_provider
 DROP TABLE IF EXISTS `authenticate_provider`;
 CREATE TABLE IF NOT EXISTS `authenticate_provider` (
@@ -170,7 +84,7 @@ CREATE TABLE IF NOT EXISTS `authenticate_provider` (
   UNIQUE KEY `UKmch87ongxq9k1dysaggwe2ggf` (`authen_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table admin_service.authenticate_provider: ~0 rows (approximately)
+-- Dumping data for table admin_service.authenticate_provider: ~1 rows (approximately)
 DELETE FROM `authenticate_provider`;
 INSERT INTO `authenticate_provider` (`id`, `authen_name`, `status`) VALUES
 	(1, 'APPLICATION', b'1');
@@ -184,6 +98,7 @@ CREATE TABLE IF NOT EXISTS `doctors` (
   `dob` date NOT NULL,
   `email` varchar(200) NOT NULL,
   `email_verified` bit(1) NOT NULL,
+  `face_encode_value` varchar(5000) DEFAULT NULL,
   `first_name` varchar(100) NOT NULL,
   `last_name` varchar(100) NOT NULL,
   `password` varchar(100) NOT NULL,
@@ -205,21 +120,13 @@ CREATE TABLE IF NOT EXISTS `doctors` (
   CONSTRAINT `FKp4iloqqmw98s65wv8761exy6c` FOREIGN KEY (`address_id`) REFERENCES `addresses` (`id`),
   CONSTRAINT `FKqlqav15r1wbthdbd7xus4e3b3` FOREIGN KEY (`authed_provider_id`) REFERENCES `authenticate_provider` (`id`),
   CONSTRAINT `FKrs925uccbwa4satfufrgayf94` FOREIGN KEY (`type_disease`) REFERENCES `type_diseases` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table admin_service.doctors: ~10 rows (approximately)
+-- Dumping data for table admin_service.doctors: ~2 rows (approximately)
 DELETE FROM `doctors`;
-INSERT INTO `doctors` (`id`, `avatar`, `created_at`, `dob`, `email`, `email_verified`, `first_name`, `last_name`, `password`, `phone`, `sex`, `status`, `updated_at`, `user_id`, `specialization`, `address_id`, `authed_provider_id`, `type_disease`) VALUES
-	(1, NULL, '2025-03-04 18:05:17.425072', '1995-08-10', 'barbra.powlowski@yahoo.com', b'1', 'Truman', 'Spinka', '6u5vjao881r1pjzl', '(812) 976-1981', b'1', b'1', NULL, '20250304180516-62345-19950810', '', 1, 1, 6),
-	(2, NULL, '2025-03-04 18:05:17.580475', '1987-10-21', 'lee.durgan@gmail.com', b'1', 'Oda', 'Wiza', 'm9l4uc5j9r9qy3g', '(730) 608-1762', b'0', b'1', NULL, '20250304180517-42192-19871021', '', 5, 1, 5),
-	(3, NULL, '2025-03-04 18:05:17.624270', '1986-02-22', 'don.reynolds@yahoo.com', b'1', 'Rocky', 'Luettgen', 'n26n7935j', '(505) 905-0902', b'0', b'1', NULL, '20250304180517-16185-19860222', '', 9, 1, 3),
-	(4, NULL, '2025-03-04 18:05:17.671418', '1985-03-03', 'winston.satterfield@hotmail.com', b'1', 'Zetta', 'Simonis', 'h30qto571g', '(386) 493-5144', b'0', b'1', NULL, '20250304180517-50571-19850303', '', 13, 1, 5),
-	(5, NULL, '2025-03-04 18:05:17.718136', '1991-01-27', 'byron.greenfelder@gmail.com', b'1', 'Cassey', 'Pouros', 'v1fjcn2j7', '(305) 254-3317', b'1', b'1', NULL, '20250304180517-74899-19910127', '', 17, 1, 6),
-	(6, NULL, '2025-03-04 18:05:17.757917', '1993-08-12', 'ursula.kerluke@yahoo.com', b'1', 'Vicente', 'Wehner', '1d5ritpqzj5i6', '(929) 376-5586', b'1', b'1', NULL, '20250304180517-71924-19930812', '', 21, 1, 6),
-	(7, NULL, '2025-03-04 18:05:17.798584', '1998-01-31', 'jasmine.terry@hotmail.com', b'1', 'Cleveland', 'Moore', 'h1bl08bw3', '(505) 808-6102', b'1', b'1', NULL, '20250304180517-85560-19980131', '', 25, 1, 3),
-	(8, NULL, '2025-03-04 18:05:17.841450', '1988-01-28', 'karole.gislason@yahoo.com', b'1', 'Sandy', 'Lind', '34qrqw6596b7885', '(730) 242-9581', b'1', b'1', NULL, '20250304180517-80532-19880128', '', 29, 1, 7),
-	(9, NULL, '2025-03-04 18:05:17.885515', '1992-12-07', 'alonzo.hodkiewicz@hotmail.com', b'1', 'Marlon', 'Kshlerin', 'i603y98l14', '(539) 813-0320', b'0', b'1', NULL, '20250304180517-35792-19921207', '', 33, 1, 2),
-	(10, NULL, '2025-03-04 18:05:17.930439', '1983-08-02', 'salvador.okon@hotmail.com', b'1', 'Krystina', 'Mann', '845h9asj83cw9t1', '(305) 508-8671', b'1', b'1', NULL, '20250304180517-48275-19830802', '', 37, 1, 4);
+INSERT INTO `doctors` (`id`, `avatar`, `created_at`, `dob`, `email`, `email_verified`, `face_encode_value`, `first_name`, `last_name`, `password`, `phone`, `sex`, `status`, `updated_at`, `user_id`, `specialization`, `address_id`, `authed_provider_id`, `type_disease`) VALUES
+	(1, NULL, '2025-04-09 00:49:25.920128', '1990-05-10', 'minhthu281103@gmail.com', b'0', '', 'Thư', 'Lê', '123456789', '0246813579', b'0', b'1', NULL, '20250409004925-20533-19900510', 'TÂM LÝ HỌC TÂM THẦN', 1, 1, 4),
+	(2, NULL, '2025-04-09 01:09:33.085097', '1990-05-10', 'joebidden@gmail.com', b'0', '', 'Joe', 'Bidden', '123456789', '035792468', b'0', b'1', NULL, '20250409010933-55428-19900510', 'TÂM LÝ HỌC CẢM XÚC', 3, 1, 1);
 
 -- Dumping structure for table admin_service.doctor_certificates
 DROP TABLE IF EXISTS `doctor_certificates`;
@@ -232,10 +139,13 @@ CREATE TABLE IF NOT EXISTS `doctor_certificates` (
   PRIMARY KEY (`id`),
   KEY `FK4s0nv89dnoagx4dlsiu03hob2` (`doctor_id`),
   CONSTRAINT `FK4s0nv89dnoagx4dlsiu03hob2` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table admin_service.doctor_certificates: ~0 rows (approximately)
+-- Dumping data for table admin_service.doctor_certificates: ~2 rows (approximately)
 DELETE FROM `doctor_certificates`;
+INSERT INTO `doctor_certificates` (`id`, `cert_name`, `created_at`, `issue_date`, `doctor_id`) VALUES
+	(1, 'CHỨNG CHỈ TÂM LÝ HỌC', '2025-04-09 00:49:28.026415', '2012-06-21', 1),
+	(2, 'CHỨNG CHỈ TÂM LÝ HỌC', '2025-04-09 01:09:35.108836', '2012-06-21', 2);
 
 -- Dumping structure for table admin_service.doctor_educations
 DROP TABLE IF EXISTS `doctor_educations`;
@@ -250,21 +160,13 @@ CREATE TABLE IF NOT EXISTS `doctor_educations` (
   PRIMARY KEY (`id`),
   KEY `FKlqv3elmi210q99ipk3cmegr2q` (`doctor_id`),
   CONSTRAINT `FKlqv3elmi210q99ipk3cmegr2q` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table admin_service.doctor_educations: ~10 rows (approximately)
+-- Dumping data for table admin_service.doctor_educations: ~2 rows (approximately)
 DELETE FROM `doctor_educations`;
 INSERT INTO `doctor_educations` (`id`, `created_at`, `diploma`, `graduate_date`, `join_date`, `school_name`, `doctor_id`) VALUES
-	(1, '2025-03-04 18:05:17.569460', 'BACHELOR', '2003-06-01', '2007-12-22', 'Dicki and Sons', 1),
-	(2, '2025-03-04 18:05:17.615142', 'BACHELOR', '2003-12-05', '2007-05-29', 'Mitchell-Quitzon', 2),
-	(3, '2025-03-04 18:05:17.660864', 'BACHELOR', '2004-02-06', '2008-01-31', 'Aufderhar, Crona and Boyer', 3),
-	(4, '2025-03-04 18:05:17.709110', 'BACHELOR', '2003-06-07', '2007-04-13', 'Feest Inc', 4),
-	(5, '2025-03-04 18:05:17.749387', 'BACHELOR', '2003-05-12', '2007-08-28', 'Gerlach LLC', 5),
-	(6, '2025-03-04 18:05:17.788523', 'BACHELOR', '2003-08-22', '2007-11-13', 'Homenick Inc', 6),
-	(7, '2025-03-04 18:05:17.831885', 'BACHELOR', '2003-05-25', '2007-11-06', 'Muller Inc', 7),
-	(8, '2025-03-04 18:05:17.877178', 'BACHELOR', '2003-09-21', '2007-03-11', 'Littel-Turner', 8),
-	(9, '2025-03-04 18:05:17.921405', 'BACHELOR', '2003-09-16', '2007-04-12', 'Schimmel LLC', 9),
-	(10, '2025-03-04 18:05:17.961705', 'BACHELOR', '2004-01-13', '2007-10-20', 'Bechtelar Inc', 10);
+	(1, '2025-04-09 00:49:30.059415', 'BACHELOR', '2012-06-21', '2008-09-10', 'ĐẠI HỌC Y HÀ NỘI', 1),
+	(2, '2025-04-09 01:09:37.122932', 'BACHELOR', '2012-06-21', '2008-09-10', 'ĐẠI HỌC Y HÀ NỘI', 2);
 
 -- Dumping structure for table admin_service.doctor_experiences
 DROP TABLE IF EXISTS `doctor_experiences`;
@@ -283,41 +185,12 @@ CREATE TABLE IF NOT EXISTS `doctor_experiences` (
   KEY `FKnoss5vksd9wtpthgxm30dqdbn` (`doctor_id`),
   CONSTRAINT `FKl47o8476q5k3fhjbany3vy5lp` FOREIGN KEY (`comp_address_id`) REFERENCES `addresses` (`id`),
   CONSTRAINT `FKnoss5vksd9wtpthgxm30dqdbn` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table admin_service.doctor_experiences: ~30 rows (approximately)
+-- Dumping data for table admin_service.doctor_experiences: ~1 rows (approximately)
 DELETE FROM `doctor_experiences`;
 INSERT INTO `doctor_experiences` (`id`, `company_name`, `created_at`, `description`, `end_date`, `specialization`, `start_date`, `comp_address_id`, `doctor_id`) VALUES
-	(1, 'Hintz Group', '2025-03-04 18:05:17.544094', 'Ipsum quod dicta.', '2001-02-16', '', '2002-02-12', 2, 1),
-	(2, 'Ebert-Cronin', '2025-03-04 18:05:17.554410', 'Quis totam incidunt ipsa.', '2000-10-10', '', '2002-10-01', 3, 1),
-	(3, 'Kertzmann Inc', '2025-03-04 18:05:17.564947', 'Non aperiam amet.', '2000-12-06', '', '2001-05-20', 4, 1),
-	(4, 'Cummerata Group', '2025-03-04 18:05:17.592050', 'Unde incidunt nostrum sit accusantium.', '2000-05-22', '', '2002-05-29', 6, 2),
-	(5, 'Cremin Inc', '2025-03-04 18:05:17.600066', 'Facere nesciunt voluptates consectetur error commodi deleniti eius.', '2000-09-18', '', '2001-10-07', 7, 2),
-	(6, 'Kreiger and Sons', '2025-03-04 18:05:17.610613', 'Esse eius nesciunt nisi.', '2000-05-05', '', '2001-10-25', 8, 2),
-	(7, 'Emard-Schneider', '2025-03-04 18:05:17.633778', 'Minima ad quos sapiente.', '2000-07-11', '', '2002-07-26', 10, 3),
-	(8, 'Huels-Gorczany', '2025-03-04 18:05:17.644311', 'Deserunt eaque tenetur nam minima earum.', '2000-07-28', '', '2002-02-26', 11, 3),
-	(9, 'Bailey, Lubowitz and Steuber', '2025-03-04 18:05:17.654844', 'Harum animi numquam recusandae.', '2000-11-16', '', '2002-09-22', 12, 3),
-	(10, 'Kilback-Zboncak', '2025-03-04 18:05:17.685468', 'Similique vero eveniet nesciunt non aperiam.', '2000-04-12', '', '2002-12-16', 14, 4),
-	(11, 'Steuber, Doyle and Dare', '2025-03-04 18:05:17.694008', 'Modi molestiae dolores.', '2000-08-31', '', '2002-05-11', 15, 4),
-	(12, 'Robel LLC', '2025-03-04 18:05:17.703575', 'Tenetur tempora doloribus illo voluptatum exercitationem cum quo.', '2000-05-12', '', '2003-02-28', 16, 4),
-	(13, 'Kautzer-Swift', '2025-03-04 18:05:17.728196', 'Quisquam eveniet odit eligendi officia.', '2000-03-31', '', '2001-05-21', 18, 5),
-	(14, 'Pacocha-Wiza', '2025-03-04 18:05:17.737726', 'Dicta earum distinctio ad.', '2000-03-05', '', '2001-05-13', 19, 5),
-	(15, 'Becker, Streich and Greenfelder', '2025-03-04 18:05:17.745403', 'Fugiat dolorem sit.', '2000-09-19', '', '2002-03-27', 20, 5),
-	(16, 'O\'Conner-Kris', '2025-03-04 18:05:17.768456', 'Fuga sapiente vel consequuntur minima nemo.', '2000-08-30', '', '2001-06-10', 22, 6),
-	(17, 'Willms-Labadie', '2025-03-04 18:05:17.776529', 'Exercitationem praesentium earum at veniam ullam.', '2000-06-24', '', '2002-06-03', 23, 6),
-	(18, 'Jacobi-Johnson', '2025-03-04 18:05:17.784510', 'Earum dolore laudantium.', '2000-12-21', '', '2003-02-24', 24, 6),
-	(19, 'Walker-Bode', '2025-03-04 18:05:17.809127', 'Facilis officiis nulla hic.', '2000-08-20', '', '2001-11-29', 26, 7),
-	(20, 'Kunde, Willms and Lockman', '2025-03-04 18:05:17.817334', 'Cupiditate enim vitae facilis in quaerat.', '2000-05-30', '', '2003-01-05', 27, 7),
-	(21, 'Dare Group', '2025-03-04 18:05:17.825851', 'Ducimus totam in dicta nobis.', '2000-08-31', '', '2002-03-27', 28, 7),
-	(22, 'Carter, White and Quigley', '2025-03-04 18:05:17.853100', 'Dolorem saepe nam architecto sit quae quia.', '2001-01-26', '', '2002-05-22', 30, 8),
-	(23, 'Grimes-Cummerata', '2025-03-04 18:05:17.862634', 'Quas laudantium officiis repudiandae consequatur iste omnis omnis.', '2000-04-09', '', '2003-01-28', 31, 8),
-	(24, 'Stiedemann, D\'Amore and Macejkovic', '2025-03-04 18:05:17.872175', 'Velit voluptates aliquam quam.', '2000-09-08', '', '2002-07-25', 32, 8),
-	(25, 'Rogahn-Hudson', '2025-03-04 18:05:17.896830', 'Quisquam architecto in veniam quam ut veritatis error.', '2000-04-14', '', '2002-10-24', 34, 9),
-	(26, 'Jacobi-O\'Conner', '2025-03-04 18:05:17.907356', 'Dolore repellat consequuntur et odio.', '2001-02-04', '', '2002-01-30', 35, 9),
-	(27, 'Casper LLC', '2025-03-04 18:05:17.916893', 'Doloribus tenetur labore reiciendis eligendi dicta facere.', '2001-01-22', '', '2002-05-20', 36, 9),
-	(28, 'Johns and Sons', '2025-03-04 18:05:17.941538', 'Eius cupiditate blanditiis.', '2001-03-03', '', '2001-04-07', 38, 10),
-	(29, 'Medhurst-Shanahan', '2025-03-04 18:05:17.950638', 'Debitis fuga esse inventore illum.', '2000-06-05', '', '2001-09-21', 39, 10),
-	(30, 'Bins and Sons', '2025-03-04 18:05:17.957706', 'Exercitationem ut fuga.', '2000-06-27', '', '2001-08-02', 40, 10);
+	(1, 'TÂM LÝ HỌC THUẬN AN', '2025-04-09 00:49:32.159440', NULL, '2024-12-10', 'TÂM LÝ HỌC TÂM THẦN', '2012-09-02', 2, 1);
 
 -- Dumping structure for table admin_service.drugs
 DROP TABLE IF EXISTS `drugs`;
@@ -325,57 +198,29 @@ CREATE TABLE IF NOT EXISTS `drugs` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `created_at` datetime(6) NOT NULL,
   `drug_name` varchar(150) NOT NULL,
-  `unit` varchar(50) NOT NULL,
   `drug_type` varchar(300) NOT NULL,
+  `unit` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table admin_service.drugs: ~8 rows (approximately)
+-- Dumping data for table admin_service.drugs: ~15 rows (approximately)
 DELETE FROM `drugs`;
-INSERT INTO `drugs` (`id`, `created_at`, `drug_name`, `unit`, `drug_type`) VALUES
-	(1, '2025-02-28 22:33:55.828644', 'Amoxicillin 500mg', 'Viên', 'Thuốc Kháng Sinh'),
-	(2, '2025-02-28 22:34:20.021350', 'Amoxicillin + Acid Clavulanic (Augmentin) 625mg', 'Viên', 'Thuốc Kháng Sinh'),
-	(3, '2025-02-28 22:34:49.178892', 'Ibuprofen 400mg', 'Viên', 'Thuốc Giảm Đau, Chống Viêm'),
-	(4, '2025-02-28 22:35:02.186566', 'Paracetamol 500mg', 'Viên', 'Thuốc Giảm Đau, Chống Viêm'),
-	(5, '2025-02-28 22:35:29.960031', 'Chlorhexidine 0.12%', 'Chai (ml)', 'Thuốc Súc Miệng, Kháng Khuẩn'),
-	(6, '2025-02-28 22:35:40.458009', 'Hydrogen Peroxide 3%', 'Chai (ml)', 'Thuốc Súc Miệng, Kháng Khuẩn'),
-	(7, '2025-02-28 22:36:06.272755', 'Nystatin 500.000 IU', 'Viên / Ngậm', 'Thuốc Chống Nấm Miệng'),
-	(8, '2025-02-28 22:36:21.974716', 'Miconazole gel 2%', 'Tuýp (g)', 'Thuốc Chống Nấm Miệng'),
-	(9, '2025-02-28 22:36:39.005893', 'Triamcinolone Acetonide 0.1% (Oracort)', 'Tuýp (g)', 'Thuốc Điều Trị Loét Miệng'),
-	(10, '2025-02-28 22:36:52.853523', 'Betamethasone 0.1%', 'Tuýp (g)', 'Thuốc Điều Trị Loét Miệng');
-
--- Dumping structure for table admin_service.medical_records
-DROP TABLE IF EXISTS `medical_records`;
-CREATE TABLE IF NOT EXISTS `medical_records` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `created_at` datetime(6) NOT NULL,
-  `diagnosis_disease` varchar(300) DEFAULT NULL,
-  `note` varchar(500) DEFAULT NULL,
-  `re_examination_date` date NOT NULL,
-  `appointment_id` bigint(20) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `UK2nyonrbplqq716buy7u4ghmt8` (`appointment_id`),
-  CONSTRAINT `FKifeec8p5v06rt258odelw8s7j` FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
-
--- Dumping data for table admin_service.medical_records: ~0 rows (approximately)
-DELETE FROM `medical_records`;
-
--- Dumping structure for table admin_service.medical_record_drugs
-DROP TABLE IF EXISTS `medical_record_drugs`;
-CREATE TABLE IF NOT EXISTS `medical_record_drugs` (
-  `how_use` varchar(5000) NOT NULL,
-  `quantity` double NOT NULL,
-  `medical_record` bigint(20) NOT NULL,
-  `drug_id` bigint(20) NOT NULL,
-  PRIMARY KEY (`drug_id`,`medical_record`),
-  KEY `FKq0r5sgy3stpiwdksamwdrls34` (`medical_record`),
-  CONSTRAINT `FK4c6sp5dplul9mxwk0cn1ehyhi` FOREIGN KEY (`drug_id`) REFERENCES `drugs` (`id`),
-  CONSTRAINT `FKq0r5sgy3stpiwdksamwdrls34` FOREIGN KEY (`medical_record`) REFERENCES `medical_records` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
-
--- Dumping data for table admin_service.medical_record_drugs: ~0 rows (approximately)
-DELETE FROM `medical_record_drugs`;
+INSERT INTO `drugs` (`id`, `created_at`, `drug_name`, `drug_type`, `unit`) VALUES
+	(1, '2025-04-09 00:27:48.298580', 'Fluoxetine', 'Thuốc Chống Trầm Cảm', '20 mg/viên'),
+	(2, '2025-04-09 00:29:07.262295', 'Sertraline', 'Thuốc Chống Trầm Cảm', '50mg/viên'),
+	(3, '2025-04-09 00:31:28.118114', 'Mirtazapine', 'Thuốc Chống Trầm Cảm', '15mg/viên'),
+	(4, '2025-04-09 00:31:48.998542', 'Diazepam', 'Thuốc Chống Lo Âu', '10mg/viên'),
+	(5, '2025-04-09 00:31:58.003571', 'Lorazepam', 'Thuốc Chống Lo Âu', '2mg/viên'),
+	(6, '2025-04-09 00:33:05.078145', 'Alprazolam', 'Thuốc Chống Lo Âu', '0.25mg/viên'),
+	(7, '2025-04-09 00:33:31.632064', 'Lithium carbonate', 'Thuốc Ổn Định Tâm Trạng', '300mg/viên'),
+	(8, '2025-04-09 00:34:45.706967', 'Lamotrigine', 'Thuốc Ổn Định Tâm Trạng', '25mg/viên'),
+	(9, '2025-04-09 00:35:12.917266', 'Carbamazepine', 'Thuốc Ổn Định Tâm Trạng', '200mg/viên'),
+	(10, '2025-04-09 00:36:44.628290', 'Risperidone', 'Thuốc Chống Loạn Thần', '1mg/viên'),
+	(11, '2025-04-09 00:37:02.558346', 'Olanzapine', 'Thuốc Chống Loạn Thần', '5mg/viên'),
+	(12, '2025-04-09 00:37:11.903117', 'Quetiapine', 'Thuốc Chống Loạn Thần', '25mg/viên'),
+	(13, '2025-04-09 00:37:39.295570', 'Zolpidem', 'Thuốc Hỗ Trợ Giấc Ngủ', '5mg/viên'),
+	(14, '2025-04-09 00:38:14.445929', 'Quetiapine (liều thấp)', 'Thuốc Hỗ Trợ Giấc Ngủ', '25mg/viên'),
+	(15, '2025-04-09 00:39:14.333611', 'Melatonin', 'Thuốc Hỗ Trợ Giấc Ngủ', '3mg/viên');
 
 -- Dumping structure for table admin_service.patients
 DROP TABLE IF EXISTS `patients`;
@@ -386,6 +231,7 @@ CREATE TABLE IF NOT EXISTS `patients` (
   `dob` date NOT NULL,
   `email` varchar(200) NOT NULL,
   `email_verified` bit(1) NOT NULL,
+  `face_encode_value` varchar(5000) DEFAULT NULL,
   `first_name` varchar(100) NOT NULL,
   `last_name` varchar(100) NOT NULL,
   `password` varchar(100) NOT NULL,
@@ -403,44 +249,12 @@ CREATE TABLE IF NOT EXISTS `patients` (
   KEY `FK7s92dg6yxcss33sqqh1d7dg1v` (`authed_provider_id`),
   CONSTRAINT `FK7s92dg6yxcss33sqqh1d7dg1v` FOREIGN KEY (`authed_provider_id`) REFERENCES `authenticate_provider` (`id`),
   CONSTRAINT `FKjc8017x8ae0rqi11m8jmny646` FOREIGN KEY (`address_id`) REFERENCES `addresses` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table admin_service.patients: ~33 rows (approximately)
+-- Dumping data for table admin_service.patients: ~1 rows (approximately)
 DELETE FROM `patients`;
-INSERT INTO `patients` (`id`, `avatar`, `created_at`, `dob`, `email`, `email_verified`, `first_name`, `last_name`, `password`, `phone`, `sex`, `status`, `updated_at`, `user_id`, `address_id`, `authed_provider_id`) VALUES
-	(1, NULL, '2025-02-28 08:19:50.363986', '2003-09-13', 'tdminhnhat13092003@gmail.com', b'1', 'Nhat', 'Truong', '123456789', '0123456789', b'0', b'1', NULL, '20250228081950-93569-20030913', NULL, 1),
-	(2, NULL, '2025-02-28 19:22:36.042887', '2000-01-02', 'skyherobrine13092003@gmail.com', b'0', 'Linh', 'NgÅ©', '123456789', '0135792468', b'0', b'1', NULL, '20250228192235-63089-20000102', NULL, 1),
-	(3, NULL, '2025-02-28 19:23:59.902233', '2000-10-01', 'nhatdev13092003@gmail.com', b'0', 'Vy', 'Nguyen', '123456789', '0129384756', b'1', b'1', NULL, '20250228192359-55935-20001001', NULL, 1),
-	(4, NULL, '2025-03-04 18:20:50.451763', '2001-02-21', 'kelley.greenfelder@hotmail.com', b'0', 'Leslie', 'Tremblay', '2p7hdf9j7q', '(414) 902-8116', b'0', b'1', NULL, '20250304182049-40175-20010221', 41, 1),
-	(5, NULL, '2025-03-04 18:20:50.517828', '1986-02-18', 'vina.ondricka@gmail.com', b'0', 'Johnathan', 'Wyman', '28hje83y3h9', '(730) 201-7158', b'0', b'1', NULL, '20250304182050-56975-19860218', 42, 1),
-	(6, NULL, '2025-03-04 18:20:50.527399', '1990-03-30', 'peter.morissette@yahoo.com', b'0', 'Jeannine', 'Torp', 'l7qy35l8qdj16zc', '(305) 232-2688', b'0', b'1', NULL, '20250304182050-32009-19900330', 43, 1),
-	(7, NULL, '2025-03-04 18:20:50.536901', '1988-05-23', 'trevor.johnston@yahoo.com', b'0', 'Ashley', 'Erdman', '36782ko4u5v27502', '(561) 540-5279', b'1', b'1', NULL, '20250304182050-82154-19880523', 44, 1),
-	(8, NULL, '2025-03-04 18:20:50.547442', '1988-11-28', 'marcus.kling@hotmail.com', b'0', 'Annis', 'Doyle', '7wv1v24lcr7s7', '(305) 983-6503', b'0', b'1', NULL, '20250304182050-47732-19881128', 45, 1),
-	(9, NULL, '2025-03-04 18:20:50.556452', '1975-09-25', 'avril.gutkowski@gmail.com', b'0', 'Valerie', 'Brakus', '36oi0416', '(983) 300-9340', b'0', b'1', NULL, '20250304182050-83383-19750925', 46, 1),
-	(10, NULL, '2025-03-04 18:20:50.565585', '1967-10-02', 'erich.gorczany@hotmail.com', b'0', 'Rafael', 'Koch', '29l0g50xg', '(505) 601-6995', b'1', b'1', NULL, '20250304182050-38167-19671002', 47, 1),
-	(11, NULL, '2025-03-04 18:20:50.576123', '1997-10-30', 'diedra.corwin@hotmail.com', b'0', 'Bryce', 'Hand', 'cbbk79lo9', '(305) 265-9885', b'1', b'1', NULL, '20250304182050-41137-19971030', 48, 1),
-	(12, NULL, '2025-03-04 18:20:50.584698', '1983-08-20', 'catina.bernier@hotmail.com', b'0', 'Stanton', 'Johnson', '49w25h3v', '(313) 201-2829', b'1', b'1', NULL, '20250304182050-99844-19830820', 49, 1),
-	(13, NULL, '2025-03-04 18:20:50.594227', '1973-01-30', 'sanford.schaden@yahoo.com', b'0', 'Silas', 'Howell', '233qk00710ksu807', '(234) 778-1906', b'0', b'1', NULL, '20250304182050-27503-19730130', 50, 1),
-	(14, NULL, '2025-03-04 18:20:50.604747', '2001-06-23', 'katheleen.gottlieb@gmail.com', b'0', 'Toshiko', 'Ziemann', 'c157fl3pr4o', '(636) 311-1662', b'1', b'1', NULL, '20250304182050-47036-20010623', 51, 1),
-	(15, NULL, '2025-03-04 18:20:50.615807', '2002-02-10', 'juliet.keebler@gmail.com', b'0', 'Claudio', 'Buckridge', '70o41wc8we', '(505) 635-9246', b'1', b'1', NULL, '20250304182050-74349-20020210', 52, 1),
-	(16, NULL, '2025-03-04 18:20:50.628338', '1986-08-18', 'humberto.kub@hotmail.com', b'0', 'Deon', 'Gottlieb', 'o015ic812', '(252) 645-2702', b'0', b'1', NULL, '20250304182050-60369-19860818', 53, 1),
-	(17, NULL, '2025-03-04 18:20:50.638873', '1997-05-25', 'lenora.rempel@yahoo.com', b'0', 'Benedict', 'Bahringer', 'xrjpjpc1a8', '(305) 293-3368', b'1', b'1', NULL, '20250304182050-83401-19970525', 54, 1),
-	(18, NULL, '2025-03-04 18:20:50.650415', '1978-11-04', 'wendell.murray@gmail.com', b'0', 'Barrett', 'Glover', '27xe0pk87', '(505) 648-7073', b'1', b'1', NULL, '20250304182050-72921-19781104', 55, 1),
-	(19, NULL, '2025-03-04 18:20:50.659942', '1987-03-27', 'angelo.gislason@gmail.com', b'0', 'Magaret', 'Kunze', 'b25u3t4fe33m7', '(680) 634-6703', b'1', b'1', NULL, '20250304182050-59530-19870327', 56, 1),
-	(20, NULL, '2025-03-04 18:20:50.670027', '2004-04-25', 'marc.vandervort@hotmail.com', b'0', 'Sydney', 'Fadel', '6hd00dd8d3z84', '(305) 206-1616', b'0', b'1', NULL, '20250304182050-34472-20040425', 57, 1),
-	(21, NULL, '2025-03-04 18:20:50.680071', '1998-03-25', 'twana.weber@yahoo.com', b'0', 'Myron', 'Spencer', 'nv9595plw5', '(505) 630-4490', b'1', b'1', NULL, '20250304182050-86688-19980325', 58, 1),
-	(22, NULL, '2025-03-04 18:20:50.690126', '2007-02-28', 'jed.mclaughlin@yahoo.com', b'0', 'Howard', 'Fay', 'd6zn9x1kf0youq', '(727) 230-5263', b'0', b'1', NULL, '20250304182050-89117-20070228', 59, 1),
-	(23, NULL, '2025-03-04 18:20:50.699103', '1960-12-22', 'lenna.white@gmail.com', b'0', 'Franklin', 'Dietrich', '3852y8awg', '(505) 690-9903', b'0', b'1', NULL, '20250304182050-78903-19601222', 60, 1),
-	(24, NULL, '2025-03-04 18:20:50.707619', '1955-10-04', 'romona.smitham@yahoo.com', b'0', 'Val', 'Harber', '99qbm4c85o', '(983) 898-4187', b'0', b'1', NULL, '20250304182050-59751-19551004', 61, 1),
-	(25, NULL, '2025-03-04 18:20:50.714633', '1978-10-17', 'leon.zieme@gmail.com', b'0', 'Mayra', 'Auer', 'a6o84900', '(505) 621-7008', b'0', b'1', NULL, '20250304182050-31302-19781017', 62, 1),
-	(26, NULL, '2025-03-04 18:20:50.723166', '1968-05-03', 'dimple.anderson@hotmail.com', b'0', 'Leeann', 'McKenzie', '0r1p1xgi6', '(828) 690-7431', b'0', b'1', NULL, '20250304182050-93840-19680503', 63, 1),
-	(27, NULL, '2025-03-04 18:20:50.730111', '1989-07-08', 'eusebio.herzog@hotmail.com', b'0', 'Elva', 'Littel', 't1cd5131f235sk3', '(805) 531-6795', b'0', b'1', NULL, '20250304182050-91670-19890708', 64, 1),
-	(28, NULL, '2025-03-04 18:20:50.738105', '1997-01-06', 'davida.strosin@hotmail.com', b'0', 'Josiah', 'Moen', '4cc888iu2fl', '(305) 204-8347', b'1', b'1', NULL, '20250304182050-60679-19970106', 65, 1),
-	(29, NULL, '2025-03-04 18:20:50.746613', '1976-04-17', 'mitzi.hane@yahoo.com', b'0', 'Walker', 'Toy', 'm2x455bc66v4v', '(305) 434-4861', b'0', b'1', NULL, '20250304182050-66373-19760417', 66, 1),
-	(30, NULL, '2025-03-04 18:20:50.756140', '1970-07-05', 'teri.weber@yahoo.com', b'0', 'Miguel', 'Marks', 'oqh7j29969341x', '(350) 870-7432', b'1', b'1', NULL, '20250304182050-71357-19700705', 67, 1),
-	(31, NULL, '2025-03-04 18:20:50.763485', '1996-12-30', 'eddie.barrows@yahoo.com', b'0', 'Hertha', 'Gusikowski', 'm903w9710o916lkw', '(983) 794-4826', b'1', b'1', NULL, '20250304182050-16310-19961230', 68, 1),
-	(32, NULL, '2025-03-04 18:20:50.771483', '1967-05-27', 'jeniffer.beier@gmail.com', b'0', 'Margert', 'Durgan', '3110g050927u96', '(505) 894-3265', b'1', b'1', NULL, '20250304182050-89821-19670527', 69, 1),
-	(33, NULL, '2025-03-04 18:20:50.781057', '2003-10-04', 'johanna.johnston@gmail.com', b'0', 'Sina', 'Swaniawski', 'b8495zswb3', '(730) 645-4969', b'0', b'1', NULL, '20250304182050-25278-20031004', 70, 1);
+INSERT INTO `patients` (`id`, `avatar`, `created_at`, `dob`, `email`, `email_verified`, `face_encode_value`, `first_name`, `last_name`, `password`, `phone`, `sex`, `status`, `updated_at`, `user_id`, `address_id`, `authed_provider_id`) VALUES
+	(1, NULL, '2025-04-09 00:01:48.649487', '1946-06-14', 'donaldtrump@gmail.com', b'0', '0.10584330558776855,0.13875123858451843,0.017335709184408188,-0.034396834671497345,0.0634281262755394,0.1731046438217163,0.13706965744495392,0.1279967874288559,-0.20125851035118103,0.1432647705078125,-0.016337769106030464,0.04654732719063759,0.09448826313018799,-0.14152637124061584,0.09778915345668793,-0.02033647708594799,0.09336532652378082,0.03785158321261406,-0.014978325925767422,-0.01065089926123619,0.08321639895439148,0.06275706738233566,-0.09443117678165436,0.06672995537519455,0.02548397332429886,-0.020930727943778038,-0.09379740059375763,-0.1023077517747879,0.06712616235017776,0.127790167927742,-0.07611799240112305,0.03837759420275688,-0.08349186927080154,0.08980368077754974,0.01547415554523468,-0.1361146718263626,0.04725499823689461,-0.025039980188012123,0.049504172056913376,-0.014677601866424084,0.038522396236658096,-0.06674099713563919,0.10104412585496902,0.06536762416362762,-0.07993385195732117,0.006556610111147165,0.12748196721076965,-0.05896943435072899,-0.1696457862854004,-0.017484785988926888,0.2638590335845947,-0.026486936956644058,-0.11667561531066895,0.008834133855998516,0.06422130018472672,0.014854923821985722,-0.05251426622271538,0.035479795187711716,0.048541177064180374,-0.07095971703529358,0.004742802586406469,-0.09870276600122452,-0.029856251552700996,-0.1513420045375824,0.07640501111745834,-0.12929591536521912,0.0021999350283294916,-0.022297585383057594,-0.10714013874530792,-0.05744510516524315,0.023083405569195747,0.09507455676794052,-0.056554775685071945,-0.07993900775909424,-0.04638156667351723,0.0924389660358429,-0.010323582217097282,0.10469857603311539,0.08798302710056305,0.08940759301185608,-0.029620077461004257,-0.011434666812419891,0.12538853287696838,0.09091522544622421,0.059597987681627274,-0.08719949424266815,0.11513292044401169,-0.04865673929452896,0.07340408861637115,0.05124524608254433,-0.13828705251216888,-0.10107102990150452,-0.12693481147289276,0.048568710684776306,-0.1492796242237091,-0.03339071571826935,0.1399904489517212,-0.008997241035103798,-0.08009881526231766,-0.0026522742118686438,-0.003236828139051795,0.16625501215457916,0.007123994641005993,0.1711837649345398,-0.18761046230793,-0.04617668315768242,-0.1000283807516098,0.10408741235733032,-0.05619249492883682,-0.04356605187058449,0.06135101616382599,0.0009394040098413825,-0.14605748653411865,-0.025118842720985413,0.03374747559428215,-0.02206031233072281,-0.10726196318864822,-0.08281461894512177,-0.11964135617017746,0.0577523410320282,0.016832564026117325,-0.012915853410959244,0.04364259913563728,0.015186404809355736,0.13587065041065216,-0.013775747269392014,0.023463400080800056,-0.08957294374704361', 'Donald', 'Trump', '123456789', '0129384756', b'0', b'1', NULL, '20250409000148-52838-19460614', NULL, 1);
 
 -- Dumping structure for table admin_service.patient_face_encodes
 DROP TABLE IF EXISTS `patient_face_encodes`;
@@ -470,14 +284,13 @@ CREATE TABLE IF NOT EXISTS `shifts` (
   `status` bit(1) NOT NULL,
   `updated_at` datetime(6) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table admin_service.shifts: ~3 rows (approximately)
+-- Dumping data for table admin_service.shifts: ~2 rows (approximately)
 DELETE FROM `shifts`;
 INSERT INTO `shifts` (`id`, `created_at`, `end`, `shift`, `start`, `status`, `updated_at`) VALUES
-	(1, '2025-03-10 09:20:11.545133', '11:00:00.000000', 1, '07:00:00.000000', b'1', '2025-03-10 09:20:11.545133'),
-	(2, '2025-03-10 09:20:45.531810', '17:00:00.000000', 2, '13:00:00.000000', b'1', '2025-03-10 09:20:45.531810'),
-	(3, '2025-03-10 09:20:55.261404', '21:00:00.000000', 3, '18:00:00.000000', b'1', '2025-03-10 09:20:55.261404');
+	(1, '2025-04-09 00:07:02.102611', '11:00:00.000000', 1, '07:00:00.000000', b'1', '2025-04-09 00:07:02.102611'),
+	(2, '2025-04-09 00:07:18.252282', '17:00:00.000000', 2, '13:00:00.000000', b'1', '2025-04-09 00:07:18.252282');
 
 -- Dumping structure for table admin_service.type_diseases
 DROP TABLE IF EXISTS `type_diseases`;
@@ -488,19 +301,20 @@ CREATE TABLE IF NOT EXISTS `type_diseases` (
   `status` bit(1) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UKpbl5knbx178mflcgajpwk3f6q` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table admin_service.type_diseases: ~8 rows (approximately)
+-- Dumping data for table admin_service.type_diseases: ~9 rows (approximately)
 DELETE FROM `type_diseases`;
 INSERT INTO `type_diseases` (`id`, `created_at`, `name`, `status`) VALUES
-	(1, '2025-03-04 17:06:05.254544', 'SÂU RĂNG', b'1'),
-	(2, '2025-03-04 17:06:14.134782', 'VÔI RĂNG', b'1'),
-	(3, '2025-03-04 17:06:21.036571', 'KHÁC', b'1'),
-	(4, '2025-03-04 17:07:21.705339', 'VIÊM NƯỚU', b'1'),
-	(5, '2025-03-04 17:07:31.284605', 'VIÊM NHA CHU', b'1'),
-	(6, '2025-03-04 17:07:44.656807', 'MÒN RĂNG', b'1'),
-	(7, '2025-03-04 17:07:49.845096', 'RĂNG KHÔN', b'1'),
-	(8, '2025-03-04 17:07:56.681766', 'HÔI MIỆNG', b'1');
+	(1, '2025-04-09 00:08:37.330874', 'TRẦM CẢM', b'1'),
+	(2, '2025-04-09 00:08:51.607775', 'RỐI LOẠN LO ÂU', b'1'),
+	(3, '2025-04-09 00:09:04.146636', 'RỐI LOẠN LƯỠNG CỰC', b'1'),
+	(4, '2025-04-09 00:09:15.827363', 'TÂM THẦN PHÂN LIỆT', b'1'),
+	(5, '2025-04-09 00:09:33.089745', 'RỐI LOẠN ÁM ẢNH CƯỠNG CHẾ', b'1'),
+	(6, '2025-04-09 00:09:43.963199', 'RỐI LOẠN ĂN UỐNG', b'1'),
+	(7, '2025-04-09 00:10:04.259456', 'RỐI LOẠN CĂNG THẲNG SAU SANG CHẤN', b'1'),
+	(8, '2025-04-09 00:10:15.236747', 'RỐI LOẠN NHÂN CÁCH', b'1'),
+	(9, '2025-04-09 00:10:19.659104', 'KHÁC', b'1');
 
 
 -- Dumping database structure for appointment_service
@@ -508,81 +322,35 @@ DROP DATABASE IF EXISTS `appointment_service`;
 CREATE DATABASE IF NOT EXISTS `appointment_service` /*!40100 DEFAULT CHARACTER SET utf8mb3 COLLATE utf8mb3_bin */;
 USE `appointment_service`;
 
--- Dumping structure for table appointment_service.appointments
-DROP TABLE IF EXISTS `appointments`;
-CREATE TABLE IF NOT EXISTS `appointments` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `created_at` datetime(6) NOT NULL,
-  `note` varchar(500) DEFAULT NULL,
-  `patient_id` varchar(50) NOT NULL,
-  `room_id` varchar(255) NOT NULL,
-  `status` tinyint(4) NOT NULL CHECK (`status` between 0 and 3),
-  `work_schedule_id` bigint(20) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
-
--- Dumping data for table appointment_service.appointments: ~0 rows (approximately)
-DELETE FROM `appointments`;
-INSERT INTO `appointments` (`id`, `created_at`, `note`, `patient_id`, `room_id`, `status`, `work_schedule_id`) VALUES
-	(1, '2025-03-05 00:12:47.441633', NULL, '20250304182049-40175-20010221', '763722-05032025001247', 0, 1);
-
 -- Dumping structure for table appointment_service.drugs
 DROP TABLE IF EXISTS `drugs`;
 CREATE TABLE IF NOT EXISTS `drugs` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `created_at` datetime(6) NOT NULL,
   `drug_name` varchar(150) NOT NULL,
-  `unit` varchar(50) NOT NULL,
   `drug_type` varchar(300) NOT NULL,
+  `unit` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table appointment_service.drugs: ~8 rows (approximately)
+-- Dumping data for table appointment_service.drugs: ~15 rows (approximately)
 DELETE FROM `drugs`;
-INSERT INTO `drugs` (`id`, `created_at`, `drug_name`, `unit`, `drug_type`) VALUES
-	(1, '2025-02-28 22:33:55.905653', 'Amoxicillin 500mg', 'Viên', 'Thuốc Kháng Sinh'),
-	(2, '2025-02-28 22:34:20.025343', 'Amoxicillin + Acid Clavulanic (Augmentin) 625mg', 'Viên', 'Thuốc Kháng Sinh'),
-	(3, '2025-02-28 22:34:49.183905', 'Ibuprofen 400mg', 'Viên', 'Thuốc Giảm Đau, Chống Viêm'),
-	(4, '2025-02-28 22:35:02.192926', 'Paracetamol 500mg', 'Viên', 'Thuốc Giảm Đau, Chống Viêm'),
-	(5, '2025-02-28 22:35:29.966024', 'Chlorhexidine 0.12%', 'Chai (ml)', 'Thuốc Súc Miệng, Kháng Khuẩn'),
-	(6, '2025-02-28 22:35:40.462012', 'Hydrogen Peroxide 3%', 'Chai (ml)', 'Thuốc Súc Miệng, Kháng Khuẩn'),
-	(7, '2025-02-28 22:36:06.277188', 'Nystatin 500.000 IU', 'Viên / Ngậm', 'Thuốc Chống Nấm Miệng'),
-	(8, '2025-02-28 22:36:21.978703', 'Miconazole gel 2%', 'Tuýp (g)', 'Thuốc Chống Nấm Miệng'),
-	(9, '2025-02-28 22:36:39.010389', 'Triamcinolone Acetonide 0.1% (Oracort)', 'Tuýp (g)', 'Thuốc Điều Trị Loét Miệng'),
-	(10, '2025-02-28 22:36:52.858511', 'Betamethasone 0.1%', 'Tuýp (g)', 'Thuốc Điều Trị Loét Miệng');
-
--- Dumping structure for table appointment_service.medical_records
-DROP TABLE IF EXISTS `medical_records`;
-CREATE TABLE IF NOT EXISTS `medical_records` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `created_at` datetime(6) NOT NULL,
-  `diagnosis_disease` varchar(300) DEFAULT NULL,
-  `note` varchar(500) DEFAULT NULL,
-  `re_examination_date` date NOT NULL,
-  `appointment_id` bigint(20) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `UK2nyonrbplqq716buy7u4ghmt8` (`appointment_id`),
-  CONSTRAINT `FKifeec8p5v06rt258odelw8s7j` FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
-
--- Dumping data for table appointment_service.medical_records: ~0 rows (approximately)
-DELETE FROM `medical_records`;
-
--- Dumping structure for table appointment_service.medical_record_drugs
-DROP TABLE IF EXISTS `medical_record_drugs`;
-CREATE TABLE IF NOT EXISTS `medical_record_drugs` (
-  `how_use` varchar(5000) NOT NULL,
-  `quantity` double NOT NULL,
-  `medical_record` bigint(20) NOT NULL,
-  `drug_id` bigint(20) NOT NULL,
-  PRIMARY KEY (`drug_id`,`medical_record`),
-  KEY `FKq0r5sgy3stpiwdksamwdrls34` (`medical_record`),
-  CONSTRAINT `FK4c6sp5dplul9mxwk0cn1ehyhi` FOREIGN KEY (`drug_id`) REFERENCES `drugs` (`id`),
-  CONSTRAINT `FKq0r5sgy3stpiwdksamwdrls34` FOREIGN KEY (`medical_record`) REFERENCES `medical_records` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
-
--- Dumping data for table appointment_service.medical_record_drugs: ~0 rows (approximately)
-DELETE FROM `medical_record_drugs`;
+INSERT INTO `drugs` (`id`, `created_at`, `drug_name`, `drug_type`, `unit`) VALUES
+	(1, '2025-04-09 00:27:48.593902', 'Fluoxetine', 'Thuốc Chống Trầm Cảm', '20 mg/viên'),
+	(2, '2025-04-09 00:29:07.263296', 'Sertraline', 'Thuốc Chống Trầm Cảm', '50mg/viên'),
+	(3, '2025-04-09 00:31:28.118114', 'Mirtazapine', 'Thuốc Chống Trầm Cảm', '15mg/viên'),
+	(4, '2025-04-09 00:31:48.998542', 'Diazepam', 'Thuốc Chống Lo Âu', '10mg/viên'),
+	(5, '2025-04-09 00:31:58.007083', 'Lorazepam', 'Thuốc Chống Lo Âu', '2mg/viên'),
+	(6, '2025-04-09 00:33:04.994412', 'Alprazolam', 'Thuốc Chống Lo Âu', '0.25mg/viên'),
+	(7, '2025-04-09 00:33:31.632064', 'Lithium carbonate', 'Thuốc Ổn Định Tâm Trạng', '300mg/viên'),
+	(8, '2025-04-09 00:34:45.706967', 'Lamotrigine', 'Thuốc Ổn Định Tâm Trạng', '25mg/viên'),
+	(9, '2025-04-09 00:35:12.925920', 'Carbamazepine', 'Thuốc Ổn Định Tâm Trạng', '200mg/viên'),
+	(10, '2025-04-09 00:36:44.635844', 'Risperidone', 'Thuốc Chống Loạn Thần', '1mg/viên'),
+	(11, '2025-04-09 00:37:02.558346', 'Olanzapine', 'Thuốc Chống Loạn Thần', '5mg/viên'),
+	(12, '2025-04-09 00:37:11.904626', 'Quetiapine', 'Thuốc Chống Loạn Thần', '25mg/viên'),
+	(13, '2025-04-09 00:37:39.297569', 'Zolpidem', 'Thuốc Hỗ Trợ Giấc Ngủ', '5mg/viên'),
+	(14, '2025-04-09 00:38:14.446930', 'Quetiapine (liều thấp)', 'Thuốc Hỗ Trợ Giấc Ngủ', '25mg/viên'),
+	(15, '2025-04-09 00:39:14.336611', 'Melatonin', 'Thuốc Hỗ Trợ Giấc Ngủ', '3mg/viên');
 
 
 -- Dumping database structure for authenticate_service
@@ -603,81 +371,14 @@ CREATE TABLE IF NOT EXISTS `addresses` (
   `updated_at` datetime(6) DEFAULT NULL,
   `ward` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=71 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table authenticate_service.addresses: ~70 rows (approximately)
+-- Dumping data for table authenticate_service.addresses: ~3 rows (approximately)
 DELETE FROM `addresses`;
 INSERT INTO `addresses` (`id`, `city`, `country`, `created_at`, `district`, `number`, `street`, `updated_at`, `ward`) VALUES
-	(1, NULL, NULL, '2025-03-04 18:05:17.431591', NULL, NULL, NULL, NULL, NULL),
-	(2, 'North Gertude', 'Cocos (Keeling) Islands', '2025-03-04 18:05:17.514413', 'Beahan Stream No District', '541', 'Beahan Stream', NULL, 'Beahan Stream No Ward'),
-	(3, 'South Aide', 'Paraguay', '2025-03-04 18:05:17.550407', 'Victor Trail No District', '273', 'Victor Trail', NULL, 'Victor Trail No Ward'),
-	(4, 'Reichelton', 'Guatemala', '2025-03-04 18:05:17.559946', 'Rempel Ramp No District', '497', 'Rempel Ramp', NULL, 'Rempel Ramp No Ward'),
-	(5, NULL, NULL, '2025-03-04 18:05:17.580475', NULL, NULL, NULL, NULL, NULL),
-	(6, 'North Rickyfort', 'Guernsey', '2025-03-04 18:05:17.586517', 'Hipolito Squares No District', '384', 'Hipolito Squares', NULL, 'Hipolito Squares No Ward'),
-	(7, 'Kamhaven', 'Pitcairn Islands', '2025-03-04 18:05:17.597067', 'Champlin Island No District', '458', 'Champlin Island', NULL, 'Champlin Island No Ward'),
-	(8, 'Hyattstad', 'Zimbabwe', '2025-03-04 18:05:17.605618', 'Norman Drive No District', '488', 'Norman Drive', NULL, 'Norman Drive No Ward'),
-	(9, NULL, NULL, '2025-03-04 18:05:17.624270', NULL, NULL, NULL, NULL, NULL),
-	(10, 'New Olympiamouth', 'Qatar', '2025-03-04 18:05:17.630263', 'Gerri Turnpike No District', '341', 'Gerri Turnpike', NULL, 'Gerri Turnpike No Ward'),
-	(11, 'Traceetown', 'Mauritius', '2025-03-04 18:05:17.638793', 'Connelly Key No District', '358', 'Connelly Key', NULL, 'Connelly Key No Ward'),
-	(12, 'Port Jaimeechester', 'Falkland Islands (Malvinas)', '2025-03-04 18:05:17.650326', 'Cristi Orchard No District', '516', 'Cristi Orchard', NULL, 'Cristi Orchard No Ward'),
-	(13, NULL, NULL, '2025-03-04 18:05:17.671418', NULL, NULL, NULL, NULL, NULL),
-	(14, 'Hortensiabury', 'Nauru', '2025-03-04 18:05:17.680477', 'Kenisha Crossroad No District', '844', 'Kenisha Crossroad', NULL, 'Kenisha Crossroad No Ward'),
-	(15, 'South Leifstad', 'Singapore', '2025-03-04 18:05:17.689002', 'Ankunding Road No District', '39', 'Ankunding Road', NULL, 'Ankunding Road No Ward'),
-	(16, 'West Vanitaborough', 'Liberia', '2025-03-04 18:05:17.698541', 'Gerardo Harbor No District', '749', 'Gerardo Harbor', NULL, 'Gerardo Harbor No Ward'),
-	(17, NULL, NULL, '2025-03-04 18:05:17.718136', NULL, NULL, NULL, NULL, NULL),
-	(18, 'Divinamouth', 'Japan', '2025-03-04 18:05:17.724209', 'Evelyne Flats No District', '66', 'Evelyne Flats', NULL, 'Evelyne Flats No Ward'),
-	(19, 'East Phylicia', 'Slovenia', '2025-03-04 18:05:17.733737', 'Tracey Stream No District', '891', 'Tracey Stream', NULL, 'Tracey Stream No Ward'),
-	(20, 'Lynnamouth', 'Singapore', '2025-03-04 18:05:17.741281', 'Langosh Spur No District', '634', 'Langosh Spur', NULL, 'Langosh Spur No Ward'),
-	(21, NULL, NULL, '2025-03-04 18:05:17.757917', NULL, NULL, NULL, NULL, NULL),
-	(22, 'Towneview', 'Republic of Korea', '2025-03-04 18:05:17.764454', 'Hermiston Canyon No District', '518', 'Hermiston Canyon', NULL, 'Hermiston Canyon No Ward'),
-	(23, 'Port Rogelioville', 'Vanuatu', '2025-03-04 18:05:17.770995', 'Hilton Pike No District', '621', 'Hilton Pike', NULL, 'Hilton Pike No Ward'),
-	(24, 'West Nikia', 'United States of America', '2025-03-04 18:05:17.781531', 'Ray Locks No District', '362', 'Ray Locks', NULL, 'Ray Locks No Ward'),
-	(25, NULL, NULL, '2025-03-04 18:05:17.798584', NULL, NULL, NULL, NULL, NULL),
-	(26, 'Goodwinberg', 'Saint Martin', '2025-03-04 18:05:17.804106', 'Jasmin Loaf No District', '984', 'Jasmin Loaf', NULL, 'Jasmin Loaf No Ward'),
-	(27, 'Willbury', 'Virgin Islands, British', '2025-03-04 18:05:17.813125', 'Georgine Valley No District', '336', 'Georgine Valley', NULL, 'Georgine Valley No Ward'),
-	(28, 'Bergstromfurt', 'Albania', '2025-03-04 18:05:17.820331', 'Schowalter Ridge No District', '930', 'Schowalter Ridge', NULL, 'Schowalter Ridge No Ward'),
-	(29, NULL, NULL, '2025-03-04 18:05:17.841450', NULL, NULL, NULL, NULL, NULL),
-	(30, 'East Adrianshire', 'Cocos (Keeling) Islands', '2025-03-04 18:05:17.848108', 'Demarcus Lock No District', '464', 'Demarcus Lock', NULL, 'Demarcus Lock No Ward'),
-	(31, 'Lake Norris', 'Antigua and Barbuda', '2025-03-04 18:05:17.858635', 'Ambrose Estates No District', '694', 'Ambrose Estates', NULL, 'Ambrose Estates No Ward'),
-	(32, 'New Dustybury', 'Samoa', '2025-03-04 18:05:17.866633', 'Norris Neck No District', '139', 'Norris Neck', NULL, 'Norris Neck No Ward'),
-	(33, NULL, NULL, '2025-03-04 18:05:17.885515', NULL, NULL, NULL, NULL, NULL),
-	(34, 'Noeport', 'Cape Verde', '2025-03-04 18:05:17.892846', 'Mayert Square No District', '385', 'Mayert Square', NULL, 'Mayert Square No Ward'),
-	(35, 'Bobbiehaven', 'Tuvalu', '2025-03-04 18:05:17.902358', 'Virgen Camp No District', '856', 'Virgen Camp', NULL, 'Virgen Camp No Ward'),
-	(36, 'Gordonfort', 'Tunisia', '2025-03-04 18:05:17.911889', 'Pagac Motorway No District', '383', 'Pagac Motorway', NULL, 'Pagac Motorway No Ward'),
-	(37, NULL, NULL, '2025-03-04 18:05:17.930439', NULL, NULL, NULL, NULL, NULL),
-	(38, 'West Vivianhaven', 'Anguilla', '2025-03-04 18:05:17.937526', 'Marquardt Plains No District', '987', 'Marquardt Plains', NULL, 'Marquardt Plains No Ward'),
-	(39, 'New Breann', 'Bhutan', '2025-03-04 18:05:17.946636', 'Schuster Fort No District', '24', 'Schuster Fort', NULL, 'Schuster Fort No Ward'),
-	(40, 'Port Solomonmouth', 'Ecuador', '2025-03-04 18:05:17.954708', 'Effertz Falls No District', '388', 'Effertz Falls', NULL, 'Effertz Falls No Ward'),
-	(41, NULL, NULL, '2025-03-04 18:20:50.458047', NULL, NULL, NULL, NULL, NULL),
-	(42, NULL, NULL, '2025-03-04 18:20:50.517828', NULL, NULL, NULL, NULL, NULL),
-	(43, NULL, NULL, '2025-03-04 18:20:50.527399', NULL, NULL, NULL, NULL, NULL),
-	(44, NULL, NULL, '2025-03-04 18:20:50.536901', NULL, NULL, NULL, NULL, NULL),
-	(45, NULL, NULL, '2025-03-04 18:20:50.547442', NULL, NULL, NULL, NULL, NULL),
-	(46, NULL, NULL, '2025-03-04 18:20:50.556452', NULL, NULL, NULL, NULL, NULL),
-	(47, NULL, NULL, '2025-03-04 18:20:50.565585', NULL, NULL, NULL, NULL, NULL),
-	(48, NULL, NULL, '2025-03-04 18:20:50.576123', NULL, NULL, NULL, NULL, NULL),
-	(49, NULL, NULL, '2025-03-04 18:20:50.585693', NULL, NULL, NULL, NULL, NULL),
-	(50, NULL, NULL, '2025-03-04 18:20:50.594227', NULL, NULL, NULL, NULL, NULL),
-	(51, NULL, NULL, '2025-03-04 18:20:50.604747', NULL, NULL, NULL, NULL, NULL),
-	(52, NULL, NULL, '2025-03-04 18:20:50.615807', NULL, NULL, NULL, NULL, NULL),
-	(53, NULL, NULL, '2025-03-04 18:20:50.628338', NULL, NULL, NULL, NULL, NULL),
-	(54, NULL, NULL, '2025-03-04 18:20:50.638873', NULL, NULL, NULL, NULL, NULL),
-	(55, NULL, NULL, '2025-03-04 18:20:50.650415', NULL, NULL, NULL, NULL, NULL),
-	(56, NULL, NULL, '2025-03-04 18:20:50.660941', NULL, NULL, NULL, NULL, NULL),
-	(57, NULL, NULL, '2025-03-04 18:20:50.671026', NULL, NULL, NULL, NULL, NULL),
-	(58, NULL, NULL, '2025-03-04 18:20:50.680071', NULL, NULL, NULL, NULL, NULL),
-	(59, NULL, NULL, '2025-03-04 18:20:50.690126', NULL, NULL, NULL, NULL, NULL),
-	(60, NULL, NULL, '2025-03-04 18:20:50.699103', NULL, NULL, NULL, NULL, NULL),
-	(61, NULL, NULL, '2025-03-04 18:20:50.707619', NULL, NULL, NULL, NULL, NULL),
-	(62, NULL, NULL, '2025-03-04 18:20:50.714633', NULL, NULL, NULL, NULL, NULL),
-	(63, NULL, NULL, '2025-03-04 18:20:50.723166', NULL, NULL, NULL, NULL, NULL),
-	(64, NULL, NULL, '2025-03-04 18:20:50.730111', NULL, NULL, NULL, NULL, NULL),
-	(65, NULL, NULL, '2025-03-04 18:20:50.738105', NULL, NULL, NULL, NULL, NULL),
-	(66, NULL, NULL, '2025-03-04 18:20:50.746613', NULL, NULL, NULL, NULL, NULL),
-	(67, NULL, NULL, '2025-03-04 18:20:50.756140', NULL, NULL, NULL, NULL, NULL),
-	(68, NULL, NULL, '2025-03-04 18:20:50.763485', NULL, NULL, NULL, NULL, NULL),
-	(69, NULL, NULL, '2025-03-04 18:20:50.771483', NULL, NULL, NULL, NULL, NULL),
-	(70, NULL, NULL, '2025-03-04 18:20:50.781057', NULL, NULL, NULL, NULL, NULL);
+	(1, NULL, NULL, '2025-04-09 00:49:26.239222', NULL, NULL, NULL, NULL, NULL),
+	(2, 'Hồ Chí Minh', 'Việt Nam', '2025-04-09 00:49:32.221342', 'Gò Vấp', '123/321', 'Dương Quảng Hàm', NULL, '10'),
+	(3, NULL, NULL, '2025-04-09 01:09:33.097091', NULL, NULL, NULL, NULL, NULL);
 
 -- Dumping structure for table authenticate_service.admins
 DROP TABLE IF EXISTS `admins`;
@@ -688,6 +389,7 @@ CREATE TABLE IF NOT EXISTS `admins` (
   `dob` date NOT NULL,
   `email` varchar(200) NOT NULL,
   `email_verified` bit(1) NOT NULL,
+  `face_encode_value` varchar(5000) DEFAULT NULL,
   `first_name` varchar(100) NOT NULL,
   `last_name` varchar(100) NOT NULL,
   `password` varchar(100) NOT NULL,
@@ -720,7 +422,7 @@ CREATE TABLE IF NOT EXISTS `authenticate_provider` (
   UNIQUE KEY `UKmch87ongxq9k1dysaggwe2ggf` (`authen_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table authenticate_service.authenticate_provider: ~0 rows (approximately)
+-- Dumping data for table authenticate_service.authenticate_provider: ~1 rows (approximately)
 DELETE FROM `authenticate_provider`;
 INSERT INTO `authenticate_provider` (`id`, `authen_name`, `status`) VALUES
 	(1, 'APPLICATION', b'1');
@@ -734,6 +436,7 @@ CREATE TABLE IF NOT EXISTS `doctors` (
   `dob` date NOT NULL,
   `email` varchar(200) NOT NULL,
   `email_verified` bit(1) NOT NULL,
+  `face_encode_value` varchar(5000) DEFAULT NULL,
   `first_name` varchar(100) NOT NULL,
   `last_name` varchar(100) NOT NULL,
   `password` varchar(100) NOT NULL,
@@ -755,21 +458,13 @@ CREATE TABLE IF NOT EXISTS `doctors` (
   CONSTRAINT `FKp4iloqqmw98s65wv8761exy6c` FOREIGN KEY (`address_id`) REFERENCES `addresses` (`id`),
   CONSTRAINT `FKqlqav15r1wbthdbd7xus4e3b3` FOREIGN KEY (`authed_provider_id`) REFERENCES `authenticate_provider` (`id`),
   CONSTRAINT `FKrs925uccbwa4satfufrgayf94` FOREIGN KEY (`type_disease`) REFERENCES `type_diseases` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table authenticate_service.doctors: ~10 rows (approximately)
+-- Dumping data for table authenticate_service.doctors: ~2 rows (approximately)
 DELETE FROM `doctors`;
-INSERT INTO `doctors` (`id`, `avatar`, `created_at`, `dob`, `email`, `email_verified`, `first_name`, `last_name`, `password`, `phone`, `sex`, `status`, `updated_at`, `user_id`, `specialization`, `address_id`, `authed_provider_id`, `type_disease`) VALUES
-	(1, NULL, '2025-03-04 18:05:17.425072', '1995-08-10', 'barbra.powlowski@yahoo.com', b'1', 'Truman', 'Spinka', '6u5vjao881r1pjzl', '(812) 976-1981', b'1', b'1', NULL, '20250304180516-62345-19950810', '', 1, 1, 6),
-	(2, NULL, '2025-03-04 18:05:17.580475', '1987-10-21', 'lee.durgan@gmail.com', b'1', 'Oda', 'Wiza', 'm9l4uc5j9r9qy3g', '(730) 608-1762', b'0', b'1', NULL, '20250304180517-42192-19871021', '', 5, 1, 5),
-	(3, NULL, '2025-03-04 18:05:17.624270', '1986-02-22', 'don.reynolds@yahoo.com', b'1', 'Rocky', 'Luettgen', 'n26n7935j', '(505) 905-0902', b'0', b'1', NULL, '20250304180517-16185-19860222', '', 9, 1, 3),
-	(4, NULL, '2025-03-04 18:05:17.671418', '1985-03-03', 'winston.satterfield@hotmail.com', b'1', 'Zetta', 'Simonis', 'h30qto571g', '(386) 493-5144', b'0', b'1', NULL, '20250304180517-50571-19850303', '', 13, 1, 5),
-	(5, NULL, '2025-03-04 18:05:17.718136', '1991-01-27', 'byron.greenfelder@gmail.com', b'1', 'Cassey', 'Pouros', 'v1fjcn2j7', '(305) 254-3317', b'1', b'1', NULL, '20250304180517-74899-19910127', '', 17, 1, 6),
-	(6, NULL, '2025-03-04 18:05:17.757917', '1993-08-12', 'ursula.kerluke@yahoo.com', b'1', 'Vicente', 'Wehner', '1d5ritpqzj5i6', '(929) 376-5586', b'1', b'1', NULL, '20250304180517-71924-19930812', '', 21, 1, 6),
-	(7, NULL, '2025-03-04 18:05:17.798584', '1998-01-31', 'jasmine.terry@hotmail.com', b'1', 'Cleveland', 'Moore', 'h1bl08bw3', '(505) 808-6102', b'1', b'1', NULL, '20250304180517-85560-19980131', '', 25, 1, 3),
-	(8, NULL, '2025-03-04 18:05:17.841450', '1988-01-28', 'karole.gislason@yahoo.com', b'1', 'Sandy', 'Lind', '34qrqw6596b7885', '(730) 242-9581', b'1', b'1', NULL, '20250304180517-80532-19880128', '', 29, 1, 7),
-	(9, NULL, '2025-03-04 18:05:17.885515', '1992-12-07', 'alonzo.hodkiewicz@hotmail.com', b'1', 'Marlon', 'Kshlerin', 'i603y98l14', '(539) 813-0320', b'0', b'1', NULL, '20250304180517-35792-19921207', '', 33, 1, 2),
-	(10, NULL, '2025-03-04 18:05:17.930439', '1983-08-02', 'salvador.okon@hotmail.com', b'1', 'Krystina', 'Mann', '845h9asj83cw9t1', '(305) 508-8671', b'1', b'1', NULL, '20250304180517-48275-19830802', '', 37, 1, 4);
+INSERT INTO `doctors` (`id`, `avatar`, `created_at`, `dob`, `email`, `email_verified`, `face_encode_value`, `first_name`, `last_name`, `password`, `phone`, `sex`, `status`, `updated_at`, `user_id`, `specialization`, `address_id`, `authed_provider_id`, `type_disease`) VALUES
+	(1, NULL, '2025-04-09 00:49:26.224129', '1990-05-10', 'minhthu281103@gmail.com', b'0', '', 'Thư', 'Lê', '123456789', '0246813579', b'0', b'1', NULL, '20250409004925-20533-19900510', 'TÂM LÝ HỌC TÂM THẦN', 1, 1, 4),
+	(2, NULL, '2025-04-09 01:09:33.097091', '1990-05-10', 'joebidden@gmail.com', b'0', '', 'Joe', 'Bidden', '123456789', '035792468', b'0', b'1', NULL, '20250409010933-55428-19900510', 'TÂM LÝ HỌC CẢM XÚC', 3, 1, 1);
 
 -- Dumping structure for table authenticate_service.doctor_certificates
 DROP TABLE IF EXISTS `doctor_certificates`;
@@ -782,10 +477,13 @@ CREATE TABLE IF NOT EXISTS `doctor_certificates` (
   PRIMARY KEY (`id`),
   KEY `FK4s0nv89dnoagx4dlsiu03hob2` (`doctor_id`),
   CONSTRAINT `FK4s0nv89dnoagx4dlsiu03hob2` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table authenticate_service.doctor_certificates: ~0 rows (approximately)
+-- Dumping data for table authenticate_service.doctor_certificates: ~2 rows (approximately)
 DELETE FROM `doctor_certificates`;
+INSERT INTO `doctor_certificates` (`id`, `cert_name`, `created_at`, `issue_date`, `doctor_id`) VALUES
+	(1, 'CHỨNG CHỈ TÂM LÝ HỌC', '2025-04-09 00:49:28.056455', '2012-06-21', 1),
+	(2, 'CHỨNG CHỈ TÂM LÝ HỌC', '2025-04-09 01:09:35.119127', '2012-06-21', 2);
 
 -- Dumping structure for table authenticate_service.doctor_educations
 DROP TABLE IF EXISTS `doctor_educations`;
@@ -800,21 +498,13 @@ CREATE TABLE IF NOT EXISTS `doctor_educations` (
   PRIMARY KEY (`id`),
   KEY `FKlqv3elmi210q99ipk3cmegr2q` (`doctor_id`),
   CONSTRAINT `FKlqv3elmi210q99ipk3cmegr2q` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table authenticate_service.doctor_educations: ~10 rows (approximately)
+-- Dumping data for table authenticate_service.doctor_educations: ~2 rows (approximately)
 DELETE FROM `doctor_educations`;
 INSERT INTO `doctor_educations` (`id`, `created_at`, `diploma`, `graduate_date`, `join_date`, `school_name`, `doctor_id`) VALUES
-	(1, '2025-03-04 18:05:17.569460', 'BACHELOR', '2003-06-01', '2007-12-22', 'Dicki and Sons', 1),
-	(2, '2025-03-04 18:05:17.615142', 'BACHELOR', '2003-12-05', '2007-05-29', 'Mitchell-Quitzon', 2),
-	(3, '2025-03-04 18:05:17.660864', 'BACHELOR', '2004-02-06', '2008-01-31', 'Aufderhar, Crona and Boyer', 3),
-	(4, '2025-03-04 18:05:17.709110', 'BACHELOR', '2003-06-07', '2007-04-13', 'Feest Inc', 4),
-	(5, '2025-03-04 18:05:17.749387', 'BACHELOR', '2003-05-12', '2007-08-28', 'Gerlach LLC', 5),
-	(6, '2025-03-04 18:05:17.788523', 'BACHELOR', '2003-08-22', '2007-11-13', 'Homenick Inc', 6),
-	(7, '2025-03-04 18:05:17.831885', 'BACHELOR', '2003-05-25', '2007-11-06', 'Muller Inc', 7),
-	(8, '2025-03-04 18:05:17.877178', 'BACHELOR', '2003-09-21', '2007-03-11', 'Littel-Turner', 8),
-	(9, '2025-03-04 18:05:17.921405', 'BACHELOR', '2003-09-16', '2007-04-12', 'Schimmel LLC', 9),
-	(10, '2025-03-04 18:05:17.961705', 'BACHELOR', '2004-01-13', '2007-10-20', 'Bechtelar Inc', 10);
+	(1, '2025-04-09 00:49:30.081370', 'BACHELOR', '2012-06-21', '2008-09-10', 'ĐẠI HỌC Y HÀ NỘI', 1),
+	(2, '2025-04-09 01:09:37.131925', 'BACHELOR', '2012-06-21', '2008-09-10', 'ĐẠI HỌC Y HÀ NỘI', 2);
 
 -- Dumping structure for table authenticate_service.doctor_experiences
 DROP TABLE IF EXISTS `doctor_experiences`;
@@ -833,41 +523,12 @@ CREATE TABLE IF NOT EXISTS `doctor_experiences` (
   KEY `FKnoss5vksd9wtpthgxm30dqdbn` (`doctor_id`),
   CONSTRAINT `FKl47o8476q5k3fhjbany3vy5lp` FOREIGN KEY (`comp_address_id`) REFERENCES `addresses` (`id`),
   CONSTRAINT `FKnoss5vksd9wtpthgxm30dqdbn` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table authenticate_service.doctor_experiences: ~30 rows (approximately)
+-- Dumping data for table authenticate_service.doctor_experiences: ~1 rows (approximately)
 DELETE FROM `doctor_experiences`;
 INSERT INTO `doctor_experiences` (`id`, `company_name`, `created_at`, `description`, `end_date`, `specialization`, `start_date`, `comp_address_id`, `doctor_id`) VALUES
-	(1, 'Hintz Group', '2025-03-04 18:05:17.544094', 'Ipsum quod dicta.', '2001-02-16', '', '2002-02-12', 2, 1),
-	(2, 'Ebert-Cronin', '2025-03-04 18:05:17.554410', 'Quis totam incidunt ipsa.', '2000-10-10', '', '2002-10-01', 3, 1),
-	(3, 'Kertzmann Inc', '2025-03-04 18:05:17.564947', 'Non aperiam amet.', '2000-12-06', '', '2001-05-20', 4, 1),
-	(4, 'Cummerata Group', '2025-03-04 18:05:17.592050', 'Unde incidunt nostrum sit accusantium.', '2000-05-22', '', '2002-05-29', 6, 2),
-	(5, 'Cremin Inc', '2025-03-04 18:05:17.600066', 'Facere nesciunt voluptates consectetur error commodi deleniti eius.', '2000-09-18', '', '2001-10-07', 7, 2),
-	(6, 'Kreiger and Sons', '2025-03-04 18:05:17.610613', 'Esse eius nesciunt nisi.', '2000-05-05', '', '2001-10-25', 8, 2),
-	(7, 'Emard-Schneider', '2025-03-04 18:05:17.633778', 'Minima ad quos sapiente.', '2000-07-11', '', '2002-07-26', 10, 3),
-	(8, 'Huels-Gorczany', '2025-03-04 18:05:17.644311', 'Deserunt eaque tenetur nam minima earum.', '2000-07-28', '', '2002-02-26', 11, 3),
-	(9, 'Bailey, Lubowitz and Steuber', '2025-03-04 18:05:17.654844', 'Harum animi numquam recusandae.', '2000-11-16', '', '2002-09-22', 12, 3),
-	(10, 'Kilback-Zboncak', '2025-03-04 18:05:17.685468', 'Similique vero eveniet nesciunt non aperiam.', '2000-04-12', '', '2002-12-16', 14, 4),
-	(11, 'Steuber, Doyle and Dare', '2025-03-04 18:05:17.694008', 'Modi molestiae dolores.', '2000-08-31', '', '2002-05-11', 15, 4),
-	(12, 'Robel LLC', '2025-03-04 18:05:17.703575', 'Tenetur tempora doloribus illo voluptatum exercitationem cum quo.', '2000-05-12', '', '2003-02-28', 16, 4),
-	(13, 'Kautzer-Swift', '2025-03-04 18:05:17.728196', 'Quisquam eveniet odit eligendi officia.', '2000-03-31', '', '2001-05-21', 18, 5),
-	(14, 'Pacocha-Wiza', '2025-03-04 18:05:17.737726', 'Dicta earum distinctio ad.', '2000-03-05', '', '2001-05-13', 19, 5),
-	(15, 'Becker, Streich and Greenfelder', '2025-03-04 18:05:17.745403', 'Fugiat dolorem sit.', '2000-09-19', '', '2002-03-27', 20, 5),
-	(16, 'O\'Conner-Kris', '2025-03-04 18:05:17.768456', 'Fuga sapiente vel consequuntur minima nemo.', '2000-08-30', '', '2001-06-10', 22, 6),
-	(17, 'Willms-Labadie', '2025-03-04 18:05:17.776529', 'Exercitationem praesentium earum at veniam ullam.', '2000-06-24', '', '2002-06-03', 23, 6),
-	(18, 'Jacobi-Johnson', '2025-03-04 18:05:17.784510', 'Earum dolore laudantium.', '2000-12-21', '', '2003-02-24', 24, 6),
-	(19, 'Walker-Bode', '2025-03-04 18:05:17.809127', 'Facilis officiis nulla hic.', '2000-08-20', '', '2001-11-29', 26, 7),
-	(20, 'Kunde, Willms and Lockman', '2025-03-04 18:05:17.817334', 'Cupiditate enim vitae facilis in quaerat.', '2000-05-30', '', '2003-01-05', 27, 7),
-	(21, 'Dare Group', '2025-03-04 18:05:17.825851', 'Ducimus totam in dicta nobis.', '2000-08-31', '', '2002-03-27', 28, 7),
-	(22, 'Carter, White and Quigley', '2025-03-04 18:05:17.853100', 'Dolorem saepe nam architecto sit quae quia.', '2001-01-26', '', '2002-05-22', 30, 8),
-	(23, 'Grimes-Cummerata', '2025-03-04 18:05:17.862634', 'Quas laudantium officiis repudiandae consequatur iste omnis omnis.', '2000-04-09', '', '2003-01-28', 31, 8),
-	(24, 'Stiedemann, D\'Amore and Macejkovic', '2025-03-04 18:05:17.872175', 'Velit voluptates aliquam quam.', '2000-09-08', '', '2002-07-25', 32, 8),
-	(25, 'Rogahn-Hudson', '2025-03-04 18:05:17.896830', 'Quisquam architecto in veniam quam ut veritatis error.', '2000-04-14', '', '2002-10-24', 34, 9),
-	(26, 'Jacobi-O\'Conner', '2025-03-04 18:05:17.907356', 'Dolore repellat consequuntur et odio.', '2001-02-04', '', '2002-01-30', 35, 9),
-	(27, 'Casper LLC', '2025-03-04 18:05:17.916893', 'Doloribus tenetur labore reiciendis eligendi dicta facere.', '2001-01-22', '', '2002-05-20', 36, 9),
-	(28, 'Johns and Sons', '2025-03-04 18:05:17.941538', 'Eius cupiditate blanditiis.', '2001-03-03', '', '2001-04-07', 38, 10),
-	(29, 'Medhurst-Shanahan', '2025-03-04 18:05:17.950638', 'Debitis fuga esse inventore illum.', '2000-06-05', '', '2001-09-21', 39, 10),
-	(30, 'Bins and Sons', '2025-03-04 18:05:17.957706', 'Exercitationem ut fuga.', '2000-06-27', '', '2001-08-02', 40, 10);
+	(1, 'TÂM LÝ HỌC THUẬN AN', '2025-04-09 00:49:32.244416', NULL, '2024-12-10', 'TÂM LÝ HỌC TÂM THẦN', '2012-09-02', 2, 1);
 
 -- Dumping structure for table authenticate_service.patients
 DROP TABLE IF EXISTS `patients`;
@@ -878,6 +539,7 @@ CREATE TABLE IF NOT EXISTS `patients` (
   `dob` date NOT NULL,
   `email` varchar(200) NOT NULL,
   `email_verified` bit(1) NOT NULL,
+  `face_encode_value` varchar(5000) DEFAULT NULL,
   `first_name` varchar(100) NOT NULL,
   `last_name` varchar(100) NOT NULL,
   `password` varchar(100) NOT NULL,
@@ -895,44 +557,12 @@ CREATE TABLE IF NOT EXISTS `patients` (
   KEY `FK7s92dg6yxcss33sqqh1d7dg1v` (`authed_provider_id`),
   CONSTRAINT `FK7s92dg6yxcss33sqqh1d7dg1v` FOREIGN KEY (`authed_provider_id`) REFERENCES `authenticate_provider` (`id`),
   CONSTRAINT `FKjc8017x8ae0rqi11m8jmny646` FOREIGN KEY (`address_id`) REFERENCES `addresses` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table authenticate_service.patients: ~33 rows (approximately)
+-- Dumping data for table authenticate_service.patients: ~1 rows (approximately)
 DELETE FROM `patients`;
-INSERT INTO `patients` (`id`, `avatar`, `created_at`, `dob`, `email`, `email_verified`, `first_name`, `last_name`, `password`, `phone`, `sex`, `status`, `updated_at`, `user_id`, `address_id`, `authed_provider_id`) VALUES
-	(1, NULL, '2025-02-28 08:19:50.363986', '2003-09-13', 'tdminhnhat13092003@gmail.com', b'1', 'Nhat', 'Truong', '123456789', '0123456789', b'0', b'1', NULL, '20250228081950-93569-20030913', NULL, 1),
-	(2, NULL, '2025-02-28 19:22:36.042887', '2000-01-02', 'skyherobrine13092003@gmail.com', b'0', 'Linh', 'Ngũ', '123456789', '0135792468', b'0', b'1', NULL, '20250228192235-63089-20000102', NULL, 1),
-	(3, NULL, '2025-02-28 19:23:59.902233', '2000-10-01', 'nhatdev13092003@gmail.com', b'0', 'Vy', 'Nguyen', '123456789', '0129384756', b'1', b'1', NULL, '20250228192359-55935-20001001', NULL, 1),
-	(4, NULL, '2025-03-04 18:20:50.451763', '2001-02-21', 'kelley.greenfelder@hotmail.com', b'0', 'Leslie', 'Tremblay', '2p7hdf9j7q', '(414) 902-8116', b'0', b'1', NULL, '20250304182049-40175-20010221', 41, 1),
-	(5, NULL, '2025-03-04 18:20:50.517828', '1986-02-18', 'vina.ondricka@gmail.com', b'0', 'Johnathan', 'Wyman', '28hje83y3h9', '(730) 201-7158', b'0', b'1', NULL, '20250304182050-56975-19860218', 42, 1),
-	(6, NULL, '2025-03-04 18:20:50.527399', '1990-03-30', 'peter.morissette@yahoo.com', b'0', 'Jeannine', 'Torp', 'l7qy35l8qdj16zc', '(305) 232-2688', b'0', b'1', NULL, '20250304182050-32009-19900330', 43, 1),
-	(7, NULL, '2025-03-04 18:20:50.536901', '1988-05-23', 'trevor.johnston@yahoo.com', b'0', 'Ashley', 'Erdman', '36782ko4u5v27502', '(561) 540-5279', b'1', b'1', NULL, '20250304182050-82154-19880523', 44, 1),
-	(8, NULL, '2025-03-04 18:20:50.547442', '1988-11-28', 'marcus.kling@hotmail.com', b'0', 'Annis', 'Doyle', '7wv1v24lcr7s7', '(305) 983-6503', b'0', b'1', NULL, '20250304182050-47732-19881128', 45, 1),
-	(9, NULL, '2025-03-04 18:20:50.556452', '1975-09-25', 'avril.gutkowski@gmail.com', b'0', 'Valerie', 'Brakus', '36oi0416', '(983) 300-9340', b'0', b'1', NULL, '20250304182050-83383-19750925', 46, 1),
-	(10, NULL, '2025-03-04 18:20:50.565585', '1967-10-02', 'erich.gorczany@hotmail.com', b'0', 'Rafael', 'Koch', '29l0g50xg', '(505) 601-6995', b'1', b'1', NULL, '20250304182050-38167-19671002', 47, 1),
-	(11, NULL, '2025-03-04 18:20:50.576123', '1997-10-30', 'diedra.corwin@hotmail.com', b'0', 'Bryce', 'Hand', 'cbbk79lo9', '(305) 265-9885', b'1', b'1', NULL, '20250304182050-41137-19971030', 48, 1),
-	(12, NULL, '2025-03-04 18:20:50.584698', '1983-08-20', 'catina.bernier@hotmail.com', b'0', 'Stanton', 'Johnson', '49w25h3v', '(313) 201-2829', b'1', b'1', NULL, '20250304182050-99844-19830820', 49, 1),
-	(13, NULL, '2025-03-04 18:20:50.594227', '1973-01-30', 'sanford.schaden@yahoo.com', b'0', 'Silas', 'Howell', '233qk00710ksu807', '(234) 778-1906', b'0', b'1', NULL, '20250304182050-27503-19730130', 50, 1),
-	(14, NULL, '2025-03-04 18:20:50.604747', '2001-06-23', 'katheleen.gottlieb@gmail.com', b'0', 'Toshiko', 'Ziemann', 'c157fl3pr4o', '(636) 311-1662', b'1', b'1', NULL, '20250304182050-47036-20010623', 51, 1),
-	(15, NULL, '2025-03-04 18:20:50.615807', '2002-02-10', 'juliet.keebler@gmail.com', b'0', 'Claudio', 'Buckridge', '70o41wc8we', '(505) 635-9246', b'1', b'1', NULL, '20250304182050-74349-20020210', 52, 1),
-	(16, NULL, '2025-03-04 18:20:50.628338', '1986-08-18', 'humberto.kub@hotmail.com', b'0', 'Deon', 'Gottlieb', 'o015ic812', '(252) 645-2702', b'0', b'1', NULL, '20250304182050-60369-19860818', 53, 1),
-	(17, NULL, '2025-03-04 18:20:50.638873', '1997-05-25', 'lenora.rempel@yahoo.com', b'0', 'Benedict', 'Bahringer', 'xrjpjpc1a8', '(305) 293-3368', b'1', b'1', NULL, '20250304182050-83401-19970525', 54, 1),
-	(18, NULL, '2025-03-04 18:20:50.650415', '1978-11-04', 'wendell.murray@gmail.com', b'0', 'Barrett', 'Glover', '27xe0pk87', '(505) 648-7073', b'1', b'1', NULL, '20250304182050-72921-19781104', 55, 1),
-	(19, NULL, '2025-03-04 18:20:50.659942', '1987-03-27', 'angelo.gislason@gmail.com', b'0', 'Magaret', 'Kunze', 'b25u3t4fe33m7', '(680) 634-6703', b'1', b'1', NULL, '20250304182050-59530-19870327', 56, 1),
-	(20, NULL, '2025-03-04 18:20:50.670027', '2004-04-25', 'marc.vandervort@hotmail.com', b'0', 'Sydney', 'Fadel', '6hd00dd8d3z84', '(305) 206-1616', b'0', b'1', NULL, '20250304182050-34472-20040425', 57, 1),
-	(21, NULL, '2025-03-04 18:20:50.680071', '1998-03-25', 'twana.weber@yahoo.com', b'0', 'Myron', 'Spencer', 'nv9595plw5', '(505) 630-4490', b'1', b'1', NULL, '20250304182050-86688-19980325', 58, 1),
-	(22, NULL, '2025-03-04 18:20:50.690126', '2007-02-28', 'jed.mclaughlin@yahoo.com', b'0', 'Howard', 'Fay', 'd6zn9x1kf0youq', '(727) 230-5263', b'0', b'1', NULL, '20250304182050-89117-20070228', 59, 1),
-	(23, NULL, '2025-03-04 18:20:50.699103', '1960-12-22', 'lenna.white@gmail.com', b'0', 'Franklin', 'Dietrich', '3852y8awg', '(505) 690-9903', b'0', b'1', NULL, '20250304182050-78903-19601222', 60, 1),
-	(24, NULL, '2025-03-04 18:20:50.707619', '1955-10-04', 'romona.smitham@yahoo.com', b'0', 'Val', 'Harber', '99qbm4c85o', '(983) 898-4187', b'0', b'1', NULL, '20250304182050-59751-19551004', 61, 1),
-	(25, NULL, '2025-03-04 18:20:50.714633', '1978-10-17', 'leon.zieme@gmail.com', b'0', 'Mayra', 'Auer', 'a6o84900', '(505) 621-7008', b'0', b'1', NULL, '20250304182050-31302-19781017', 62, 1),
-	(26, NULL, '2025-03-04 18:20:50.723166', '1968-05-03', 'dimple.anderson@hotmail.com', b'0', 'Leeann', 'McKenzie', '0r1p1xgi6', '(828) 690-7431', b'0', b'1', NULL, '20250304182050-93840-19680503', 63, 1),
-	(27, NULL, '2025-03-04 18:20:50.730111', '1989-07-08', 'eusebio.herzog@hotmail.com', b'0', 'Elva', 'Littel', 't1cd5131f235sk3', '(805) 531-6795', b'0', b'1', NULL, '20250304182050-91670-19890708', 64, 1),
-	(28, NULL, '2025-03-04 18:20:50.738105', '1997-01-06', 'davida.strosin@hotmail.com', b'0', 'Josiah', 'Moen', '4cc888iu2fl', '(305) 204-8347', b'1', b'1', NULL, '20250304182050-60679-19970106', 65, 1),
-	(29, NULL, '2025-03-04 18:20:50.746613', '1976-04-17', 'mitzi.hane@yahoo.com', b'0', 'Walker', 'Toy', 'm2x455bc66v4v', '(305) 434-4861', b'0', b'1', NULL, '20250304182050-66373-19760417', 66, 1),
-	(30, NULL, '2025-03-04 18:20:50.756140', '1970-07-05', 'teri.weber@yahoo.com', b'0', 'Miguel', 'Marks', 'oqh7j29969341x', '(350) 870-7432', b'1', b'1', NULL, '20250304182050-71357-19700705', 67, 1),
-	(31, NULL, '2025-03-04 18:20:50.763485', '1996-12-30', 'eddie.barrows@yahoo.com', b'0', 'Hertha', 'Gusikowski', 'm903w9710o916lkw', '(983) 794-4826', b'1', b'1', NULL, '20250304182050-16310-19961230', 68, 1),
-	(32, NULL, '2025-03-04 18:20:50.771483', '1967-05-27', 'jeniffer.beier@gmail.com', b'0', 'Margert', 'Durgan', '3110g050927u96', '(505) 894-3265', b'1', b'1', NULL, '20250304182050-89821-19670527', 69, 1),
-	(33, NULL, '2025-03-04 18:20:50.781057', '2003-10-04', 'johanna.johnston@gmail.com', b'0', 'Sina', 'Swaniawski', 'b8495zswb3', '(730) 645-4969', b'0', b'1', NULL, '20250304182050-25278-20031004', 70, 1);
+INSERT INTO `patients` (`id`, `avatar`, `created_at`, `dob`, `email`, `email_verified`, `face_encode_value`, `first_name`, `last_name`, `password`, `phone`, `sex`, `status`, `updated_at`, `user_id`, `address_id`, `authed_provider_id`) VALUES
+	(1, NULL, '2025-04-09 00:01:48.537920', '1946-06-14', 'donaldtrump@gmail.com', b'0', '0.10584330558776855,0.13875123858451843,0.017335709184408188,-0.034396834671497345,0.0634281262755394,0.1731046438217163,0.13706965744495392,0.1279967874288559,-0.20125851035118103,0.1432647705078125,-0.016337769106030464,0.04654732719063759,0.09448826313018799,-0.14152637124061584,0.09778915345668793,-0.02033647708594799,0.09336532652378082,0.03785158321261406,-0.014978325925767422,-0.01065089926123619,0.08321639895439148,0.06275706738233566,-0.09443117678165436,0.06672995537519455,0.02548397332429886,-0.020930727943778038,-0.09379740059375763,-0.1023077517747879,0.06712616235017776,0.127790167927742,-0.07611799240112305,0.03837759420275688,-0.08349186927080154,0.08980368077754974,0.01547415554523468,-0.1361146718263626,0.04725499823689461,-0.025039980188012123,0.049504172056913376,-0.014677601866424084,0.038522396236658096,-0.06674099713563919,0.10104412585496902,0.06536762416362762,-0.07993385195732117,0.006556610111147165,0.12748196721076965,-0.05896943435072899,-0.1696457862854004,-0.017484785988926888,0.2638590335845947,-0.026486936956644058,-0.11667561531066895,0.008834133855998516,0.06422130018472672,0.014854923821985722,-0.05251426622271538,0.035479795187711716,0.048541177064180374,-0.07095971703529358,0.004742802586406469,-0.09870276600122452,-0.029856251552700996,-0.1513420045375824,0.07640501111745834,-0.12929591536521912,0.0021999350283294916,-0.022297585383057594,-0.10714013874530792,-0.05744510516524315,0.023083405569195747,0.09507455676794052,-0.056554775685071945,-0.07993900775909424,-0.04638156667351723,0.0924389660358429,-0.010323582217097282,0.10469857603311539,0.08798302710056305,0.08940759301185608,-0.029620077461004257,-0.011434666812419891,0.12538853287696838,0.09091522544622421,0.059597987681627274,-0.08719949424266815,0.11513292044401169,-0.04865673929452896,0.07340408861637115,0.05124524608254433,-0.13828705251216888,-0.10107102990150452,-0.12693481147289276,0.048568710684776306,-0.1492796242237091,-0.03339071571826935,0.1399904489517212,-0.008997241035103798,-0.08009881526231766,-0.0026522742118686438,-0.003236828139051795,0.16625501215457916,0.007123994641005993,0.1711837649345398,-0.18761046230793,-0.04617668315768242,-0.1000283807516098,0.10408741235733032,-0.05619249492883682,-0.04356605187058449,0.06135101616382599,0.0009394040098413825,-0.14605748653411865,-0.025118842720985413,0.03374747559428215,-0.02206031233072281,-0.10726196318864822,-0.08281461894512177,-0.11964135617017746,0.0577523410320282,0.016832564026117325,-0.012915853410959244,0.04364259913563728,0.015186404809355736,0.13587065041065216,-0.013775747269392014,0.023463400080800056,-0.08957294374704361', 'Donald', 'Trump', '123456789', '0129384756', b'0', b'1', NULL, '20250409000148-52838-19460614', NULL, 1);
 
 -- Dumping structure for table authenticate_service.patient_face_encodes
 DROP TABLE IF EXISTS `patient_face_encodes`;
@@ -962,14 +592,13 @@ CREATE TABLE IF NOT EXISTS `shifts` (
   `status` bit(1) NOT NULL,
   `updated_at` datetime(6) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table authenticate_service.shifts: ~3 rows (approximately)
+-- Dumping data for table authenticate_service.shifts: ~2 rows (approximately)
 DELETE FROM `shifts`;
 INSERT INTO `shifts` (`id`, `created_at`, `end`, `shift`, `start`, `status`, `updated_at`) VALUES
-	(1, '2025-03-10 09:20:11.755434', '11:00:00.000000', 1, '07:00:00.000000', b'1', '2025-03-10 09:20:11.755434'),
-	(2, '2025-03-10 09:20:45.542119', '17:00:00.000000', 2, '13:00:00.000000', b'1', '2025-03-10 09:20:45.542119'),
-	(3, '2025-03-10 09:20:55.267401', '21:00:00.000000', 3, '18:00:00.000000', b'1', '2025-03-10 09:20:55.267401');
+	(1, '2025-04-09 00:07:02.184562', '11:00:00.000000', 1, '07:00:00.000000', b'1', '2025-04-09 00:07:02.184562'),
+	(2, '2025-04-09 00:07:18.257279', '17:00:00.000000', 2, '13:00:00.000000', b'1', '2025-04-09 00:07:18.257279');
 
 -- Dumping structure for table authenticate_service.type_diseases
 DROP TABLE IF EXISTS `type_diseases`;
@@ -980,19 +609,258 @@ CREATE TABLE IF NOT EXISTS `type_diseases` (
   `status` bit(1) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UKpbl5knbx178mflcgajpwk3f6q` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
--- Dumping data for table authenticate_service.type_diseases: ~8 rows (approximately)
+-- Dumping data for table authenticate_service.type_diseases: ~9 rows (approximately)
 DELETE FROM `type_diseases`;
 INSERT INTO `type_diseases` (`id`, `created_at`, `name`, `status`) VALUES
-	(1, '2025-03-04 17:06:05.353767', 'SÂU RĂNG', b'1'),
-	(2, '2025-03-04 17:06:14.141431', 'VÔI RĂNG', b'1'),
-	(3, '2025-03-04 17:06:21.041771', 'KHÁC', b'1'),
-	(4, '2025-03-04 17:07:21.711850', 'VIÊM NƯỚU', b'1'),
-	(5, '2025-03-04 17:07:31.290151', 'VIÊM NHA CHU', b'1'),
-	(6, '2025-03-04 17:07:44.660812', 'MÒN RĂNG', b'1'),
-	(7, '2025-03-04 17:07:49.849652', 'RĂNG KHÔN', b'1'),
-	(8, '2025-03-04 17:07:56.685278', 'HÔI MIỆNG', b'1');
+	(1, '2025-04-09 00:08:37.337330', 'TRẦM CẢM', b'1'),
+	(2, '2025-04-09 00:08:51.611769', 'RỐI LOẠN LO ÂU', b'1'),
+	(3, '2025-04-09 00:09:04.141639', 'RỐI LOẠN LƯỠNG CỰC', b'1'),
+	(4, '2025-04-09 00:09:15.830801', 'TÂM THẦN PHÂN LIỆT', b'1'),
+	(5, '2025-04-09 00:09:33.089745', 'RỐI LOẠN ÁM ẢNH CƯỠNG CHẾ', b'1'),
+	(6, '2025-04-09 00:09:43.967506', 'RỐI LOẠN ĂN UỐNG', b'1'),
+	(7, '2025-04-09 00:10:04.265532', 'RỐI LOẠN CĂNG THẲNG SAU SANG CHẤN', b'1'),
+	(8, '2025-04-09 00:10:15.240746', 'RỐI LOẠN NHÂN CÁCH', b'1'),
+	(9, '2025-04-09 00:10:19.665100', 'KHÁC', b'1');
+
+
+-- Dumping database structure for image_detect_service
+DROP DATABASE IF EXISTS `image_detect_service`;
+CREATE DATABASE IF NOT EXISTS `image_detect_service` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin */;
+USE `image_detect_service`;
+
+-- Dumping structure for table image_detect_service.auth_group
+DROP TABLE IF EXISTS `auth_group`;
+CREATE TABLE IF NOT EXISTS `auth_group` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(150) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Dumping data for table image_detect_service.auth_group: ~0 rows (approximately)
+DELETE FROM `auth_group`;
+
+-- Dumping structure for table image_detect_service.auth_group_permissions
+DROP TABLE IF EXISTS `auth_group_permissions`;
+CREATE TABLE IF NOT EXISTS `auth_group_permissions` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `auth_group_permissions_group_id_permission_id_0cd325b0_uniq` (`group_id`,`permission_id`),
+  KEY `auth_group_permissio_permission_id_84c5c92e_fk_auth_perm` (`permission_id`),
+  CONSTRAINT `auth_group_permissio_permission_id_84c5c92e_fk_auth_perm` FOREIGN KEY (`permission_id`) REFERENCES `auth_permission` (`id`),
+  CONSTRAINT `auth_group_permissions_group_id_b120cbf9_fk_auth_group_id` FOREIGN KEY (`group_id`) REFERENCES `auth_group` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Dumping data for table image_detect_service.auth_group_permissions: ~0 rows (approximately)
+DELETE FROM `auth_group_permissions`;
+
+-- Dumping structure for table image_detect_service.auth_permission
+DROP TABLE IF EXISTS `auth_permission`;
+CREATE TABLE IF NOT EXISTS `auth_permission` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `content_type_id` int(11) NOT NULL,
+  `codename` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `auth_permission_content_type_id_codename_01ab375a_uniq` (`content_type_id`,`codename`),
+  CONSTRAINT `auth_permission_content_type_id_2f476e4b_fk_django_co` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Dumping data for table image_detect_service.auth_permission: ~28 rows (approximately)
+DELETE FROM `auth_permission`;
+INSERT INTO `auth_permission` (`id`, `name`, `content_type_id`, `codename`) VALUES
+	(1, 'Can add log entry', 1, 'add_logentry'),
+	(2, 'Can change log entry', 1, 'change_logentry'),
+	(3, 'Can delete log entry', 1, 'delete_logentry'),
+	(4, 'Can view log entry', 1, 'view_logentry'),
+	(5, 'Can add permission', 2, 'add_permission'),
+	(6, 'Can change permission', 2, 'change_permission'),
+	(7, 'Can delete permission', 2, 'delete_permission'),
+	(8, 'Can view permission', 2, 'view_permission'),
+	(9, 'Can add group', 3, 'add_group'),
+	(10, 'Can change group', 3, 'change_group'),
+	(11, 'Can delete group', 3, 'delete_group'),
+	(12, 'Can view group', 3, 'view_group'),
+	(13, 'Can add user', 4, 'add_user'),
+	(14, 'Can change user', 4, 'change_user'),
+	(15, 'Can delete user', 4, 'delete_user'),
+	(16, 'Can view user', 4, 'view_user'),
+	(17, 'Can add content type', 5, 'add_contenttype'),
+	(18, 'Can change content type', 5, 'change_contenttype'),
+	(19, 'Can delete content type', 5, 'delete_contenttype'),
+	(20, 'Can view content type', 5, 'view_contenttype'),
+	(21, 'Can add session', 6, 'add_session'),
+	(22, 'Can change session', 6, 'change_session'),
+	(23, 'Can delete session', 6, 'delete_session'),
+	(24, 'Can view session', 6, 'view_session'),
+	(25, 'Can add user', 7, 'add_user'),
+	(26, 'Can change user', 7, 'change_user'),
+	(27, 'Can delete user', 7, 'delete_user'),
+	(28, 'Can view user', 7, 'view_user');
+
+-- Dumping structure for table image_detect_service.auth_user
+DROP TABLE IF EXISTS `auth_user`;
+CREATE TABLE IF NOT EXISTS `auth_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `password` varchar(128) NOT NULL,
+  `last_login` datetime(6) DEFAULT NULL,
+  `is_superuser` tinyint(1) NOT NULL,
+  `username` varchar(150) NOT NULL,
+  `first_name` varchar(150) NOT NULL,
+  `last_name` varchar(150) NOT NULL,
+  `email` varchar(254) NOT NULL,
+  `is_staff` tinyint(1) NOT NULL,
+  `is_active` tinyint(1) NOT NULL,
+  `date_joined` datetime(6) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Dumping data for table image_detect_service.auth_user: ~0 rows (approximately)
+DELETE FROM `auth_user`;
+
+-- Dumping structure for table image_detect_service.auth_user_groups
+DROP TABLE IF EXISTS `auth_user_groups`;
+CREATE TABLE IF NOT EXISTS `auth_user_groups` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `auth_user_groups_user_id_group_id_94350c0c_uniq` (`user_id`,`group_id`),
+  KEY `auth_user_groups_group_id_97559544_fk_auth_group_id` (`group_id`),
+  CONSTRAINT `auth_user_groups_group_id_97559544_fk_auth_group_id` FOREIGN KEY (`group_id`) REFERENCES `auth_group` (`id`),
+  CONSTRAINT `auth_user_groups_user_id_6a12ed8b_fk_auth_user_id` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Dumping data for table image_detect_service.auth_user_groups: ~0 rows (approximately)
+DELETE FROM `auth_user_groups`;
+
+-- Dumping structure for table image_detect_service.auth_user_user_permissions
+DROP TABLE IF EXISTS `auth_user_user_permissions`;
+CREATE TABLE IF NOT EXISTS `auth_user_user_permissions` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `auth_user_user_permissions_user_id_permission_id_14a6b632_uniq` (`user_id`,`permission_id`),
+  KEY `auth_user_user_permi_permission_id_1fbb5f2c_fk_auth_perm` (`permission_id`),
+  CONSTRAINT `auth_user_user_permi_permission_id_1fbb5f2c_fk_auth_perm` FOREIGN KEY (`permission_id`) REFERENCES `auth_permission` (`id`),
+  CONSTRAINT `auth_user_user_permissions_user_id_a95ead1b_fk_auth_user_id` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Dumping data for table image_detect_service.auth_user_user_permissions: ~0 rows (approximately)
+DELETE FROM `auth_user_user_permissions`;
+
+-- Dumping structure for table image_detect_service.django_admin_log
+DROP TABLE IF EXISTS `django_admin_log`;
+CREATE TABLE IF NOT EXISTS `django_admin_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `action_time` datetime(6) NOT NULL,
+  `object_id` longtext DEFAULT NULL,
+  `object_repr` varchar(200) NOT NULL,
+  `action_flag` smallint(5) unsigned NOT NULL CHECK (`action_flag` >= 0),
+  `change_message` longtext NOT NULL,
+  `content_type_id` int(11) DEFAULT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `django_admin_log_content_type_id_c4bce8eb_fk_django_co` (`content_type_id`),
+  KEY `django_admin_log_user_id_c564eba6_fk_auth_user_id` (`user_id`),
+  CONSTRAINT `django_admin_log_content_type_id_c4bce8eb_fk_django_co` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`),
+  CONSTRAINT `django_admin_log_user_id_c564eba6_fk_auth_user_id` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Dumping data for table image_detect_service.django_admin_log: ~0 rows (approximately)
+DELETE FROM `django_admin_log`;
+
+-- Dumping structure for table image_detect_service.django_content_type
+DROP TABLE IF EXISTS `django_content_type`;
+CREATE TABLE IF NOT EXISTS `django_content_type` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `app_label` varchar(100) NOT NULL,
+  `model` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `django_content_type_app_label_model_76bd3d3b_uniq` (`app_label`,`model`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Dumping data for table image_detect_service.django_content_type: ~7 rows (approximately)
+DELETE FROM `django_content_type`;
+INSERT INTO `django_content_type` (`id`, `app_label`, `model`) VALUES
+	(1, 'admin', 'logentry'),
+	(3, 'auth', 'group'),
+	(2, 'auth', 'permission'),
+	(4, 'auth', 'user'),
+	(5, 'contenttypes', 'contenttype'),
+	(7, 'healthcare_app_server', 'user'),
+	(6, 'sessions', 'session');
+
+-- Dumping structure for table image_detect_service.django_migrations
+DROP TABLE IF EXISTS `django_migrations`;
+CREATE TABLE IF NOT EXISTS `django_migrations` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `app` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `applied` datetime(6) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Dumping data for table image_detect_service.django_migrations: ~23 rows (approximately)
+DELETE FROM `django_migrations`;
+INSERT INTO `django_migrations` (`id`, `app`, `name`, `applied`) VALUES
+	(1, 'contenttypes', '0001_initial', '2025-04-08 16:57:54.740453'),
+	(2, 'auth', '0001_initial', '2025-04-08 16:57:55.049224'),
+	(3, 'admin', '0001_initial', '2025-04-08 16:57:55.129890'),
+	(4, 'admin', '0002_logentry_remove_auto_add', '2025-04-08 16:57:55.140314'),
+	(5, 'admin', '0003_logentry_add_action_flag_choices', '2025-04-08 16:57:55.153025'),
+	(6, 'contenttypes', '0002_remove_content_type_name', '2025-04-08 16:57:55.217304'),
+	(7, 'auth', '0002_alter_permission_name_max_length', '2025-04-08 16:57:55.261222'),
+	(8, 'auth', '0003_alter_user_email_max_length', '2025-04-08 16:57:55.286262'),
+	(9, 'auth', '0004_alter_user_username_opts', '2025-04-08 16:57:55.306308'),
+	(10, 'auth', '0005_alter_user_last_login_null', '2025-04-08 16:57:55.350604'),
+	(11, 'auth', '0006_require_contenttypes_0002', '2025-04-08 16:57:55.352508'),
+	(12, 'auth', '0007_alter_validators_add_error_messages', '2025-04-08 16:57:55.372151'),
+	(13, 'auth', '0008_alter_user_username_max_length', '2025-04-08 16:57:55.402820'),
+	(14, 'auth', '0009_alter_user_last_name_max_length', '2025-04-08 16:57:55.437033'),
+	(15, 'auth', '0010_alter_group_name_max_length', '2025-04-08 16:57:55.464620'),
+	(16, 'auth', '0011_update_proxy_permissions', '2025-04-08 16:57:55.484125'),
+	(17, 'auth', '0012_alter_user_first_name_max_length', '2025-04-08 16:57:55.517633'),
+	(18, 'healthcare_app_server', '0001_initial', '2025-04-08 16:57:55.582352'),
+	(19, 'healthcare_app_server', '0002_user', '2025-04-08 16:57:55.605671'),
+	(20, 'healthcare_app_server', '0003_remove_historydetect_user_id_historydetect_user', '2025-04-08 16:57:55.669329'),
+	(21, 'healthcare_app_server', '0004_remove_user_face_image_user_face_detect_data', '2025-04-08 16:57:55.716307'),
+	(22, 'healthcare_app_server', '0005_remove_historydetect_type_detect_id_and_more', '2025-04-08 16:57:56.069812'),
+	(23, 'sessions', '0001_initial', '2025-04-08 16:57:56.105898');
+
+-- Dumping structure for table image_detect_service.django_session
+DROP TABLE IF EXISTS `django_session`;
+CREATE TABLE IF NOT EXISTS `django_session` (
+  `session_key` varchar(40) NOT NULL,
+  `session_data` longtext NOT NULL,
+  `expire_date` datetime(6) NOT NULL,
+  PRIMARY KEY (`session_key`),
+  KEY `django_session_expire_date_a5c62663` (`expire_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Dumping data for table image_detect_service.django_session: ~0 rows (approximately)
+DELETE FROM `django_session`;
+
+-- Dumping structure for table image_detect_service.users
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(30) NOT NULL,
+  `face_encode_value` longtext NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Dumping data for table image_detect_service.users: ~1 rows (approximately)
+DELETE FROM `users`;
+INSERT INTO `users` (`id`, `user_id`, `face_encode_value`) VALUES
+	(1, '20250409000148-52838-19460614', '0.10584330558776855,0.13875123858451843,0.017335709184408188,-0.034396834671497345,0.0634281262755394,0.1731046438217163,0.13706965744495392,0.1279967874288559,-0.20125851035118103,0.1432647705078125,-0.016337769106030464,0.04654732719063759,0.09448826313018799,-0.14152637124061584,0.09778915345668793,-0.02033647708594799,0.09336532652378082,0.03785158321261406,-0.014978325925767422,-0.01065089926123619,0.08321639895439148,0.06275706738233566,-0.09443117678165436,0.06672995537519455,0.02548397332429886,-0.020930727943778038,-0.09379740059375763,-0.1023077517747879,0.06712616235017776,0.127790167927742,-0.07611799240112305,0.03837759420275688,-0.08349186927080154,0.08980368077754974,0.01547415554523468,-0.1361146718263626,0.04725499823689461,-0.025039980188012123,0.049504172056913376,-0.014677601866424084,0.038522396236658096,-0.06674099713563919,0.10104412585496902,0.06536762416362762,-0.07993385195732117,0.006556610111147165,0.12748196721076965,-0.05896943435072899,-0.1696457862854004,-0.017484785988926888,0.2638590335845947,-0.026486936956644058,-0.11667561531066895,0.008834133855998516,0.06422130018472672,0.014854923821985722,-0.05251426622271538,0.035479795187711716,0.048541177064180374,-0.07095971703529358,0.004742802586406469,-0.09870276600122452,-0.029856251552700996,-0.1513420045375824,0.07640501111745834,-0.12929591536521912,0.0021999350283294916,-0.022297585383057594,-0.10714013874530792,-0.05744510516524315,0.023083405569195747,0.09507455676794052,-0.056554775685071945,-0.07993900775909424,-0.04638156667351723,0.0924389660358429,-0.010323582217097282,0.10469857603311539,0.08798302710056305,0.08940759301185608,-0.029620077461004257,-0.011434666812419891,0.12538853287696838,0.09091522544622421,0.059597987681627274,-0.08719949424266815,0.11513292044401169,-0.04865673929452896,0.07340408861637115,0.05124524608254433,-0.13828705251216888,-0.10107102990150452,-0.12693481147289276,0.048568710684776306,-0.1492796242237091,-0.03339071571826935,0.1399904489517212,-0.008997241035103798,-0.08009881526231766,-0.0026522742118686438,-0.003236828139051795,0.16625501215457916,0.007123994641005993,0.1711837649345398,-0.18761046230793,-0.04617668315768242,-0.1000283807516098,0.10408741235733032,-0.05619249492883682,-0.04356605187058449,0.06135101616382599,0.0009394040098413825,-0.14605748653411865,-0.025118842720985413,0.03374747559428215,-0.02206031233072281,-0.10726196318864822,-0.08281461894512177,-0.11964135617017746,0.0577523410320282,0.016832564026117325,-0.012915853410959244,0.04364259913563728,0.015186404809355736,0.13587065041065216,-0.013775747269392014,0.023463400080800056,-0.08957294374704361');
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
