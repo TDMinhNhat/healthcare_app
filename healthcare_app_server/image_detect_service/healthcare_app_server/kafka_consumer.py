@@ -47,7 +47,7 @@ class KafkaConsumer(threading.Thread):
 
     def __filter_topic__(self, topic, data) -> None:
         match topic:
-            case "insert_user":
+            case "insert_patient":
                 self.__insert_user__(data)
             case _:
                 print("There're no matched topic")

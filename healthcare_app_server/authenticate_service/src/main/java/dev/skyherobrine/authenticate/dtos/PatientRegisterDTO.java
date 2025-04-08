@@ -17,6 +17,7 @@ public class PatientRegisterDTO {
     private String username;
     private String email;
     private String password;
+    private String faceEncodeValue;
 
     public LocalDate getDobLocalDate() {
         String[] splitDob = dob.split("-");
@@ -25,7 +26,7 @@ public class PatientRegisterDTO {
 
     public Patient toObject() {
         return new Patient(
-            "123", firstName, lastName, sex, getDobLocalDate(), phone, email, password
+            "123", firstName, lastName, sex, getDobLocalDate(), phone, email, password, faceEncodeValue
         );
     }
 }
