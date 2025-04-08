@@ -42,6 +42,8 @@ class FaceDetectService:
         i = np.argmax(detections[0, 0, :, 2])
         confidence = detections[0, 0, i, 2]
 
+        print(confidence)
+
         if confidence >= 0.98:
             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
             (startX, startY, endX, endY) = box.astype("int")
@@ -80,6 +82,8 @@ class FaceDetectService:
 
         i = np.argmax(detections[0, 0, :, 2])
         confidence = detections[0, 0, i, 2]
+
+        print(confidence)
 
         if confidence >= 0.98:
             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
