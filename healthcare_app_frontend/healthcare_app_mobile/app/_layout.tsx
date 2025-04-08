@@ -74,6 +74,14 @@ export default function Layout() {
             presentation: "card",
           }}
         />
+        <Stack.Screen
+          name={"edit-profile"}
+          options={{
+            title: "Chỉnh sửa thông tin",
+            headerShown: true,
+            presentation: "card",
+          }}
+        />
       </Stack>
     </Provider>
   );

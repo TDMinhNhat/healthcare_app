@@ -13,6 +13,11 @@ const userSlice = createSlice({
       state.user = action.payload;
       setUserAsyncStorage(action.payload);
     },
+    updateUser: (state, action) => {
+      state.user = state.user
+        ? { ...state.user, ...action.payload } // ghi đè thông tin user cũ (các trường cùng tên)
+        : action.payload;
+    },
     logOut: (state) => {
       state.user = null;
       removeUserAsyncStorage();
@@ -20,5 +25,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { setUser, logOut } = userSlice.actions;
+export const { setUser, logOut, updateUser } = userSlice.actions;
 export default userSlice.reducer;
