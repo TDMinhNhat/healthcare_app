@@ -57,7 +57,7 @@ public abstract class User {
     @Column(nullable = false)
     private boolean status;
 
-    @Column(name = "face_encode_value", length = 5000, nullable = false) @NonNull
+    @Column(name = "face_encode_value", length = 5000)
     private String faceEncodeValue;
 
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
@@ -68,7 +68,7 @@ public abstract class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public User(@NonNull String userId, @NonNull String firstName, @NonNull String lastName, @NonNull Boolean sex, @NonNull LocalDate dob, @NonNull String phone, @NonNull String email, @NonNull String password, @NonNull String faceEncodeValue, AuthenticateProvider authedProvider) {
+    public User(@NonNull String userId, @NonNull String firstName, @NonNull String lastName, @NonNull Boolean sex, @NonNull LocalDate dob, @NonNull String phone, @NonNull String email, @NonNull String password, AuthenticateProvider authedProvider) {
         this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -77,7 +77,6 @@ public abstract class User {
         this.phone = phone;
         this.email = email;
         this.password = password;
-        this.faceEncodeValue = faceEncodeValue;
         this.authedProvider = authedProvider;
         this.address = new Address();
     }
