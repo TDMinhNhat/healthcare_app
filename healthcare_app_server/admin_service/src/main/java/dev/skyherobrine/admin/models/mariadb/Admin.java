@@ -15,10 +15,10 @@ import java.time.LocalDate;
 public class Admin extends User{
 
     public Admin(@NonNull String userId, @NonNull String firstName, @NonNull String lastName, @NonNull Boolean sex, @NonNull LocalDate dob, @NonNull String phone, @NonNull String email, @NonNull String password) {
-        super(userId, firstName, lastName, sex, dob, phone, email, password);
+        super(userId, firstName, lastName, sex, dob, phone, email, password, "");
     }
 
     public Admin(@NonNull String userId, @NonNull String firstName, @NonNull String lastName, @NonNull Boolean sex, @NonNull LocalDate dob, @NonNull String phone, @NonNull String email, @NonNull String password, AuthenticateProvider authedProvider) {
-        super(userId, firstName, lastName, sex, dob, phone, email, password, authedProvider);
+        super(userId, firstName, lastName, sex, dob, phone, email, password, "", authedProvider);
     }
 }
