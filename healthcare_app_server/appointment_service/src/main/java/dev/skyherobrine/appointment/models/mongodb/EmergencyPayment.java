@@ -12,12 +12,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class EmergencyPayment extends Payment{
 
-    private LocalDateTime emergencyTime;
+    private Emergency emergency;
     private String patientId;
 
-    public EmergencyPayment(Long id, Double price, String content, String patientId) {
+    public EmergencyPayment(Long id, Double price, String content, String patientId, Emergency emergency) {
         super(id, price, content);
         this.patientId = patientId;
-        this.emergencyTime = LocalDateTime.now();
+        this.emergency = emergency;
     }
 }
