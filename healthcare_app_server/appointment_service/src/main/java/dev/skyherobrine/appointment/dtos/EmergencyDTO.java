@@ -7,4 +7,9 @@ import lombok.Setter;
 public class EmergencyDTO {
     private String patientId;
     private String doctorId;
+
+    public EmergencyDTO(String patientId, String doctorId) {
+        this.patientId = patientId;
+        this.doctorId = doctorId;
+    }
 }
