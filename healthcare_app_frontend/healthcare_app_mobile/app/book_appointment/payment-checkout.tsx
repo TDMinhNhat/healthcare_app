@@ -35,6 +35,7 @@ const PaymentCheckout = () => {
   const [paymentError, setPaymentError] = useState<string | null>(null); // Lưu thông báo lỗi khi thanh toán thất bại
   const [note, setNote] = useState(""); // Ghi chú cho cuộc hẹn nếu cần
   const [isConnected, setIsConnected] = useState(false); // Trạng thái kết nối với server
+  const getIntervalNumber = useRef(null);
 
   // Các thông số cần thiết cho thanh toán
   const appointmentFee = 5000; // Phí khám bệnh (VND)
@@ -65,6 +66,41 @@ const PaymentCheckout = () => {
   const copyToClipboard = (text: string) => {
     Clipboard.setString(text);
   };
+
+
+  const client = new Client({
+    brokerURL: `ws://${process.env.EXPO_PUBLIC_HOST_ID}:8081/appointment/socket`,
+    debug: (msg) => {
+      console.log("STOMP: " + msg);
+    },
+    onConnect: () => {
+        client.subscribe("/patient/result_check_payment", () => {
+          handlePaymentComplete().catch((error) => {
+            console.log(error);
+            setPaymentError("Có lỗi xảy ra trong quá trình xác minh thanh toán.");
+          });
+        })
+    }
+  })
+  client.appendMissingNULLonIncoming = true;
+  client.discardWebsocketOnCommFailure = true;
+  client.forceBinaryWSFrames = true;
+
+  useEffect(() => {
+    client.activate();
+
+    getIntervalNumber.current = setInterval(() => {
+      client.publish({ destination: "/app/check_payment", body: JSON.stringify({
+        "amount_in": 5000,
+        "transaction_content": code
+      })});
+    }, 1000);
+
+    return () => {
+      client.deactivate();
+      clearInterval(getIntervalNumber.current);
+    }
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
