@@ -25,8 +25,10 @@ public class WorkSchedule {
     @JsonFormat(pattern = "dd-MM-yyyy")
     @Field(name = "date_appointment")
     private LocalDate dateAppointment;
+    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
     @Field(name = "created_at")
     private LocalDateTime createdAt;
+    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
     @Field(name = "updated_at")
     private LocalDateTime updatedAt;
     private boolean status;
