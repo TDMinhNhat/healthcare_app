@@ -32,7 +32,7 @@ import { useNavigate } from "react-router";
 import { formatDateToString } from "../utils/dateUtils";
 import { toast } from "react-toastify";
 import { ROUTING } from "../constants/routing";
-import axios from "axios";
+import { registerFace } from "../services/image_detect/detect_service";
 
 // Schema xác thực dữ liệu đầu vào cho form đăng ký
 const validationSchema = Yup.object({
@@ -154,24 +154,17 @@ export default function RegisterPage() {
           const byteArray = new Uint8Array(byteNumbers);
           const blob = new Blob([byteArray], { type: "image/jpeg" });
 
-          // Tạo FormData và gửi lên server
-          const formData = new FormData();
-          formData.append("file", blob, "image.jpg");
-
-          const response = await axios.post(
-            "http://localhost:8081/image_detect/face/register",
-            formData,
-            {
-              headers: {
-                "Content-Type": "multipart/form-data",
-              },
-            }
-          );
-
-          const result = response.data;
-
+          // Sử dụng hàm registerFace thay vì gọi trực tiếp axios
+          const result = await registerFace(blob);
+          // .then((response) => {
+          //   return response.data;
+          // })
+          // .catch((error) => {
+          //   console.error("Error during face detection:", error);
+          // });
+          console.log("Kết quả nhận diện khuôn mặt:", result);
           // Nếu phát hiện được khuôn mặt, chuyển sang bước tiếp theo
-          if (result.code === 200) {
+          if (result.code === 200 && result.message == "New User") {
             setDetectedFaceImage(result.data);
             clearInterval(intervalRef.current);
             toast.success("Nhận diện khuôn mặt thành công!");

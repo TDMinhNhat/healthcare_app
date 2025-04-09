@@ -680,7 +680,11 @@ const AppointmentPage = () => {
                         <TableCell
                           key={`${day.formattedDate}-morning`}
                           align="center"
-                          sx={{ verticalAlign: "top", p: 1 }}
+                          sx={{
+                            // verticalAlign: "top",
+                            p: 1,
+                            alignItems: "center",
+                          }}
                         >
                           {renderPeriodAppointments(
                             day.formattedDate,
@@ -707,7 +711,11 @@ const AppointmentPage = () => {
                         <TableCell
                           key={`${day.formattedDate}-afternoon`}
                           align="center"
-                          sx={{ verticalAlign: "top", p: 1 }}
+                          sx={{
+                            // verticalAlign: "top",
+                            p: 1,
+                            alignItems: "center",
+                          }}
                         >
                           {renderPeriodAppointments(
                             day.formattedDate,

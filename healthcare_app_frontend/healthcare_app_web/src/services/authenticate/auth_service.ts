@@ -27,7 +27,8 @@ export const signUp = async (
   username: string,
   sex: boolean,
   dob: string,
-  phone: string
+  phone: string,
+  faceEncodeValue: string
 ) => {
   const response = await axiosConfig.post(prefix + "/register", {
     firstName,
@@ -38,6 +39,7 @@ export const signUp = async (
     sex,
     dob,
     phone,
+    faceEncodeValue,
   });
   return response;
 };

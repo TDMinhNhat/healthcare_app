@@ -191,7 +191,7 @@ export default function ExaminationRoomPage() {
         socket.emit("getPatientQueue", { scheduleId });
 
         // Lắng nghe sự kiện khi bệnh nhân huỷ tham gia hàng đợi
-        socket.on("cancelWaitingQueue", (data) => {
+        socket.on("listenCancelWaitingQueue", (data) => {
           console.log("Bệnh nhân huỷ tham gia:", data);
           // Xoá bệnh nhân khỏi hàng đợi
           setPatientQueue((prevQueue) =>
