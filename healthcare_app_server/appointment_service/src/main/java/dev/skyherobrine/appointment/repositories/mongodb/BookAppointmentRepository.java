@@ -10,6 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface BookAppointmentRepository extends MongoRepository<BookAppointment,Long> {
+    Optional<BookAppointment> findByPatientIdAndWorkScheduleAndStatus(String patientId, Long workSchedule, AppointmentStatus status);
 
     Optional<BookAppointment> findTopByOrderByIdDesc();
 
@@ -24,4 +25,6 @@ public interface BookAppointmentRepository extends MongoRepository<BookAppointme
     List<BookAppointment> findByWorkScheduleAndStatusNot(Long workSchedule, AppointmentStatus status);
 
     List<BookAppointment> findByPatientId(String patientId);
+
+
 }

@@ -46,6 +46,10 @@ public class BookingService {
         log.info("Booking Service: add the book appointment");
         Map<String,Object> result = new HashMap<>();
 
+        if(bar.findByPatientIdAndWorkScheduleAndStatus(appointmentDTO.getPatientId(), appointmentDTO.getWorkSchedule(), AppointmentStatus.WAITING).isPresent()) {
+            throw new Exception("You have already booked an appointment for this schedule");
+        }
+
         BookAppointment bookAppointment = new BookAppointment(
                 getMaxIdBookAppointment(),
                 appointmentDTO.getPatientId(),
