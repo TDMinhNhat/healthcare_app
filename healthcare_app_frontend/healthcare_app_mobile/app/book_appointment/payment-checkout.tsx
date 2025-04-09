@@ -94,7 +94,7 @@ const PaymentCheckout = () => {
         "amount_in": 5000,
         "transaction_content": code
       })});
-    }, 1000);
+    }, 3000);
 
     return () => {
       client.deactivate();
