@@ -69,6 +69,11 @@ const run = (server) => {
             socket.leave("waiting: " + data.scheduleId);
             socket.join("clinic: " + data.scheduleId);
         })
+
+        //The patient cancel joining the waiting room
+        socket.on("cancelWaitingQueue", (data) => {
+            socket.to("waiting: " + data.scheduleId).emit("listenCancelWaitingQueue", data);
+        })
     }
 }
 
