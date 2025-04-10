@@ -15,6 +15,7 @@ import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { detectFace } from "../services/image_detect/detect_service";
 
 export default function Emergency() {
   const [permission, requestPermission] = useCameraPermissions(); // State quản lý quyền truy cập camera
@@ -91,6 +92,22 @@ export default function Emergency() {
     }
   };
 
+  // Utility function to convert URI to Blob
+  const uriToBlob = async (uri: string): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function () {
+        reject(new Error("uriToBlob failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", uri, true);
+      xhr.send(null);
+    });
+  };
+
   // Hàm upload ảnh lên server
   const uploadImage = async () => {
     if (!capturedImage) {
@@ -101,28 +118,14 @@ export default function Emergency() {
     setIsUploading(true);
 
     try {
-      // Tạo form data để upload
-      const formData = new FormData();
-      const filename =
-        capturedImage.split("/").pop() || `image_${Date.now()}.jpg`;
+      // Chuyển đổi URI ảnh thành Blob
+      const imageBlob = await uriToBlob(capturedImage);
 
-      formData.append("image", {
-        uri: capturedImage,
-        type: "image/jpeg",
-        name: filename,
-      } as any);
+      // Sử dụng dịch vụ detectFace để tải ảnh lên server
+      const response = await detectFace(imageBlob);
 
-      // Trong ứng dụng thực tế, sẽ gửi dữ liệu đến API
-      // const response = await fetch('YOUR_UPLOAD_API_ENDPOINT', {
-      //   method: 'POST',
-      //   body: formData,
-      //   headers: {
-      //     'Content-Type': 'multipart/form-data',
-      //   },
-      // });
-
-      // Giả lập độ trễ khi upload
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Xử lý phản hồi từ server
+      console.log("Phản hồi từ server:", response);
 
       // Hiển thị thông báo thành công
       Alert.alert(
