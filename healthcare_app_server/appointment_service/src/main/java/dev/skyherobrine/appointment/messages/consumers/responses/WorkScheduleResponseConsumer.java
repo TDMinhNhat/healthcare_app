@@ -49,6 +49,38 @@ public class WorkScheduleResponseConsumer {
         latch.countDown();
     }
 
+    @KafkaListener(topics = "response_get_today_work_schedule_by_doctor", groupId = "appointment_response_get_today_work_schedule_by_doctor")
+    public void responseGetTodayWorkScheduleByDoctor(String message) throws Exception {
+        log.info("Work Schedule Response Consumer: listen for getting the request");
+        log.info("Work Schedule Response Consumer: {}", message);
+        node = new ObjectMapper().readTree(message);
+        latch.countDown();
+    }
+
+    @KafkaListener(topics = "response_get_work_schedule_by_doctor", groupId = "appointment_response_get_work_schedule_by_doctor")
+    public void responseGetWorkScheduleByDoctor(String message) throws Exception {
+        log.info("Work Schedule Response Consumer: listen for getting the request");
+        log.info("Work Schedule Response Consumer: {}", message);
+        node = new ObjectMapper().readTree(message);
+        latch.countDown();
+    }
+
+    @KafkaListener(topics = "response_visualize_work_schedule_doctor_by_monthly", groupId = "appointment_response_visualize_work_schedule_doctor_by_monthly")
+    public void responseVisualizeWorkScheduleDoctorByMonthly(String message) throws Exception {
+        log.info("Work Schedule Response Consumer: listen for getting the request");
+        log.info("Work Schedule Response Consumer: {}", message);
+        node = new ObjectMapper().readTree(message);
+        latch.countDown();
+    }
+
+    @KafkaListener(topics = "response_visualize_work_schedule_doctor_by_yearly", groupId = "appointment_response_visualize_work_schedule_doctor_by_yearly")
+    public void responseVisualizeWorkScheduleDoctorByYearly(String message) throws Exception {
+        log.info("Work Schedule Response Consumer: listen for getting the request");
+        log.info("Work Schedule Response Consumer: {}", message);
+        node = new ObjectMapper().readTree(message);
+        latch.countDown();
+    }
+
     public JsonNode getStorageData() {
         try {
             latch.await();

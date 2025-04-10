@@ -17,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -113,6 +114,85 @@ public class WorkScheduleRequestConsumer {
             kafkaTemplate.send("response_visualize_appointment_by_yearly", ObjectParser.convertObjectToJson(visualizeYearly)).get();
             kafkaTemplate.flush();
 
+        } catch (Exception e) {
+            log.error("Work Schedule Request Consumer: error when getting the request");
+            log.error("Work Schedule Request Consumer: {}", e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "request_get_today_work_schedule_by_doctor", groupId = "authenticate_request_get_today_work_schedule_by_doctor")
+    public void responseGetTodayWorkScheduleByDoctor(String message) {
+        try {
+            log.info("Work Schedule Request Consumer: listen for getting the request");
+            log.info("Work Schedule Request Consumer: {}", message);
+
+            String doctorId = ObjectParser.convertJsonToObject(message, String.class);
+            List<Long> workSchedules = workScheduleRepository.findAllByDoctor_UserId(doctorId).stream().filter(workSchedule -> Objects.equals(workSchedule.getDateAppointment(), LocalDate.now())).map(WorkSchedule::getId).toList();
+
+            kafkaTemplate.send("response_get_today_work_schedule_by_doctor", ObjectParser.convertObjectToJson(workSchedules)).get();
+            kafkaTemplate.flush();
+
+        } catch (Exception e) {
+            log.error("Work Schedule Request Consumer: error when getting the request");
+            log.error("Work Schedule Request Consumer: {}", e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "request_get_work_schedule_by_doctor", groupId = "authenticate_request_get_work_schedule_by_doctor")
+    public void responseGetWorkScheduleByDoctor(String message) {
+        try {
+            log.info("Work Schedule Request Consumer: listen for getting the request");
+            log.info("Work Schedule Request Consumer: {}", message);
+
+            String doctorId = ObjectParser.convertJsonToObject(message, String.class);
+            List<Long> workSchedules = workScheduleRepository.findAllByDoctor_UserId(doctorId).stream().map(WorkSchedule::getId).toList();
+
+            kafkaTemplate.send("response_get_work_schedule_by_doctor", ObjectParser.convertObjectToJson(workSchedules)).get();
+            kafkaTemplate.flush();
+        } catch (Exception e) {
+            log.error("Work Schedule Request Consumer: error when getting the request");
+            log.error("Work Schedule Request Consumer: {}", e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "request_visualize_work_schedule_doctor_by_monthly", groupId = "authenticate_request_visualize_work_schedule_doctor_by_monthly")
+    public void responseVisualizeWorkScheduleDoctorByMonthly(String message) {
+        try {
+            log.info("Work Schedule Request Consumer: listen for getting the request");
+            log.info("Work Schedule Request Consumer: {}", message);
+
+            String doctorId = ObjectParser.convertJsonToObject(message, String.class);
+            List<WorkSchedule> result = workScheduleRepository.findAllByDoctor_UserId(doctorId).stream().filter(workSchedule -> workSchedule.getDateAppointment().getYear() == LocalDate.now().getYear()).toList();
+
+            Map<String,Object> visualizeMonthly = new HashMap<>();
+            for(AtomicInteger i = new AtomicInteger(1); i.get() <= 12; i.set(i.get() + 1)) {
+                visualizeMonthly.put(i.get() + "", result.stream().filter(workSchedule -> workSchedule.getDateAppointment().getMonthValue() == i.get()).map(WorkSchedule::getId).toList());
+            }
+
+            kafkaTemplate.send("response_visualize_work_schedule_doctor_by_monthly", ObjectParser.convertObjectToJson(visualizeMonthly)).get();
+            kafkaTemplate.flush();
+        } catch (Exception e) {
+            log.error("Work Schedule Request Consumer: error when getting the request");
+            log.error("Work Schedule Request Consumer: {}", e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "request_visualize_work_schedule_doctor_by_yearly", groupId = "authenticate_request_visualize_work_schedule_doctor_by_yearly")
+    public void responseVisualizeWorkScheduleDoctorByYearly(String message) {
+        try {
+            log.info("Work Schedule Request Consumer: listen for getting the request");
+            log.info("Work Schedule Request Consumer: {}", message);
+
+            String doctorId = ObjectParser.convertJsonToObject(message, String.class);
+            List<WorkSchedule> result = workScheduleRepository.findAllByDoctor_UserId(doctorId).stream().filter(workSchedule -> workSchedule.getDateAppointment().getYear() == LocalDate.now().getYear()).toList();
+
+            Map<String,Object> visualizeYearly = new HashMap<>();
+            for(AtomicInteger i = new AtomicInteger(LocalDate.now().getYear()); i.get() >= LocalDate.now().minusYears(5L).getYear(); i.set(i.get() - 1)) {
+                visualizeYearly.put(i.get() + "", result.stream().filter(workSchedule -> workSchedule.getDateAppointment().getYear() == i.get()).map(WorkSchedule::getId).toList());
+            }
+
+            kafkaTemplate.send("response_visualize_work_schedule_doctor_by_yearly", ObjectParser.convertObjectToJson(visualizeYearly)).get();
+            kafkaTemplate.flush();
         } catch (Exception e) {
             log.error("Work Schedule Request Consumer: error when getting the request");
             log.error("Work Schedule Request Consumer: {}", e.getMessage());

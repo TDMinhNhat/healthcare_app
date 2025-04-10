@@ -27,4 +27,24 @@ public class WorkScheduleRequestProducer {
     public NewTopic requestVisualizeAppointmentByYearly() {
         return TopicBuilder.name("request_visualize_appointment_by_yearly").build();
     }
+
+    @Bean
+    public NewTopic requestGetTodayWorkScheduleByDoctor() {
+        return TopicBuilder.name("request_get_today_work_schedule_by_doctor").build();
+    }
+
+    @Bean
+    public NewTopic requestGetWorkScheduleByDoctor() {
+        return TopicBuilder.name("request_get_work_schedule_by_doctor").build();
+    }
+
+    @Bean
+    public NewTopic requestVisualizeWorkScheduleDoctorByMonthly() {
+        return TopicBuilder.name("request_visualize_work_schedule_doctor_by_monthly").build();
+    }
+
+    @Bean
+    public NewTopic requestVisualizeWorkScheduleDoctorByYearly() {
+        return TopicBuilder.name("request_visualize_work_schedule_doctor_by_yearly").build();
+    }
 }

@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,9 +100,63 @@ public class DashboardService {
         return result;
     }
 
-    public Map<String,Object> getDoctorDashboard(String doctorId) {
+    public Map<String,Object> getDoctorDashboard(String doctorId) throws Exception {
         Map<String,Object> result = new HashMap<>();
 
+        //Get the number of patients have to do in today
+        kafkaTemplate.send("request_get_today_work_schedule_by_doctor", ObjectParser.convertObjectToJson(doctorId));
+        JsonNode nodes = workScheduleResponseConsumer.getStorageData();
+        List<Integer> getWorkSchedules = new ArrayList<>();
+        for(JsonNode node : nodes) {
+            getWorkSchedules.add(node.asInt());
+        }
+        result.put("total_patient_today", bookAppointmentRepository.findByWorkScheduleIn(getWorkSchedules.stream().map(workSchedule -> Long.parseLong(workSchedule.toString())).toList()).size());
+
+        //Get the number of patients have done
+        kafkaTemplate.send("request_get_work_schedule_by_doctor", ObjectParser.convertObjectToJson(doctorId));
+        nodes = workScheduleResponseConsumer.getStorageData();
+        getWorkSchedules = new ArrayList<>();
+        for(JsonNode node : nodes) {
+            getWorkSchedules.add(node.asInt());
+        }
+        result.put("total_patient_done", bookAppointmentRepository.findByWorkScheduleIn(getWorkSchedules.stream().map(workSchedule -> Long.parseLong(workSchedule.toString())).toList()).stream().filter(bookAppointment -> bookAppointment.getStatus().equals(AppointmentStatus.DONE)).toList().size());
+
+        //Visualize the patient registered
+        Map<String,Object> charts = new HashMap<>();
+        Map<String,Object> monthly = new HashMap<>();
+        Map<String,Object> yearly = new HashMap<>();
+
+        //// Monthly
+        kafkaTemplate.send("request_visualize_work_schedule_doctor_by_monthly", ObjectParser.convertObjectToJson(doctorId));
+        nodes = workScheduleResponseConsumer.getStorageData();
+        if(nodes != null) {
+            for(int month = 1; month <= 12; month++) {
+                JsonNode nodeMonth = nodes.get(month + "");
+                List<Long> workSchedules = new ArrayList<>();
+                for(JsonNode targetNodeMonth : nodeMonth) {
+                    workSchedules.add(targetNodeMonth.asLong());
+                }
+                monthly.put(month + "", bookAppointmentRepository.findByWorkScheduleIn(workSchedules).stream().filter(bookAppointment -> bookAppointment.getStatus().equals(AppointmentStatus.DONE)).toList().size());
+            }
+        }
+        charts.put("monthly", monthly);
+
+        //// Yearly
+        kafkaTemplate.send("request_visualize_work_schedule_doctor_by_yearly", ObjectParser.convertObjectToJson(doctorId));
+        nodes = workScheduleResponseConsumer.getStorageData();
+        if(nodes != null) {
+            for(int year = LocalDate.now().getYear(); year >= LocalDate.now().minusYears(5L).getYear(); year--) {
+                JsonNode nodeYear = nodes.get(year + "");
+                List<Long> workSchedules = new ArrayList<>();
+                for(JsonNode targetNodeYear : nodeYear) {
+                    workSchedules.add(targetNodeYear.asLong());
+                }
+                yearly.put(year + "", bookAppointmentRepository.findByWorkScheduleIn(workSchedules).stream().filter(bookAppointment -> bookAppointment.getStatus().equals(AppointmentStatus.DONE)).toList().size());
+            }
+        }
+
+        charts.put("yearly", yearly);
+        result.put("charts", charts);
         return result;
     }
 

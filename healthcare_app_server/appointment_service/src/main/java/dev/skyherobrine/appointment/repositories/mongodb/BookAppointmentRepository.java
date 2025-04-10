@@ -5,6 +5,7 @@ import dev.skyherobrine.appointment.models.mongodb.BookAppointment;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +26,8 @@ public interface BookAppointmentRepository extends MongoRepository<BookAppointme
     List<BookAppointment> findByWorkScheduleAndStatusNot(Long workSchedule, AppointmentStatus status);
 
     List<BookAppointment> findByPatientId(String patientId);
+
+    List<BookAppointment> findByWorkScheduleIn(Collection<Long> workSchedules);
 
 
 }
