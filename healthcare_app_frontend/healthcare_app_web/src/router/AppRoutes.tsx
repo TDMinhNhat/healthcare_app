@@ -27,6 +27,7 @@ import WaitingRoomPage from "../pages/patient/WatingRoomPage";
 import PatientManagementPage from "../pages/admin/PatientManagementPage";
 import PatientMedicalRecord from "../pages/patient/PatientMedicalRecord";
 import DrugManagementPage from "../pages/admin/DrugManagementPage";
+import DoctorManagementPage from "../pages/admin/DoctorManagementPage";
 
 // const ChatPage = lazy(() => import("../pages/ChatPage"));
 
@@ -53,10 +54,7 @@ export const AppRoutes = () => {
             <Route index element={<div>Dashboard</div>} />
             {/* Add other admin routes as needed */}
             <Route path={ROUTING.USERS} element={<PatientManagementPage />} />
-            <Route
-              path={ROUTING.DOCTORS}
-              element={<div>Doctors Management</div>}
-            />
+            <Route path={ROUTING.DOCTORS} element={<DoctorManagementPage />} />
             <Route path={ROUTING.DRUG} element={<DrugManagementPage />} />
           </Route>
 

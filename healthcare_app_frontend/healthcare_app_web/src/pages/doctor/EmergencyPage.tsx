@@ -33,6 +33,7 @@ import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import PatientMedicalRecordModal from "../../components/emergency/PatientMedicalRecordModal";
 import { User } from "../../types/user";
 import { Avatar } from "@mui/material";
+import GPSMapComponent from "../../components/find_doctor/GPSMapComponent";
 
 // Dữ liệu giả lập cho bệnh nhân cấp cứu
 const mockEmergencyPatients: (User & { received?: boolean })[] = [
@@ -380,39 +381,53 @@ const EmergencyPage: React.FC = () => {
             {error}
           </Alert>
         ) : (
-          <Box sx={{ height: 500, width: "100%" }}>
-            <DataGrid
-              rows={patients.map((p, index) => ({
-                ...p,
-                id: p.userId || `unknown-${index}`,
-              }))}
-              columns={columns}
-              pageSizeOptions={[5, 10, 25, 50, 100]}
-              slots={{
-                toolbar: GridToolbar,
-              }}
-              slotProps={{
-                toolbar: {
-                  showQuickFilter: true, // search
-                  // tắt export
-                  printOptions: { disableToolbarButton: true },
-                  csvOptions: { disableToolbarButton: true },
-                  quickFilterProps: { debounceMs: 500 },
-                },
-              }}
-              // tắt mấy filter khác
-              disableRowSelectionOnClick
-              disableColumnFilter={true}
-              disableDensitySelector={true}
-              disableColumnSelector={true}
-              onRowClick={(params) => {
-                // Chỉ mở modal cho bệnh nhân có thông tin xác định (có userId)
-                if (params.row.userId) {
-                  handlePatientClick(params.row);
-                }
-              }}
-            />
-          </Box>
+          <>
+            {/* Bản đồ vị trí */}
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
+                Bản đồ vị trí
+              </Typography>
+              <Box sx={{ height: "400px", width: "100%" }}>
+                <GPSMapComponent />
+              </Box>
+            </Box>
+
+            <Divider sx={{ mb: 3 }} />
+
+            <Box sx={{ height: 500, width: "100%" }}>
+              <DataGrid
+                rows={patients.map((p, index) => ({
+                  ...p,
+                  id: p.userId || `unknown-${index}`,
+                }))}
+                columns={columns}
+                pageSizeOptions={[5, 10, 25, 50, 100]}
+                slots={{
+                  toolbar: GridToolbar,
+                }}
+                slotProps={{
+                  toolbar: {
+                    showQuickFilter: true, // search
+                    // tắt export
+                    printOptions: { disableToolbarButton: true },
+                    csvOptions: { disableToolbarButton: true },
+                    quickFilterProps: { debounceMs: 500 },
+                  },
+                }}
+                // tắt mấy filter khác
+                disableRowSelectionOnClick
+                disableColumnFilter={true}
+                disableDensitySelector={true}
+                disableColumnSelector={true}
+                onRowClick={(params) => {
+                  // Chỉ mở modal cho bệnh nhân có thông tin xác định (có userId)
+                  if (params.row.userId) {
+                    handlePatientClick(params.row);
+                  }
+                }}
+              />
+            </Box>
+          </>
         )}
       </Paper>
 

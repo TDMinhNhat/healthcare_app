@@ -3,67 +3,85 @@ import {
   Typography,
   Paper,
   Grid,
-  Card,
-  CardContent,
-  Button,
   CircularProgress,
   Box,
   Alert,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
+  ToggleButtonGroup,
+  ToggleButton,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import EmptyState from "../../components/EmptyState";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { PieChart } from "@mui/x-charts/PieChart";
+import EventIcon from "@mui/icons-material/Event";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import PersonIcon from "@mui/icons-material/Person";
+import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
+import { format } from "date-fns";
 
-// Dữ liệu mẫu đơn giản cho toa thuốc - theo cấu trúc của MedicalRecordDrug
-const MOCK_MEDICATIONS = [
-  {
-    drug: {
-      id: 1,
-      drugName: "Amlodipine",
-      unit: "viên",
-    },
-    howUse: "Uống 1 viên mỗi ngày vào buổi sáng",
-    quantity: 30,
-  },
-  {
-    drug: {
-      id: 2,
-      drugName: "Losartan",
-      unit: "viên",
-    },
-    howUse: "Uống 1 viên mỗi ngày vào buổi tối",
-    quantity: 30,
-  },
-  {
-    drug: {
-      id: 3,
-      drugName: "Vitamin C",
-      unit: "viên",
-    },
-    howUse: "Uống 1 viên mỗi ngày sau bữa sáng",
-    quantity: 60,
-  },
-];
+// Interface for appointments
+interface Appointment {
+  id: number;
+  workScheduleId: number;
+  date: string;
+  startTime: string;
+  endTime: string;
+  status: "WAITING" | "IN_PROGRESS" | "DONE" | "CANCELLED";
+  doctorName: string;
+  specialization: string;
+  reason?: string;
+  doctorId?: number;
+  numericalOrder?: number;
+}
 
 const PatientDashboard: React.FC = () => {
   // Lấy thông tin người dùng từ Redux store
   const user = useSelector((state: any) => state.user.user);
 
-  // Các state để quản lý dữ liệu và trạng thái tải
+  // State để theo dõi chế độ xem thời gian (tháng hoặc năm)
+  const [timeView, setTimeView] = useState<"month" | "year">("month");
+
+  // Tách state thành các phần riêng biệt để dễ quản lý - giống Doctor Dashboard
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [patientData, setPatientData] = useState<any | null>(null);
-  const [medications, setMedications] = useState<any[] | null>(null);
-  const [medicationsLoading, setMedicationsLoading] = useState<boolean>(true);
-  const [medicationsError, setMedicationsError] = useState<string | null>(null);
+
+  // Tách các trạng thái dữ liệu riêng biệt thay vì lưu trong một đối tượng patientData duy nhất
+  const [appointmentStats, setAppointmentStats] = useState({
+    total: 0,
+    completed: 0,
+    upcoming: 0,
+    cancelled: 0,
+  });
+
+  const [monthlyAppointments, setMonthlyAppointments] = useState({
+    jan: 0,
+    feb: 0,
+    mar: 0,
+    apr: 0,
+    may: 0,
+    jun: 0,
+    jul: 0,
+    aug: 0,
+    sep: 0,
+    oct: 0,
+    nov: 0,
+    dec: 0,
+  });
+
+  const [yearlyAppointments, setYearlyAppointments] = useState<
+    Record<string, number>
+  >({});
+
+  const [todayAppointments, setTodayAppointments] = useState<Appointment[]>([]);
+  const [appointmentsLoading, setAppointmentsLoading] = useState<boolean>(true);
+  const [appointmentsError, setAppointmentsError] = useState<string | null>(
+    null
+  );
   const dispatch = useDispatch();
 
   // Lấy dữ liệu thống kê của bệnh nhân
@@ -78,26 +96,49 @@ const PatientDashboard: React.FC = () => {
 
       try {
         setLoading(true);
-        // Dữ liệu mẫu cho demo - trong thực tế sẽ gọi API
-        const data = {
-          appointmentStats: {
-            total: 12, // Tổng số lịch hẹn
-            completed: 10, // Số lịch hẹn đã hoàn thành
-            upcoming: 2, // Số lịch hẹn sắp tới
-            cancelled: 1, // Số lịch hẹn đã hủy
-          },
-          // Dữ liệu lịch hẹn theo ngày trong tuần
-          weeklyAppointments: {
-            monday: 2, // Số lịch hẹn thứ 2
-            tuesday: 1, // Số lịch hẹn thứ 3
-            wednesday: 3, // Số lịch hẹn thứ 4
-            thursday: 0, // Số lịch hẹn thứ 5
-            friday: 2, // Số lịch hẹn thứ 6
-            saturday: 4, // Số lịch hẹn thứ 7
-            sunday: 0, // Số lịch hẹn chủ nhật
-          },
-        };
-        setPatientData(data);
+
+        // Giả lập gọi API với độ trễ để tăng tính thực tế
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        // Dữ liệu mẫu cho thống kê lịch hẹn
+        setAppointmentStats({
+          total: 12, // Tổng số lịch hẹn
+          completed: 10, // Số lịch hẹn đã hoàn thành
+          upcoming: 2, // Số lịch hẹn sắp tới
+          cancelled: 1, // Số lịch hẹn đã hủy
+        });
+
+        // Giả lập gọi API lấy dữ liệu theo tháng với độ trễ
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        // Dữ liệu mẫu cho lịch hẹn theo tháng
+        setMonthlyAppointments({
+          jan: 5,
+          feb: 3,
+          mar: 7,
+          apr: 2,
+          may: 4,
+          jun: 6,
+          jul: 8,
+          aug: 4,
+          sep: 3,
+          oct: 5,
+          nov: 2,
+          dec: 1,
+        });
+
+        // Giả lập gọi API lấy dữ liệu theo năm với độ trễ
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        // Dữ liệu mẫu cho lịch hẹn theo năm
+        setYearlyAppointments({
+          "2020": 25,
+          "2021": 30,
+          "2022": 45,
+          "2023": 38,
+          "2024": 12,
+        });
+
         setError(null);
       } catch (err) {
         setError("Không thể tải dữ liệu bệnh nhân");
@@ -110,32 +151,78 @@ const PatientDashboard: React.FC = () => {
     fetchPatientData();
   }, [user]);
 
-  // Lấy dữ liệu thuốc riêng biệt
+  // Lấy dữ liệu lịch hẹn hôm nay
   useEffect(() => {
-    const fetchMedications = async () => {
+    const fetchTodayAppointments = async () => {
       // Kiểm tra ID người dùng tồn tại
       if (!user?.userId) {
-        setMedicationsError("Không tìm thấy thông tin người dùng");
-        setMedicationsLoading(false);
+        setAppointmentsError("Không tìm thấy thông tin người dùng");
+        setAppointmentsLoading(false);
         return;
       }
 
       try {
-        setMedicationsLoading(true);
+        setAppointmentsLoading(true);
         // Giả lập gọi API với độ trễ 500ms
         await new Promise((resolve) => setTimeout(resolve, 500));
-        // Sử dụng dữ liệu mẫu
-        setMedications(MOCK_MEDICATIONS);
-        setMedicationsError(null);
+
+        // Ngày hôm nay dưới định dạng dd-MM-yyyy
+        const today = format(new Date(), "dd-MM-yyyy");
+
+        // Dữ liệu mẫu cho lịch hẹn hôm nay
+        const mockAppointments: Appointment[] = [
+          {
+            id: 1,
+            workScheduleId: 101,
+            date: today,
+            startTime: "09:00",
+            endTime: "09:30",
+            status: "WAITING",
+            doctorName: "Bác sĩ Nguyễn Văn A",
+            specialization: "Tim mạch",
+            reason: "Khám tim mạch định kỳ",
+            doctorId: 201,
+            numericalOrder: 5,
+          },
+          {
+            id: 2,
+            workScheduleId: 102,
+            date: today,
+            startTime: "14:30",
+            endTime: "15:00",
+            status: "WAITING",
+            doctorName: "Bác sĩ Trần Thị B",
+            specialization: "Da liễu",
+            reason: "Khám da liễu",
+            doctorId: 202,
+            numericalOrder: 12,
+          },
+          {
+            id: 3,
+            workScheduleId: 103,
+            date: today,
+            startTime: "16:00",
+            endTime: "16:30",
+            status: "IN_PROGRESS",
+            doctorName: "Bác sĩ Lê Văn C",
+            specialization: "Nội khoa",
+            reason: "Tái khám",
+            doctorId: 203,
+            numericalOrder: 8,
+          },
+        ];
+
+        setTodayAppointments(mockAppointments);
+        setAppointmentsError(null);
       } catch (err) {
-        setMedicationsError("Không thể tải dữ liệu thuốc");
+        setAppointmentsError("Không thể tải dữ liệu lịch hẹn");
         console.error(err);
       } finally {
-        setMedicationsLoading(false);
+        setAppointmentsLoading(false);
       }
     };
 
-    fetchMedications();
+    fetchTodayAppointments();
   }, [user]);
 
   // Hiển thị trạng thái đang tải
@@ -153,33 +240,69 @@ const PatientDashboard: React.FC = () => {
   }
 
   // Hiển thị thông báo đang tải dữ liệu
-  if (!patientData) {
+  if (!appointmentStats) {
     return <Alert severity="info">Đang tải dữ liệu...</Alert>;
   }
 
-  const { appointmentStats, weeklyAppointments } = patientData;
+  // Xử lý thay đổi chế độ xem thời gian
+  const handleTimeViewChange = (
+    event: React.MouseEvent<HTMLElement>,
+    newTimeView: "month" | "year" | null
+  ) => {
+    if (newTimeView !== null) {
+      setTimeView(newTimeView);
+    }
+  };
 
-  // Chuẩn bị dữ liệu cho biểu đồ
-  const appointmentChartData = [
-    {
-      id: 0,
-      value: appointmentStats.completed,
-      label: "Đã hoàn thành",
-      color: "#4caf50",
-    },
-    {
-      id: 1,
-      value: appointmentStats.upcoming,
-      label: "Sắp tới",
-      color: "#2196f3",
-    },
-    {
-      id: 2,
-      value: appointmentStats.cancelled,
-      label: "Đã hủy",
-      color: "#f44336",
-    },
-  ];
+  // Get chart data based on selected time view
+  const getChartConfig = () => {
+    switch (timeView) {
+      case "month":
+        return {
+          xAxisData: [
+            "T1",
+            "T2",
+            "T3",
+            "T4",
+            "T5",
+            "T6",
+            "T7",
+            "T8",
+            "T9",
+            "T10",
+            "T11",
+            "T12",
+          ],
+          seriesData: [
+            monthlyAppointments.jan,
+            monthlyAppointments.feb,
+            monthlyAppointments.mar,
+            monthlyAppointments.apr,
+            monthlyAppointments.may,
+            monthlyAppointments.jun,
+            monthlyAppointments.jul,
+            monthlyAppointments.aug,
+            monthlyAppointments.sep,
+            monthlyAppointments.oct,
+            monthlyAppointments.nov,
+            monthlyAppointments.dec,
+          ],
+          title: "Thống kê lịch hẹn trong năm (theo tháng)",
+        };
+      case "year":
+        // Lấy danh sách các năm và sắp xếp theo thứ tự tăng dần
+        const yearKeys = Object.keys(yearlyAppointments).sort();
+        return {
+          xAxisData: yearKeys,
+          seriesData: yearKeys.map((year) => yearlyAppointments[year]),
+          title: "Thống kê lịch hẹn theo năm",
+        };
+      default:
+        return { xAxisData: [], seriesData: [], title: "" };
+    }
+  };
+
+  const chartConfig = getChartConfig();
 
   return (
     <>
@@ -264,12 +387,37 @@ const PatientDashboard: React.FC = () => {
           </Paper>
         </Grid>
 
-        {/* Biểu đồ thống kê lịch hẹn theo ngày trong tuần */}
+        {/* Biểu đồ thống kê lịch hẹn theo tháng và năm */}
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Thống kê lịch hẹn trong tuần
-            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <Typography variant="h6" gutterBottom>
+                {chartConfig.title}
+              </Typography>
+
+              <ToggleButtonGroup
+                value={timeView}
+                exclusive
+                onChange={handleTimeViewChange}
+                aria-label="time view"
+                size="small"
+              >
+                <ToggleButton value="month" aria-label="month view">
+                  Tháng
+                </ToggleButton>
+                <ToggleButton value="year" aria-label="year view">
+                  Năm
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+
             <Stack spacing={2} mt={2}>
               <Box
                 sx={{
@@ -281,20 +429,12 @@ const PatientDashboard: React.FC = () => {
                   justifyContent: "center",
                 }}
               >
-                {/* Biểu đồ thống kê số lịch hẹn theo ngày trong tuần */}
+                {/* Biểu đồ thống kê số lịch hẹn theo tháng/năm */}
                 <BarChart
                   xAxis={[
                     {
                       scaleType: "band", // Sử dụng dạng biểu đồ cột
-                      data: [
-                        "Thứ 2",
-                        "Thứ 3",
-                        "Thứ 4",
-                        "Thứ 5",
-                        "Thứ 6",
-                        "Thứ 7",
-                        "Chủ nhật",
-                      ],
+                      data: chartConfig.xAxisData,
                       tickLabelStyle: {
                         fontSize: 12,
                         fontWeight: 600,
@@ -304,19 +444,11 @@ const PatientDashboard: React.FC = () => {
                   // Cấu hình dữ liệu hiển thị trên biểu đồ
                   series={[
                     {
-                      data: [
-                        weeklyAppointments.monday, // Số lịch hẹn thứ 2
-                        weeklyAppointments.tuesday, // Số lịch hẹn thứ 3
-                        weeklyAppointments.wednesday, // Số lịch hẹn thứ 4
-                        weeklyAppointments.thursday, // Số lịch hẹn thứ 5
-                        weeklyAppointments.friday, // Số lịch hẹn thứ 6
-                        weeklyAppointments.saturday, // Số lịch hẹn thứ 7
-                        weeklyAppointments.sunday, // Số lịch hẹn chủ nhật
-                      ],
+                      data: chartConfig.seriesData,
                       label: "Số lịch hẹn", // Nhãn cho chuỗi dữ liệu
                     },
                   ]}
-                  // Sử dụng màu xanh dương cho biểu đồ lịch hẹn trong tuần
+                  // Sử dụng màu xanh dương cho biểu đồ lịch hẹn
                   colors={["#2196f3"]}
                   height={320} // Chiều cao của biểu đồ (pixel)
                   width={590} // Chiều rộng của biểu đồ (pixel)
@@ -326,6 +458,7 @@ const PatientDashboard: React.FC = () => {
                       label: "Số lịch hẹn",
                     },
                   ]}
+                  margin={{ left: timeView === "year" ? 120 : 80 }}
                   // Cấu hình tooltip hiển thị khi di chuột vào từng cột
                   tooltip={{ trigger: "item" }}
                 />
@@ -334,53 +467,119 @@ const PatientDashboard: React.FC = () => {
           </Paper>
         </Grid>
 
-        {/* Phần hiển thị toa thuốc */}
+        {/* Phần hiển thị lịch hẹn hôm nay */}
         <Grid item xs={12}>
           <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom mb={2}>
-              Toa thuốc
+            <Typography
+              variant="h6"
+              gutterBottom
+              mb={2}
+              display="flex"
+              alignItems="center"
+            >
+              <EventIcon sx={{ mr: 1 }} />
+              Lịch hẹn hôm nay
             </Typography>
 
-            {/* Hiển thị trạng thái tải dữ liệu thuốc */}
-            {medicationsLoading ? (
+            {/* Hiển thị trạng thái tải dữ liệu lịch hẹn */}
+            {appointmentsLoading ? (
               <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
                 <CircularProgress size={24} />
               </Box>
-            ) : medicationsError ? (
+            ) : appointmentsError ? (
               <Alert severity="error" sx={{ mb: 2 }}>
-                {medicationsError}
+                {appointmentsError}
               </Alert>
-            ) : medications && medications.length > 0 ? (
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: "bold" }}>
-                        Tên thuốc
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>
-                        Cách dùng
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>
-                        Số lượng
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>Đơn vị</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {medications.map((med, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{med.drug.drugName}</TableCell>
-                        <TableCell>{med.howUse}</TableCell>
-                        <TableCell align="center">{med.quantity}</TableCell>
-                        <TableCell>{med.drug.unit}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+            ) : todayAppointments && todayAppointments.length > 0 ? (
+              <List sx={{ width: "100%" }}>
+                {todayAppointments.map((appointment, index) => (
+                  <React.Fragment key={appointment.id}>
+                    {index > 0 && <Divider component="li" />}
+                    <ListItem
+                      alignItems="flex-start"
+                      sx={{
+                        "&:hover": {
+                          bgcolor: "rgba(0, 0, 0, 0.04)",
+                        },
+                        // borderLeft: `4px solid ${getStatusColor(
+                        //   appointment.status
+                        // )}`,
+                      }}
+                    >
+                      <ListItemText
+                        primary={
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              mb: 1,
+                            }}
+                          >
+                            <Typography
+                              variant="subtitle1"
+                              component="span"
+                              fontWeight="medium"
+                            >
+                              STT: {appointment.numericalOrder} -{" "}
+                              {appointment.doctorName}
+                            </Typography>
+                          </Box>
+                        }
+                        secondary={
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 0.5,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                              }}
+                            >
+                              <AccessTimeIcon
+                                fontSize="small"
+                                sx={{ color: "text.secondary", fontSize: 16 }}
+                              />
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                {appointment.startTime} - {appointment.endTime}
+                              </Typography>
+                            </Box>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                              }}
+                            >
+                              <MedicalServicesIcon
+                                fontSize="small"
+                                sx={{ color: "text.secondary", fontSize: 16 }}
+                              />
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                {appointment.specialization} -{" "}
+                                {appointment.reason}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        }
+                      />
+                    </ListItem>
+                  </React.Fragment>
+                ))}
+              </List>
             ) : (
-              <EmptyState message="Không có thuốc nào đang được sử dụng" />
+              <EmptyState message="Không có lịch hẹn nào hôm nay" />
             )}
           </Paper>
         </Grid>
