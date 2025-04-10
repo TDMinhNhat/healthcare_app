@@ -17,4 +17,14 @@ public class WorkScheduleRequestProducer {
     public NewTopic requestGetListWorkScheduleOrder() {
         return TopicBuilder.name("request_get_list_work_schedule_order").build();
     }
+
+    @Bean
+    public NewTopic requestVisualizeAppointmentByMonthly() {
+        return TopicBuilder.name("request_visualize_appointment_by_monthly").build();
+    }
+
+    @Bean
+    public NewTopic requestVisualizeAppointmentByYearly() {
+        return TopicBuilder.name("request_visualize_appointment_by_yearly").build();
+    }
 }

@@ -33,6 +33,22 @@ public class WorkScheduleResponseConsumer {
         latch.countDown();
     }
 
+    @KafkaListener(topics = "response_visualize_appointment_by_monthly", groupId = "appointment_response_visualize_appointment_by_monthly")
+    public void responseVisualizeAppointmentByMonthly(String message) throws Exception {
+        log.info("Work Schedule Response Consumer: listen for getting the request");
+        log.info("Work Schedule Response Consumer: {}", message);
+        node = new ObjectMapper().readTree(message);
+        latch.countDown();
+    }
+
+    @KafkaListener(topics = "response_visualize_appointment_by_yearly", groupId = "appointment_response_visualize_appointment_by_yearly")
+    public void responseVisualizeAppointmentByYearly(String message) throws Exception {
+        log.info("Work Schedule Response Consumer: listen for getting the request");
+        log.info("Work Schedule Response Consumer: {}", message);
+        node = new ObjectMapper().readTree(message);
+        latch.countDown();
+    }
+
     public JsonNode getStorageData() {
         try {
             latch.await();

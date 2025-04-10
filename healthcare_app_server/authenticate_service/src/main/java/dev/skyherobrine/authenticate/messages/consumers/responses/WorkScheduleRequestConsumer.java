@@ -14,9 +14,12 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Slf4j
@@ -48,7 +51,7 @@ public class WorkScheduleRequestConsumer {
             log.info("Work Schedule Request Consumer: sent the response");
         } catch (Exception e) {
             log.info("Work Schedule Request Consumer: error when getting the request");
-            e.printStackTrace();
+            log.error("Work Schedule Request Consumer: {}", e.getMessage());
         }
     }
 
@@ -67,7 +70,52 @@ public class WorkScheduleRequestConsumer {
             log.info("Work Schedule Request Consumer: sent the response");
         } catch (Exception e) {
             log.info("Work Schedule Request Consumer: error when getting the request");
-            e.printStackTrace();
+            log.error("Work Schedule Request Consumer: {}", e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "request_visualize_appointment_by_monthly", groupId = "authenticate_request_visualize_appointment_by_monthly")
+    public void responseVisualizeAppointmentByMonthly(String message) {
+        try {
+            log.info("Work Schedule Request Consumer: listen for getting the request");
+            log.info("Work Schedule Request Consumer: {}", message);
+
+            List<Integer> getListWorkScheduleId = ObjectParser.convertJsonToObject(message, List.class);
+            List<WorkSchedule> result = workScheduleRepository.findByIdInOrderByDateAppointmentDesc(getListWorkScheduleId.stream().map(id -> Long.parseLong(id.toString())).toList()).stream().filter(workSchedule -> workSchedule.getDateAppointment().getYear() == LocalDate.now().getYear()).toList();
+
+            Map<String,String> visualizeMonthly = new HashMap<>();
+            for(AtomicInteger i = new AtomicInteger(1); i.get() <= 12; i.set(i.get() + 1)) {
+                visualizeMonthly.put(i.get() + "", result.stream().filter(workSchedule -> workSchedule.getDateAppointment().getMonthValue() == i.get()).toList().size() + "");
+            }
+
+            kafkaTemplate.send("response_visualize_appointment_by_monthly", ObjectParser.convertObjectToJson(visualizeMonthly)).get();
+            kafkaTemplate.flush();
+        } catch (Exception e) {
+            log.error("Work Schedule Request Consumer: error when getting the request");
+            log.error("Work Schedule Request Consumer: {}", e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "request_visualize_appointment_by_yearly", groupId = "authenticate_request_visualize_appointment_by_yearly")
+    public void responseVisualizeAppointmentByYearly(String message) {
+        try {
+            log.info("Work Schedule Request Consumer: listen for getting the request");
+            log.info("Work Schedule Request Consumer: {}", message);
+
+            List<Integer> getListWorkScheduleId = ObjectParser.convertJsonToObject(message, List.class);
+            List<WorkSchedule> result = workScheduleRepository.findByIdInOrderByDateAppointmentDesc(getListWorkScheduleId.stream().map(id -> Long.parseLong(id.toString())).toList());
+
+            Map<String,String> visualizeYearly = new HashMap<>();
+            for(AtomicInteger i = new AtomicInteger(LocalDate.now().getYear()); i.get() >= LocalDate.now().minusYears(5L).getYear(); i.set(i.get() - 1)) {
+                visualizeYearly.put(i.get() + "", result.stream().filter(workSchedule -> workSchedule.getDateAppointment().getYear() == i.get()).toList().size() + "");
+            }
+
+            kafkaTemplate.send("response_visualize_appointment_by_yearly", ObjectParser.convertObjectToJson(visualizeYearly)).get();
+            kafkaTemplate.flush();
+
+        } catch (Exception e) {
+            log.error("Work Schedule Request Consumer: error when getting the request");
+            log.error("Work Schedule Request Consumer: {}", e.getMessage());
         }
     }
 }
