@@ -8,50 +8,68 @@ import {
   ActivityIndicator,
   Dimensions,
   TouchableOpacity,
+  FlatList,
 } from "react-native";
 import { useSelector } from "react-redux";
 import { PieChart, BarChart } from "react-native-gifted-charts";
+import { format } from "date-fns";
+import { Ionicons } from "@expo/vector-icons";
 
-// Dữ liệu mẫu cho thuốc
-const MOCK_MEDICATIONS = [
-  {
-    drug: {
-      id: 1,
-      drugName: "Amlodipine",
-      unit: "viên",
-    },
-    howUse: "Uống 1 viên mỗi ngày vào buổi sáng",
-    quantity: 30,
-  },
-  {
-    drug: {
-      id: 2,
-      drugName: "Losartan",
-      unit: "viên",
-    },
-    howUse: "Uống 1 viên mỗi ngày vào buổi tối",
-    quantity: 30,
-  },
-  {
-    drug: {
-      id: 3,
-      drugName: "Vitamin C",
-      unit: "viên",
-    },
-    howUse: "Uống 1 viên mỗi ngày sau bữa sáng",
-    quantity: 60,
-  },
-];
+// Interface for appointments
+interface Appointment {
+  id: number;
+  workScheduleId: number;
+  date: string;
+  startTime: string;
+  endTime: string;
+  status: "WAITING" | "IN_PROGRESS" | "DONE" | "CANCELLED";
+  doctorName: string;
+  specialization: string;
+  reason?: string;
+  doctorId?: number;
+  numericalOrder?: number;
+}
 
 export default function DashboardTab() {
   const user = useSelector((state: any) => state.user.user);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [patientData, setPatientData] = useState<any | null>(null);
-  // State lưu trữ danh sách thuốc
-  const [medications, setMedications] = useState<any[] | null>(null);
-  // State quản lý trạng thái loading của danh sách thuốc
-  const [medicationsLoading, setMedicationsLoading] = useState<boolean>(true);
+
+  // State để theo dõi chế độ xem thời gian (tháng hoặc năm)
+  const [timeView, setTimeView] = useState<"month" | "year">("month");
+
+  // Tách các trạng thái dữ liệu riêng biệt
+  const [appointmentStats, setAppointmentStats] = useState({
+    total: 0,
+    completed: 0,
+    upcoming: 0,
+    cancelled: 0,
+  });
+
+  const [monthlyAppointments, setMonthlyAppointments] = useState({
+    jan: 0,
+    feb: 0,
+    mar: 0,
+    apr: 0,
+    may: 0,
+    jun: 0,
+    jul: 0,
+    aug: 0,
+    sep: 0,
+    oct: 0,
+    nov: 0,
+    dec: 0,
+  });
+
+  const [yearlyAppointments, setYearlyAppointments] = useState<
+    Record<string, number>
+  >({});
+
+  const [todayAppointments, setTodayAppointments] = useState<Appointment[]>([]);
+  const [appointmentsLoading, setAppointmentsLoading] = useState<boolean>(true);
+  const [appointmentsError, setAppointmentsError] = useState<string | null>(
+    null
+  );
 
   // Lấy chiều rộng màn hình
   const screenWidth = Dimensions.get("window").width;
@@ -69,25 +87,48 @@ export default function DashboardTab() {
 
       try {
         setLoading(true);
-        // Dữ liệu giả lập
-        const data = {
-          appointmentStats: {
-            total: 12,
-            completed: 10,
-            upcoming: 2,
-            cancelled: 1,
-          },
-          weeklyAppointments: {
-            monday: 2,
-            tuesday: 1,
-            wednesday: 3,
-            thursday: 0,
-            friday: 2,
-            saturday: 4,
-            sunday: 0,
-          },
-        };
-        setPatientData(data);
+        // Giả lập gọi API với độ trễ để tăng tính thực tế
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        // Dữ liệu mẫu cho thống kê lịch hẹn - giống với web version
+        setAppointmentStats({
+          total: 12, // Tổng số lịch hẹn
+          completed: 10, // Số lịch hẹn đã hoàn thành
+          upcoming: 2, // Số lịch hẹn sắp tới
+          cancelled: 1, // Số lịch hẹn đã hủy
+        });
+
+        // Giả lập gọi API lấy dữ liệu theo tháng với độ trễ
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        // Dữ liệu mẫu cho lịch hẹn theo tháng - giống với web version
+        setMonthlyAppointments({
+          jan: 5,
+          feb: 3,
+          mar: 7,
+          apr: 2,
+          may: 4,
+          jun: 6,
+          jul: 8,
+          aug: 4,
+          sep: 3,
+          oct: 5,
+          nov: 2,
+          dec: 1,
+        });
+
+        // Giả lập gọi API lấy dữ liệu theo năm với độ trễ
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        // Dữ liệu mẫu cho lịch hẹn theo năm - giống với web version
+        setYearlyAppointments({
+          "2020": 25,
+          "2021": 30,
+          "2022": 45,
+          "2023": 38,
+          "2024": 12,
+        });
+
         setError(null);
       } catch (err) {
         setError("Không thể tải dữ liệu bệnh nhân");
@@ -100,29 +141,78 @@ export default function DashboardTab() {
     fetchPatientData();
   }, [user]);
 
-  // useEffect để lấy danh sách thuốc
+  // Lấy dữ liệu lịch hẹn hôm nay - giống với web version
   useEffect(() => {
-    const fetchMedications = async () => {
-      // Kiểm tra xem có thông tin người dùng không
+    const fetchTodayAppointments = async () => {
+      // Kiểm tra ID người dùng tồn tại
       if (!user?.userId) {
-        setError("Không tìm thấy thông tin người dùng");
-        setMedicationsLoading(false);
+        setAppointmentsError("Không tìm thấy thông tin người dùng");
+        setAppointmentsLoading(false);
         return;
       }
 
       try {
-        setMedicationsLoading(true);
-        // Giả lập độ trễ cuả API call
+        setAppointmentsLoading(true);
+        // Giả lập gọi API với độ trễ 500ms
         await new Promise((resolve) => setTimeout(resolve, 500));
-        setMedications(MOCK_MEDICATIONS);
+
+        // Ngày hôm nay dưới định dạng dd-MM-yyyy
+        const today = format(new Date(), "dd-MM-yyyy");
+
+        // Dữ liệu mẫu cho lịch hẹn hôm nay - giống với web version
+        const mockAppointments: Appointment[] = [
+          {
+            id: 1,
+            workScheduleId: 101,
+            date: today,
+            startTime: "09:00",
+            endTime: "09:30",
+            status: "WAITING",
+            doctorName: "Bác sĩ Nguyễn Văn A",
+            specialization: "Tim mạch",
+            reason: "Khám tim mạch định kỳ",
+            doctorId: 201,
+            numericalOrder: 5,
+          },
+          {
+            id: 2,
+            workScheduleId: 102,
+            date: today,
+            startTime: "14:30",
+            endTime: "15:00",
+            status: "WAITING",
+            doctorName: "Bác sĩ Trần Thị B",
+            specialization: "Da liễu",
+            reason: "Khám da liễu",
+            doctorId: 202,
+            numericalOrder: 12,
+          },
+          {
+            id: 3,
+            workScheduleId: 103,
+            date: today,
+            startTime: "16:00",
+            endTime: "16:30",
+            status: "IN_PROGRESS",
+            doctorName: "Bác sĩ Lê Văn C",
+            specialization: "Nội khoa",
+            reason: "Tái khám",
+            doctorId: 203,
+            numericalOrder: 8,
+          },
+        ];
+
+        setTodayAppointments(mockAppointments);
+        setAppointmentsError(null);
       } catch (err) {
+        setAppointmentsError("Không thể tải dữ liệu lịch hẹn");
         console.error(err);
       } finally {
-        setMedicationsLoading(false);
+        setAppointmentsLoading(false);
       }
     };
 
-    fetchMedications();
+    fetchTodayAppointments();
   }, [user]);
 
   // Hiển thị loading khi đang tải dữ liệu
@@ -148,18 +238,6 @@ export default function DashboardTab() {
       </SafeAreaView>
     );
   }
-
-  // Hiển thị loading nếu chưa có dữ liệu bệnh nhân
-  if (!patientData) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.loadingText}>Đang tải dữ liệu...</Text>
-      </SafeAreaView>
-    );
-  }
-
-  // Phân rã dữ liệu thống kê
-  const { appointmentStats, weeklyAppointments } = patientData;
 
   // Dữ liệu cho biểu đồ tròn thể hiện thống kê lịch hẹn
   const pieChartData = [
@@ -189,124 +267,72 @@ export default function DashboardTab() {
     },
   ];
 
-  // Dữ liệu cho biểu đồ cột thể hiện lịch hẹn trong tuần
-  const barChartData = [
-    {
-      value: weeklyAppointments.monday,
-      label: "T2",
-      frontColor: "#26b9c8",
-      topLabelComponent: () => (
-        <Text
-          style={{
-            color: "#333",
-            fontSize: 11,
-            fontWeight: "600",
-            marginBottom: 4,
-          }}
-        >
-          {weeklyAppointments.monday}
-        </Text>
-      ),
-    },
-    {
-      value: weeklyAppointments.tuesday,
-      label: "T3",
-      topLabelComponent: () => (
-        <Text
-          style={{
-            color: "#333",
-            fontSize: 11,
-            fontWeight: "600",
-            marginBottom: 4,
-          }}
-        >
-          {weeklyAppointments.tuesday}
-        </Text>
-      ),
-    },
-    {
-      value: weeklyAppointments.wednesday,
-      label: "T4",
-      frontColor: "#26b9c8",
-      topLabelComponent: () => (
-        <Text
-          style={{
-            color: "#333",
-            fontSize: 11,
-            fontWeight: "600",
-            marginBottom: 4,
-          }}
-        >
-          {weeklyAppointments.wednesday}
-        </Text>
-      ),
-    },
-    {
-      value: weeklyAppointments.thursday,
-      label: "T5",
-      topLabelComponent: () => (
-        <Text
-          style={{
-            color: "#333",
-            fontSize: 11,
-            fontWeight: "600",
-            marginBottom: 4,
-          }}
-        >
-          {weeklyAppointments.thursday}
-        </Text>
-      ),
-    },
-    {
-      value: weeklyAppointments.friday,
-      label: "T6",
-      frontColor: "#26b9c8",
-      topLabelComponent: () => (
-        <Text
-          style={{
-            color: "#333",
-            fontSize: 11,
-            fontWeight: "600",
-            marginBottom: 4,
-          }}
-        >
-          {weeklyAppointments.friday}
-        </Text>
-      ),
-    },
-    {
-      value: weeklyAppointments.saturday,
-      label: "T7",
-      topLabelComponent: () => (
-        <Text
-          style={{
-            color: "#333",
-            fontSize: 11,
-            fontWeight: "600",
-            marginBottom: 4,
-          }}
-        >
-          {weeklyAppointments.saturday}
-        </Text>
-      ),
-    },
-    {
-      value: weeklyAppointments.sunday,
-      label: "CN",
-      topLabelComponent: () => (
-        <Text
-          style={{
-            color: "#333",
-            fontSize: 11,
-            fontWeight: "600",
-            marginBottom: 4,
-          }}
-        >
-          {weeklyAppointments.sunday}
-        </Text>
-      ),
-    },
-  ];
+  // Lấy dữ liệu biểu đồ dựa trên chế độ xem đã chọn
+  const getChartData = () => {
+    if (timeView === "month") {
+      // Dữ liệu lịch hẹn theo tháng
+      return {
+        labels: [
+          "T1",
+          "T2",
+          "T3",
+          "T4",
+          "T5",
+          "T6",
+          "T7",
+          "T8",
+          "T9",
+          "T10",
+          "T11",
+          "T12",
+        ],
+        values: [
+          monthlyAppointments.jan,
+          monthlyAppointments.feb,
+          monthlyAppointments.mar,
+          monthlyAppointments.apr,
+          monthlyAppointments.may,
+          monthlyAppointments.jun,
+          monthlyAppointments.jul,
+          monthlyAppointments.aug,
+          monthlyAppointments.sep,
+          monthlyAppointments.oct,
+          monthlyAppointments.nov,
+          monthlyAppointments.dec,
+        ],
+        title: "Thống kê lịch hẹn trong năm (theo tháng)",
+      };
+    } else {
+      // Dữ liệu lịch hẹn theo năm
+      const yearKeys = Object.keys(yearlyAppointments).sort();
+      return {
+        labels: yearKeys,
+        values: yearKeys.map((year) => yearlyAppointments[year]),
+        title: "Thống kê lịch hẹn theo năm",
+      };
+    }
+  };
+
+  const chartData = getChartData();
+
+  // Chuẩn bị dữ liệu biểu đồ cột
+  const barData = chartData.labels.map((label, index) => ({
+    value: chartData.values[index],
+    label: label,
+    frontColor: "#2196f3",
+    topLabelComponent: () => (
+      <Text
+        style={{
+          color: "#333",
+          fontSize: 11,
+          fontWeight: "600",
+          marginBottom: 4,
+        }}
+      >
+        {chartData.values[index]}
+      </Text>
+    ),
+  }));
 
   // Render UI chính
   return (
@@ -361,74 +387,118 @@ export default function DashboardTab() {
           </View>
         </View>
 
-        {/* Thống kê lịch hẹn trong tuần - Biểu đồ cột */}
+        {/* Thống kê lịch hẹn theo tháng/năm - Biểu đồ cột */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Thống kê lịch hẹn trong tuần</Text>
+          <View style={styles.chartHeaderContainer}>
+            <Text style={styles.cardTitle}>{chartData.title}</Text>
+            <View style={styles.timeViewToggle}>
+              <TouchableOpacity
+                style={[
+                  styles.toggleButton,
+                  timeView === "month" && styles.toggleButtonActive,
+                ]}
+                onPress={() => setTimeView("month")}
+              >
+                <Text
+                  style={[
+                    styles.toggleText,
+                    timeView === "month" && styles.toggleTextActive,
+                  ]}
+                >
+                  Tháng
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.toggleButton,
+                  timeView === "year" && styles.toggleButtonActive,
+                ]}
+                onPress={() => setTimeView("year")}
+              >
+                <Text
+                  style={[
+                    styles.toggleText,
+                    timeView === "year" && styles.toggleTextActive,
+                  ]}
+                >
+                  Năm
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
           <View style={styles.chartContainer}>
             <BarChart
-              data={barChartData}
-              width={chartWidth}
-              barWidth={26}
-              noOfSections={3}
+              data={barData}
+              // width={chartWidth}
+              barWidth={timeView === "year" ? 30 : 20} // Độ rộng của cột
+              noOfSections={4} // Số lượng phần trong trục Y
               barBorderRadius={4}
-              frontColor="lightgray"
-              spacing={14}
-              yAxisThickness={0}
-              xAxisThickness={0}
-              hideRules
+              frontColor="#2196f3"
+              spacing={timeView === "year" ? 20 : 8}
+              yAxisThickness={0} // Độ dày của trục Y
+              xAxisThickness={0} // Độ dày của trục X
+              hideRules // Ẩn các đường kẻ
               xAxisLabelTextStyle={{ color: "#333", fontSize: 12 }}
-              isAnimated
+              // isAnimated
             />
           </View>
         </View>
 
-        {/* Danh sách toa thuốc */}
+        {/* Lịch hẹn hôm nay */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Toa thuốc</Text>
-          {medicationsLoading ? (
-            <ActivityIndicator size="small" color="#26b9c8" />
-          ) : medications && medications.length > 0 ? (
-            <View style={styles.medicationsContainer}>
-              {/* Tiêu đề bảng thuốc */}
-              <View style={styles.medicationHeader}>
-                <Text style={[styles.medicationHeaderText, { flex: 2 }]}>
-                  Tên thuốc
-                </Text>
-                <Text style={[styles.medicationHeaderText, { flex: 1 }]}>
-                  Số lượng
-                </Text>
-                <Text style={[styles.medicationHeaderText, { flex: 1 }]}>
-                  Đơn vị
-                </Text>
-              </View>
-              {/* Danh sách các thuốc */}
-              {medications.map((med, index) => (
-                <View key={index} style={styles.medicationRow}>
-                  <Text style={[styles.medicationText, { flex: 2 }]}>
-                    {med.drug.drugName}
-                  </Text>
-                  <Text style={[styles.medicationText, { flex: 1 }]}>
-                    {med.quantity}
-                  </Text>
-                  <Text style={[styles.medicationText, { flex: 1 }]}>
-                    {med.drug.unit}
-                  </Text>
-                </View>
-              ))}
-              {/* Phần hướng dẫn cách dùng thuốc */}
-              <View style={styles.howUseContainer}>
-                <Text style={styles.howUseTitle}>Cách dùng:</Text>
-                {medications.map((med, index) => (
-                  <Text key={`usage-${index}`} style={styles.howUseText}>
-                    - {med.drug.drugName}: {med.howUse}
-                  </Text>
-                ))}
-              </View>
-            </View>
-          ) : (
-            <Text style={styles.emptyText}>
-              Không có thuốc nào đang được sử dụng
+          <View style={styles.appointmentHeaderContainer}>
+            <Ionicons name="calendar" size={22} color="#333" />
+            <Text
+              style={[styles.cardTitle, { marginLeft: 8, marginBottom: 0 }]}
+            >
+              Lịch hẹn hôm nay
             </Text>
+          </View>
+
+          {appointmentsLoading ? (
+            <View style={styles.loadingIndicator}>
+              <ActivityIndicator size="small" color="#26b9c8" />
+            </View>
+          ) : appointmentsError ? (
+            <Text style={styles.errorText}>{appointmentsError}</Text>
+          ) : todayAppointments.length > 0 ? (
+            <FlatList
+              data={todayAppointments}
+              scrollEnabled={false}
+              keyExtractor={(item) => item.id.toString()}
+              ItemSeparatorComponent={() => (
+                <View style={styles.appointmentDivider} />
+              )}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.appointmentItem}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    console.log(`Appointment ${item.id} selected`);
+                  }}
+                >
+                  <View style={styles.appointmentHeader}>
+                    <Text style={styles.doctorName}>
+                      STT: {item.numericalOrder} - {item.doctorName}
+                    </Text>
+                  </View>
+                  <View style={styles.appointmentDetail}>
+                    <Ionicons name="time-outline" size={16} color="#666" />
+                    <Text style={styles.detailText}>
+                      {item.startTime} - {item.endTime}
+                    </Text>
+                  </View>
+                  <View style={styles.appointmentDetail}>
+                    <Ionicons name="medkit-outline" size={16} color="#666" />
+                    <Text style={styles.detailText}>
+                      {item.specialization} - {item.reason}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+          ) : (
+            <Text style={styles.emptyText}>Không có lịch hẹn nào hôm nay</Text>
           )}
         </View>
       </ScrollView>
@@ -507,49 +577,70 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 12,
   },
-  medicationsContainer: {
+  chartHeaderContainer: {
+    flexDirection: "column",
+    marginBottom: 12,
+  },
+  timeViewToggle: {
+    flexDirection: "row",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 6,
+    overflow: "hidden",
+    alignSelf: "flex-start",
     marginTop: 8,
   },
-  medicationHeader: {
-    flexDirection: "row",
-    backgroundColor: "#f0f0f0",
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-    marginBottom: 6,
+  toggleButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
   },
-  medicationHeaderText: {
-    fontWeight: "bold",
+  toggleButtonActive: {
+    backgroundColor: "#2196f3",
+  },
+  toggleText: {
     fontSize: 14,
-    color: "#555",
+    color: "#666",
   },
-  medicationRow: {
+  toggleTextActive: {
+    color: "white",
+    fontWeight: "500",
+  },
+  appointmentHeaderContainer: {
     flexDirection: "row",
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    alignItems: "center",
+    marginBottom: 16,
   },
-  medicationText: {
-    fontSize: 14,
+  appointmentItem: {
+    paddingVertical: 12,
+  },
+  appointmentHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  doctorName: {
+    fontSize: 16,
+    fontWeight: "600",
     color: "#333",
   },
-  howUseContainer: {
-    marginTop: 12,
-    padding: 10,
-    backgroundColor: "#f8f8f8",
-    borderRadius: 6,
+  appointmentDetail: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 4,
   },
-  howUseTitle: {
-    fontSize: 15,
-    fontWeight: "bold",
-    marginBottom: 8,
-    color: "#555",
-  },
-  howUseText: {
+  detailText: {
     fontSize: 14,
-    color: "#444",
-    marginBottom: 5,
+    color: "#666",
+    marginLeft: 8,
+  },
+  appointmentDivider: {
+    height: 1,
+    backgroundColor: "#eee",
+  },
+  loadingIndicator: {
+    padding: 20,
+    alignItems: "center",
   },
   emptyText: {
     textAlign: "center",

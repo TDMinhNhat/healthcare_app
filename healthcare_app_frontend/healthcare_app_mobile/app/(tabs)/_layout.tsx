@@ -102,7 +102,7 @@ export default function TabLayout() {
               color={tab === "profile" ? "#26b9c8" : "black"}
             />
           ),
-          title: "Profile",
+          title: "Hồ sơ",
           href: "/(tabs)/profile",
         }}
       />
