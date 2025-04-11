@@ -11,6 +11,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import SettingsIcon from "@mui/icons-material/Settings";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { useNavigate } from "react-router";
 import { Outlet } from "react-router";
 
@@ -48,6 +49,13 @@ export const AdminLayout: React.FC = () => {
             <LocalHospitalIcon />
           </ListItemIcon>
           <ListItemText primary="Quản lí thuốc" />
+        </ListItemButton>
+        {/* quản lí ca làm việc */}
+        <ListItemButton onClick={() => handleNavigation("/admin/shifts")}>
+          <ListItemIcon>
+            <AccessTimeIcon />
+          </ListItemIcon>
+          <ListItemText primary="Ca làm việc" />
         </ListItemButton>
       </List>
       <Divider />

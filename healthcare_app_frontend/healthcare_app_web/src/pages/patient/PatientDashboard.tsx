@@ -15,6 +15,7 @@ import {
   Divider,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router";
 import EmptyState from "../../components/EmptyState";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { PieChart } from "@mui/x-charts/PieChart";
@@ -23,8 +24,8 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PersonIcon from "@mui/icons-material/Person";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import { format } from "date-fns";
+import { getPatientDashboard } from "../../services/appointment/dashboard_service";
 
-// Interface for appointments
 interface Appointment {
   id: number;
   workScheduleId: number;
@@ -37,6 +38,47 @@ interface Appointment {
   reason?: string;
   doctorId?: number;
   numericalOrder?: number;
+}
+interface DashboardResponse {
+  charts: {
+    monthly: Record<string, number>;
+    yearly: Record<string, number>;
+  };
+  appointments: {
+    book_appointment: {
+      id: number;
+      patientId: string;
+      workSchedule: number;
+      numericalOrder: number;
+      note: string;
+      createdAt: string;
+      status: string;
+    };
+    work_schedule: {
+      id: number;
+      doctor: {
+        id: number;
+        userId: string;
+        firstName: string;
+        lastName: string;
+        specialization: string;
+        typeDisease: {
+          name: string;
+        };
+      };
+      shift: {
+        start: string;
+        end: string;
+      };
+      dateAppointment: string;
+    };
+  }[];
+  appointmentStats: {
+    total: number;
+    cancelled: number;
+    complete: number;
+    upcoming: number;
+  };
 }
 
 const PatientDashboard: React.FC = () => {
@@ -82,7 +124,19 @@ const PatientDashboard: React.FC = () => {
   const [appointmentsError, setAppointmentsError] = useState<string | null>(
     null
   );
+
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // Helper function to format time from API format
+  const formatTimeFromApiFormat = (timeString: string): string => {
+    // Format from "07-00-00" to "07:00"
+    const parts = timeString.split("-");
+    if (parts.length >= 2) {
+      return `${parts[0]}:${parts[1]}`;
+    }
+    return timeString;
+  };
 
   // Lấy dữ liệu thống kê của bệnh nhân
   useEffect(() => {
@@ -96,133 +150,75 @@ const PatientDashboard: React.FC = () => {
 
       try {
         setLoading(true);
+        setAppointmentsLoading(true);
 
-        // Giả lập gọi API với độ trễ để tăng tính thực tế
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        console.log("Fetching patient dashboard data for userId:", user.userId);
+        const response = await getPatientDashboard(user.userId);
+        const dashboardData: DashboardResponse = response.data;
+        // console.log("Dashboard data:", dashboardData);
 
-        // Dữ liệu mẫu cho thống kê lịch hẹn
+        // Update appointment stats
         setAppointmentStats({
-          total: 12, // Tổng số lịch hẹn
-          completed: 10, // Số lịch hẹn đã hoàn thành
-          upcoming: 2, // Số lịch hẹn sắp tới
-          cancelled: 1, // Số lịch hẹn đã hủy
+          total: dashboardData.appointmentStats.total,
+          completed: dashboardData.appointmentStats.complete,
+          upcoming: dashboardData.appointmentStats.upcoming,
+          cancelled: dashboardData.appointmentStats.cancelled,
         });
 
-        // Giả lập gọi API lấy dữ liệu theo tháng với độ trễ
-        await new Promise((resolve) => setTimeout(resolve, 200));
-
-        // Dữ liệu mẫu cho lịch hẹn theo tháng
+        // Update monthly appointments chart data
         setMonthlyAppointments({
-          jan: 5,
-          feb: 3,
-          mar: 7,
-          apr: 2,
-          may: 4,
-          jun: 6,
-          jul: 8,
-          aug: 4,
-          sep: 3,
-          oct: 5,
-          nov: 2,
-          dec: 1,
+          jan: dashboardData.charts.monthly.jan,
+          feb: dashboardData.charts.monthly.feb,
+          mar: dashboardData.charts.monthly.mar,
+          apr: dashboardData.charts.monthly.apr,
+          may: dashboardData.charts.monthly.may,
+          jun: dashboardData.charts.monthly.jun,
+          jul: dashboardData.charts.monthly.jul,
+          aug: dashboardData.charts.monthly.aug,
+          sep: dashboardData.charts.monthly.sep,
+          oct: dashboardData.charts.monthly.oct,
+          nov: dashboardData.charts.monthly.nov,
+          dec: dashboardData.charts.monthly.dec,
         });
 
-        // Giả lập gọi API lấy dữ liệu theo năm với độ trễ
-        await new Promise((resolve) => setTimeout(resolve, 200));
+        // Update yearly appointments chart data
+        setYearlyAppointments(dashboardData.charts.yearly);
 
-        // Dữ liệu mẫu cho lịch hẹn theo năm
-        setYearlyAppointments({
-          "2020": 25,
-          "2021": 30,
-          "2022": 45,
-          "2023": 38,
-          "2024": 12,
-        });
-
+        const today = format(new Date(), "dd-MM-yyyy");
+        // Format today's appointments from the API response
+        const formattedAppointments: Appointment[] = dashboardData.appointments
+          // lọc ngày hiện tại
+          .filter((appt) => appt.work_schedule.dateAppointment === today)
+          .map((appt) => ({
+            id: appt.book_appointment.id,
+            workScheduleId: appt.work_schedule.id,
+            date: appt.work_schedule.dateAppointment,
+            startTime: formatTimeFromApiFormat(appt.work_schedule.shift.start),
+            endTime: formatTimeFromApiFormat(appt.work_schedule.shift.end),
+            status: appt.book_appointment.status as any,
+            doctorName: `Bác sĩ ${appt.work_schedule.doctor.lastName} ${appt.work_schedule.doctor.firstName}`,
+            specialization: appt.work_schedule.doctor.specialization,
+            reason:
+              appt.book_appointment.note ||
+              appt.work_schedule.doctor.typeDisease.name,
+            doctorId: appt.work_schedule.doctor.id,
+            numericalOrder: appt.book_appointment.numericalOrder,
+          }));
+        console.log("Formatted appointments:", formattedAppointments);
+        setTodayAppointments(formattedAppointments);
         setError(null);
+        setAppointmentsError(null);
       } catch (err) {
+        console.error("Error fetching patient dashboard data:", err);
         setError("Không thể tải dữ liệu bệnh nhân");
-        console.error(err);
+        setAppointmentsError("Không thể tải dữ liệu lịch hẹn");
       } finally {
         setLoading(false);
+        setAppointmentsLoading(false);
       }
     };
 
     fetchPatientData();
-  }, [user]);
-
-  // Lấy dữ liệu lịch hẹn hôm nay
-  useEffect(() => {
-    const fetchTodayAppointments = async () => {
-      // Kiểm tra ID người dùng tồn tại
-      if (!user?.userId) {
-        setAppointmentsError("Không tìm thấy thông tin người dùng");
-        setAppointmentsLoading(false);
-        return;
-      }
-
-      try {
-        setAppointmentsLoading(true);
-        // Giả lập gọi API với độ trễ 500ms
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Ngày hôm nay dưới định dạng dd-MM-yyyy
-        const today = format(new Date(), "dd-MM-yyyy");
-
-        // Dữ liệu mẫu cho lịch hẹn hôm nay
-        const mockAppointments: Appointment[] = [
-          {
-            id: 1,
-            workScheduleId: 101,
-            date: today,
-            startTime: "09:00",
-            endTime: "09:30",
-            status: "WAITING",
-            doctorName: "Bác sĩ Nguyễn Văn A",
-            specialization: "Tim mạch",
-            reason: "Khám tim mạch định kỳ",
-            doctorId: 201,
-            numericalOrder: 5,
-          },
-          {
-            id: 2,
-            workScheduleId: 102,
-            date: today,
-            startTime: "14:30",
-            endTime: "15:00",
-            status: "WAITING",
-            doctorName: "Bác sĩ Trần Thị B",
-            specialization: "Da liễu",
-            reason: "Khám da liễu",
-            doctorId: 202,
-            numericalOrder: 12,
-          },
-          {
-            id: 3,
-            workScheduleId: 103,
-            date: today,
-            startTime: "16:00",
-            endTime: "16:30",
-            status: "IN_PROGRESS",
-            doctorName: "Bác sĩ Lê Văn C",
-            specialization: "Nội khoa",
-            reason: "Tái khám",
-            doctorId: 203,
-            numericalOrder: 8,
-          },
-        ];
-
-        setTodayAppointments(mockAppointments);
-        setAppointmentsError(null);
-      } catch (err) {
-        setAppointmentsError("Không thể tải dữ liệu lịch hẹn");
-        console.error(err);
-      } finally {
-        setAppointmentsLoading(false);
-      }
-    };
-
-    fetchTodayAppointments();
   }, [user]);
 
   // Hiển thị trạng thái đang tải
@@ -253,8 +249,10 @@ const PatientDashboard: React.FC = () => {
       setTimeView(newTimeView);
     }
   };
-
-  // Get chart data based on selected time view
+  const handleAppointmentClick = (appointmentId: number) => {
+    navigate(`/patient/appointments/${appointmentId}`);
+  };
+  // Lấy chart data dưa vào chế độ xem thời gian
   const getChartConfig = () => {
     switch (timeView) {
       case "month":
@@ -333,7 +331,6 @@ const PatientDashboard: React.FC = () => {
                 >
                   Tổng số lịch hẹn: {appointmentStats.total}
                 </Typography>
-
                 <PieChart
                   series={[
                     {
@@ -401,7 +398,6 @@ const PatientDashboard: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 {chartConfig.title}
               </Typography>
-
               <ToggleButtonGroup
                 value={timeView}
                 exclusive
@@ -417,7 +413,6 @@ const PatientDashboard: React.FC = () => {
                 </ToggleButton>
               </ToggleButtonGroup>
             </Box>
-
             <Stack spacing={2} mt={2}>
               <Box
                 sx={{
@@ -480,7 +475,6 @@ const PatientDashboard: React.FC = () => {
               <EventIcon sx={{ mr: 1 }} />
               Lịch hẹn hôm nay
             </Typography>
-
             {/* Hiển thị trạng thái tải dữ liệu lịch hẹn */}
             {appointmentsLoading ? (
               <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
@@ -500,11 +494,13 @@ const PatientDashboard: React.FC = () => {
                       sx={{
                         "&:hover": {
                           bgcolor: "rgba(0, 0, 0, 0.04)",
+                          cursor: "pointer",
                         },
                         // borderLeft: `4px solid ${getStatusColor(
                         //   appointment.status
                         // )}`,
                       }}
+                      onClick={() => handleAppointmentClick(appointment.id)}
                     >
                       <ListItemText
                         primary={
@@ -567,7 +563,7 @@ const PatientDashboard: React.FC = () => {
                                 variant="body2"
                                 color="text.secondary"
                               >
-                                {appointment.specialization} -{" "}
+                                {/* {appointment.specialization} -{" "} */}
                                 {appointment.reason}
                               </Typography>
                             </Box>

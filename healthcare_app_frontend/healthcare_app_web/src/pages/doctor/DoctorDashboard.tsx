@@ -9,144 +9,76 @@ import {
   Stack,
   ToggleButtonGroup,
   ToggleButton,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
+import { getDoctorDashboard } from "../../services/appointment/dashboard_service";
+import { useSelector } from "react-redux";
+
+interface DoctorDashboardResponse {
+  data: {
+    total_patient_done: number;
+    charts: {
+      monthly: Record<string, number>;
+      yearly: Record<string, number>;
+    };
+    total_patient_today: number;
+  };
+}
 
 const DoctorDashboard: React.FC = () => {
+  const user = useSelector((state: any) => state.user.user);
+
   // State to track the selected time period view
-  const [timeView, setTimeView] = useState<"week" | "month" | "year">("week");
+  const [timeView, setTimeView] = useState<"month" | "year">("month");
 
-  // State để lưu số lịch hẹn hôm nay
+  // State for dashboard data
   const [todayAppointments, setTodayAppointments] = useState(0);
-
-  // State để lưu dữ liệu từ API
-  const [weeklyPatientVisits, setWeeklyPatientVisits] = useState({
-    monday: 0,
-    tuesday: 0,
-    wednesday: 0,
-    thursday: 0,
-    friday: 0,
-    saturday: 0,
-    sunday: 0,
-  });
-
-  const [monthlyPatientVisits, setMonthlyPatientVisits] = useState({
-    jan: 0,
-    feb: 0,
-    mar: 0,
-    apr: 0,
-    may: 0,
-    jun: 0,
-    jul: 0,
-    aug: 0,
-    sep: 0,
-    oct: 0,
-    nov: 0,
-    dec: 0,
-  });
-
-  // Tính toán 5 năm gần nhất để hiển thị thống kê linh hoạt
-  const currentYear = new Date().getFullYear();
-  const initialYearlyData = Object.fromEntries(
-    Array(5)
-      .fill(0)
-      .map((_, i) => [`${currentYear - 4 + i}`, 0])
-  );
-
-  const [yearlyPatientVisits, setYearlyPatientVisits] =
-    useState(initialYearlyData);
-
   const [totalPatients, setTotalPatients] = useState(0);
+  const [monthlyData, setMonthlyData] = useState<Record<string, number>>({});
+  const [yearlyData, setYearlyData] = useState<Record<string, number>>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Giả lập gọi API để lấy dữ liệu
+  // Fetch dashboard data from API
   useEffect(() => {
-    // Hàm giả lập gọi API lấy dữ liệu theo tuần
-    const fetchWeeklyData = () => {
-      // Giả lập thời gian trễ của mạng
-      setTimeout(() => {
-        // Dữ liệu mẫu - trong thực tế sẽ được trả về từ API
-        const mockData = {
-          monday: 12,
-          tuesday: 15,
-          wednesday: 9,
-          thursday: 18,
-          friday: 14,
-          saturday: 22,
-          sunday: 5,
-        };
-        setWeeklyPatientVisits(mockData);
-      }, 500);
+    const fetchDashboardData = async () => {
+      // Check if user exists and has userId
+      if (!user?.userId) {
+        setError("Không tìm thấy thông tin người dùng");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        console.log("Fetching doctor dashboard data for userId:", user.userId);
+
+        const response = await getDoctorDashboard(user.userId);
+        const dashboardData: DoctorDashboardResponse = response;
+
+        // Update states with API data
+        setTotalPatients(dashboardData.data.total_patient_done);
+        setTodayAppointments(dashboardData.data.total_patient_today);
+        setMonthlyData(dashboardData.data.charts.monthly);
+        setYearlyData(dashboardData.data.charts.yearly);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching doctor dashboard data:", err);
+        setError("Không thể tải dữ liệu bảng điều khiển");
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    // Hàm giả lập gọi API lấy dữ liệu theo tháng
-    const fetchMonthlyData = () => {
-      setTimeout(() => {
-        // Dữ liệu mẫu - trong thực tế sẽ được trả về từ API
-        const mockData = {
-          jan: 115,
-          feb: 130,
-          mar: 142,
-          apr: 125,
-          may: 133,
-          jun: 141,
-          jul: 128,
-          aug: 134,
-          sep: 138,
-          oct: 142,
-          nov: 132,
-          dec: 145,
-        };
-        setMonthlyPatientVisits(mockData);
-      }, 700);
-    };
-
-    // Hàm giả lập gọi API lấy dữ liệu theo năm
-    const fetchYearlyData = () => {
-      setTimeout(() => {
-        // Tạo dữ liệu mẫu dựa trên 5 năm gần nhất
-        // 2021 : 1000,
-        // 2022 : 1200,
-        // 2023 : 1500,
-        // 2024 : 1700,
-        // 2025 : 2000,
-        const mockData = {};
-        for (let i = 0; i < 5; i++) {
-          const year = `${currentYear - 4 + i}`;
-          // Giả lập số lượng bệnh nhân từ 1000-2000
-          mockData[year] = 1000 + Math.floor(Math.random() * 1000);
-        }
-        setYearlyPatientVisits(mockData);
-      }, 900);
-    };
-
-    // Hàm giả lập gọi API lấy tổng số bệnh nhân
-    const fetchTotalPatients = () => {
-      setTimeout(() => {
-        // Dữ liệu mẫu - trong thực tế sẽ được trả về từ API
-        setTotalPatients(120);
-      }, 600);
-    };
-
-    // Hàm giả lập gọi API lấy số lịch hẹn hôm nay
-    const fetchTodayAppointments = () => {
-      setTimeout(() => {
-        // Dữ liệu mẫu - trong thực tế sẽ được trả về từ API
-        setTodayAppointments(8);
-      }, 400);
-    };
-
-    // Gọi các hàm giả lập API
-    fetchWeeklyData();
-    fetchMonthlyData();
-    fetchYearlyData();
-    fetchTotalPatients();
-    fetchTodayAppointments();
-  }, []);
+    fetchDashboardData();
+  }, [user]);
 
   // Xử lý thay đổi chế độ xem thời gian
   const handleTimeViewChange = (
     event: React.MouseEvent<HTMLElement>,
-    newTimeView: "week" | "month" | "year" | null
+    newTimeView: "month" | "year" | null
   ) => {
     if (newTimeView !== null) {
       setTimeView(newTimeView);
@@ -156,68 +88,43 @@ const DoctorDashboard: React.FC = () => {
   // Get chart data based on selected time view
   const getChartConfig = () => {
     switch (timeView) {
-      case "week":
+      case "month": {
+        const monthNames = [
+          "T1",
+          "T2",
+          "T3",
+          "T4",
+          "T5",
+          "T6",
+          "T7",
+          "T8",
+          "T9",
+          "T10",
+          "T11",
+          "T12",
+        ];
+        // Tạo mảng tháng từ 1 đến 12
+        // ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+        const months = Array.from({ length: 12 }, (_, i) => String(i + 1));
+
         return {
-          xAxisData: [
-            "Thứ 2",
-            "Thứ 3",
-            "Thứ 4",
-            "Thứ 5",
-            "Thứ 6",
-            "Thứ 7",
-            "Chủ nhật",
-          ],
-          seriesData: [
-            weeklyPatientVisits.monday,
-            weeklyPatientVisits.tuesday,
-            weeklyPatientVisits.wednesday,
-            weeklyPatientVisits.thursday,
-            weeklyPatientVisits.friday,
-            weeklyPatientVisits.saturday,
-            weeklyPatientVisits.sunday,
-          ],
-          title: "Số bệnh nhân khám trong tuần",
-        };
-      case "month":
-        return {
-          xAxisData: [
-            "T1",
-            "T2",
-            "T3",
-            "T4",
-            "T5",
-            "T6",
-            "T7",
-            "T8",
-            "T9",
-            "T10",
-            "T11",
-            "T12",
-          ],
-          seriesData: [
-            monthlyPatientVisits.jan,
-            monthlyPatientVisits.feb,
-            monthlyPatientVisits.mar,
-            monthlyPatientVisits.apr,
-            monthlyPatientVisits.may,
-            monthlyPatientVisits.jun,
-            monthlyPatientVisits.jul,
-            monthlyPatientVisits.aug,
-            monthlyPatientVisits.sep,
-            monthlyPatientVisits.oct,
-            monthlyPatientVisits.nov,
-            monthlyPatientVisits.dec,
-          ],
+          xAxisData: monthNames,
+          seriesData: months.map((month) => monthlyData[month] || 0),
           title: "Số bệnh nhân khám trong năm (theo tháng)",
         };
-      case "year":
-        // Lấy danh sách các năm và sắp xếp theo thứ tự tăng dần
-        const yearKeys = Object.keys(yearlyPatientVisits).sort();
+      }
+
+      case "year": {
+        // Get years from API data and sort them
+        const yearKeys = Object.keys(yearlyData).sort();
+
         return {
           xAxisData: yearKeys,
-          seriesData: yearKeys.map((year) => yearlyPatientVisits[year]),
-          title: "Số bệnh nhân khám theo 5 năm gần nhất",
+          seriesData: yearKeys.map((year) => yearlyData[year] || 0),
+          title: "Số bệnh nhân khám theo các năm",
         };
+      }
+
       default:
         return { xAxisData: [], seriesData: [], title: "" };
     }
@@ -225,27 +132,39 @@ const DoctorDashboard: React.FC = () => {
 
   const chartConfig = getChartConfig();
 
+  if (isLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return <Alert severity="error">{error}</Alert>;
+  }
+
   return (
     <>
       <Grid container spacing={3}>
-        {/* Thẻ hiển thị số lịch hẹn hôm nay */}
+        {/* Thẻ hiển thị số bệnh nhân hôm nay */}
         <Grid item xs={12} sm={6} md={6}>
           <Card>
             <CardContent>
               <Typography variant="h5" component="div">
-                Lịch hẹn hôm nay
+                Số bệnh nhân hôm nay
               </Typography>
               <Typography variant="h3">{todayAppointments}</Typography>
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Thẻ hiển thị tổng số bệnh nhân */}
+        {/* Thẻ hiển thị tổng bệnh nhân đã khám */}
         <Grid item xs={12} sm={6} md={6}>
           <Card>
             <CardContent>
               <Typography variant="h5" component="div">
-                Tổng số bệnh nhân
+                Tổng bệnh nhân đã khám
               </Typography>
               <Typography variant="h3">{totalPatients}</Typography>
             </CardContent>
@@ -274,9 +193,6 @@ const DoctorDashboard: React.FC = () => {
                 aria-label="time view"
                 size="small"
               >
-                <ToggleButton value="week" aria-label="week view">
-                  Tuần
-                </ToggleButton>
                 <ToggleButton value="month" aria-label="month view">
                   Tháng
                 </ToggleButton>

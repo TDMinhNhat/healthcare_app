@@ -95,6 +95,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
             name: `${result.work_schedule.doctor.firstName} ${result.work_schedule.doctor.lastName}`,
             typeDisease: result.work_schedule.doctor.typeDisease.name,
             avatar: result.work_schedule.doctor.avatar,
+            specialization: result.work_schedule.doctor.specialization || "",
           },
           hasMedicalRecord: true,
         };
