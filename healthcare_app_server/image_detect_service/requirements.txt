@@ -13,3 +13,4 @@ numpy==1.26.4
 confluent-kafka
 mediapipe
 python-socketio
+daphne
