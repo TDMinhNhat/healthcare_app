@@ -17,6 +17,8 @@ import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { detectFace } from "../services/image_detect/detect_service";
 import * as Location from "expo-location";
+import { io, Socket } from "socket.io-client";
+import * as FileSystem from "expo-file-system";
 
 export default function Emergency() {
   const [permission, requestPermission] = useCameraPermissions(); // State quản lý quyền truy cập camera
@@ -35,7 +37,17 @@ export default function Emergency() {
   const [locationErrorMsg, setLocationErrorMsg] = useState<string | null>(null);
 
   const cameraRef = useRef<CameraView>(null); // Tham chiếu đến component camera
+  const getIntervalNumber = useRef(0);
   const router = useRouter(); // Hook điều hướng
+  const [socket, setSocket] = useState<Socket>(
+    io(`ws://${process.env.EXPO_PUBLIC_HOST_ID}:8081`, {
+      path: "/image_detect/socket",
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      autoConnect: false,
+    })
+  );
 
   // Lấy vị trí hiện tại
   useEffect(() => {
@@ -70,6 +82,33 @@ export default function Emergency() {
         );
       }
     })();
+
+    socket.connect();
+    socket.on("connect", () => {
+      socket.on("emergency_detect_response", (data) => {});
+    });
+
+    getIntervalNumber.current = setInterval(() => {
+      (async () => {
+        const photo = await cameraRef.current.takePictureAsync({
+          quality: 0.8, // Chất lượng ảnh 80%
+        });
+
+        const fileURI = photo.uri;
+        const base64Image = await FileSystem.readAsStringAsync(fileURI, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        socket.emit("emergency_detect_request", {
+          image: base64Image,
+          fileName: "face.jpg",
+        });
+      })();
+    }, 2000);
+
+    return () => {
+      socket.disconnect();
+      clearInterval(getIntervalNumber.current);
+    };
   }, []);
 
   // Hàm được gọi khi camera sẵn sàng sử dụng
