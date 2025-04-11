@@ -16,8 +16,11 @@ import django
 django.setup()
 
 from django.core.asgi import get_asgi_application
-import healthcare_app_server.eureka
 from healthcare_app_server.kafka_consumer import KafkaConsumer
+import face_detect_package.services as face_detect_service
+import healthcare_app_server.eureka
+import base64
+
 sio = socketio.AsyncServer(async_mode = 'asgi', cors_allowed_origins = '*', always_connect=False)
 django_asgi_application = get_asgi_application()
 
@@ -32,5 +35,12 @@ async def connect(sid, environ):
 @sio.event
 async def disconnect(sid):
     print("Client disconnected: ", sid)
+    pass
+
+@sio.on("emergency_detect_request")
+async def emergency_detect(sid, data):
+    image_bytes = base64.b64decode(data["image"])
+    face_detect = face_detect_service.FaceDetectService(image_bytes)
+    print(await face_detect.detect_face())
     pass
 
