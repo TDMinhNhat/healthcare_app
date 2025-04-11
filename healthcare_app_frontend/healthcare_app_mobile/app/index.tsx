@@ -61,7 +61,7 @@ export default function HomeScreen() {
   return (
     <Formik
       initialValues={{
-        email: "tdminhnhat13092003@gmail.com",
+        email: "donaldtrump@gmail.com",
         password: "123456789",
       }}
       validationSchema={LoginSchema}
@@ -86,28 +86,27 @@ export default function HomeScreen() {
                 value={values.email}
                 placeholder={"Nhập tài khoản email"}
                 onChangeText={handleChange("email")}
-                onBlur={() => {
-                  handleBlur("email");
-                  if (touched.email && errors.email) {
-                    Alert.alert("Lỗi", errors.email);
-                  }
-                }}
-                style={style.input}
+                onBlur={handleBlur("email")}
+                style={[
+                  style.input,
+                  touched.email && errors.email ? style.inputError : null,
+                ]}
               />
             </View>
+            {touched.email && errors.email && (
+              <Text style={style.errorText}>{errors.email}</Text>
+            )}
             <View style={style.itemAreaPassword}>
               <TextInput
                 secureTextEntry={!showPassword}
                 value={values.password}
                 placeholder={"Nhập mật khẩu"}
                 onChangeText={handleChange("password")}
-                onBlur={() => {
-                  handleBlur("password");
-                  if (touched.password && errors.password) {
-                    Alert.alert("Lỗi", errors.password);
-                  }
-                }}
-                style={style.inputPassword}
+                onBlur={handleBlur("password")}
+                style={[
+                  style.inputPassword,
+                  touched.password && errors.password ? style.inputError : null,
+                ]}
               />
               <MaterialCommunityIcons
                 name={showPassword ? "eye-off" : "eye"}
@@ -117,6 +116,9 @@ export default function HomeScreen() {
                 onPress={() => setShowPassword(!showPassword)}
               />
             </View>
+            {touched.password && errors.password && (
+              <Text style={style.errorText}>{errors.password}</Text>
+            )}
             <View style={style.itemArea}>
               <Link href={"/register"}>
                 <View>
@@ -132,18 +134,7 @@ export default function HomeScreen() {
             <View style={style.itemArea}>
               <TouchableOpacity
                 style={style.button}
-                onPress={() => {
-                  // Validate manually before submitting
-                  if (errors.email) {
-                    Alert.alert("Lỗi", errors.email);
-                    return;
-                  }
-                  if (errors.password) {
-                    Alert.alert("Lỗi", errors.password);
-                    return;
-                  }
-                  handleSubmit();
-                }}
+                onPress={() => handleSubmit()}
               >
                 <Text style={style.buttonText}>Đăng Nhập</Text>
               </TouchableOpacity>

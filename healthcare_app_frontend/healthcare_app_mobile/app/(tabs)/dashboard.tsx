@@ -14,6 +14,8 @@ import { useSelector } from "react-redux";
 import { PieChart, BarChart } from "react-native-gifted-charts";
 import { format } from "date-fns";
 import { Ionicons } from "@expo/vector-icons";
+import { getPatientDashboard } from "../../services/appointment/dashboard_service";
+import { useRouter } from "expo-router";
 
 // Interface for appointments
 interface Appointment {
@@ -30,10 +32,54 @@ interface Appointment {
   numericalOrder?: number;
 }
 
+// Interface for the dashboard API response
+interface DashboardResponse {
+  charts: {
+    monthly: Record<string, number>;
+    yearly: Record<string, number>;
+  };
+  appointments: {
+    book_appointment: {
+      id: number;
+      patientId: string;
+      workSchedule: number;
+      numericalOrder: number;
+      note: string;
+      createdAt: string;
+      status: string;
+    };
+    work_schedule: {
+      id: number;
+      doctor: {
+        id: number;
+        userId: string;
+        firstName: string;
+        lastName: string;
+        specialization: string;
+        typeDisease: {
+          name: string;
+        };
+      };
+      shift: {
+        start: string;
+        end: string;
+      };
+      dateAppointment: string;
+    };
+  }[];
+  appointmentStats: {
+    total: number;
+    cancelled: number;
+    complete: number;
+    upcoming: number;
+  };
+}
+
 export default function DashboardTab() {
   const user = useSelector((state: any) => state.user.user);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   // State để theo dõi chế độ xem thời gian (tháng hoặc năm)
   const [timeView, setTimeView] = useState<"month" | "year">("month");
@@ -75,6 +121,16 @@ export default function DashboardTab() {
   const screenWidth = Dimensions.get("window").width;
   const chartWidth = screenWidth - 74; // Tính toán dựa trên padding của màn hình và card
 
+  // Helper function to format time from API format
+  const formatTimeFromApiFormat = (timeString: string): string => {
+    // Format from "07-00-00" to "07:00"
+    const parts = timeString.split("-");
+    if (parts.length >= 2) {
+      return `${parts[0]}:${parts[1]}`;
+    }
+    return timeString;
+  };
+
   // useEffect để lấy dữ liệu thống kê bệnh nhân
   useEffect(() => {
     const fetchPatientData = async () => {
@@ -87,133 +143,85 @@ export default function DashboardTab() {
 
       try {
         setLoading(true);
-        // Giả lập gọi API với độ trễ để tăng tính thực tế
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        setAppointmentsLoading(true);
 
-        // Dữ liệu mẫu cho thống kê lịch hẹn - giống với web version
+        // Call the API to get patient dashboard data
+        const response = await getPatientDashboard(user.userId);
+        const dashboardData: DashboardResponse = response.data;
+        console.log("Dashboard data:", dashboardData);
+        // Update appointment stats
         setAppointmentStats({
-          total: 12, // Tổng số lịch hẹn
-          completed: 10, // Số lịch hẹn đã hoàn thành
-          upcoming: 2, // Số lịch hẹn sắp tới
-          cancelled: 1, // Số lịch hẹn đã hủy
+          total: dashboardData.appointmentStats.total,
+          completed: dashboardData.appointmentStats.complete,
+          upcoming: dashboardData.appointmentStats.upcoming,
+          cancelled: dashboardData.appointmentStats.cancelled,
         });
 
-        // Giả lập gọi API lấy dữ liệu theo tháng với độ trễ
-        await new Promise((resolve) => setTimeout(resolve, 200));
-
-        // Dữ liệu mẫu cho lịch hẹn theo tháng - giống với web version
+        // Update monthly appointments chart data
         setMonthlyAppointments({
-          jan: 5,
-          feb: 3,
-          mar: 7,
-          apr: 2,
-          may: 4,
-          jun: 6,
-          jul: 8,
-          aug: 4,
-          sep: 3,
-          oct: 5,
-          nov: 2,
-          dec: 1,
+          jan: dashboardData.charts.monthly.jan || 0,
+          feb: dashboardData.charts.monthly.feb || 0,
+          mar: dashboardData.charts.monthly.mar || 0,
+          apr: dashboardData.charts.monthly.apr || 0,
+          may: dashboardData.charts.monthly.may || 0,
+          jun: dashboardData.charts.monthly.jun || 0,
+          jul: dashboardData.charts.monthly.jul || 0,
+          aug: dashboardData.charts.monthly.aug || 0,
+          sep: dashboardData.charts.monthly.sep || 0,
+          oct: dashboardData.charts.monthly.oct || 0,
+          nov: dashboardData.charts.monthly.nov || 0,
+          dec: dashboardData.charts.monthly.dec || 0,
         });
 
-        // Giả lập gọi API lấy dữ liệu theo năm với độ trễ
-        await new Promise((resolve) => setTimeout(resolve, 200));
+        // Update yearly appointments chart data
+        setYearlyAppointments(dashboardData.charts.yearly);
 
-        // Dữ liệu mẫu cho lịch hẹn theo năm - giống với web version
-        setYearlyAppointments({
-          "2020": 25,
-          "2021": 30,
-          "2022": 45,
-          "2023": 38,
-          "2024": 12,
-        });
+        // Get today's appointments from the dashboard data
+        const today = format(new Date(), "dd-MM-yyyy");
 
+        // Format today's appointments from the API response
+        const formattedAppointments: Appointment[] = dashboardData.appointments
+          // Filter for today's appointments
+          .filter((appt) => appt.work_schedule.dateAppointment === today)
+          .map((appt) => ({
+            id: appt.book_appointment.id,
+            workScheduleId: appt.work_schedule.id,
+            date: appt.work_schedule.dateAppointment,
+            startTime: formatTimeFromApiFormat(appt.work_schedule.shift.start),
+            endTime: formatTimeFromApiFormat(appt.work_schedule.shift.end),
+            status: appt.book_appointment.status as any,
+            doctorName: `Bác sĩ ${appt.work_schedule.doctor.lastName} ${appt.work_schedule.doctor.firstName}`,
+            specialization: appt.work_schedule.doctor.specialization,
+            reason:
+              appt.book_appointment.note ||
+              appt.work_schedule.doctor.typeDisease.name,
+            doctorId: appt.work_schedule.doctor.id,
+            numericalOrder: appt.book_appointment.numericalOrder,
+          }));
+
+        setTodayAppointments(formattedAppointments);
         setError(null);
+        setAppointmentsError(null);
       } catch (err) {
+        console.error("Error fetching patient dashboard data:", err);
         setError("Không thể tải dữ liệu bệnh nhân");
-        console.error(err);
+        setAppointmentsError("Không thể tải dữ liệu lịch hẹn");
       } finally {
         setLoading(false);
+        setAppointmentsLoading(false);
       }
     };
 
     fetchPatientData();
   }, [user]);
 
-  // Lấy dữ liệu lịch hẹn hôm nay - giống với web version
-  useEffect(() => {
-    const fetchTodayAppointments = async () => {
-      // Kiểm tra ID người dùng tồn tại
-      if (!user?.userId) {
-        setAppointmentsError("Không tìm thấy thông tin người dùng");
-        setAppointmentsLoading(false);
-        return;
-      }
-
-      try {
-        setAppointmentsLoading(true);
-        // Giả lập gọi API với độ trễ 500ms
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Ngày hôm nay dưới định dạng dd-MM-yyyy
-        const today = format(new Date(), "dd-MM-yyyy");
-
-        // Dữ liệu mẫu cho lịch hẹn hôm nay - giống với web version
-        const mockAppointments: Appointment[] = [
-          {
-            id: 1,
-            workScheduleId: 101,
-            date: today,
-            startTime: "09:00",
-            endTime: "09:30",
-            status: "WAITING",
-            doctorName: "Bác sĩ Nguyễn Văn A",
-            specialization: "Tim mạch",
-            reason: "Khám tim mạch định kỳ",
-            doctorId: 201,
-            numericalOrder: 5,
-          },
-          {
-            id: 2,
-            workScheduleId: 102,
-            date: today,
-            startTime: "14:30",
-            endTime: "15:00",
-            status: "WAITING",
-            doctorName: "Bác sĩ Trần Thị B",
-            specialization: "Da liễu",
-            reason: "Khám da liễu",
-            doctorId: 202,
-            numericalOrder: 12,
-          },
-          {
-            id: 3,
-            workScheduleId: 103,
-            date: today,
-            startTime: "16:00",
-            endTime: "16:30",
-            status: "IN_PROGRESS",
-            doctorName: "Bác sĩ Lê Văn C",
-            specialization: "Nội khoa",
-            reason: "Tái khám",
-            doctorId: 203,
-            numericalOrder: 8,
-          },
-        ];
-
-        setTodayAppointments(mockAppointments);
-        setAppointmentsError(null);
-      } catch (err) {
-        setAppointmentsError("Không thể tải dữ liệu lịch hẹn");
-        console.error(err);
-      } finally {
-        setAppointmentsLoading(false);
-      }
-    };
-
-    fetchTodayAppointments();
-  }, [user]);
+  // navigate đến trang chi tiết lịch hẹn
+  const navigateToAppointmentDetail = (appointmentId: number) => {
+    router.push({
+      pathname: "/appointment-details",
+      params: { appointmentId },
+    });
+  };
 
   // Hiển thị loading khi đang tải dữ liệu
   if (loading) {
@@ -430,7 +438,7 @@ export default function DashboardTab() {
             <BarChart
               data={barData}
               // width={chartWidth}
-              barWidth={timeView === "year" ? 30 : 20} // Độ rộng của cột
+              barWidth={timeView === "year" ? 24 : 20} // Độ rộng của cột
               noOfSections={4} // Số lượng phần trong trục Y
               barBorderRadius={4}
               frontColor="#2196f3"
@@ -474,7 +482,7 @@ export default function DashboardTab() {
                   style={styles.appointmentItem}
                   activeOpacity={0.7}
                   onPress={() => {
-                    console.log(`Appointment ${item.id} selected`);
+                    navigateToAppointmentDetail(item.id);
                   }}
                 >
                   <View style={styles.appointmentHeader}>
@@ -490,9 +498,7 @@ export default function DashboardTab() {
                   </View>
                   <View style={styles.appointmentDetail}>
                     <Ionicons name="medkit-outline" size={16} color="#666" />
-                    <Text style={styles.detailText}>
-                      {item.specialization} - {item.reason}
-                    </Text>
+                    <Text style={styles.detailText}>{item.reason}</Text>
                   </View>
                 </TouchableOpacity>
               )}

@@ -15,15 +15,18 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useSelector, useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { updateUser } from "../redux/slices/userSlice"; // Cập nhật đường dẫn import
+import { updateUser } from "../redux/slices/userSlice";
 import { User } from "../types/user";
 import { format, parse } from "date-fns";
+import { Formik } from "formik";
+import * as Yup from "yup";
 
 export default function EditProfileScreen() {
   const params = useLocalSearchParams();
   const { userId } = params;
   const user = useSelector((state: any) => state.user.user);
   const dispatch = useDispatch();
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Xử lý ngày tháng đúng cách với date-fns
   const parseDob = () => {
@@ -42,253 +45,292 @@ export default function EditProfileScreen() {
     }
   };
 
-  // Cập nhật state để khớp với các thuộc tính trong giao diện User
-  const [firstName, setFirstName] = useState(user?.firstName || "");
-  const [lastName, setLastName] = useState(user?.lastName || "");
-  const [email, setEmail] = useState(user?.email || "");
-  const [phone, setPhone] = useState(user?.phone || "");
+  // Quản lý giới tính và ngày sinh riêng biệt, không qua Formik
   const [sex, setSex] = useState(user?.sex !== undefined ? user.sex : true);
   const [dob, setDob] = useState(parseDob());
-  const [showDatePicker, setShowDatePicker] = useState(false);
-
-  // Xử lý địa chỉ
-  const [number, setNumber] = useState(user?.address?.number || "");
-  const [street, setStreet] = useState(user?.address?.street || "");
-  const [ward, setWard] = useState(user?.address?.ward || "");
-  const [district, setDistrict] = useState(user?.address?.district || "");
-  const [city, setCity] = useState(user?.address?.city || "");
-  const [country, setCountry] = useState(user?.address?.country || "");
 
   const formatDate = (date: Date) => {
-    return format(date, "dd-MM-yyyy"); // Định dạng DD-MM-YYYY using date-fns
+    return format(date, "dd-MM-yyyy");
   };
 
-  const onDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      setDob(selectedDate);
-    }
-  };
+  // Validation schema với Yup - loại bỏ sex và dob
+  const validationSchema = Yup.object().shape({
+    firstName: Yup.string().required("Họ là bắt buộc"),
+    lastName: Yup.string().required("Tên là bắt buộc"),
+    email: Yup.string()
+      .email("Email không hợp lệ")
+      .required("Email là bắt buộc"),
+    phone: Yup.string()
+      .matches(/^[0-9]{10,}$/, "Số điện thoại phải có ít nhất 10 chữ số")
+      .required("Số điện thoại là bắt buộc"),
+    address: Yup.object().shape({
+      number: Yup.string(),
+      street: Yup.string(),
+      ward: Yup.string(),
+      district: Yup.string(),
+      city: Yup.string(),
+      country: Yup.string(),
+    }),
+  });
 
-  const handleSaveProfile = () => {
-    // Kiểm tra các trường bắt buộc
-    if (
-      !firstName.trim() ||
-      !lastName.trim() ||
-      !email.trim() ||
-      !phone.trim()
-    ) {
-      Alert.alert("Lỗi", "Vui lòng điền đầy đủ các trường bắt buộc");
-      return;
-    }
-
-    // Cập nhật thông tin người dùng trong Redux với cấu trúc chính xác
-    dispatch(
-      updateUser({
-        ...user,
-        firstName,
-        lastName,
-        email,
-        phone,
-        sex,
-        dob: formatDate(dob),
-        address: {
-          id: user?.address?.id || 0,
-          number,
-          street,
-          ward,
-          district,
-          city,
-          country,
-        },
-      })
-    );
-
-    // Hiển thị thông báo thành công
-    Alert.alert("Thành công", "Hồ sơ đã được cập nhật thành công", [
-      { text: "OK", onPress: () => router.back() },
-    ]);
+  const initialValues = {
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    address: {
+      id: user?.address?.id || 0,
+      number: user?.address?.number || "",
+      street: user?.address?.street || "",
+      ward: user?.address?.ward || "",
+      district: user?.address?.district || "",
+      city: user?.address?.city || "",
+      country: user?.address?.country || "",
+    },
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <Ionicons name="arrow-back" size={24} color="#0056b3" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Chỉnh sửa hồ sơ</Text>
-        <View style={styles.placeholder} />
-      </View> */}
-
       <ScrollView style={styles.scrollView}>
-        <View style={styles.content}>
-          {/* Ảnh hồ sơ */}
-          <View style={styles.avatarContainer}>
-            <Image
-              source={{
-                uri: user?.avatar || "https://via.placeholder.com/150",
-              }}
-              style={styles.avatar}
-            />
-            <TouchableOpacity style={styles.editAvatarButton}>
-              <Ionicons name="camera" size={20} color="#fff" />
-            </TouchableOpacity>
-          </View>
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={(values) => {
+            // Cập nhật thông tin người dùng trong Redux với cấu trúc chính xác
+            dispatch(
+              updateUser({
+                ...user,
+                ...values,
+                sex: sex, // Sử dụng state sex riêng biệt
+                dob: formatDate(dob), // Sử dụng state dob riêng biệt
+              })
+            );
 
-          {/* Các trường biểu mẫu - Cập nhật để phù hợp với giao diện User */}
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Họ*</Text>
-            <TextInput
-              style={styles.input}
-              value={firstName}
-              onChangeText={setFirstName}
-              placeholder="Nhập họ của bạn"
-            />
-          </View>
+            // Hiển thị thông báo thành công
+            Alert.alert("Thành công", "Hồ sơ đã được cập nhật thành công", [
+              { text: "OK", onPress: () => router.back() },
+            ]);
+          }}
+        >
+          {({
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            setFieldValue,
+            values,
+            errors,
+            touched,
+          }) => (
+            <View style={styles.content}>
+              {/* Ảnh hồ sơ */}
+              <View style={styles.avatarContainer}>
+                <Image
+                  source={{
+                    uri: user?.avatar || "https://via.placeholder.com/150",
+                  }}
+                  style={styles.avatar}
+                />
+                <TouchableOpacity style={styles.editAvatarButton}>
+                  <Ionicons name="camera" size={20} color="#fff" />
+                </TouchableOpacity>
+              </View>
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Tên*</Text>
-            <TextInput
-              style={styles.input}
-              value={lastName}
-              onChangeText={setLastName}
-              placeholder="Nhập tên của bạn"
-            />
-          </View>
+              {/* Các trường biểu mẫu - Sử dụng Formik */}
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Họ*</Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    touched.firstName && errors.firstName
+                      ? styles.inputError
+                      : null,
+                  ]}
+                  value={values.firstName}
+                  onChangeText={handleChange("firstName")}
+                  onBlur={handleBlur("firstName")}
+                  placeholder="Nhập họ của bạn"
+                />
+                {touched.firstName && errors.firstName && (
+                  <Text style={styles.errorText}>{errors.firstName}</Text>
+                )}
+              </View>
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Email*</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Nhập email của bạn"
-              keyboardType="email-address"
-            />
-          </View>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Tên*</Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    touched.lastName && errors.lastName
+                      ? styles.inputError
+                      : null,
+                  ]}
+                  value={values.lastName}
+                  onChangeText={handleChange("lastName")}
+                  onBlur={handleBlur("lastName")}
+                  placeholder="Nhập tên của bạn"
+                />
+                {touched.lastName && errors.lastName && (
+                  <Text style={styles.errorText}>{errors.lastName}</Text>
+                )}
+              </View>
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Số điện thoại*</Text>
-            <TextInput
-              style={styles.input}
-              value={phone}
-              onChangeText={setPhone}
-              placeholder="Nhập số điện thoại của bạn"
-              keyboardType="phone-pad"
-            />
-          </View>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Email*</Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    touched.email && errors.email ? styles.inputError : null,
+                  ]}
+                  value={values.email}
+                  onChangeText={handleChange("email")}
+                  onBlur={handleBlur("email")}
+                  placeholder="Nhập email của bạn"
+                  keyboardType="email-address"
+                />
+                {touched.email && errors.email && (
+                  <Text style={styles.errorText}>{errors.email}</Text>
+                )}
+              </View>
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Ngày sinh</Text>
-            <TouchableOpacity
-              style={styles.datePickerButton}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <Text>{formatDate(dob)}</Text>
-              <Ionicons name="calendar" size={20} color="#0056b3" />
-            </TouchableOpacity>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Số điện thoại*</Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    touched.phone && errors.phone ? styles.inputError : null,
+                  ]}
+                  value={values.phone}
+                  onChangeText={handleChange("phone")}
+                  onBlur={handleBlur("phone")}
+                  placeholder="Nhập số điện thoại của bạn"
+                  keyboardType="phone-pad"
+                />
+                {touched.phone && errors.phone && (
+                  <Text style={styles.errorText}>{errors.phone}</Text>
+                )}
+              </View>
 
-            {showDatePicker && (
-              <DateTimePicker
-                value={dob}
-                mode="date"
-                display="default"
-                onChange={onDateChange}
-              />
-            )}
-          </View>
+              {/* Ngày sinh - quản lý riêng biệt */}
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Ngày sinh</Text>
+                <TouchableOpacity
+                  style={styles.datePickerButton}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Text>{formatDate(dob)}</Text>
+                  <Ionicons name="calendar" size={20} color="#0056b3" />
+                </TouchableOpacity>
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Giới tính</Text>
-            <View style={styles.sexToggle}>
-              <Text>Nữ</Text>
-              <Switch
-                value={sex}
-                onValueChange={setSex}
-                trackColor={{ false: "#e0e0e0", true: "#0056b380" }}
-                thumbColor={sex ? "#0056b3" : "#f4f3f4"}
-                style={{ marginHorizontal: 10 }}
-              />
-              <Text>Nam</Text>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={dob}
+                    mode="date"
+                    display="default"
+                    onChange={(event, selectedDate) => {
+                      setShowDatePicker(false);
+                      if (selectedDate) {
+                        setDob(selectedDate);
+                      }
+                    }}
+                  />
+                )}
+              </View>
+
+              {/* Giới tính - quản lý riêng biệt */}
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Giới tính</Text>
+                <View style={styles.sexToggle}>
+                  <Text>Nữ</Text>
+                  <Switch
+                    value={sex}
+                    onValueChange={setSex}
+                    trackColor={{ false: "#e0e0e0", true: "#0056b380" }}
+                    thumbColor={sex ? "#0056b3" : "#f4f3f4"}
+                    style={{ marginHorizontal: 10 }}
+                  />
+                  <Text>Nam</Text>
+                </View>
+              </View>
+
+              {/* Các trường địa chỉ */}
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Thông tin địa chỉ</Text>
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Số nhà</Text>
+                <TextInput
+                  style={styles.input}
+                  value={values.address.number}
+                  onChangeText={(text) => setFieldValue("address.number", text)}
+                  placeholder="Nhập số nhà/tòa nhà của bạn"
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Đường</Text>
+                <TextInput
+                  style={styles.input}
+                  value={values.address.street}
+                  onChangeText={(text) => setFieldValue("address.street", text)}
+                  placeholder="Nhập tên đường của bạn"
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Phường/Xã</Text>
+                <TextInput
+                  style={styles.input}
+                  value={values.address.ward}
+                  onChangeText={(text) => setFieldValue("address.ward", text)}
+                  placeholder="Nhập phường/xã của bạn"
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Quận/Huyện</Text>
+                <TextInput
+                  style={styles.input}
+                  value={values.address.district}
+                  onChangeText={(text) =>
+                    setFieldValue("address.district", text)
+                  }
+                  placeholder="Nhập quận/huyện của bạn"
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Thành phố</Text>
+                <TextInput
+                  style={styles.input}
+                  value={values.address.city}
+                  onChangeText={(text) => setFieldValue("address.city", text)}
+                  placeholder="Nhập thành phố của bạn"
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Quốc gia</Text>
+                <TextInput
+                  style={styles.input}
+                  value={values.address.country}
+                  onChangeText={(text) =>
+                    setFieldValue("address.country", text)
+                  }
+                  placeholder="Nhập quốc gia của bạn"
+                />
+              </View>
+
+              {/* Nút lưu */}
+              <TouchableOpacity
+                style={styles.saveButton}
+                onPress={() => handleSubmit()}
+              >
+                <Text style={styles.saveButtonText}>Lưu thay đổi</Text>
+              </TouchableOpacity>
             </View>
-          </View>
-
-          {/* Các trường địa chỉ */}
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Thông tin địa chỉ</Text>
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Số nhà</Text>
-            <TextInput
-              style={styles.input}
-              value={number}
-              onChangeText={setNumber}
-              placeholder="Nhập số nhà/tòa nhà của bạn"
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Đường</Text>
-            <TextInput
-              style={styles.input}
-              value={street}
-              onChangeText={setStreet}
-              placeholder="Nhập tên đường của bạn"
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Phường/Xã</Text>
-            <TextInput
-              style={styles.input}
-              value={ward}
-              onChangeText={setWard}
-              placeholder="Nhập phường/xã của bạn"
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Quận/Huyện</Text>
-            <TextInput
-              style={styles.input}
-              value={district}
-              onChangeText={setDistrict}
-              placeholder="Nhập quận/huyện của bạn"
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Thành phố</Text>
-            <TextInput
-              style={styles.input}
-              value={city}
-              onChangeText={setCity}
-              placeholder="Nhập thành phố của bạn"
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Quốc gia</Text>
-            <TextInput
-              style={styles.input}
-              value={country}
-              onChangeText={setCountry}
-              placeholder="Nhập quốc gia của bạn"
-            />
-          </View>
-
-          {/* Nút lưu */}
-          <TouchableOpacity
-            style={styles.saveButton}
-            onPress={handleSaveProfile}
-          >
-            <Text style={styles.saveButtonText}>Lưu thay đổi</Text>
-          </TouchableOpacity>
-        </View>
+          )}
+        </Formik>
       </ScrollView>
     </SafeAreaView>
   );
@@ -403,5 +445,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
+  },
+  inputError: {
+    borderColor: "red",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 12,
+    marginTop: 5,
   },
 });
