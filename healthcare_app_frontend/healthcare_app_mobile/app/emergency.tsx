@@ -16,6 +16,7 @@ import * as ImagePicker from "expo-image-picker";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { detectFace } from "../services/image_detect/detect_service";
+import * as Location from "expo-location";
 
 export default function Emergency() {
   const [permission, requestPermission] = useCameraPermissions(); // State quản lý quyền truy cập camera
@@ -28,9 +29,30 @@ export default function Emergency() {
   const [mediaLibraryPermission, setMediaLibraryPermission] = useState<
     boolean | null
   >(null); // State quản lý quyền truy cập thư viện ảnh
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
+  const [locationErrorMsg, setLocationErrorMsg] = useState<string | null>(null);
 
   const cameraRef = useRef<CameraView>(null); // Tham chiếu đến component camera
   const router = useRouter(); // Hook điều hướng
+
+  // Lấy vị trí hiện tại
+  useEffect(() => {
+    async function getCurrentLocation() {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setLocationErrorMsg("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+      console.log("Current location:", location);
+    }
+
+    getCurrentLocation();
+  }, []);
 
   // Yêu cầu quyền truy cập thư viện ảnh khi component được render
   useEffect(() => {
@@ -208,9 +230,9 @@ export default function Emergency() {
 
       {/* Phần header */}
       <View style={styles.header}>
-        {/* <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity> */}
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Hỗ Trợ Khẩn Cấp</Text>
         <View style={{ width: 24 }} />
       </View>

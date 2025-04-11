@@ -55,7 +55,8 @@
     "react-redux": "^9.2.0",
     "socket.io-client": "^4.8.1",
     "text-encoding": "^0.7.0",
-    "yup": "^1.6.1"
+    "yup": "^1.6.1",
+    "expo-location": "~18.0.10"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

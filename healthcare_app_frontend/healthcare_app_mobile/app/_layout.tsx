@@ -63,7 +63,7 @@ export default function Layout() {
           name={"emergency"}
           options={{
             title: "Cấp cứu",
-            headerShown: true,
+            headerShown: false,
             presentation: "card",
           }}
         />
