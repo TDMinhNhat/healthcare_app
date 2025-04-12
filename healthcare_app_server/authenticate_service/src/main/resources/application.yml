@@ -61,3 +61,5 @@ springdoc:
     path: /authenticate/v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+aws_access_key: AKIATWBJ2KFZKJUMQ33C
+aws_secret_key: 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
