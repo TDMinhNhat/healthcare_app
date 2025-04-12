@@ -30,4 +30,26 @@ public class ShiftConsumer {
             log.error(e.getMessage());
         }
     }
+
+    @KafkaListener(topics = "delete_shift", groupId = "authenticate_delete_shift")
+    public void deleteShift(String message) {
+        try {
+            log.info("Shift Consumer: listen the message for deleting the shift");
+            log.info("Shift Consumer: {}", message);
+
+            Long getId = ObjectParser.convertJsonToObject(message, Long.class);
+            Shift target = shiftRepository.findById(getId).orElse(null);
+            if(target != null) {
+                log.info("Shift Consumer: found the shift");
+                target.setStatus(false);
+                shiftRepository.save(target);
+                log.info("Shift Consumer: The shift has been deleted");
+            } else {
+                log.warn("Shift Consumer: The shift wasn't found!");
+            }
+        } catch (Exception e) {
+            log.error("Shift Consumer: The consumer thrown an exception");
+            log.error(e.getMessage());
+        }
+    }
 }

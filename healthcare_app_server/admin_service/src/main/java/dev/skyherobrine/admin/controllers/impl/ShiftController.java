@@ -80,8 +80,38 @@ public class ShiftController implements IManagement<ShiftDTO,Long> {
         return null;
     }
 
+    @DeleteMapping("/{id}")
     @Override
-    public ResponseEntity<Response> delete(Long aLong) {
-        return null;
+    public ResponseEntity<Response> delete(@PathVariable("id") Long id) {
+        try {
+            log.info("Shift: Call the api delete the shift");
+            Shift shift = shiftRepository.findById(id).orElse(null);
+
+            if(shift != null) {
+                log.info("Shift: send the message to kafka");
+                kafkaTemplate.send("delete_shift", ObjectParser.convertObjectToJson(id));
+
+                shift.setStatus(false);
+                Shift result = shiftRepository.save(shift);
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.OK.value(),
+                        "The shift has been deleted",
+                        result
+                ));
+            }
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "The shift wasn't found!",
+                    null
+            ));
+        } catch (Exception e) {
+            log.error("Shift: The api thrown an exception");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an exception",
+                    e.getMessage()
+            ));
+        }
     }
 }

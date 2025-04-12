@@ -12,4 +12,9 @@ public class ShiftProducer {
     public NewTopic insertShift() {
         return TopicBuilder.name("insert_shift").build();
     }
+
+    @Bean
+    public NewTopic deleteShift() {
+        return TopicBuilder.name("delete_shift").build();
+    }
 }
