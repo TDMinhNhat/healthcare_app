@@ -19,6 +19,7 @@ import { detectFace } from "../services/image_detect/detect_service";
 import * as Location from "expo-location";
 import { io, Socket } from "socket.io-client";
 import * as FileSystem from "expo-file-system";
+import { navigate } from "expo-router/build/global-state/routing";
 
 export default function Emergency() {
   const [permission, requestPermission] = useCameraPermissions(); // State quản lý quyền truy cập camera
@@ -82,10 +83,16 @@ export default function Emergency() {
         );
       }
     })();
+  }, []);
 
+  useEffect(() => {
     socket.connect();
     socket.on("connect", () => {
-      socket.on("emergency_detect_response", (data) => {});
+      socket.on("emergency_detect_response", (data) => {
+        if(data.code === 200 || data === "New User") {
+          socket.emit("send_data_emergency", data.data);
+        }
+      });
     });
 
     getIntervalNumber.current = setInterval(() => {
@@ -109,7 +116,7 @@ export default function Emergency() {
       socket.disconnect();
       clearInterval(getIntervalNumber.current);
     };
-  }, []);
+  }, [])
 
   // Hàm được gọi khi camera sẵn sàng sử dụng
   const onCameraReady = () => {

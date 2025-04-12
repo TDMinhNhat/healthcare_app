@@ -34,6 +34,7 @@ import PatientMedicalRecordModal from "../../components/emergency/PatientMedical
 import { User } from "../../types/user";
 import { Avatar } from "@mui/material";
 import GPSMapComponent from "../../components/find_doctor/GPSMapComponent";
+import { Socket, io } from "socket.io-client";
 
 // Dữ liệu giả lập cho bệnh nhân cấp cứu
 const mockEmergencyPatients: (User & { received?: boolean })[] = [
@@ -117,24 +118,66 @@ const EmergencyPage: React.FC = () => {
     patientId: "",
     patientName: "",
   });
+  const [socket, setSocket] = useState<Socket>(
+    io(`ws://${import.meta.env.VITE_HOST}:8081`, {
+      path: "/image_detect/socket",
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      autoConnect: false,
+    })
+  );
+
+  // useEffect(() => {
+  //   loadEmergencyPatients();
+  // }, [selectedDate]); // Tải lại khi ngày thay đổi
 
   useEffect(() => {
-    loadEmergencyPatients();
-  }, [selectedDate]); // Tải lại khi ngày thay đổi
+    socket.connect();
+
+    socket.on("connect", () => {
+      socket.emit("request_patient_in_emergency")
+
+      socket.on("receive_patient_in_emergency", (data) => { 
+        if(data === "New User") {
+          //Add new patient with empty object
+          setPatients((prevPatients) => [
+            ...prevPatients,
+            { } as User,
+          ]);
+        } else {
+          // Filter patients contain the userId already before
+          const result = patients.filter((patient) => patient.userId === data.userId);
+          // Check if newPatients is empty or not
+          if(result.length === 0) {
+            // Add new patients to the state
+            setPatients((prevPatients) => [
+              ...prevPatients,
+              data,
+            ]);
+          }
+        }
+      })
+
+      socket.on("get_patient_in_emergency", (data) => { 
+
+      })
+    })
+  }, [])
 
   const loadEmergencyPatients = async () => {
     try {
       setLoading(true);
-      // Truyền ngày được chọn vào hàm tải dữ liệu
-      const data = await fetchEmergencyPatients(selectedDate);
+      // // Truyền ngày được chọn vào hàm tải dữ liệu
+      // const data = await fetchEmergencyPatients(selectedDate);
 
-      // Khởi tạo trạng thái chưa tiếp nhận (received=false) cho bệnh nhân
-      const patientsWithReceivedStatus = (data || []).map((patient) => ({
-        ...patient,
-        received: patient.received !== undefined ? patient.received : false,
-      }));
+      // // Khởi tạo trạng thái chưa tiếp nhận (received=false) cho bệnh nhân
+      // const patientsWithReceivedStatus = (data || []).map((patient) => ({
+      //   ...patient,
+      //   received: patient.received !== undefined ? patient.received : false,
+      // }));
 
-      setPatients(patientsWithReceivedStatus);
+      // setPatients(patientsWithReceivedStatus);
       setError(null);
     } catch (err) {
       console.error("Failed to fetch emergency patients:", err);
