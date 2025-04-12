@@ -99,7 +99,7 @@ class FaceDetectService:
             if result is not None:
                 return result
             else:
-                return vector_str
+                return "New User"
 
         return "Can't detect"
 
@@ -114,7 +114,7 @@ class FaceDetectService:
             similarity = 1 - cosine(vector_check, vector)
 
             if similarity >= 0.5:
-                return await self.__get_user_by_userid__(user.user_id)
+                return self.__get_user_by_userid__(user.user_id)
         return None
 
     def __rotate_image__(self, image, angle):
