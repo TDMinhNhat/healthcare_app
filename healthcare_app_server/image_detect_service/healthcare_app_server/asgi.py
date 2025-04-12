@@ -41,7 +41,7 @@ async def disconnect(sid):
 async def emergency_detect(sid, data):
     image_bytes = base64.b64decode(data["image"])
     face_detect = face_detect_service.FaceDetectService(image_bytes)
-    await sio.emit("emergency_detect_response", await face_detect.detect_face(), to = sid)
+    await sio.emit("emergency_detect_response", await face_detect.detect_face())
     pass
 
 @sio.on("send_data_emergency")
