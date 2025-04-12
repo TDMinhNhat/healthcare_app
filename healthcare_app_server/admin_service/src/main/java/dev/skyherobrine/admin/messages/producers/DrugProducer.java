@@ -12,4 +12,9 @@ public class DrugProducer {
     public NewTopic insertDrug() {
         return TopicBuilder.name("insert_drug").build();
     }
+
+    @Bean
+    public NewTopic updateDrug() {
+        return TopicBuilder.name("update_drug").build();
+    }
 }

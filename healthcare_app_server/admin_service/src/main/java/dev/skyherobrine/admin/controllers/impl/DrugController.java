@@ -12,6 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/admin/api/v1/drug")
 @Slf4j
@@ -68,10 +71,48 @@ public class DrugController implements IManagement<DrugDTO,Long> {
         }
     }
 
+    @PutMapping("/{id}")
     @Override
-    public ResponseEntity<Response> update(Long aLong, DrugDTO drugDTO) {
-        return null;
+    public ResponseEntity<Response> update(@PathVariable("id") Long id, @RequestBody DrugDTO drugDTO) {
+        try {
+            log.info("Drug: Call api for updating drug");
+            Drug drug = drugRepository.findById(id).orElse(null);
+            if(drug != null) {
+                drug.setDrugName(drugDTO.getDrugName());
+                drug.setDrugType(drugDTO.getDrugType());
+                drug.setUnit(drugDTO.getUnit());
+                log.info("Drug: sending update drug message to kafka");
+
+                Map<String,Object> dataSend = new HashMap<>();
+                dataSend.put("id", id);
+                dataSend.put("drug", drugDTO);
+                kafkaTemplate.send("update_drug", ObjectParser.convertObjectToJson(dataSend));
+                log.info("Drug: updating drug into database");
+                drugRepository.save(drug);
+                log.info("Drug: drug updated successfully");
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.OK.value(),
+                        "The api update drug is called successfully",
+                        "Drug updated successfully"
+                ));
+            } else {
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.NOT_FOUND.value(),
+                        "The api update drug is called but the drug not found",
+                        "Drug not found"
+                ));
+            }
+        } catch (Exception e) {
+            log.error("Drug: update drug error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api update drug thrown an exception",
+                    e.getMessage()
+            ));
+        }
     }
+
 
     @Override
     public ResponseEntity<Response> delete(Long aLong) {
