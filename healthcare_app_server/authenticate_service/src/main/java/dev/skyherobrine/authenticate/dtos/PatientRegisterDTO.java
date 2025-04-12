@@ -14,7 +14,6 @@ public class PatientRegisterDTO {
     private Boolean sex;
     private String dob;
     private String phone;
-    private String username;
     private String email;
     private String password;
     private String faceEncodeValue;

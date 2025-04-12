@@ -17,4 +17,9 @@ public class PatientProducer {
     public NewTopic updateVerifyEmail() {
         return TopicBuilder.name("update_verify_email").build();
     }
+
+    @Bean
+    public NewTopic updateInfo() {
+        return TopicBuilder.name("update_patient_info").build();
+    }
 }
