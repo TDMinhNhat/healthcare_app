@@ -119,7 +119,7 @@ const EmergencyPage: React.FC = () => {
     patientName: "",
   });
   const [socket, setSocket] = useState<Socket>(
-    io(`ws://${import.meta.env.VITE_HOST}:8081`, {
+    io(`ws://localhost:8081`, {
       path: "/image_detect/socket",
       transports: ["websocket", "polling"],
       reconnection: true,
@@ -136,9 +136,11 @@ const EmergencyPage: React.FC = () => {
     socket.connect();
 
     socket.on("connect", () => {
+      console.log("connected");
       socket.emit("request_patient_in_emergency", "")
 
       socket.on("receive_patient_in_emergency", (data) => { 
+        console.log(data);
         if(data === "New User") {
           //Add new patient with empty object
           setPatients((prevPatients) => [
@@ -167,7 +169,7 @@ const EmergencyPage: React.FC = () => {
 
       })
     })
-  }, [socket])
+  }, [])
 
   const loadEmergencyPatients = async () => {
     try {

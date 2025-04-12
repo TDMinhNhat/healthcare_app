@@ -100,7 +100,7 @@ export default function Emergency() {
 
     getIntervalNumber.current = setInterval(() => {
       (async () => {
-        const photo = await cameraRef.current.takePictureAsync({
+        const photo = await cameraRef.current?.takePictureAsync({
           quality: 0.8, // Chất lượng ảnh 80%
         });
 
