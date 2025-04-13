@@ -119,7 +119,7 @@ const EmergencyPage: React.FC = () => {
     patientName: "",
   });
   const [socket, setSocket] = useState<Socket>(
-    io(`ws://${import.meta.env.VITE_HOST}:8081`, {
+    io(`ws://localhost:8081`, {
       path: "/image_detect/socket",
       transports: ["websocket", "polling"],
       reconnection: true,
@@ -128,33 +128,39 @@ const EmergencyPage: React.FC = () => {
     })
   );
 
-  // useEffect(() => {
-  //   loadEmergencyPatients();
-  // }, [selectedDate]); // Tải lại khi ngày thay đổi
+  useEffect(() => {
+    loadEmergencyPatients();
+  }, [selectedDate]); // Tải lại khi ngày thay đổi
 
   useEffect(() => {
     socket.connect();
 
     socket.on("connect", () => {
-      socket.emit("request_patient_in_emergency")
+      console.log("connected");
+      socket.emit("request_patient_in_emergency", "")
 
       socket.on("receive_patient_in_emergency", (data) => { 
+        console.log(data);
         if(data === "New User") {
           //Add new patient with empty object
           setPatients((prevPatients) => [
             ...prevPatients,
             { } as User,
           ]);
-        } else {
-          // Filter patients contain the userId already before
-          const result = patients.filter((patient) => patient.userId === data.userId);
-          // Check if newPatients is empty or not
-          if(result.length === 0) {
-            // Add new patients to the state
-            setPatients((prevPatients) => [
-              ...prevPatients,
-              data,
-            ]);
+        } else if(data !== undefined) {
+          if(patients.length === 0) {
+            setPatients([data]);
+          } else {
+            // Filter patients contain the userId already before
+            const result = patients.filter((patient) => patient.userId === data.userId);
+            // Check if newPatients is empty or not
+            if(result.length === 0) {
+              // Add new patients to the state
+              setPatients((prevPatients) => [
+                ...prevPatients,
+                data,
+              ]);
+            }
           }
         }
       })

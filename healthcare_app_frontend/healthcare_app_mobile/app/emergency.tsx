@@ -90,14 +90,17 @@ export default function Emergency() {
     socket.on("connect", () => {
       socket.on("emergency_detect_response", (data) => {
         if(data.code === 200 || data === "New User") {
-          socket.emit("send_data_emergency", data.data);
+          socket.emit("send_data_emergency", data === "New User" ? data : data.data);
+
+          // socket.disconnect();
+          // clearInterval(getIntervalNumber.current);
         }
       });
     });
 
     getIntervalNumber.current = setInterval(() => {
       (async () => {
-        const photo = await cameraRef.current.takePictureAsync({
+        const photo = await cameraRef.current?.takePictureAsync({
           quality: 0.8, // Chất lượng ảnh 80%
         });
 
