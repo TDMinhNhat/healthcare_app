@@ -28,6 +28,7 @@ const validationSchema = Yup.object({
   drugName: Yup.string()
     .required("Tên thuốc là bắt buộc")
     .min(2, "Tên thuốc phải có ít nhất 2 ký tự"),
+  drugType: Yup.string().required("Loại thuốc là bắt buộc"),
   unit: Yup.string()
     .required("Đơn vị là bắt buộc")
     .min(1, "Đơn vị không được để trống"),
@@ -44,6 +45,7 @@ const DrugForm: React.FC<DrugFormProps> = ({
   const formik = useFormik({
     initialValues: {
       drugName: "",
+      drugType: "",
       unit: "",
     },
     validationSchema: validationSchema,
@@ -58,6 +60,7 @@ const DrugForm: React.FC<DrugFormProps> = ({
     if (drug && mode === "edit") {
       formik.setValues({
         drugName: drug.drugName,
+        drugType: drug.drugType || "",
         unit: drug.unit,
       });
     } else if (mode === "add") {
@@ -94,6 +97,20 @@ const DrugForm: React.FC<DrugFormProps> = ({
                 helperText={formik.touched.drugName && formik.errors.drugName}
                 fullWidth
                 required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="drugType"
+                label="Loại thuốc"
+                value={formik.values.drugType}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={
+                  formik.touched.drugType && Boolean(formik.errors.drugType)
+                }
+                helperText={formik.touched.drugType && formik.errors.drugType}
+                fullWidth
               />
             </Grid>
             <Grid item xs={12}>

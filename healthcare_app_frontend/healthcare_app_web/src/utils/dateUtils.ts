@@ -83,7 +83,7 @@ export const formatCreatedAtDate = (dateString: string): string => {
 
 export const formatTime = (time: string): string => {
   try {
-    if(time.length <= 1) {
+    if (time.length <= 1) {
       return `0${time}`;
     } else {
       return time;
@@ -92,14 +92,19 @@ export const formatTime = (time: string): string => {
     console.error("Error formatting date:", error);
     return time;
   }
-}
+};
 
 export const formatTimeFromDateTime = (dateTime: Date): string => {
-  return `${formatTime(dateTime.getHours().toString())}:${formatTime(dateTime.getMinutes().toString())}`;
-}
+  return `${formatTime(dateTime.getHours().toString())}:${formatTime(
+    dateTime.getMinutes().toString()
+  )}`;
+};
 
-export const formatTimeFromTimeString = (timeString: string, type: string): any => {
-  if(type === "string") {
+export const formatTimeFromTimeString = (
+  timeString: string,
+  type: string
+): any => {
+  if (type === "string") {
     const time = timeString.split("-");
     return `${formatTime(time[0])}:${formatTime(time[1])}`;
   } else {
@@ -110,4 +115,4 @@ export const formatTimeFromTimeString = (timeString: string, type: string): any 
     date.setSeconds(parseInt(time[2]));
     return date;
   }
-}
+};

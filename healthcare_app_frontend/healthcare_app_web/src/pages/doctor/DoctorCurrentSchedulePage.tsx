@@ -282,6 +282,21 @@ const DoctorCurrentSchedulePage: React.FC = () => {
         newScheduleMap[dateFromAPI].push(workSchedule);
       });
 
+      // Sort theo thời gian ca làm việc bằng cách trực tiếp parse giờ và phút
+      Object.keys(newScheduleMap).forEach((date) => {
+        newScheduleMap[date].sort((a, b) => {
+          // Parse thời gian từ format "HH:mm"
+          const [hoursA, minutesA] = a.shift.start.split(":").map(Number);
+          const [hoursB, minutesB] = b.shift.start.split(":").map(Number);
+
+          // So sánh giờ trước
+          if (hoursA !== hoursB) {
+            return hoursA - hoursB;
+          }
+          // Nếu giờ bằng nhau, so sánh phút
+          return minutesA - minutesB;
+        });
+      });
       setScheduleMap(newScheduleMap);
     } catch (error) {
       console.error("Lỗi khi lấy lịch làm việc:", error);

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   DataGrid,
   GridColDef,
@@ -6,22 +6,85 @@ import {
   GridRenderCellParams,
   GridToolbar,
 } from "@mui/x-data-grid";
-import { Box, IconButton, Paper, Button } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Paper,
+  Button,
+  Snackbar,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
 import { Edit, Delete, Add } from "@mui/icons-material";
 import { Drug } from "../../types/medical";
 import DrugForm from "../../components/admin/DrugForm";
+import {
+  getDrugs,
+  addDrug,
+  updateDrug,
+} from "../../services/admin/drugs_service";
 
 const DrugManagementPage: React.FC = () => {
   // Khai báo state để quản lý dữ liệu và trạng thái UI
-  const [drugs, setDrugs] = useState<Drug[]>(mockDrugs); // Danh sách thuốc
+  const [drugs, setDrugs] = useState<Drug[]>([]); // Danh sách thuốc
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false); // Trạng thái hiển thị form
   const [formMode, setFormMode] = useState<"add" | "edit">("add"); // Chế độ form: thêm mới/chỉnh sửa
   const [selectedDrug, setSelectedDrug] = useState<Drug | null>(null); // Thuốc đang được chọn
+  const [loading, setLoading] = useState<boolean>(true); // Trạng thái loading
+  const [error, setError] = useState<string | null>(null); // Lỗi nếu có
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error" | "info" | "warning";
+  }>({
+    open: false,
+    message: "",
+    severity: "info",
+  });
 
   const csvOptions: GridCsvExportOptions = {
     fileName: "drugs",
     delimiter: ",",
     utf8WithBom: true,
+  };
+
+  // Fetch drugs from API when component mounts
+  useEffect(() => {
+    const fetchDrugs = async () => {
+      try {
+        setLoading(true);
+        const response = await getDrugs();
+        if (response && response.data) {
+          setDrugs(response.data);
+        } else {
+          setError("Không thể tải danh sách thuốc");
+        }
+      } catch (error) {
+        console.error("Error fetching drugs:", error);
+        setError("Đã xảy ra lỗi khi tải danh sách thuốc");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDrugs();
+  }, []);
+
+  // Close snackbar
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  // Show snackbar message
+  const showMessage = (
+    message: string,
+    severity: "success" | "error" | "info" | "warning"
+  ) => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
   };
 
   // Hàm mở form thêm thuốc mới
@@ -44,35 +107,52 @@ const DrugManagementPage: React.FC = () => {
   };
 
   // Hàm xử lý khi submit form (áp dụng cho cả thêm mới và chỉnh sửa)
-  const handleFormSubmit = (drugData: Partial<Drug>) => {
-    if (formMode === "add") {
-      // Xử lý thêm mới thuốc
-      const lastId = Math.max(...drugs.map((drug) => drug.id), 0);
-      const newDrug: Drug = {
-        ...(drugData as Drug),
-        id: lastId + 1,
-      };
-
-      setDrugs([...drugs, newDrug]);
-    } else {
-      // Xử lý chỉnh sửa thông tin thuốc
-      if (selectedDrug) {
-        setDrugs(
-          drugs.map((drug) =>
-            drug.id === selectedDrug.id
-              ? { ...selectedDrug, ...drugData }
-              : drug
-          )
-        );
+  const handleFormSubmit = async (drugData: Partial<Drug>) => {
+    try {
+      if (formMode === "add") {
+        // Xử lý thêm mới thuốc qua API
+        const response = await addDrug(drugData);
+        if (response && response.data) {
+          setDrugs([...drugs, response.data]);
+          showMessage("Thêm thuốc thành công", "success");
+        }
+      } else {
+        // Xử lý chỉnh sửa thông tin thuốc qua API
+        if (selectedDrug) {
+          const response = await updateDrug(
+            selectedDrug.id.toString(),
+            drugData
+          );
+          if (response && response.data) {
+            console.log("Fetched drugs:", response.data);
+            setDrugs(
+              drugs.map((drug) =>
+                drug.id === selectedDrug.id ? response.data : drug
+              )
+            );
+            showMessage("Cập nhật thuốc thành công", "success");
+          }
+        }
       }
+      setIsFormOpen(false);
+    } catch (error) {
+      console.error(
+        `Error ${formMode === "add" ? "adding" : "updating"} drug:`,
+        error
+      );
+      showMessage(
+        `Lỗi khi ${formMode === "add" ? "thêm" : "cập nhật"} thuốc`,
+        "error"
+      );
     }
-    setIsFormOpen(false);
   };
 
-  // Hàm xử lý xóa thuốc
+  // Hàm xử lý xóa thuốc (chưa kết nối API)
   const handleDeleteClick = (id: number) => {
-    // TODO: Thêm xác nhận trước khi xóa
-    setDrugs(drugs.filter((drug) => drug.id !== id));
+    if (window.confirm("Bạn có chắc chắn muốn xóa thuốc này?")) {
+      setDrugs(drugs.filter((drug) => drug.id !== id));
+      showMessage("Xóa thuốc thành công", "success");
+    }
   };
 
   // Định nghĩa cấu trúc các cột cho bảng dữ liệu
@@ -90,6 +170,12 @@ const DrugManagementPage: React.FC = () => {
       flex: 2,
     },
     {
+      field: "drugType",
+      headerName: "Loại thuốc",
+      width: 200,
+      flex: 1.5,
+    },
+    {
       field: "unit",
       headerName: "Đơn vị",
       width: 150,
@@ -103,7 +189,7 @@ const DrugManagementPage: React.FC = () => {
       sortable: false,
       disableExport: true,
       renderCell: (params: GridRenderCellParams) => (
-        <Box sx={{ display: "flex", gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1, height: "100%" }}>
           <IconButton
             size="small"
             color="info"
@@ -141,28 +227,37 @@ const DrugManagementPage: React.FC = () => {
 
       {/* Bảng dữ liệu thuốc */}
       <Paper sx={{ width: "100%" }}>
-        <DataGrid
-          rows={drugs}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 10 },
-            },
-          }}
-          pageSizeOptions={[5, 10, 25, 50, 100]}
-          slots={{ toolbar: GridToolbar }}
-          slotProps={{
-            toolbar: {
-              showQuickFilter: true,
-              quickFilterProps: { debounceMs: 500 },
-              csvOptions: csvOptions,
-            },
-          }}
-          disableRowSelectionOnClick
-          disableColumnFilter={false}
-          disableDensitySelector={false}
-          disableColumnSelector={false}
-        />
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Box sx={{ p: 3, color: "error.main" }}>{error}</Box>
+        ) : (
+          <DataGrid
+            rows={drugs}
+            columns={columns}
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 10 },
+              },
+            }}
+            pageSizeOptions={[5, 10, 25, 50, 100]}
+            slots={{ toolbar: GridToolbar }}
+            slotProps={{
+              toolbar: {
+                showQuickFilter: true,
+                quickFilterProps: { debounceMs: 500 },
+                csvOptions: csvOptions,
+              },
+            }}
+            disableRowSelectionOnClick
+            disableColumnFilter={false}
+            disableDensitySelector={false}
+            disableColumnSelector={false}
+            loading={loading}
+          />
+        )}
       </Paper>
 
       {/* Form thêm mới/chỉnh sửa thuốc */}
@@ -173,62 +268,23 @@ const DrugManagementPage: React.FC = () => {
         drug={selectedDrug}
         mode={formMode}
       />
+
+      {/* Snackbar cho thông báo */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
-
-// Dữ liệu mẫu cho danh sách thuốc
-const mockDrugs: Drug[] = [
-  {
-    id: 1,
-    drugName: "Paracetamol",
-    unit: "viên",
-  },
-  {
-    id: 2,
-    drugName: "Amoxicillin",
-    unit: "viên",
-  },
-  {
-    id: 3,
-    drugName: "Ibuprofen",
-    unit: "viên",
-  },
-  {
-    id: 4,
-    drugName: "Omeprazole",
-    unit: "viên",
-  },
-  {
-    id: 5,
-    drugName: "Vitamin C",
-    unit: "viên",
-  },
-  {
-    id: 6,
-    drugName: "Aspirin",
-    unit: "viên",
-  },
-  {
-    id: 7,
-    drugName: "Atorvastatin",
-    unit: "viên",
-  },
-  {
-    id: 8,
-    drugName: "Simvastatin",
-    unit: "viên",
-  },
-  {
-    id: 9,
-    drugName: "Metformin",
-    unit: "viên",
-  },
-  {
-    id: 10,
-    drugName: "Losartan",
-    unit: "viên",
-  },
-];
 
 export default DrugManagementPage;

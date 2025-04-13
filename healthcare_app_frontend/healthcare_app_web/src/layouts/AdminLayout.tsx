@@ -12,6 +12,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import SettingsIcon from "@mui/icons-material/Settings";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import { useNavigate } from "react-router";
 import { Outlet } from "react-router";
 
@@ -57,7 +58,15 @@ export const AdminLayout: React.FC = () => {
           </ListItemIcon>
           <ListItemText primary="Ca làm việc" />
         </ListItemButton>
+        {/* Quản lí dịch vụ */}
+        <ListItemButton onClick={() => handleNavigation("/admin/diseases")}>
+          <ListItemIcon>
+            <MedicalServicesIcon />
+          </ListItemIcon>
+          <ListItemText primary="Quản lí dịch vụ" />
+        </ListItemButton>
       </List>
+
       <Divider />
       {/* <List>
         <ListItemButton onClick={() => handleNavigation("/admin/settings")}>

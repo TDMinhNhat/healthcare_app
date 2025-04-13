@@ -17,6 +17,7 @@ export const ROUTING = {
   DOCTORS: "doctors",
   DRUG: "drugs",
   SHIFTS: "shifts",
+  DISEASES: "diseases",
 
   // Doctor routes (nested under /doctor)
   APPOINTMENTS: "appointments",

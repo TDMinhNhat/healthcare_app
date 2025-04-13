@@ -3,6 +3,7 @@ import { Appointment } from "./appointment";
 export interface Drug {
   id: number;
   drugName: string;
+  drugType?: string;
   unit: string;
 }
 
