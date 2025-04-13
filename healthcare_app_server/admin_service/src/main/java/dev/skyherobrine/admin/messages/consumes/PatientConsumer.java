@@ -83,4 +83,27 @@ public class PatientConsumer {
             log.error(e.getMessage());
         }
     }
+
+    @KafkaListener(topics = "update_patient_avatar", groupId = "admin_update_patient_avatar")
+    public void updatePatientAvatar(String message) {
+        try {
+            log.info("Patient Consumer: listen the message update patient avatar");
+            log.info("Patient Consumer: {}", message);
+
+            JsonNode node = new ObjectMapper().readTree(message);
+            String getPatientId = node.get("patientId").asText();
+            String getURLAvatar = node.get("image").asText();
+
+            Patient patient = pr.findPatientByUserId(getPatientId).orElse(null);
+            if(patient != null) {
+                patient.setAvatar(getURLAvatar);
+                pr.save(patient);
+                log.info("Patient Consumer: Patient updated successfully");
+            }
+            log.warn("Patient Consumer: Patient was not found");
+        } catch (Exception e) {
+            log.error("Patient Consumer: the listener failed to update the patient");
+            log.error(e.getMessage());
+        }
+    }
 }

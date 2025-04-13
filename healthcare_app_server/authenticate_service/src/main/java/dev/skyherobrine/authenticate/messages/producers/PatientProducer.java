@@ -19,7 +19,12 @@ public class PatientProducer {
     }
 
     @Bean
-    public NewTopic updateInfo() {
+    public NewTopic updatePatientInfo() {
         return TopicBuilder.name("update_patient_info").build();
+    }
+
+    @Bean
+    public NewTopic updatePatientAvatar() {
+        return TopicBuilder.name("update_patient_avatar").build();
     }
 }

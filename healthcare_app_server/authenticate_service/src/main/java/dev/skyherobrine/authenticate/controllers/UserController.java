@@ -6,12 +6,15 @@ import dev.skyherobrine.authenticate.models.mariadb.Patient;
 import dev.skyherobrine.authenticate.models.mariadb.Response;
 import dev.skyherobrine.authenticate.repositories.mariadb.*;
 import dev.skyherobrine.authenticate.repositories.mariadb.*;
+import dev.skyherobrine.authenticate.services.AvatarService;
+import dev.skyherobrine.authenticate.services.UserService;
 import dev.skyherobrine.authenticate.utils.ObjectParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,14 +30,18 @@ public class UserController {
     private final DoctorEducationRepository doctorEducationRepository;
     private final DoctorExperienceRepository doctorExperienceRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final UserService userService;
+    private final AvatarService avatarService;
 
-    public UserController(PatientRepository pr, DoctorRepository dr, DoctorCertificateRepository doctorCertificateRepository, DoctorEducationRepository doctorEducationRepository, DoctorExperienceRepository doctorExperienceRepository, KafkaTemplate<String, String> kafkaTemplate) {
+    public UserController(PatientRepository pr, DoctorRepository dr, DoctorCertificateRepository doctorCertificateRepository, DoctorEducationRepository doctorEducationRepository, DoctorExperienceRepository doctorExperienceRepository, KafkaTemplate<String, String> kafkaTemplate, UserService userService, AvatarService avatarService) {
         this.pr = pr;
         this.dr = dr;
         this.doctorCertificateRepository = doctorCertificateRepository;
         this.doctorEducationRepository = doctorEducationRepository;
         this.doctorExperienceRepository = doctorExperienceRepository;
         this.kafkaTemplate = kafkaTemplate;
+        this.userService = userService;
+        this.avatarService = avatarService;
     }
 
     @GetMapping("/patient")
@@ -103,30 +110,12 @@ public class UserController {
     public ResponseEntity<Response> updatePatientInfo(@PathVariable("userId") String patientId, @RequestBody PatientRegisterDTO patientRegisterDTO) {
         try {
             log.info("User: Call api update the patient");
-            Patient patient = pr.findPatientByUserId(patientId).orElse(null);
+            Patient patient = userService.updatePatientInfo(patientId, patientRegisterDTO);
             if(patient != null) {
-                log.info("User: send the message to kafka");
-                Map<String,Object> dataSend = new HashMap<>() {
-                    {
-                        put("patientId", patientId);
-                        put("data", patientRegisterDTO);
-                    }
-                };
-                kafkaTemplate.send("update_patient_info", ObjectParser.convertObjectToJson(dataSend));
-
-                patient.setFirstName(patientRegisterDTO.getFirstName());
-                patient.setLastName(patientRegisterDTO.getLastName());
-                patient.setPhone(patientRegisterDTO.getPhone());
-                patient.setSex(patientRegisterDTO.getSex());
-                patient.setDob(patientRegisterDTO.getDobLocalDate());
-                patient.setEmail(patientRegisterDTO.getEmail());
-                patient.setPassword(patientRegisterDTO.getPassword());
-
-                Patient result = pr.save(patient);
                 return ResponseEntity.ok(new Response(
                         HttpStatus.OK.value(),
-                        "Update the patient successfully",
-                        result
+                        "Update patient successfully",
+                        patient
                 ));
             }
             return ResponseEntity.ok(new Response(
@@ -140,6 +129,47 @@ public class UserController {
             return ResponseEntity.ok(new Response(
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "The server can't update the patient",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @PutMapping("/patient/avatar")
+    public synchronized ResponseEntity<Response> updatePatientAvatar(
+            @RequestParam("patientId") String patientId,
+            @RequestParam("image") MultipartFile file
+            ) {
+        try {
+            log.info("User: Call api update the patient avatar");
+            Patient patient = pr.findPatientByUserId(patientId).orElse(null);
+            if(patient != null) {
+                String getKeyFileName = avatarService.uploadFile(patientId, file);
+                String getURL = avatarService.getURLFile(getKeyFileName).toExternalForm();
+
+                kafkaTemplate.send("update_patient_avatar", ObjectParser.convertObjectToJson(new HashMap<>(){{
+                    put("patientId", patientId);
+                    put("image", getURL);
+                }}));
+
+                patient.setAvatar(getURL);
+                Patient result = pr.save(patient);
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.OK.value(),
+                        "Update avatar patient successfully!",
+                        result
+                ));
+            }
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.NOT_FOUND.value(),
+                    "Can't find the patient",
+                    null
+            ));
+        } catch (Exception e) {
+            log.error("User: Can't update the patient avatar");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The server can't update the patient avatar",
                     e.getMessage()
             ));
         }
