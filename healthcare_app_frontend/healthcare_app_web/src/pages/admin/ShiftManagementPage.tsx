@@ -4,6 +4,7 @@ import {
   GridColDef,
   GridRenderCellParams,
   GridToolbar,
+  GridCsvExportOptions,
 } from "@mui/x-data-grid";
 import { Box, IconButton, Paper, Button, Chip } from "@mui/material";
 import { Edit, Delete, Add } from "@mui/icons-material";
@@ -16,6 +17,14 @@ const ShiftManagementPage: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false); // Trạng thái hiển thị form
   const [formMode, setFormMode] = useState<"add" | "edit">("add"); // Chế độ form: thêm mới/chỉnh sửa
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null); // Ca làm việc đang được chọn
+
+  // CSV options
+  const csvOptions: GridCsvExportOptions = {
+    fileName: "shifts.csv",
+    delimiter: ",",
+    utf8WithBom: true,
+    fields: ["id", "shift", "start", "end", "status"],
+  };
 
   // Hàm mở form thêm ca làm việc mới
   const handleAddClick = () => {
@@ -166,6 +175,7 @@ const ShiftManagementPage: React.FC = () => {
             toolbar: {
               showQuickFilter: true,
               quickFilterProps: { debounceMs: 500 },
+              csvOptions: csvOptions,
             },
           }}
           disableRowSelectionOnClick

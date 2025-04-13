@@ -29,6 +29,7 @@ import PatientMedicalRecord from "../pages/patient/PatientMedicalRecord";
 import DrugManagementPage from "../pages/admin/DrugManagementPage";
 import DoctorManagementPage from "../pages/admin/DoctorManagementPage";
 import ShiftManagementPage from "../pages/admin/ShiftManagementPage";
+import AdminDashboardPage from "../pages/admin/AdminDashboardPage"; // Import the new admin dashboard
 
 // const ChatPage = lazy(() => import("../pages/ChatPage"));
 
@@ -51,8 +52,8 @@ export const AppRoutes = () => {
 
           {/* Admin routes */}
           <Route path={ROUTING.ADMIN} element={<AdminLayout />}>
-            <Route path={ROUTING.DASHBOARD} element={<div>Dashboard</div>} />
-            <Route index element={<div>Dashboard</div>} />
+            <Route path={ROUTING.DASHBOARD} element={<AdminDashboardPage />} />
+            <Route index element={<AdminDashboardPage />} />
             {/* Add other admin routes as needed */}
             <Route path={ROUTING.USERS} element={<PatientManagementPage />} />
             <Route path={ROUTING.DOCTORS} element={<DoctorManagementPage />} />
