@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   DataGrid,
   GridColDef,
+  GridCsvExportOptions,
   GridRenderCellParams,
   GridToolbar,
 } from "@mui/x-data-grid";
@@ -18,6 +19,12 @@ const DoctorManagementPage: React.FC = () => {
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false); // Trạng thái hiển thị modal chi tiết
   const [formMode, setFormMode] = useState<"add" | "edit">("add"); // Chế độ form: thêm mới/chỉnh sửa
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null); // Bác sĩ đang được chọn
+
+  const csvOptions: GridCsvExportOptions = {
+    fileName: "doctors",
+    delimiter: ",",
+    utf8WithBom: true,
+  };
 
   // Hàm mở form thêm bác sĩ mới
   const handleAddClick = () => {
@@ -189,6 +196,7 @@ const DoctorManagementPage: React.FC = () => {
       width: 150,
       flex: 1,
       sortable: false,
+      disableExport: true,
       renderCell: (params: GridRenderCellParams) => (
         <Box sx={{ display: "flex", gap: 1 }}>
           <IconButton
@@ -250,6 +258,7 @@ const DoctorManagementPage: React.FC = () => {
             toolbar: {
               showQuickFilter: true,
               quickFilterProps: { debounceMs: 500 },
+              csvOptions: csvOptions,
             },
           }}
           disableRowSelectionOnClick
@@ -294,22 +303,28 @@ const mockDoctors: Doctor[] = [
     avatar: "https://i.pravatar.cc/150?img=1",
     status: true,
     specialization: "Nội khoa",
-    experience: {
-      id: 1,
-      compName: "Bệnh viện Bạch Mai",
-      specialization: "Nội khoa",
-      startDate: "2010-01-01",
-      endDate: "2018-12-31",
-      compAddress: {
+    diseases: [
+      { id: 1, name: "Bệnh tim mạch", status: true },
+      { id: 4, name: "Cao huyết áp", status: true },
+    ],
+    experiences: [
+      {
         id: 1,
-        number: "78",
-        street: "Giải Phóng",
-        ward: "Phương Mai",
-        district: "Đống Đa",
-        city: "Hà Nội",
+        compName: "Bệnh viện Bạch Mai",
+        specialization: "Nội khoa",
+        startDate: "2010-01-01",
+        endDate: "2018-12-31",
+        compAddress: {
+          id: 1,
+          number: "78",
+          street: "Giải Phóng",
+          ward: "Phương Mai",
+          district: "Đống Đa",
+          city: "Hà Nội",
+        },
+        description: "Bác sĩ nội trú khoa Nội tại Bệnh viện Bạch Mai",
       },
-      description: "Bác sĩ nội trú khoa Nội tại Bệnh viện Bạch Mai",
-    },
+    ],
     educations: [
       {
         id: 1,
@@ -358,21 +373,27 @@ const mockDoctors: Doctor[] = [
     avatar: "https://i.pravatar.cc/150?img=2",
     status: true,
     specialization: "Nhi khoa",
-    experience: {
-      id: 2,
-      compName: "Bệnh viện Nhi Trung Ương",
-      specialization: "Nhi khoa",
-      startDate: "2012-01-01",
-      compAddress: {
-        id: 3,
-        number: "18",
-        street: "Ngọc Khánh",
-        ward: "Giảng Võ",
-        district: "Ba Đình",
-        city: "Hà Nội",
+    diseases: [
+      { id: 2, name: "Viêm phổi", status: true },
+      { id: 3, name: "Tiểu đường", status: true },
+    ],
+    experiences: [
+      {
+        id: 2,
+        compName: "Bệnh viện Nhi Trung Ương",
+        specialization: "Nhi khoa",
+        startDate: "2012-01-01",
+        compAddress: {
+          id: 3,
+          number: "18",
+          street: "Ngọc Khánh",
+          ward: "Giảng Võ",
+          district: "Ba Đình",
+          city: "Hà Nội",
+        },
+        description: "Bác sĩ chuyên khoa Nhi tại Bệnh viện Nhi Trung Ương",
       },
-      description: "Bác sĩ chuyên khoa Nhi tại Bệnh viện Nhi Trung Ương",
-    },
+    ],
     educations: [
       {
         id: 3,

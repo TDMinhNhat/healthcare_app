@@ -1,6 +1,7 @@
 import { Address } from "./address";
 import { User } from "./user";
 import { Diploma } from "./enums";
+import { Disease } from "./typeDisease";
 
 export interface DoctorExperience {
   id: number;
@@ -34,4 +35,5 @@ export interface Doctor extends User {
   experience: DoctorExperience;
   educations?: DoctorEducation[];
   certificates?: DoctorCertificate[];
+  diseases?: Disease[]; // Array of diseases the doctor can treat
 }

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   DataGrid,
   GridColDef,
+  GridCsvExportOptions,
   GridRenderCellParams,
   GridToolbar,
 } from "@mui/x-data-grid";
@@ -16,6 +17,12 @@ const DrugManagementPage: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false); // Trạng thái hiển thị form
   const [formMode, setFormMode] = useState<"add" | "edit">("add"); // Chế độ form: thêm mới/chỉnh sửa
   const [selectedDrug, setSelectedDrug] = useState<Drug | null>(null); // Thuốc đang được chọn
+
+  const csvOptions: GridCsvExportOptions = {
+    fileName: "drugs",
+    delimiter: ",",
+    utf8WithBom: true,
+  };
 
   // Hàm mở form thêm thuốc mới
   const handleAddClick = () => {
@@ -94,6 +101,7 @@ const DrugManagementPage: React.FC = () => {
       width: 120,
       flex: 0.7,
       sortable: false,
+      disableExport: true,
       renderCell: (params: GridRenderCellParams) => (
         <Box sx={{ display: "flex", gap: 1 }}>
           <IconButton
@@ -147,6 +155,7 @@ const DrugManagementPage: React.FC = () => {
             toolbar: {
               showQuickFilter: true,
               quickFilterProps: { debounceMs: 500 },
+              csvOptions: csvOptions,
             },
           }}
           disableRowSelectionOnClick

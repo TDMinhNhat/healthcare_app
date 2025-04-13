@@ -23,6 +23,7 @@ interface ExperienceFormProps {
   onClose: () => void;
   onSubmit: (data: DoctorExperience) => void;
   experience: DoctorExperience | null;
+  mode?: "add" | "edit"; // Add this optional prop
 }
 
 const ExperienceForm: React.FC<ExperienceFormProps> = ({
@@ -30,6 +31,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
   onClose,
   onSubmit,
   experience,
+  mode = "add", // Default to "add" if not provided
 }) => {
   // State để lưu trữ dữ liệu form
   const [formData, setFormData] = useState<Partial<DoctorExperience>>({
@@ -215,7 +217,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
-        {experience
+        {mode === "edit"
           ? "Chỉnh sửa thông tin kinh nghiệm"
           : "Thêm kinh nghiệm mới"}
       </DialogTitle>

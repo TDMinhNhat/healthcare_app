@@ -14,8 +14,12 @@ import {
   FormHelperText,
   Box,
   Typography,
+  Chip,
+  OutlinedInput,
+  SelectChangeEvent,
 } from "@mui/material";
 import { Doctor } from "../../types/doctor";
+import { Disease } from "../../types/typeDisease";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -28,6 +32,16 @@ interface DoctorFormProps {
   doctor: Doctor | null;
   mode: "add" | "edit";
 }
+
+// Mock disease data for multi-select example
+const mockDiseases: Disease[] = [
+  { id: 1, name: "Bệnh tim mạch", status: true },
+  { id: 2, name: "Viêm phổi", status: true },
+  { id: 3, name: "Tiểu đường", status: true },
+  { id: 4, name: "Cao huyết áp", status: true },
+  { id: 5, name: "Viêm khớp", status: true },
+  { id: 6, name: "Loãng xương", status: true },
+];
 
 const DoctorForm: React.FC<DoctorFormProps> = ({
   open,
@@ -46,6 +60,7 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
     email: "",
     specialization: "",
     status: true,
+    diseases: [],
   });
 
   // State cho validation
@@ -63,6 +78,7 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
         email: doctor.email,
         specialization: doctor.specialization,
         status: doctor.status,
+        diseases: doctor.diseases || [],
       });
     } else {
       // Reset form khi thêm mới
@@ -75,6 +91,7 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
         email: "",
         specialization: "",
         status: true,
+        diseases: [],
       });
     }
     // Reset errors
@@ -115,6 +132,25 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
         });
       }
     }
+  };
+
+  // Handle disease multi-select change
+  const handleDiseaseChange = (event: SelectChangeEvent<number[]>) => {
+    const selectedIds = event.target.value as number[];
+
+    const selectedDiseases = mockDiseases.filter((disease) =>
+      selectedIds.includes(disease.id)
+    );
+
+    setFormData({
+      ...formData,
+      diseases: selectedDiseases,
+    });
+  };
+
+  // Get selected disease IDs for the multi-select value
+  const getSelectedDiseaseIds = () => {
+    return formData.diseases?.map((disease) => disease.id) || [];
   };
 
   // Validate form trước khi submit
@@ -281,6 +317,39 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
                 >
                   <MenuItem value={true}>Đang hoạt động</MenuItem>
                   <MenuItem value={false}>Không hoạt động</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel id="disease-select-label">
+                  Các loại bệnh có thể khám
+                </InputLabel>
+                <Select
+                  labelId="disease-select-label"
+                  multiple
+                  value={getSelectedDiseaseIds()}
+                  onChange={handleDiseaseChange}
+                  input={<OutlinedInput label="Các loại bệnh có thể khám" />}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                      {selected.map((value) => {
+                        const disease = mockDiseases.find(
+                          (d) => d.id === value
+                        );
+                        return disease ? (
+                          <Chip key={value} label={disease.name} />
+                        ) : null;
+                      })}
+                    </Box>
+                  )}
+                >
+                  {mockDiseases.map((disease) => (
+                    <MenuItem key={disease.id} value={disease.id}>
+                      {disease.name}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>

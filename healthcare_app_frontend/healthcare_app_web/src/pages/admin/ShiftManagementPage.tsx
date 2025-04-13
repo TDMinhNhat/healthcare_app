@@ -20,10 +20,9 @@ const ShiftManagementPage: React.FC = () => {
 
   // CSV options
   const csvOptions: GridCsvExportOptions = {
-    fileName: "shifts.csv",
+    fileName: "shifts",
     delimiter: ",",
     utf8WithBom: true,
-    fields: ["id", "shift", "start", "end", "status"],
   };
 
   // Hàm mở form thêm ca làm việc mới
@@ -122,6 +121,7 @@ const ShiftManagementPage: React.FC = () => {
       width: 120,
       flex: 0.7,
       sortable: false,
+      disableExport: true,
       renderCell: (params: GridRenderCellParams) => (
         <Box sx={{ display: "flex", gap: 1 }}>
           <IconButton

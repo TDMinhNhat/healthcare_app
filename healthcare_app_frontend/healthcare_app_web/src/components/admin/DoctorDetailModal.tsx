@@ -21,6 +21,9 @@ import {
   TableRow,
   IconButton,
   Chip,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
 } from "@mui/material";
 import {
   Doctor,
@@ -28,6 +31,7 @@ import {
   DoctorCertificate,
   DoctorExperience,
 } from "../../types/doctor";
+import { Disease } from "../../types/typeDisease";
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -70,6 +74,20 @@ const TabPanel = (props: TabPanelProps) => {
   );
 };
 
+// Mock disease data for selection in disease modal
+const mockDiseases: Disease[] = [
+  { id: 1, name: "Bệnh tim mạch", status: true },
+  { id: 2, name: "Viêm phổi", status: true },
+  { id: 3, name: "Tiểu đường", status: true },
+  { id: 4, name: "Cao huyết áp", status: true },
+  { id: 5, name: "Viêm khớp", status: true },
+  { id: 6, name: "Loãng xương", status: true },
+  { id: 7, name: "Đau lưng mãn tính", status: true },
+  { id: 8, name: "Viêm xoang", status: true },
+  { id: 9, name: "Bệnh dạ dày", status: true },
+  { id: 10, name: "Bệnh về mắt", status: true },
+];
+
 const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
   open,
   onClose,
@@ -80,6 +98,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
   const [isEducationFormOpen, setIsEducationFormOpen] = useState(false);
   const [isCertificateFormOpen, setIsCertificateFormOpen] = useState(false);
   const [isExperienceFormOpen, setIsExperienceFormOpen] = useState(false);
+  const [isDiseaseDialogOpen, setIsDiseaseDialogOpen] = useState(false);
   const [selectedEducation, setSelectedEducation] =
     useState<DoctorEducation | null>(null);
   const [selectedCertificate, setSelectedCertificate] =
@@ -88,12 +107,28 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
     useState<DoctorExperience | null>(null);
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
 
+  // State for managing disease selection
+  const [availableDiseases, setAvailableDiseases] = useState<Disease[]>([]);
+  const [selectedDiseases, setSelectedDiseases] = useState<number[]>([]);
+
   // Reset tab khi modal đóng/mở
   useEffect(() => {
     if (open) {
       setTabValue(0);
     }
   }, [open]);
+
+  // Load available diseases that the doctor doesn't already have
+  useEffect(() => {
+    if (doctor && open) {
+      const doctorDiseaseIds =
+        doctor.diseases?.map((disease) => disease.id) || [];
+      const filteredDiseases = mockDiseases.filter(
+        (disease) => !doctorDiseaseIds.includes(disease.id)
+      );
+      setAvailableDiseases(filteredDiseases);
+    }
+  }, [doctor, open]);
 
   // Xử lý thay đổi tab
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -109,12 +144,6 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
         return "Thạc sĩ";
       case "DOCTOR":
         return "Tiến sĩ";
-      case "ASSOCIATE":
-        return "Cao đẳng";
-      case "SPECIALIST_1":
-        return "Chuyên khoa 1";
-      case "SPECIALIST_2":
-        return "Chuyên khoa 2";
       default:
         return "Không xác định";
     }
@@ -148,10 +177,34 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
     setIsCertificateFormOpen(true);
   };
 
+  // Add handler for adding new experience
+  const handleAddExperience = () => {
+    setFormMode("add");
+    setSelectedExperience(null);
+    setIsExperienceFormOpen(true);
+  };
+
   // Xử lý mở form sửa kinh nghiệm
   const handleEditExperience = (experience: DoctorExperience) => {
+    setFormMode("edit");
     setSelectedExperience(experience);
     setIsExperienceFormOpen(true);
+  };
+
+  // Add handler for deleting experiences
+  const handleDeleteExperience = (id: number) => {
+    if (!doctor?.experiences) return;
+
+    const updatedExperiences = doctor.experiences.filter(
+      (exp) => exp.id !== id
+    );
+
+    const updatedDoctor = {
+      ...doctor,
+      experiences: updatedExperiences,
+    };
+
+    onUpdate(updatedDoctor);
   };
 
   // Xử lý lưu thông tin học vấn
@@ -256,17 +309,93 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
     onUpdate(updatedDoctor);
   };
 
-  // Xử lý lưu thông tin kinh nghiệm
+  // Update the experience save handler to work with multiple experiences
   const handleSaveExperience = (experienceData: DoctorExperience) => {
     if (!doctor) return;
 
+    let updatedExperiences = [...(doctor.experiences || [])];
+
+    if (formMode === "add") {
+      // Create new ID
+      const newId =
+        updatedExperiences.length > 0
+          ? Math.max(...updatedExperiences.map((e) => e.id)) + 1
+          : 1;
+
+      updatedExperiences.push({
+        ...experienceData,
+        id: newId,
+        doctorId: doctor.id,
+      });
+    } else if (selectedExperience) {
+      // Update existing experience
+      updatedExperiences = updatedExperiences.map((exp) =>
+        exp.id === selectedExperience.id
+          ? { ...experienceData, doctorId: doctor.id }
+          : exp
+      );
+    }
+
     const updatedDoctor = {
       ...doctor,
-      experience: experienceData,
+      experiences: updatedExperiences,
     };
 
     onUpdate(updatedDoctor);
     setIsExperienceFormOpen(false);
+  };
+
+  // Add a function to handle adding diseases
+  const handleAddDiseases = () => {
+    setSelectedDiseases([]);
+    setIsDiseaseDialogOpen(true);
+  };
+
+  // Handle disease selection in the dialog
+  const handleDiseaseSelectionChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    diseaseId: number
+  ) => {
+    setSelectedDiseases((prev) =>
+      event.target.checked
+        ? [...prev, diseaseId]
+        : prev.filter((id) => id !== diseaseId)
+    );
+  };
+
+  // Handle saving selected diseases
+  const handleSaveSelectedDiseases = () => {
+    if (!doctor) return;
+
+    const newDiseases = selectedDiseases
+      .map((id) => mockDiseases.find((disease) => disease.id === id))
+      .filter((disease): disease is Disease => disease !== undefined);
+
+    const updatedDiseases = [...(doctor.diseases || []), ...newDiseases];
+
+    const updatedDoctor = {
+      ...doctor,
+      diseases: updatedDiseases,
+    };
+
+    onUpdate(updatedDoctor);
+    setIsDiseaseDialogOpen(false);
+  };
+
+  // Handle removing a disease from the doctor's list
+  const handleRemoveDisease = (id: number) => {
+    if (!doctor?.diseases) return;
+
+    const updatedDiseases = doctor.diseases.filter(
+      (disease) => disease.id !== id
+    );
+
+    const updatedDoctor = {
+      ...doctor,
+      diseases: updatedDiseases,
+    };
+
+    onUpdate(updatedDoctor);
   };
 
   // Render nội dung modal
@@ -324,6 +453,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
             <Tab label="Học vấn" />
             <Tab label="Chứng chỉ" />
             <Tab label="Kinh nghiệm" />
+            <Tab label="Loại bệnh" />
           </Tabs>
 
           <TabPanel value={tabValue} index={0}>
@@ -376,6 +506,33 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                   <Typography variant="body1" gutterBottom>
                     {doctor.specialization}
                   </Typography>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Typography
+                    variant="subtitle2"
+                    color="text.secondary"
+                    gutterBottom
+                  >
+                    Các loại bệnh có thể khám
+                  </Typography>
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                    {doctor.diseases && doctor.diseases.length > 0 ? (
+                      doctor.diseases.map((disease) => (
+                        <Chip
+                          key={disease.id}
+                          label={disease.name}
+                          variant="outlined"
+                          color="primary"
+                          size="small"
+                        />
+                      ))
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        Chưa có thông tin về loại bệnh có thể khám
+                      </Typography>
+                    )}
+                  </Box>
                 </Grid>
               </Grid>
             </Paper>
@@ -513,87 +670,130 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
           </TabPanel>
 
           <TabPanel value={tabValue} index={3}>
-            {doctor.experience ? (
-              <Paper sx={{ p: 2 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    mb: 2,
-                  }}
-                >
-                  <Typography variant="h6">
-                    {doctor.experience.compName}
-                  </Typography>
-                  <IconButton
-                    size="small"
-                    color="primary"
-                    onClick={() => handleEditExperience(doctor.experience)}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                </Box>
+            <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleAddExperience}
+              >
+                Thêm kinh nghiệm
+              </Button>
+            </Box>
 
-                <Divider sx={{ my: 1 }} />
-
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Chuyên môn
-                    </Typography>
-                    <Typography variant="body1" gutterBottom>
-                      {doctor.experience.specialization}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Thời gian
-                    </Typography>
-                    <Typography variant="body1" gutterBottom>
-                      {new Date(doctor.experience.startDate).toLocaleDateString(
-                        "vi-VN"
-                      )}
-                      {doctor.experience.endDate
-                        ? ` - ${new Date(
-                            doctor.experience.endDate
-                          ).toLocaleDateString("vi-VN")}`
-                        : " - Hiện tại"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={12}>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Địa chỉ công ty
-                    </Typography>
-                    <Typography variant="body1" gutterBottom>
-                      {`${doctor.experience.compAddress.number} ${doctor.experience.compAddress.street}, 
-                        ${doctor.experience.compAddress.ward}, 
-                        ${doctor.experience.compAddress.district}, 
-                        ${doctor.experience.compAddress.city}`}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Mô tả công việc
-                    </Typography>
-                    <Typography variant="body1" gutterBottom>
-                      {doctor.experience.description}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Paper>
+            {doctor.experiences && doctor.experiences.length > 0 ? (
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Tên công ty/Cơ sở y tế</TableCell>
+                      <TableCell>Chuyên môn</TableCell>
+                      <TableCell>Thời gian</TableCell>
+                      <TableCell align="right">Thao tác</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {doctor.experiences.map((experience) => (
+                      <TableRow key={experience.id}>
+                        <TableCell>{experience.compName}</TableCell>
+                        <TableCell>{experience.specialization}</TableCell>
+                        <TableCell>
+                          {new Date(experience.startDate).toLocaleDateString(
+                            "vi-VN"
+                          )}
+                          {experience.endDate
+                            ? ` - ${new Date(
+                                experience.endDate
+                              ).toLocaleDateString("vi-VN")}`
+                            : " - Hiện tại"}
+                        </TableCell>
+                        <TableCell align="right">
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => handleEditExperience(experience)}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() =>
+                              handleDeleteExperience(experience.id)
+                            }
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             ) : (
-              <Box sx={{ textAlign: "center", p: 3 }}>
-                <Typography color="text.secondary" gutterBottom>
+              <Paper sx={{ p: 3, textAlign: "center" }}>
+                <Typography color="text.secondary">
                   Chưa có thông tin về kinh nghiệm
                 </Typography>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={() => setIsExperienceFormOpen(true)}
-                >
-                  Thêm kinh nghiệm
-                </Button>
-              </Box>
+              </Paper>
+            )}
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={4}>
+            <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleAddDiseases}
+              >
+                Thêm loại bệnh
+              </Button>
+            </Box>
+
+            {doctor.diseases && doctor.diseases.length > 0 ? (
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Tên loại bệnh</TableCell>
+                      <TableCell>Trạng thái</TableCell>
+                      <TableCell align="right">Thao tác</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {doctor.diseases.map((disease) => (
+                      <TableRow key={disease.id}>
+                        <TableCell>{disease.name}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={
+                              disease.status
+                                ? "Đang hoạt động"
+                                : "Không hoạt động"
+                            }
+                            color={disease.status ? "success" : "error"}
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell align="right">
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => handleRemoveDisease(disease.id)}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Paper sx={{ p: 3, textAlign: "center" }}>
+                <Typography color="text.secondary">
+                  Chưa có thông tin về loại bệnh có thể khám
+                </Typography>
+              </Paper>
             )}
           </TabPanel>
         </Box>
@@ -627,7 +827,55 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
         onClose={() => setIsExperienceFormOpen(false)}
         onSubmit={handleSaveExperience}
         experience={selectedExperience}
+        mode={formMode}
       />
+
+      {/* Dialog for adding diseases */}
+      <Dialog
+        open={isDiseaseDialogOpen}
+        onClose={() => setIsDiseaseDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Thêm loại bệnh</DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 2 }}>
+            {availableDiseases.length > 0 ? (
+              <FormGroup>
+                {availableDiseases.map((disease) => (
+                  <FormControlLabel
+                    key={disease.id}
+                    control={
+                      <Checkbox
+                        checked={selectedDiseases.includes(disease.id)}
+                        onChange={(e) =>
+                          handleDiseaseSelectionChange(e, disease.id)
+                        }
+                      />
+                    }
+                    label={disease.name}
+                  />
+                ))}
+              </FormGroup>
+            ) : (
+              <Typography color="text.secondary" align="center">
+                Không còn loại bệnh nào để thêm
+              </Typography>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsDiseaseDialogOpen(false)}>Hủy</Button>
+          <Button
+            onClick={handleSaveSelectedDiseases}
+            variant="contained"
+            color="primary"
+            disabled={selectedDiseases.length === 0}
+          >
+            Thêm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
 };
