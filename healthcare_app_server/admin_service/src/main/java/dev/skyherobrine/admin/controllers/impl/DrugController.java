@@ -53,12 +53,12 @@ public class DrugController implements IManagement<DrugDTO,Long> {
             log.info("Drug: sending insert drug message to kafka");
             kafkaTemplate.send("insert_drug", ObjectParser.convertObjectToJson(drug));
             log.info("Drug: saving drug into database");
-            drugRepository.save(drug);
+            Drug result = drugRepository.save(drug);
             log.info("Drug: drug saved successfully");
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "The api add drug is called successfully",
-                    "Drug added successfully"
+                    result
             ));
         } catch (Exception e) {
             log.error("Drug: add drug error");
@@ -88,12 +88,12 @@ public class DrugController implements IManagement<DrugDTO,Long> {
                 dataSend.put("drug", drugDTO);
                 kafkaTemplate.send("update_drug", ObjectParser.convertObjectToJson(dataSend));
                 log.info("Drug: updating drug into database");
-                drugRepository.save(drug);
+                Drug result = drugRepository.save(drug);
                 log.info("Drug: drug updated successfully");
                 return ResponseEntity.ok(new Response(
                         HttpStatus.OK.value(),
                         "The api update drug is called successfully",
-                        "Drug updated successfully"
+                        result
                 ));
             } else {
                 return ResponseEntity.ok(new Response(
