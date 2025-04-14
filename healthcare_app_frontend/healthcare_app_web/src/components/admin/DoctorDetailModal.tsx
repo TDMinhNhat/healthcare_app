@@ -24,6 +24,7 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
+  CircularProgress,
 } from "@mui/material";
 import {
   Doctor,
@@ -42,6 +43,7 @@ import { Diploma } from "../../types/enums";
 import EducationForm from "./forms/EducationForm";
 import CertificateForm from "./forms/CertificateForm";
 import ExperienceForm from "./forms/ExperienceForm";
+import { getAllTypeDiseases } from "../../services/admin/typeDisease_service";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -109,6 +111,8 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
 
   // State for managing disease selection
   const [availableDiseases, setAvailableDiseases] = useState<Disease[]>([]);
+  const [loadingDiseases, setLoadingDiseases] = useState<boolean>(false);
+  const [errorDiseases, setErrorDiseases] = useState<string | null>(null);
   const [selectedDiseases, setSelectedDiseases] = useState<number[]>([]);
 
   // Reset tab khi modal đóng/mở
@@ -118,17 +122,39 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
     }
   }, [open]);
 
-  // Load available diseases that the doctor doesn't already have
+  // Load available diseases from API
   useEffect(() => {
-    if (doctor && open) {
-      const doctorDiseaseIds =
-        doctor.diseases?.map((disease) => disease.id) || [];
-      const filteredDiseases = mockDiseases.filter(
-        (disease) => !doctorDiseaseIds.includes(disease.id)
-      );
-      setAvailableDiseases(filteredDiseases);
+    if (open) {
+      const fetchDiseases = async () => {
+        try {
+          setLoadingDiseases(true);
+          setErrorDiseases(null);
+          const response = await getAllTypeDiseases();
+          if (response && response.data) {
+            // If doctor already has a disease, filter it out
+            if (doctor && doctor.typeDisease) {
+              setAvailableDiseases(
+                response.data.filter(
+                  (disease) => disease.id !== doctor.typeDisease?.id
+                )
+              );
+            } else {
+              setAvailableDiseases(response.data);
+            }
+          } else {
+            setErrorDiseases("Không thể tải danh sách loại bệnh");
+          }
+        } catch (error) {
+          console.error("Error fetching diseases:", error);
+          setErrorDiseases("Đã xảy ra lỗi khi tải danh sách loại bệnh");
+        } finally {
+          setLoadingDiseases(false);
+        }
+      };
+
+      fetchDiseases();
     }
-  }, [doctor, open]);
+  }, [open, doctor]);
 
   // Xử lý thay đổi tab
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -363,36 +389,33 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
     );
   };
 
-  // Handle saving selected diseases
+  // Handle saving selected disease - now for a single disease
   const handleSaveSelectedDiseases = () => {
-    if (!doctor) return;
+    if (!doctor || selectedDiseases.length === 0) return;
 
-    const newDiseases = selectedDiseases
-      .map((id) => mockDiseases.find((disease) => disease.id === id))
-      .filter((disease): disease is Disease => disease !== undefined);
+    const selectedId = selectedDiseases[0]; // Take just the first selected disease
+    const selectedDisease = mockDiseases.find(
+      (disease) => disease.id === selectedId
+    );
 
-    const updatedDiseases = [...(doctor.diseases || []), ...newDiseases];
+    if (selectedDisease) {
+      const updatedDoctor = {
+        ...doctor,
+        typeDisease: selectedDisease,
+      };
 
-    const updatedDoctor = {
-      ...doctor,
-      diseases: updatedDiseases,
-    };
-
-    onUpdate(updatedDoctor);
+      onUpdate(updatedDoctor);
+    }
     setIsDiseaseDialogOpen(false);
   };
 
   // Handle removing a disease from the doctor's list
   const handleRemoveDisease = (id: number) => {
-    if (!doctor?.diseases) return;
-
-    const updatedDiseases = doctor.diseases.filter(
-      (disease) => disease.id !== id
-    );
+    if (!doctor?.typeDisease) return;
 
     const updatedDoctor = {
       ...doctor,
-      diseases: updatedDiseases,
+      typeDisease: undefined,
     };
 
     onUpdate(updatedDoctor);
@@ -514,19 +537,17 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                     color="text.secondary"
                     gutterBottom
                   >
-                    Các loại bệnh có thể khám
+                    Loại bệnh có thể khám
                   </Typography>
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                    {doctor.diseases && doctor.diseases.length > 0 ? (
-                      doctor.diseases.map((disease) => (
-                        <Chip
-                          key={disease.id}
-                          label={disease.name}
-                          variant="outlined"
-                          color="primary"
-                          size="small"
-                        />
-                      ))
+                    {doctor.typeDisease ? (
+                      <Chip
+                        key={doctor.typeDisease.id}
+                        label={doctor.typeDisease.name}
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                      />
                     ) : (
                       <Typography variant="body2" color="text.secondary">
                         Chưa có thông tin về loại bệnh có thể khám
@@ -744,12 +765,13 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                 variant="contained"
                 startIcon={<AddIcon />}
                 onClick={handleAddDiseases}
+                disabled={doctor.typeDisease !== undefined} // Disable if already has a disease
               >
                 Thêm loại bệnh
               </Button>
             </Box>
 
-            {doctor.diseases && doctor.diseases.length > 0 ? (
+            {doctor.typeDisease ? (
               <TableContainer component={Paper}>
                 <Table>
                   <TableHead>
@@ -760,31 +782,37 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {doctor.diseases.map((disease) => (
-                      <TableRow key={disease.id}>
-                        <TableCell>{disease.name}</TableCell>
-                        <TableCell>
-                          <Chip
-                            label={
-                              disease.status
-                                ? "Đang hoạt động"
-                                : "Không hoạt động"
-                            }
-                            color={disease.status ? "success" : "error"}
-                            size="small"
-                          />
-                        </TableCell>
-                        <TableCell align="right">
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => handleRemoveDisease(disease.id)}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    <TableRow>
+                      <TableCell>{doctor.typeDisease.name}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={
+                            doctor.typeDisease.status
+                              ? "Đang hoạt động"
+                              : "Không hoạt động"
+                          }
+                          color={
+                            doctor.typeDisease.status ? "success" : "error"
+                          }
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell align="right">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => {
+                            const updatedDoctor = {
+                              ...doctor,
+                              typeDisease: undefined,
+                            };
+                            onUpdate(updatedDoctor);
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -837,10 +865,18 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Thêm loại bệnh</DialogTitle>
+        <DialogTitle>Chọn loại bệnh</DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
-            {availableDiseases.length > 0 ? (
+            {loadingDiseases ? (
+              <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
+                <CircularProgress size={24} />
+              </Box>
+            ) : errorDiseases ? (
+              <Typography color="error" align="center">
+                {errorDiseases}
+              </Typography>
+            ) : availableDiseases.length > 0 ? (
               <FormGroup>
                 {availableDiseases.map((disease) => (
                   <FormControlLabel
@@ -848,9 +884,14 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                     control={
                       <Checkbox
                         checked={selectedDiseases.includes(disease.id)}
-                        onChange={(e) =>
-                          handleDiseaseSelectionChange(e, disease.id)
-                        }
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            // Only allow one selection
+                            setSelectedDiseases([disease.id]);
+                          } else {
+                            setSelectedDiseases([]);
+                          }
+                        }}
                       />
                     }
                     label={disease.name}
@@ -859,7 +900,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
               </FormGroup>
             ) : (
               <Typography color="text.secondary" align="center">
-                Không còn loại bệnh nào để thêm
+                Không có loại bệnh nào để chọn
               </Typography>
             )}
           </Box>
@@ -872,7 +913,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
             color="primary"
             disabled={selectedDiseases.length === 0}
           >
-            Thêm
+            Chọn
           </Button>
         </DialogActions>
       </Dialog>

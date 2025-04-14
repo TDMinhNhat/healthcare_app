@@ -1,5 +1,6 @@
 import { Address } from "./address";
 import { AuthenticateProvider } from "./auth";
+import { Disease } from "./typeDisease";
 
 export interface User {
   id: number;
@@ -16,6 +17,7 @@ export interface User {
   password: string;
   authProvider?: AuthenticateProvider;
   status: boolean;
+  typeDisease?: Disease; // Array of Disease objects
 }
 
 // Helper function to calculate age

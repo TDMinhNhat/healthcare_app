@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   DataGrid,
   GridColDef,
@@ -6,24 +6,87 @@ import {
   GridRenderCellParams,
   GridToolbar,
 } from "@mui/x-data-grid";
-import { Box, Chip, Avatar, IconButton, Paper, Button } from "@mui/material";
+import {
+  Box,
+  Chip,
+  Avatar,
+  IconButton,
+  Paper,
+  Button,
+  Snackbar,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
 import { Edit, Delete, Add, Visibility } from "@mui/icons-material";
 import { Doctor } from "../../types/doctor";
 import DoctorForm from "../../components/admin/DoctorForm";
 import DoctorDetailModal from "../../components/admin/DoctorDetailModal";
+import { getAllDoctors, addDoctor } from "../../services/admin/doctor_service";
+import { format } from "date-fns";
 
 const DoctorManagementPage: React.FC = () => {
   // Khai báo state để quản lý dữ liệu và trạng thái UI
-  const [doctors, setDoctors] = useState<Doctor[]>(mockDoctors); // Danh sách bác sĩ
+  const [doctors, setDoctors] = useState<Doctor[]>([]); // Danh sách bác sĩ
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false); // Trạng thái hiển thị form
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false); // Trạng thái hiển thị modal chi tiết
   const [formMode, setFormMode] = useState<"add" | "edit">("add"); // Chế độ form: thêm mới/chỉnh sửa
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null); // Bác sĩ đang được chọn
+  const [loading, setLoading] = useState<boolean>(true); // Trạng thái loading
+  const [error, setError] = useState<string | null>(null); // Lỗi nếu có
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error" | "info" | "warning";
+  }>({
+    open: false,
+    message: "",
+    severity: "info",
+  });
+  const [submitting, setSubmitting] = useState<boolean>(false); // New state for form submission loading
 
   const csvOptions: GridCsvExportOptions = {
     fileName: "doctors",
     delimiter: ",",
     utf8WithBom: true,
+  };
+
+  // Fetch doctors from API when component mounts
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        setLoading(true);
+        const response = await getAllDoctors();
+        if (response && response.data) {
+          setDoctors(response.data);
+        } else {
+          setError("Không thể tải danh sách bác sĩ");
+        }
+      } catch (error) {
+        console.error("Error fetching doctors:", error);
+        setError("Đã xảy ra lỗi khi tải danh sách bác sĩ");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
+
+  // Close snackbar
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  // Show snackbar message
+  const showMessage = (
+    message: string,
+    severity: "success" | "error" | "info" | "warning"
+  ) => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
   };
 
   // Hàm mở form thêm bác sĩ mới
@@ -38,6 +101,7 @@ const DoctorManagementPage: React.FC = () => {
     setFormMode("edit");
     setSelectedDoctor(doctor);
     setIsFormOpen(true);
+    showMessage("Chức năng chỉnh sửa bác sĩ chưa được hỗ trợ", "info");
   };
 
   // Hàm mở modal xem chi tiết bác sĩ
@@ -57,54 +121,70 @@ const DoctorManagementPage: React.FC = () => {
   };
 
   // Hàm xử lý khi submit form (áp dụng cho cả thêm mới và chỉnh sửa)
-  const handleFormSubmit = (doctorData: Partial<Doctor>) => {
-    if (formMode === "add") {
-      // Xử lý thêm mới bác sĩ
-      const lastId = Math.max(...doctors.map((doctor) => doctor.id), 0);
-      const lastUserId =
-        doctors.length > 0
-          ? parseInt(doctors[doctors.length - 1].userId.replace("BS", ""))
-          : 0;
+  const handleFormSubmit = async (doctorData: Partial<Doctor>) => {
+    try {
+      setSubmitting(true); // Start loading
+      if (formMode === "add") {
+        // Format dob to dd-MM-yyyy
+        let formattedDob = "";
+        if (doctorData.dob) {
+          const dobDate = new Date(doctorData.dob);
+          formattedDob = format(dobDate, "dd-MM-yyyy");
+        }
 
-      // Tạo ID và mã bác sĩ mới
-      const newId = lastId + 1;
-      const newUserId = `BS${String(lastUserId + 1).padStart(3, "0")}`;
+        // Extract only disease name if typeDisease exists
+        let diseaseInfo = null;
+        if (doctorData.typeDisease) {
+          diseaseInfo = doctorData.typeDisease.name;
+        }
 
-      const doctorToAdd: Doctor = {
-        ...(doctorData as Doctor),
-        id: newId,
-        userId: newUserId,
-        password: "defaultpassword",
-      };
+        // Chuẩn bị dữ liệu theo cấu trúc API
+        const doctorToAdd = {
+          ...doctorData,
+          password: "123456789", // Default password
+          dob: formattedDob,
+          typeDisease: diseaseInfo, // Send only disease name
+          certificates: [], // Đảm bảo các mảng là rỗng
+          educations: [],
+          experiences: [],
+        };
 
-      setDoctors([...doctors, doctorToAdd]);
-    } else {
-      // Xử lý chỉnh sửa thông tin bác sĩ
-      if (selectedDoctor) {
-        setDoctors(
-          doctors.map((doctor) =>
-            doctor.id === selectedDoctor.id
-              ? { ...selectedDoctor, ...doctorData }
-              : doctor
-          )
-        );
+        // Log data for debugging
+        console.log("Sending doctor data:", JSON.stringify(doctorToAdd));
+
+        // Gọi API thêm bác sĩ
+        const response = await addDoctor(doctorToAdd);
+        console.log("Response from addDoctor:", response);
+        if (response && response.data) {
+          // Cập nhật state với bác sĩ mới được thêm vào
+          setDoctors([...doctors, response.data]);
+          showMessage("Thêm bác sĩ thành công", "success");
+        }
+      } else {
+        showMessage("Chức năng cập nhật bác sĩ chưa được hỗ trợ", "info");
       }
+      setIsFormOpen(false);
+    } catch (error) {
+      console.error("Error submitting doctor data:", error);
+      showMessage(
+        `Lỗi khi ${formMode === "add" ? "thêm" : "cập nhật"} bác sĩ`,
+        "error"
+      );
+    } finally {
+      setSubmitting(false); // End loading regardless of outcome
     }
-    setIsFormOpen(false);
   };
 
   // Hàm xử lý xóa bác sĩ
   const handleDeleteClick = (id: number) => {
-    // TODO: Cần thêm xác nhận trước khi xóa
-    setDoctors(doctors.filter((doctor) => doctor.id !== id));
+    showMessage("Chức năng xóa bác sĩ chưa được hỗ trợ", "info");
   };
 
   // Hàm xử lý cập nhật thông tin chi tiết của bác sĩ (học vấn, chứng chỉ, kinh nghiệm)
   const handleUpdateDoctorDetail = (updatedDoctor: Doctor) => {
-    setDoctors(
-      doctors.map((doctor) =>
-        doctor.id === updatedDoctor.id ? updatedDoctor : doctor
-      )
+    showMessage(
+      "Chức năng cập nhật thông tin chi tiết bác sĩ chưa được hỗ trợ",
+      "info"
     );
   };
 
@@ -244,28 +324,37 @@ const DoctorManagementPage: React.FC = () => {
 
       {/* Bảng dữ liệu bác sĩ */}
       <Paper sx={{ width: "100%" }}>
-        <DataGrid
-          rows={doctors}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 10 },
-            },
-          }}
-          pageSizeOptions={[5, 10, 25, 50, 100]}
-          slots={{ toolbar: GridToolbar }}
-          slotProps={{
-            toolbar: {
-              showQuickFilter: true,
-              quickFilterProps: { debounceMs: 500 },
-              csvOptions: csvOptions,
-            },
-          }}
-          disableRowSelectionOnClick
-          disableColumnFilter={false}
-          disableDensitySelector={false}
-          disableColumnSelector={false}
-        />
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Box sx={{ p: 3, color: "error.main" }}>{error}</Box>
+        ) : (
+          <DataGrid
+            rows={doctors}
+            columns={columns}
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 10 },
+              },
+            }}
+            pageSizeOptions={[5, 10, 25, 50, 100]}
+            slots={{ toolbar: GridToolbar }}
+            slotProps={{
+              toolbar: {
+                showQuickFilter: true,
+                quickFilterProps: { debounceMs: 500 },
+                csvOptions: csvOptions,
+              },
+            }}
+            disableRowSelectionOnClick
+            disableColumnFilter={false}
+            disableDensitySelector={false}
+            disableColumnSelector={false}
+            loading={loading}
+          />
+        )}
       </Paper>
 
       {/* Form thêm mới/chỉnh sửa bác sĩ */}
@@ -275,6 +364,7 @@ const DoctorManagementPage: React.FC = () => {
         onSubmit={handleFormSubmit}
         doctor={selectedDoctor}
         mode={formMode}
+        isSubmitting={submitting} // Pass loading state to form
       />
 
       {/* Modal xem chi tiết bác sĩ */}
@@ -284,127 +374,23 @@ const DoctorManagementPage: React.FC = () => {
         doctor={selectedDoctor}
         onUpdate={handleUpdateDoctorDetail}
       />
+
+      {/* Snackbar cho thông báo */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
-
-// Dữ liệu mẫu cho danh sách bác sĩ
-const mockDoctors: Doctor[] = [
-  {
-    id: 1,
-    userId: "BS001",
-    firstName: "Nguyễn",
-    lastName: "Văn A",
-    sex: true,
-    dob: "1980-05-15",
-    phone: "0987654321",
-    email: "nguyenvana@example.com",
-    password: "hashedpassword",
-    avatar: "https://i.pravatar.cc/150?img=1",
-    status: true,
-    specialization: "Nội khoa",
-    diseases: [
-      { id: 1, name: "Bệnh tim mạch", status: true },
-      { id: 4, name: "Cao huyết áp", status: true },
-    ],
-    experiences: [
-      {
-        id: 1,
-        compName: "Bệnh viện Bạch Mai",
-        specialization: "Nội khoa",
-        startDate: "2010-01-01",
-        endDate: "2018-12-31",
-        compAddress: {
-          id: 1,
-          number: "78",
-          street: "Giải Phóng",
-          ward: "Phương Mai",
-          district: "Đống Đa",
-          city: "Hà Nội",
-        },
-        description: "Bác sĩ nội trú khoa Nội tại Bệnh viện Bạch Mai",
-      },
-    ],
-    educations: [
-      {
-        id: 1,
-        doctorId: 1,
-        schoolName: "Đại học Y Hà Nội",
-        joinedDate: "2000-09-01",
-        graduateDate: "2006-06-30",
-        diploma: "BACHELOR",
-      },
-      {
-        id: 2,
-        doctorId: 1,
-        schoolName: "Đại học Y Hà Nội",
-        joinedDate: "2007-09-01",
-        graduateDate: "2009-06-30",
-        diploma: "MASTER",
-      },
-    ],
-    certificates: [
-      {
-        id: 1,
-        doctorId: 1,
-        certName: "Chứng chỉ hành nghề khám chữa bệnh",
-        issueDate: "2007-01-15",
-        address: {
-          id: 2,
-          number: "138",
-          street: "Giảng Võ",
-          ward: "Ba Đình",
-          district: "Ba Đình",
-          city: "Hà Nội",
-        },
-      },
-    ],
-  },
-  {
-    id: 2,
-    userId: "BS002",
-    firstName: "Trần",
-    lastName: "Thị B",
-    sex: false,
-    dob: "1985-08-22",
-    phone: "0912345678",
-    email: "tranthib@example.com",
-    password: "hashedpassword",
-    avatar: "https://i.pravatar.cc/150?img=2",
-    status: true,
-    specialization: "Nhi khoa",
-    diseases: [
-      { id: 2, name: "Viêm phổi", status: true },
-      { id: 3, name: "Tiểu đường", status: true },
-    ],
-    experiences: [
-      {
-        id: 2,
-        compName: "Bệnh viện Nhi Trung Ương",
-        specialization: "Nhi khoa",
-        startDate: "2012-01-01",
-        compAddress: {
-          id: 3,
-          number: "18",
-          street: "Ngọc Khánh",
-          ward: "Giảng Võ",
-          district: "Ba Đình",
-          city: "Hà Nội",
-        },
-        description: "Bác sĩ chuyên khoa Nhi tại Bệnh viện Nhi Trung Ương",
-      },
-    ],
-    educations: [
-      {
-        id: 3,
-        doctorId: 2,
-        schoolName: "Đại học Y Dược TP.HCM",
-        joinedDate: "2004-09-01",
-        graduateDate: "2010-06-30",
-        diploma: "BACHELOR",
-      },
-    ],
-  },
-];
 
 export default DoctorManagementPage;

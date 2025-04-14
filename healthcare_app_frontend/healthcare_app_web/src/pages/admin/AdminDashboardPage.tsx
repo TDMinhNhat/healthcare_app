@@ -440,7 +440,7 @@ const AdminDashboardPage: React.FC = () => {
               {revenueChartConfig.title}
             </Typography>
             <Box sx={{ height: 350, width: "100%" }}>
-              <BarChart
+              <LineChart
                 xAxis={[
                   {
                     scaleType: "band",
@@ -457,15 +457,6 @@ const AdminDashboardPage: React.FC = () => {
                 ]}
                 height={320}
                 width={500}
-                yAxis={
-                  [
-                    //   {
-                    //     valueFormatter: (value) =>
-                    //       (value / 1000000).toFixed(0) + " tr",
-                    //     tickNumber: 5,
-                    //   },
-                  ]
-                }
                 margin={{ left: 100, right: 20 }}
                 tooltip={{
                   trigger: "item",
@@ -486,7 +477,7 @@ const AdminDashboardPage: React.FC = () => {
               {patientsChartConfig.title}
             </Typography>
             <Box sx={{ height: 350, width: "100%" }}>
-              <BarChart
+              <LineChart
                 xAxis={[
                   {
                     scaleType: "band",
@@ -503,7 +494,6 @@ const AdminDashboardPage: React.FC = () => {
                 ]}
                 height={320}
                 width={500}
-                yAxis={[{}]}
                 margin={{ left: 70, right: 20 }}
                 tooltip={{ trigger: "item" }}
                 slotProps={{
