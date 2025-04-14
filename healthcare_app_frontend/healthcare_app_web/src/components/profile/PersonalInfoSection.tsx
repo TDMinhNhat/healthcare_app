@@ -35,15 +35,15 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   hideEditButton = false,
 }) => {
   const { t } = useTranslation();
-  useEffect(() => {
-    console.log("firstName:", firstName || "undefined");
-    console.log("lastName:", lastName || "undefined");
-    console.log("email:", email || "undefined");
-    console.log("phone:", phone || "undefined");
-    console.log("dob:", dob || "undefined");
-    console.log("avatar:", avatar || "undefined");
-    console.log("sex: ", sex || "undefined");
-  }, [firstName, lastName, email, phone, dob, avatar]);
+  // useEffect(() => {
+  //   console.log("firstName:", firstName || "undefined");
+  //   console.log("lastName:", lastName || "undefined");
+  //   console.log("email:", email || "undefined");
+  //   console.log("phone:", phone || "undefined");
+  //   console.log("dob:", dob || "undefined");
+  //   console.log("avatar:", avatar || "undefined");
+  //   console.log("sex: ", sex || "undefined");
+  // }, [firstName, lastName, email, phone, dob, avatar]);
   // console.log("sex:", sex || "undefined");
 
   // Format the address into a readable string
@@ -118,7 +118,7 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
             <WcIcon color="primary" sx={{ mr: 1 }} />
             <Typography variant="body1">
-              {typeof sex !== "undefined" ? (sex ? "Nam" : "Nữ") : ""}
+              {typeof sex !== "undefined" ? (sex ? "Nữ" : "Nam") : ""}
             </Typography>
           </Box>
         </Grid>

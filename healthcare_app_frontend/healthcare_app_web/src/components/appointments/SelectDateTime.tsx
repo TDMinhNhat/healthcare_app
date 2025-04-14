@@ -22,6 +22,7 @@ import {
   formatTimeFromTimeString,
 } from "../../utils/dateUtils";
 import { getWorkScheduleByDoctorAndExactDate } from "../../services/authenticate/workSchedule_service";
+import DoctorDetails from "./DoctorDetails"; // Import DoctorDetails component
 
 /**
  * Props cho component SelectDateTime
@@ -35,11 +36,7 @@ interface SelectDateTimeProps {
   // onBack: () => void;
 }
 
-// Định nghĩa các ca làm việc cố định của bác sĩ
-const SHIFTS = {
-  CA1: { id: 1, shift: "Ca 1", start: "07:00", end: "11:00" }, // Ca sáng: 8h-12h
-  CA2: { id: 2, shift: "Ca 2", start: "13:00", end: "17:00" }, // Ca chiều: 13h-17h
-};
+// Loại bỏ định nghĩa SHIFTS cố định
 
 /**
  * Component cho phép bệnh nhân chọn ngày và ca khám
@@ -94,7 +91,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
 
   /**
    * Hàm gọi API lấy danh sách ca làm việc của bác sĩ theo ngày
-   * Nhóm các khung giờ thành các ca (sáng/chiều) và kiểm tra tính khả dụng
+   * Đã sửa để xử lý linh hoạt các ca làm việc theo dữ liệu từ API
    * @param date - Ngày cần kiểm tra lịch
    */
   const fetchAvailableShifts = async (date: Date) => {
@@ -131,34 +128,24 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
         return;
       }
 
-      // Nhóm các khung giờ theo ca (sáng/chiều)
-      // Kiểm tra xem ca 1 (8h-12h) có slot nào còn trống không
-      const shift1Available = result.some((item) => {
-        const start = formatTimeFromTimeString(item.shift.start, "date");
-        const hourStart = start.getHours();
-        item.isAvailable = true;
-        return hourStart >= 7 && hourStart < 11 && item.isAvailable;
+      // Tạo map để nhóm các lịch làm việc theo shift id
+      const shiftsMap = new Map();
+
+      // Nhóm các lịch làm việc theo shift id
+      filteredResult.forEach((item: any) => {
+        if (!shiftsMap.has(item.shift.id)) {
+          shiftsMap.set(item.shift.id, {
+            id: item.shift.id,
+            shift: `Ca ${item.shift.id}`,
+            start: item.shift.start,
+            end: item.shift.end,
+            isAvailable: true,
+          });
+        }
       });
 
-      // Kiểm tra xem ca 2 (13h-17h) có slot nào còn trống không
-      const shift2Available = result.some((item) => {
-        const start = formatTimeFromTimeString(item.shift.start, "date");
-        const hourStart = start.getHours();
-        item.isAvailable = true;
-        return hourStart >= 13 && hourStart < 17 && item.isAvailable;
-      });
-
-      // Tạo mảng các ca làm việc với thông tin khả dụng
-      const shifts = [
-        {
-          ...SHIFTS.CA1,
-          isAvailable: shift1Available,
-        },
-        {
-          ...SHIFTS.CA2,
-          isAvailable: shift2Available,
-        },
-      ];
+      // Chuyển map thành mảng để hiển thị
+      const shifts = Array.from(shiftsMap.values());
 
       setAvailableShifts(shifts);
     } catch (err) {
@@ -186,15 +173,11 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
    */
   const handleShiftSelect = (shift: string, shiftInfo: any) => {
     // Tìm và lưu thông tin lịch làm việc tương ứng với ca được chọn
-    if (shift === "Ca 1") {
-      setWorkScheduleTarget(
-        workSchedules.find((item: object) => item.shift.id === 1)
-      );
-    } else {
-      setWorkScheduleTarget(
-        workSchedules.find((item: object) => item.shift.id === 2)
-      );
-    }
+    const shiftId = shiftInfo.id;
+    setWorkScheduleTarget(
+      workSchedules.find((item: any) => item.shift.id === shiftId)
+    );
+
     setSelectedShift(shift);
     setSelectedShiftInfo(shiftInfo);
   };
@@ -238,13 +221,10 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
     if (!selectedDate || !isToday(selectedDate)) return false;
 
     const now = new Date();
-    // Vô hiệu hóa ca sáng nếu đã quá 12h trưa
-    if (shift.id === 1 && now.getHours() > 11) {
-      return true;
-    }
+    const shiftEndHour = parseInt(shift.end.split(":")[0]);
 
-    // Vô hiệu hóa ca chiều nếu đã quá 17h chiều
-    if (shift.id === 2 && now.getHours() > 17) {
+    // Vô hiệu hóa ca nếu đã qua giờ kết thúc
+    if (now.getHours() >= shiftEndHour) {
       return true;
     }
 
@@ -258,15 +238,9 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
         {t("patient.appointments.select_date_time")}
       </Typography>
 
-      {/* Thông tin bác sĩ đã chọn */}
+      {/* Include DoctorDetails component */}
       <Box sx={{ mb: 3 }}>
-        <Typography variant="subtitle1">
-          {t("patient.appointments.doctor")}: {doctor.firstName}{" "}
-          {doctor.lastName}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {doctor.specialization}
-        </Typography>
+        <DoctorDetails doctor={doctor} />
       </Box>
 
       {/* Bố cục lưới: bên trái là lịch, bên phải là danh sách ca khám */}
@@ -352,7 +326,9 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
                             </Typography>
                             {/* Thời gian ca khám */}
                             <Typography variant="body2" color="text.secondary">
-                              Thời gian: {shift.start} - {shift.end}
+                              Thời gian:{" "}
+                              {formatTimeFromTimeString(shift.start, "string")}{" "}
+                              - {formatTimeFromTimeString(shift.end, "string")}
                             </Typography>
                           </CardContent>
                         </Card>

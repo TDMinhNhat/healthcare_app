@@ -88,9 +88,9 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
   return (
     <Box>
       {/* Tiêu đề phần thông tin bác sĩ */}
-      <Typography variant="h6" gutterBottom>
+      {/* <Typography variant="h6" gutterBottom>
         {t("patient.appointments.doctor_details")}
-      </Typography>
+      </Typography> */}
 
       {/* Hiển thị thông báo lỗi nếu có */}
       {error && (
@@ -106,7 +106,12 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
           <Grid item xs={12} sm={3}>
             <CardMedia
               component="img"
-              sx={{ width: "100%", borderRadius: 1 }}
+              sx={{
+                width: "80%",
+                maxWidth: "120px",
+                borderRadius: 1,
+                margin: "0 auto",
+              }}
               image={
                 infoBasic.avatar || "https://picsum.photos/120/160?random=1" // Ảnh mặc định nếu không có avatar
               }
@@ -123,10 +128,7 @@ const DoctorDetails: React.FC<DoctorDetailsProps> = ({ doctor }) => {
               color="primary"
               sx={{ mt: 1, mb: 1 }}
             />
-            <Typography variant="body1" color="text.secondary">
-              {t("doctor.profile.experience")}: {details.experience}{" "}
-              {t("doctor.profile.years")}
-            </Typography>
+            {/* Đã bỏ phần hiển thị số năm kinh nghiệm */}
             <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
               <Rating value={details.rating || 0} precision={0.1} readOnly />
               <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>

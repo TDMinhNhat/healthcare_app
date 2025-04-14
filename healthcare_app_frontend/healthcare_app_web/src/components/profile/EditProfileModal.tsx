@@ -320,8 +320,8 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                         onBlur={handleBlur}
                         label="Giới tính"
                       >
-                        <MenuItem value={true}>Nam</MenuItem>
-                        <MenuItem value={false}>Nữ</MenuItem>
+                        <MenuItem value={false}>Nam</MenuItem>
+                        <MenuItem value={true}>Nữ</MenuItem>
                       </Field>
                       {touched.sex && errors.sex && (
                         <FormHelperText>{errors.sex}</FormHelperText>
