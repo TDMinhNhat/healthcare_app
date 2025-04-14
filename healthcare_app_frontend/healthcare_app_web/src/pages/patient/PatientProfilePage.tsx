@@ -1,38 +1,41 @@
+// Import các thư viện React và các component UI
 import React, { useState, useEffect } from "react";
 import { Container, Grid, Box, IconButton, Alert } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 
+// Import các component dùng cho hồ sơ
 import { PersonalInfoSection } from "../../components/profile/PersonalInfoSection";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
 import AvatarUploadModal from "../../components/profile/AvatarUploadModal";
 import { useTranslation } from "react-i18next";
+// Import services và Redux hooks
 import { getPatientInfo } from "../../services/authenticate/user_service";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { setUser } from "../../stores/slices/user.slice";
 
+// Component trang hồ sơ bệnh nhân
 const PatientProfilePage: React.FC = () => {
-  const { t } = useTranslation();
-  const [patientData, setPatientData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
-  const user = useSelector((state: any) => state.user.user);
+  const { t } = useTranslation(); // Hook đa ngôn ngữ
+  // Khai báo các state cần thiết
+  const [patientData, setPatientData] = useState<any>(null); // Lưu thông tin bệnh nhân
+  const [loading, setLoading] = useState(true); // Trạng thái đang tải
+  const [error, setError] = useState<string | null>(null); // Lưu thông báo lỗi nếu có
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Trạng thái hiển thị modal chỉnh sửa
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false); // Trạng thái hiển thị modal tải lên avatar
+  const user = useSelector((state: any) => state.user.user); // Lấy thông tin người dùng từ Redux
+  const dispatch = useDispatch(); // Hook để gửi action đến Redux
 
   useEffect(() => {
-    // Only fetch patient data for display
+    // Hàm chỉ lấy dữ liệu bệnh nhân để hiển thị
     const fetchPatientData = async () => {
       setLoading(true);
       try {
-        // Fetch patient data using the userId - in a real app, you might get this from authentication
-        // if (!user?.userId) {
-        //   setError("User not found");
-        //   setLoading(false);
-        //   return;
-        // }
+        // Gọi API để lấy thông tin bệnh nhân dựa vào userId
         const response = await getPatientInfo(user.userId);
 
         if (response.data && response.data.code === 200) {
           setPatientData(response.data.data);
+          // Không cập nhật Redux state ở đây theo yêu cầu
         } else {
           setError("Failed to retrieve patient data");
         }
@@ -47,57 +50,75 @@ const PatientProfilePage: React.FC = () => {
     fetchPatientData();
   }, [user.userId]);
 
-  // Modal control functions - no API calls
+  // Các hàm điều khiển modal - không gọi API
+  // Hàm mở modal chỉnh sửa
   const handleOpenEditModal = () => {
     setIsEditModalOpen(true);
   };
 
+  // Hàm đóng modal chỉnh sửa
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
   };
 
+  // Hàm mở modal tải lên avatar
   const handleOpenAvatarModal = () => {
     setIsAvatarModalOpen(true);
   };
 
+  // Hàm đóng modal tải lên avatar
   const handleCloseAvatarModal = () => {
     setIsAvatarModalOpen(false);
   };
 
-  // Only updates local state for UI preview
-  // In a real application, this would make an API call to update the profile
+  // Cập nhật state local và đảm bảo Redux state cũng được cập nhật
   const handleSaveProfile = (updatedData: any) => {
+    // Cập nhật state local để hiển thị ngay lập tức
     const updatedPatientData = {
       ...patientData,
       ...updatedData,
       address: updatedData.address || patientData.address || null,
     };
     setPatientData(updatedPatientData);
-    console.log("Profile data updated locally (no API call):", updatedData);
+
+    // Phần cập nhật Redux state đã bị comment lại
+    // const updatedUser = {
+    //   ...user,
+    //   ...updatedData,
+    // };
+    // dispatch(setUser(updatedUser));
+
+    // Phần cập nhật localStorage đã bị comment lại
+    // localStorage.setItem("user", JSON.stringify(updatedUser));
   };
 
-  // Only updates local state for UI preview
-  // In a real application, this would make an API call to update the avatar
+  // Chỉ cập nhật state local để xem trước UI
+  // Trong ứng dụng thực tế, hàm này sẽ gọi API để cập nhật avatar
   const handleSaveAvatar = (newAvatar: string) => {
     setPatientData({ ...patientData, avatar: newAvatar });
     console.log("Avatar updated locally (no API call):", newAvatar);
   };
 
+  // Hiển thị trạng thái đang tải
   if (loading) {
     return <div>{t("common.loading")}</div>;
   }
 
+  // Hiển thị thông báo lỗi nếu có
   if (error) {
     return <Alert severity="error">{error}</Alert>;
   }
 
+  // Hiển thị thông báo khi không có dữ liệu
   if (!patientData) {
     return <Alert severity="info">{t("common.noData")}</Alert>;
   }
 
+  // Render giao diện chính khi đã có dữ liệu
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Grid container spacing={3}>
+        {/* Phần thông tin cá nhân */}
         <Grid item xs={12}>
           <Box sx={{ position: "relative" }}>
             <PersonalInfoSection
@@ -111,6 +132,7 @@ const PatientProfilePage: React.FC = () => {
               avatar={patientData.avatar || "/default-avatar.png"}
               onEditAvatar={handleOpenAvatarModal}
             />
+            {/* Nút chỉnh sửa thông tin */}
             <IconButton
               color="primary"
               onClick={handleOpenEditModal}
@@ -134,6 +156,7 @@ const PatientProfilePage: React.FC = () => {
         </Grid>
       </Grid>
 
+      {/* Modal chỉnh sửa thông tin cá nhân */}
       <EditProfileModal
         open={isEditModalOpen}
         onClose={handleCloseEditModal}
@@ -149,6 +172,7 @@ const PatientProfilePage: React.FC = () => {
         }}
       />
 
+      {/* Modal tải lên avatar */}
       <AvatarUploadModal
         open={isAvatarModalOpen}
         currentAvatar={patientData.avatar || "/default-avatar.png"}

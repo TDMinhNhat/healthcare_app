@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Paper, Box, Typography, Grid, Divider } from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import EmailIcon from "@mui/icons-material/Email";
@@ -15,8 +15,7 @@ interface PersonalInfoSectionProps {
   email: string;
   phone: string;
   dob: string;
-  sex?: boolean;
-  gender?: string;
+  sex: boolean;
   address: Address;
   avatar: string;
   onEditAvatar?: () => void;
@@ -30,20 +29,28 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   phone,
   dob,
   sex,
-  gender,
   address,
   avatar,
   onEditAvatar,
   hideEditButton = false,
 }) => {
   const { t } = useTranslation();
+  useEffect(() => {
+    console.log("firstName:", firstName || "undefined");
+    console.log("lastName:", lastName || "undefined");
+    console.log("email:", email || "undefined");
+    console.log("phone:", phone || "undefined");
+    console.log("dob:", dob || "undefined");
+    console.log("avatar:", avatar || "undefined");
+    console.log("sex: ", sex || "undefined");
+  }, [firstName, lastName, email, phone, dob, avatar]);
+  // console.log("sex:", sex || "undefined");
 
   // Format the address into a readable string
   const addressString =
     address != null
       ? `${address.number} ${address.street}, ${address.ward}, ${address.district}, ${address.city}, ${address.country}`
       : t("common.noData");
-
   return (
     <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
       <Box sx={{ textAlign: "center", mb: 3 }}>
@@ -111,11 +118,7 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
             <WcIcon color="primary" sx={{ mr: 1 }} />
             <Typography variant="body1">
-              {typeof sex !== "undefined"
-                ? sex
-                  ? t("profile.female")
-                  : t("profile.male")
-                : gender || ""}
+              {typeof sex !== "undefined" ? (sex ? "Nam" : "Nữ") : ""}
             </Typography>
           </Box>
         </Grid>

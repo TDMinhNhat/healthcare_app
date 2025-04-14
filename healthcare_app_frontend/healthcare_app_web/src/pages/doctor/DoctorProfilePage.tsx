@@ -1,12 +1,15 @@
+// Import các thư viện React và các component cần thiết
 import React, { useState, useEffect } from "react";
 import { Container, Grid, Box, IconButton, Alert } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+// Import các component cho phần thông tin cá nhân và chuyên môn của bác sĩ
 import { PersonalInfoSection } from "../../components/profile/PersonalInfoSection";
 import { DoctorExperienceSection } from "../../components/doctor/DoctorExperienceSection";
 import { DoctorEducationSection } from "../../components/doctor/DoctorEducationSection";
 import { DoctorCertificatesSection } from "../../components/doctor/DoctorCertificatesSection";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
 import AvatarUploadModal from "../../components/profile/AvatarUploadModal";
+// Import types và services
 import { Doctor } from "../../types/doctor";
 import { useTranslation } from "react-i18next";
 import { Diploma } from "../../types";
@@ -14,7 +17,7 @@ import { useSelector } from "react-redux";
 import { getDoctorInfo } from "../../services/authenticate/user_service";
 import { log } from "console";
 
-// Mock data - would normally come from API
+// Dữ liệu mẫu - thông thường sẽ lấy từ API
 const mockDoctorData: any = {
   id: 1,
   userId: "dr123",
@@ -105,30 +108,27 @@ const mockDoctorData: any = {
   ],
 };
 
+// Component trang hồ sơ bác sĩ
 const DoctorProfilePage: React.FC = () => {
-  const { t } = useTranslation();
-  const [doctorData, setDoctorData] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const user = useSelector((state: any) => state.user.user);
+  const { t } = useTranslation(); // Hook đa ngôn ngữ
+  // Khai báo các state cần thiết
+  const [doctorData, setDoctorData] = useState<any | null>(null); // Lưu thông tin bác sĩ
+  const [loading, setLoading] = useState(true); // Trạng thái đang tải
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Trạng thái hiển thị modal chỉnh sửa
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false); // Trạng thái hiển thị modal tải lên avatar
+  const [error, setError] = useState<string | null>(null); // Lưu thông báo lỗi nếu có
+  const user = useSelector((state: any) => state.user.user); // Lấy thông tin người dùng từ Redux
 
   useEffect(() => {
-    // Fetch doctor data from API
+    // Hàm lấy dữ liệu bác sĩ từ API
     const fetchDoctorData = async () => {
       setLoading(true);
       try {
-        // if (!user?.userId) {
-        //   setError("User not found");
-        //   setLoading(false);
-        //   return;
-        // }
+        // Gọi API để lấy thông tin bác sĩ dựa vào userId
         const response = await getDoctorInfo(user.userId);
-        console.log("response", response.data.data);
         if (response.data && response.data.code === 200) {
+          console.log("Doctor data:", response.data.data.doctor.sex);
           setDoctorData(response.data.data);
-          console.log("Doctor exp", response.data.data.experiences);
         } else {
           setError("Failed to retrieve doctor data");
         }
@@ -142,51 +142,62 @@ const DoctorProfilePage: React.FC = () => {
 
     fetchDoctorData();
   }, [user?.userId]);
-  console.log("DoctorProfilePage -> doctorData", doctorData);
+  console.log("Doctor data:", doctorData);
+
+  // Hàm mở modal chỉnh sửa thông tin cá nhân
   const handleOpenEditModal = () => {
     setIsEditModalOpen(true);
   };
 
+  // Hàm đóng modal chỉnh sửa thông tin cá nhân
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
   };
 
+  // Hàm mở modal tải lên avatar
   const handleOpenAvatarModal = () => {
     setIsAvatarModalOpen(true);
   };
 
+  // Hàm đóng modal tải lên avatar
   const handleCloseAvatarModal = () => {
     setIsAvatarModalOpen(false);
   };
 
+  // Hàm xử lý khi lưu thông tin cá nhân
   const handleSaveProfile = (updatedData: any) => {
-    // Here you would make an API call to update the profile
+    // Cập nhật state local để hiển thị ngay lập tức
     setDoctorData({ ...doctorData, ...updatedData });
-    // For demonstration purposes, we're just updating the local state
-    console.log("Saving updated profile data:", updatedData);
+    // Lưu ý: Không cần gọi API ở đây vì đã được thực hiện trong EditProfileModal
   };
 
+  // Hàm xử lý khi lưu avatar mới
   const handleSaveAvatar = (newAvatar: string) => {
-    // Here you would make an API call to update the avatar
+    // Ở đây sẽ gọi API để cập nhật avatar
     setDoctorData({ ...doctorData, avatar: newAvatar });
     console.log("Saving updated avatar:", newAvatar);
   };
 
+  // Hiển thị trạng thái đang tải
   if (loading) {
     return <div>{t("common.loading")}</div>;
   }
 
+  // Hiển thị thông báo lỗi nếu có
   if (error) {
     return <Alert severity="error">{error}</Alert>;
   }
 
+  // Hiển thị thông báo khi không có dữ liệu
   if (!doctorData) {
     return <Alert severity="info">{t("common.noData")}</Alert>;
   }
 
+  // Render giao diện chính khi đã có dữ liệu
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Grid container spacing={3}>
+        {/* Phần thông tin cá nhân */}
         <Grid item xs={12}>
           <Box sx={{ position: "relative" }}>
             <PersonalInfoSection
@@ -197,12 +208,13 @@ const DoctorProfilePage: React.FC = () => {
               email={doctorData.doctor?.email || t("common.notAvailable")}
               phone={doctorData.doctor?.phone || t("common.notAvailable")}
               dob={doctorData.doctor?.dob || t("common.notAvailable")}
-              sex={doctorData.doctor?.sex || t("common.notAvailable")}
+              sex={doctorData.doctor?.sex ?? t("common.notAvailable")}
               address={doctorData.doctor?.address || null}
               avatar={doctorData.doctor?.avatar || "/default-avatar.png"}
               onEditAvatar={handleOpenAvatarModal}
-              hideEditButton={false} // Changed to false to show edit button
+              hideEditButton={false} // Hiển thị nút chỉnh sửa
             />
+            {/* Nút chỉnh sửa thông tin */}
             <IconButton
               color="primary"
               onClick={handleOpenEditModal}
@@ -215,7 +227,7 @@ const DoctorProfilePage: React.FC = () => {
                   bgcolor: "action.hover",
                 },
                 boxShadow: 1,
-                zIndex: 1, // Add zIndex to ensure our button is on top
+                zIndex: 1,
               }}
               aria-label={t("common.edit")}
               size="small"
@@ -224,6 +236,7 @@ const DoctorProfilePage: React.FC = () => {
             </IconButton>
           </Box>
         </Grid>
+        {/* Phần thông tin kinh nghiệm */}
         <Grid item xs={12} md={6}>
           <DoctorExperienceSection
             experiences={doctorData.experiences || []}
@@ -232,6 +245,7 @@ const DoctorProfilePage: React.FC = () => {
             }
           />
         </Grid>
+        {/* Phần thông tin học vấn và chứng chỉ */}
         <Grid item xs={12} md={6}>
           <DoctorEducationSection education={doctorData.educations || []} />
           <Box sx={{ mt: 3 }}>
@@ -242,6 +256,7 @@ const DoctorProfilePage: React.FC = () => {
         </Grid>
       </Grid>
 
+      {/* Modal chỉnh sửa thông tin cá nhân */}
       <EditProfileModal
         open={isEditModalOpen}
         onClose={handleCloseEditModal}
@@ -257,6 +272,7 @@ const DoctorProfilePage: React.FC = () => {
         }}
       />
 
+      {/* Modal tải lên avatar */}
       <AvatarUploadModal
         open={isAvatarModalOpen}
         currentAvatar={doctorData.doctor?.avatar || "/default-avatar.png"}

@@ -17,3 +17,8 @@ export const getDoctorInfo = async (userId: string) => {
   });
   return response;
 };
+
+export const updateInfo = async (userId: string, data: any) => {
+  const response = await axiosConfig.put(`${prefix}/patient/${userId}`, data);
+  return response;
+};
