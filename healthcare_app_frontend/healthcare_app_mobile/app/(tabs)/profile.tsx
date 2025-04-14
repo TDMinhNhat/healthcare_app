@@ -105,8 +105,8 @@ export default function ProfileTab() {
               <Text style={styles.infoValue}>
                 {user?.sex !== undefined
                   ? user.sex
-                    ? "Nam"
-                    : "Nữ"
+                    ? "Nữ"
+                    : "Nam"
                   : "Chưa xác định"}
               </Text>
             </View>

@@ -25,6 +25,14 @@ export default function BookAppointmentLayout() {
           }}
         />
         <Stack.Screen
+          name="date-time-selection"
+          options={{
+            headerShown: false,
+            title: "Chọn ngày giờ khám",
+            presentation: "card",
+          }}
+        />
+        <Stack.Screen
           name="payment-checkout"
           options={{
             headerShown: false,

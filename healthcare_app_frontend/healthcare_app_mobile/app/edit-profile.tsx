@@ -10,6 +10,7 @@ import {
   ScrollView,
   Alert,
   Switch,
+  ActivityIndicator,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSelector, useDispatch } from "react-redux";
@@ -20,6 +21,7 @@ import { User } from "../types/user";
 import { format, parse } from "date-fns";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import { updateInfo } from "../services/authenticate/user_service";
 
 export default function EditProfileScreen() {
   const params = useLocalSearchParams();
@@ -27,6 +29,7 @@ export default function EditProfileScreen() {
   const user = useSelector((state: any) => state.user.user);
   const dispatch = useDispatch();
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Xử lý ngày tháng đúng cách với date-fns
   const parseDob = () => {
@@ -95,21 +98,57 @@ export default function EditProfileScreen() {
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
-          onSubmit={(values) => {
-            // Cập nhật thông tin người dùng trong Redux với cấu trúc chính xác
-            dispatch(
-              updateUser({
-                ...user,
-                ...values,
-                sex: sex, // Sử dụng state sex riêng biệt
-                dob: formatDate(dob), // Sử dụng state dob riêng biệt
-              })
-            );
+          onSubmit={async (values) => {
+            try {
+              setIsSubmitting(true);
 
-            // Hiển thị thông báo thành công
-            Alert.alert("Thành công", "Hồ sơ đã được cập nhật thành công", [
-              { text: "OK", onPress: () => router.back() },
-            ]);
+              // Prepare data for API submission
+              const apiData = {
+                ...values,
+                sex: sex, // Include sex state
+                dob: formatDate(dob), // Format date properly
+                password: user.password, // Include password from current user
+              };
+
+              // Call API to update user info
+              const response = await updateInfo(user.userId, apiData);
+
+              if (response.data && response.data.code === 200) {
+                // Get updated data from server response
+                const responseData = response.data.data;
+
+                // Create updated user object
+                const updatedUser = {
+                  ...user,
+                  ...responseData,
+                };
+
+                // Update Redux store
+                dispatch(updateUser(updatedUser));
+
+                // Show success message
+                Alert.alert("Thành công", "Hồ sơ đã được cập nhật thành công", [
+                  { text: "OK", onPress: () => router.back() },
+                ]);
+              } else {
+                // Handle error from API
+                Alert.alert(
+                  "Lỗi",
+                  response.data?.message ||
+                    "Không thể cập nhật thông tin. Vui lòng thử lại.",
+                  [{ text: "OK" }]
+                );
+              }
+            } catch (error) {
+              console.error("Error updating profile:", error);
+              Alert.alert(
+                "Lỗi",
+                "Đã xảy ra lỗi khi cập nhật thông tin. Vui lòng thử lại sau.",
+                [{ text: "OK" }]
+              );
+            } finally {
+              setIsSubmitting(false);
+            }
           }}
         >
           {({
@@ -240,7 +279,7 @@ export default function EditProfileScreen() {
               <View style={styles.formGroup}>
                 <Text style={styles.label}>Giới tính</Text>
                 <View style={styles.sexToggle}>
-                  <Text>Nữ</Text>
+                  <Text>Nam</Text>
                   <Switch
                     value={sex}
                     onValueChange={setSex}
@@ -248,7 +287,7 @@ export default function EditProfileScreen() {
                     thumbColor={sex ? "#0056b3" : "#f4f3f4"}
                     style={{ marginHorizontal: 10 }}
                   />
-                  <Text>Nam</Text>
+                  <Text>Nữ</Text>
                 </View>
               </View>
 
@@ -325,8 +364,13 @@ export default function EditProfileScreen() {
               <TouchableOpacity
                 style={styles.saveButton}
                 onPress={() => handleSubmit()}
+                disabled={isSubmitting}
               >
-                <Text style={styles.saveButtonText}>Lưu thay đổi</Text>
+                {isSubmitting ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.saveButtonText}>Lưu thay đổi</Text>
+                )}
               </TouchableOpacity>
             </View>
           )}

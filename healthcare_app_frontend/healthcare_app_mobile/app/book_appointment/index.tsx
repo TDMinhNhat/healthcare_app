@@ -10,6 +10,7 @@ import {
   Alert,
   Modal,
   Platform,
+  FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -78,6 +79,10 @@ export default function BookAppointmentScreen() {
   const [loadingServices, setLoadingServices] = useState(false);
   const [loadingDoctors, setLoadingDoctors] = useState(false);
   const [loadingTimeSlots, setLoadingTimeSlots] = useState(false);
+
+  // State cho phân trang bác sĩ
+  const [currentPage, setCurrentPage] = useState(0);
+  const doctorsPerPage = 6; // Số bác sĩ hiển thị mỗi trang
 
   // Lấy danh sách các dịch vụ từ API - sử dụng getAllTypeDiseases thay vì getAllServices
   useEffect(() => {
@@ -290,6 +295,42 @@ export default function BookAppointmentScreen() {
     });
   };
 
+  // Modify the doctor selection handler to navigate to date-time selection screen
+  const handleDoctorSelection = (doctor) => {
+    setSelectedDoctor(doctor);
+    // Navigate to the date-time selection screen with doctor info
+    router.push({
+      pathname: "/book_appointment/date-time-selection",
+      params: {
+        doctorId: doctor.userId,
+        doctorName: `${doctor.firstName} ${doctor.lastName}`,
+        serviceName: selectedService?.name,
+        serviceId: selectedService?.id,
+      },
+    });
+  };
+
+  // Tính toán tổng số trang
+  const totalPages = Math.ceil(doctors.length / doctorsPerPage);
+
+  // Lấy danh sách bác sĩ cho trang hiện tại
+  const paginatedDoctors = doctors.slice(
+    currentPage * doctorsPerPage,
+    (currentPage + 1) * doctorsPerPage
+  );
+
+  // Hàm chuyển trang
+  const goToPage = (pageNumber) => {
+    if (pageNumber >= 0 && pageNumber < totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
+
+  // Reset trang khi chọn dịch vụ mới
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [selectedService]);
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.content}>
@@ -339,139 +380,72 @@ export default function BookAppointmentScreen() {
                 </Text>
               </View>
             ) : (
-              <View style={styles.optionsContainer}>
-                {doctors.map((doctor) => (
-                  <TouchableOpacity
-                    key={doctor.id}
-                    style={[
-                      styles.optionItem,
-                      selectedDoctor?.userId === doctor.userId &&
-                        styles.selectedOption,
-                    ]}
-                    onPress={() => setSelectedDoctor(doctor)}
-                  >
-                    <Text
+              <>
+                <View style={styles.optionsContainer}>
+                  {paginatedDoctors.map((doctor) => (
+                    <TouchableOpacity
+                      key={doctor.id}
                       style={[
-                        styles.optionText,
+                        styles.doctorCard,
                         selectedDoctor?.userId === doctor.userId &&
-                          styles.selectedOptionText,
+                          styles.selectedOption,
                       ]}
+                      onPress={() => handleDoctorSelection(doctor)}
                     >
-                      {doctor.firstName} {doctor.lastName}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-                {doctors.length === 0 && (
-                  <Text style={styles.noDataText}>
-                    Không có bác sĩ cho dịch vụ này
-                  </Text>
-                )}
-              </View>
-            )}
-          </View>
-        )}
-
-        {selectedDoctor && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>3. Chọn ngày và giờ khám</Text>
-
-            {/* Bộ chọn ngày */}
-            <View style={styles.dateTimeContainer}>
-              <Text style={styles.subSectionTitle}>Ngày khám:</Text>
-              <TouchableOpacity
-                style={styles.dateSelector}
-                onPress={() => setShowDatePicker(true)}
-              >
-                <MaterialIcons name="event" size={24} color="#26b9c8" />
-                <Text style={styles.dateText}>
-                  {format(selectedDate, "dd/MM/yyyy")}
-                </Text>
-              </TouchableOpacity>
-
-              {showDatePicker && (
-                <DateTimePicker
-                  value={selectedDate}
-                  mode="date"
-                  display="default"
-                  onChange={handleDateChange}
-                  minimumDate={new Date()}
-                  maximumDate={addDays(new Date(), 14)}
-                />
-              )}
-            </View>
-
-            {/* Các khung giờ khám */}
-            <View style={styles.timeSlotSection}>
-              <Text style={styles.subSectionTitle}>Giờ khám:</Text>
-              {loadingTimeSlots ? (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator color="#26b9c8" />
-                  <Text style={styles.loadingText}>
-                    Đang tải khung giờ khám...
-                  </Text>
-                </View>
-              ) : (
-                <View style={styles.timeSlotContainer}>
-                  {timeSlots.length > 0 ? (
-                    <View style={styles.timeSlotGrid}>
-                      {timeSlots.map((slot) => {
-                        const isDisabled = isTimeSlotDisabled(slot.time);
-                        return (
-                          <TouchableOpacity
-                            key={slot.id}
-                            style={[
-                              styles.timeSlot,
-                              selectedTimeSlot === slot.id &&
-                                styles.selectedTimeSlot,
-                              isDisabled && styles.disabledTimeSlot,
-                            ]}
-                            onPress={() =>
-                              !isDisabled &&
-                              handleTimeSlotSelection(
-                                slot.id,
-                                slot.workScheduleId
-                              )
-                            }
-                            disabled={isDisabled}
-                          >
-                            <Text
-                              style={[
-                                styles.timeSlotText,
-                                selectedTimeSlot === slot.id &&
-                                  styles.selectedTimeSlotText,
-                                isDisabled && styles.disabledTimeSlotText,
-                              ]}
-                            >
-                              {slot.time}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </View>
-                  ) : (
+                      <Text
+                        style={[
+                          styles.doctorName,
+                          selectedDoctor?.userId === doctor.userId &&
+                            styles.selectedOptionText,
+                        ]}
+                      >
+                        {doctor.firstName} {doctor.lastName}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                  {doctors.length === 0 && (
                     <Text style={styles.noDataText}>
-                      Không có khung giờ khám cho ngày này
+                      Không có bác sĩ cho dịch vụ này
                     </Text>
                   )}
                 </View>
-              )}
-            </View>
+
+                {doctors.length > doctorsPerPage && (
+                  <View style={styles.paginationContainer}>
+                    <TouchableOpacity
+                      style={[
+                        styles.paginationButton,
+                        currentPage === 0 && styles.disabledPaginationButton,
+                      ]}
+                      onPress={() => goToPage(currentPage - 1)}
+                      disabled={currentPage === 0}
+                    >
+                      <Text style={styles.paginationButtonText}>Trước</Text>
+                    </TouchableOpacity>
+
+                    <View style={styles.pageIndicator}>
+                      <Text style={styles.pageText}>
+                        {currentPage + 1} / {totalPages}
+                      </Text>
+                    </View>
+
+                    <TouchableOpacity
+                      style={[
+                        styles.paginationButton,
+                        currentPage === totalPages - 1 &&
+                          styles.disabledPaginationButton,
+                      ]}
+                      onPress={() => goToPage(currentPage + 1)}
+                      disabled={currentPage === totalPages - 1}
+                    >
+                      <Text style={styles.paginationButtonText}>Tiếp</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </>
+            )}
           </View>
         )}
-
-        {/* {selectedTimeSlot && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>4. Ghi chú (không bắt buộc)</Text>
-            <TextInput
-              style={styles.reasonInput}
-              placeholder="Nhập lý do khám, triệu chứng..."
-              multiline
-              numberOfLines={4}
-              value={reason}
-              onChangeText={(text) => setReason(text)}
-            />
-          </View>
-        )} */}
       </ScrollView>
 
       {/* Phần chân trang chứa nút "Xác nhận đặt lịch" */}
@@ -668,5 +642,49 @@ const styles = StyleSheet.create({
   },
   timeSlotSection: {
     marginTop: 16,
+  },
+  doctorCard: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 16,
+    marginVertical: 8,
+    width: "100%",
+  },
+  doctorName: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+  },
+  paginationContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 16,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+  },
+  paginationButton: {
+    backgroundColor: "#26b9c8",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 4,
+    marginHorizontal: 8,
+  },
+  disabledPaginationButton: {
+    backgroundColor: "#ccc",
+    opacity: 0.6,
+  },
+  paginationButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  pageIndicator: {
+    paddingHorizontal: 16,
+  },
+  pageText: {
+    fontSize: 14,
+    color: "#666",
   },
 });
