@@ -1,7 +1,6 @@
 package dev.skyherobrine.admin.services;
 
 import dev.skyherobrine.admin.dtos.DoctorDTO;
-import dev.skyherobrine.admin.dtos.imports.DoctorBaseInfoDTO;
 import dev.skyherobrine.admin.models.mariadb.*;
 import dev.skyherobrine.admin.repositories.mariadb.*;
 import dev.skyherobrine.admin.repositories.mongodb.WorkScheduleRepository;
@@ -100,24 +99,6 @@ public class DoctorService {
         log.info("Doctor Service: saving doctor experiences into database");
 
         return doctor;
-    }
-
-    public Doctor addDoctorBaseInfo(DoctorBaseInfoDTO doctor) throws Exception {
-        log.info("Doctor Service: add doctor base info");
-        Doctor target = new Doctor(
-                generateUserId(LocalDate.parse(doctor.getDob(), DateTimeFormatter.ofPattern("dd-MM-yyyy"))),
-                doctor.getFirstName(),
-                doctor.getLastName(),
-                doctor.getSex(),
-                LocalDate.parse(doctor.getDob(), DateTimeFormatter.ofPattern("dd-MM-yyyy")),
-                doctor.getPhone(),
-                doctor.getEmail(),
-                doctor.getPassword(),
-                doctor.getSpecialization(),
-                typeDiseaseRepository.findByName(doctor.getTypeDisease()).orElseThrow(() -> new EntityNotFoundException("Type Disease wasn't found!"))
-        );
-        kafkaTemplate.send("insert_doctor", ObjectParser.convertObjectToJson(target));
-        return doctorRepository.save(target);
     }
 
     private String generateUserId(LocalDate dob) {
