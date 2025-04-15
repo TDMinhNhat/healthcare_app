@@ -82,6 +82,14 @@ export default function Layout() {
             presentation: "card",
           }}
         />
+        <Stack.Screen
+          name={"change_password"}
+          options={{
+            title: "Đổi mật khẩu",
+            headerShown: true,
+            presentation: "card",
+          }}
+        />
       </Stack>
     </Provider>
   );

@@ -132,6 +132,19 @@ export default function ProfileTab() {
             <Text style={styles.menuText}>Khẩn cấp</Text>
             <Ionicons name="chevron-forward" size={20} color="#ccc" />
           </TouchableOpacity>
+          {/* Nút đổi mật khẩu */}
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => router.push("/change_password")}
+          >
+            <View
+              style={[styles.menuIconContainer, { backgroundColor: "#e3f2fd" }]}
+            >
+              <Ionicons name="key-outline" size={20} color="#1976d2" />
+            </View>
+            <Text style={styles.menuText}>Đổi mật khẩu</Text>
+            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+          </TouchableOpacity>
         </View>
 
         {/* Tùy chọn đăng xuất */}
