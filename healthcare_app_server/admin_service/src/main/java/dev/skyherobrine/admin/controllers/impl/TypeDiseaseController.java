@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/admin/api/v1/type_disease")
 @Slf4j
@@ -104,6 +106,34 @@ public class TypeDiseaseController implements IManagement<String, Long> {
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "The api thrown an error",
                     e.getMessage()
+            ));
+        }
+    }
+
+    @PostMapping("/import")
+    public ResponseEntity<Response> importTypeDisease(@RequestBody List<String> typeDiseases) {
+        try {
+            log.info("Type Disease: Call the api import type disease");
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Import type disease success",
+                    typeDiseaseRepository.saveAll(typeDiseases.stream().map(item -> {
+                        try {
+                            TypeDisease typeDisease = new TypeDisease(item);
+                            kafkaTemplate.send("insert_type_disease", ObjectParser.convertObjectToJson(typeDisease));
+                            return typeDisease;
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }).toList())
+            ));
+        } catch (Exception e) {
+            log.error("Type Disease: Import type disease failed");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Import type disease failed",
+                    null
             ));
         }
     }

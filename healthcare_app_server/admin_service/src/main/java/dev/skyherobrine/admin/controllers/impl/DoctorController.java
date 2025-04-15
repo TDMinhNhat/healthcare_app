@@ -2,6 +2,7 @@ package dev.skyherobrine.admin.controllers.impl;
 
 import dev.skyherobrine.admin.controllers.IManagement;
 import dev.skyherobrine.admin.dtos.DoctorDTO;
+import dev.skyherobrine.admin.dtos.imports.DoctorBaseInfoDTO;
 import dev.skyherobrine.admin.models.mariadb.Doctor;
 import dev.skyherobrine.admin.models.mariadb.Response;
 import dev.skyherobrine.admin.repositories.mariadb.DoctorRepository;
@@ -111,5 +112,46 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
                     e.getMessage()
             ));
         }
+    }
+
+    @PostMapping("/import")
+    public ResponseEntity<Response> importDoctorBaseInfo(@RequestBody List<DoctorBaseInfoDTO> doctors) {
+        try {
+            log.info("Doctor: Call the api import doctor base info");
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Import doctor base info successfully",
+                    doctors.stream().map(item -> {
+                        try {
+                            return doctorService.addDoctorBaseInfo(item);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }).toList()
+            ));
+        } catch (Exception e) {
+            log.error("Doctor: The api return an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api import doctor base info return an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @PostMapping("/import/education")
+    public ResponseEntity<Response> importDoctorEducationInfo() {
+
+    }
+
+    @PostMapping("/import/certificate")
+    public ResponseEntity<Response> importDoctorCertificateInfo() {
+
+    }
+
+    @PostMapping("/import/experience")
+    public ResponseEntity<Response> importDoctorExperienceInfo() {
+
     }
 }

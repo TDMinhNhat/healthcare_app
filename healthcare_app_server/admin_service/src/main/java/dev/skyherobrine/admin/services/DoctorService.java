@@ -1,6 +1,7 @@
 package dev.skyherobrine.admin.services;
 
 import dev.skyherobrine.admin.dtos.DoctorDTO;
+import dev.skyherobrine.admin.dtos.imports.DoctorBaseInfoDTO;
 import dev.skyherobrine.admin.models.mariadb.*;
 import dev.skyherobrine.admin.repositories.mariadb.*;
 import dev.skyherobrine.admin.repositories.mongodb.WorkScheduleRepository;
@@ -67,7 +68,7 @@ public class DoctorService {
         log.info("Doctor Service: saving doctor into database");
         Doctor doctor = doctorRepository.save(target);
 
-        Thread.sleep(2000);
+        Thread.sleep(1000);
 
         log.info("Doctor Service: sending insert doctor certificate message to kafka");
         for(DoctorCertificate doctorCertificate : doctorDTO.certificates(doctor)) {
@@ -76,7 +77,7 @@ public class DoctorService {
         }
         log.info("Doctor Service: saving doctor certificates into database");
 
-        Thread.sleep(2000);
+        Thread.sleep(1000);
 
         log.info("Doctor Service: sending insert doctor education message to kafka");
         for(DoctorEducation doctorEducation : doctorDTO.educations(doctor)) {
@@ -85,7 +86,7 @@ public class DoctorService {
         }
         log.info("Doctor Service: saving doctor educations into database");
 
-        Thread.sleep(2000);
+        Thread.sleep(1000);
 
         log.info("Doctor Service: sending insert doctor experience message to kafka");
         for(DoctorExperience doctorExperience : doctorDTO.experiences(doctor)) {
@@ -99,6 +100,24 @@ public class DoctorService {
         log.info("Doctor Service: saving doctor experiences into database");
 
         return doctor;
+    }
+
+    public Doctor addDoctorBaseInfo(DoctorBaseInfoDTO doctor) throws Exception {
+        log.info("Doctor Service: add doctor base info");
+        Doctor target = new Doctor(
+                generateUserId(LocalDate.parse(doctor.getDob(), DateTimeFormatter.ofPattern("dd-MM-yyyy"))),
+                doctor.getFirstName(),
+                doctor.getLastName(),
+                doctor.getSex(),
+                LocalDate.parse(doctor.getDob(), DateTimeFormatter.ofPattern("dd-MM-yyyy")),
+                doctor.getPhone(),
+                doctor.getEmail(),
+                doctor.getPassword(),
+                doctor.getSpecialization(),
+                typeDiseaseRepository.findByName(doctor.getTypeDisease()).orElseThrow(() -> new EntityNotFoundException("Type Disease wasn't found!"))
+        );
+        kafkaTemplate.send("insert_doctor", ObjectParser.convertObjectToJson(target));
+        return doctorRepository.save(target);
     }
 
     private String generateUserId(LocalDate dob) {

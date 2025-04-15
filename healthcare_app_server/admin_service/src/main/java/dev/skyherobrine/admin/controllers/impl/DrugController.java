@@ -13,6 +13,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -117,5 +118,35 @@ public class DrugController implements IManagement<DrugDTO,Long> {
     @Override
     public ResponseEntity<Response> delete(Long aLong) {
         return null;
+    }
+
+    @PostMapping("/import")
+    public ResponseEntity<Response> importDrug(@RequestBody List<DrugDTO> drugs) {
+        try {
+            log.info("Drug: Call api for importing drugs");
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "The api import drug is called successfully",
+                    drugRepository.saveAll(drugs.stream().map(item -> {
+                        try {
+                            Drug drug = item.toObject();
+                            log.info("Drug: sending insert drug message to kafka");
+                            kafkaTemplate.send("insert_drug", ObjectParser.convertObjectToJson(drug));
+                            log.info("Drug: saving drug into database");
+                            return drugRepository.save(drug);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }).toList())
+            ));
+        } catch (Exception e) {
+            log.error("Drug: import drug error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api import drug thrown an exception",
+                    e.getMessage()
+            ));
+        }
     }
 }
