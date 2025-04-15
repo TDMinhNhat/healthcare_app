@@ -19,6 +19,10 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { vi } from "date-fns/locale";
+import {
+  parseDateFromString,
+  formatDateToString,
+} from "../../../utils/dateUtils";
 
 interface EducationFormProps {
   open: boolean;
@@ -49,9 +53,11 @@ const EducationForm: React.FC<EducationFormProps> = ({
   // Cập nhật dữ liệu form khi prop education thay đổi
   useEffect(() => {
     if (education && mode === "edit") {
-      setFormData({
-        ...education,
-      });
+      // Create a copy of education to avoid mutation
+      const formattedEducation = { ...education };
+
+      // No need to modify dates here, we'll handle in the DatePicker component
+      setFormData(formattedEducation);
     } else {
       // Reset form khi thêm mới
       setFormData({
@@ -88,9 +94,11 @@ const EducationForm: React.FC<EducationFormProps> = ({
   // Xử lý thay đổi ngày
   const handleJoinedDateChange = (date: Date | null) => {
     if (date) {
+      // Use formatDateToString to ensure date is in correct format (dd-MM-yyyy)
+      const formattedDate = formatDateToString(date);
       setFormData({
         ...formData,
-        joinedDate: date.toISOString().split("T")[0],
+        joinedDate: formattedDate,
       });
       if (errors["joinedDate"]) {
         setErrors({
@@ -103,9 +111,11 @@ const EducationForm: React.FC<EducationFormProps> = ({
 
   const handleGraduateDateChange = (date: Date | null) => {
     if (date) {
+      // Use formatDateToString to ensure date is in correct format (dd-MM-yyyy)
+      const formattedDate = formatDateToString(date);
       setFormData({
         ...formData,
-        graduateDate: date.toISOString().split("T")[0],
+        graduateDate: formattedDate,
       });
       if (errors["graduateDate"]) {
         setErrors({
@@ -199,7 +209,15 @@ const EducationForm: React.FC<EducationFormProps> = ({
               <DatePicker
                 label="Ngày bắt đầu"
                 value={
-                  formData.joinedDate ? new Date(formData.joinedDate) : null
+                  formData.joinedDate
+                    ? typeof formData.joinedDate === "string"
+                      ? parseDateFromString(formData.joinedDate)
+                      : new Date(formData.joinedDate)
+                    : formData.joinDate
+                    ? typeof formData.joinDate === "string"
+                      ? parseDateFromString(formData.joinDate)
+                      : new Date(formData.joinDate)
+                    : null
                 }
                 onChange={handleJoinedDateChange}
                 slotProps={{
@@ -221,7 +239,11 @@ const EducationForm: React.FC<EducationFormProps> = ({
               <DatePicker
                 label="Ngày kết thúc"
                 value={
-                  formData.graduateDate ? new Date(formData.graduateDate) : null
+                  formData.graduateDate
+                    ? typeof formData.graduateDate === "string"
+                      ? parseDateFromString(formData.graduateDate)
+                      : new Date(formData.graduateDate)
+                    : null
                 }
                 onChange={handleGraduateDateChange}
                 slotProps={{

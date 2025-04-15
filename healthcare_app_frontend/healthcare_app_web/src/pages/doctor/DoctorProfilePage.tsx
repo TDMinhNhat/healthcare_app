@@ -19,6 +19,7 @@ import { Diploma } from "../../types";
 import { useSelector } from "react-redux";
 import { getDoctorInfo } from "../../services/authenticate/user_service";
 import { log } from "console";
+import { ROUTING } from "../../constants/routing";
 
 // Dữ liệu mẫu - thông thường sẽ lấy từ API
 const mockDoctorData: any = {
@@ -253,7 +254,7 @@ const DoctorProfilePage: React.FC = () => {
                 minWidth: 0,
                 px: 1.5,
               }}
-              onClick={() => navigate("/change-password")}
+              onClick={() => navigate(ROUTING.CHANGE_PASSWORD)}
             >
               Đổi mật khẩu
             </Button>

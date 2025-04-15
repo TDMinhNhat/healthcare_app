@@ -4,6 +4,7 @@ export const ROUTING = {
   LOGIN: "/login",
   REGISTER: "/register",
   VERIFY_EMAIL: "/verify-email",
+  CHANGE_PASSWORD: "/change-password", // New route for password change
   EXAMINATION_ROOM: "/examination/:scheduleId", // New standalone examination room route
 
   // Role root paths

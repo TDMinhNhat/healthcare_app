@@ -500,7 +500,9 @@ const PatientDashboard: React.FC = () => {
                         //   appointment.status
                         // )}`,
                       }}
-                      onClick={() => handleAppointmentClick(appointment.id)}
+                      onClick={() =>
+                        handleAppointmentClick(appointment.workScheduleId)
+                      }
                     >
                       <ListItemText
                         primary={

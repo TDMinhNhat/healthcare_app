@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { getPatientInfo } from "../../services/authenticate/user_service";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "../../stores/slices/user.slice";
+import { ROUTING } from "../../constants/routing";
 
 // Component trang hồ sơ bệnh nhân
 const PatientProfilePage: React.FC = () => {
@@ -171,7 +172,7 @@ const PatientProfilePage: React.FC = () => {
                 minWidth: 0,
                 px: 1.5,
               }}
-              onClick={() => navigate("/change-password")}
+              onClick={() => navigate(ROUTING.CHANGE_PASSWORD)}
             >
               Đổi mật khẩu
             </Button>

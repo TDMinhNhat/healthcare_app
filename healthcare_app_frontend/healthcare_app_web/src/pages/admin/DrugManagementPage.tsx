@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   DataGrid,
   GridColDef,
@@ -15,7 +15,7 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import { Edit, Delete, Add } from "@mui/icons-material";
+import { Edit, Delete, Add, UploadFile } from "@mui/icons-material";
 import { Drug } from "../../types/medical";
 import DrugForm from "../../components/admin/DrugForm";
 import {
@@ -23,6 +23,8 @@ import {
   addDrug,
   updateDrug,
 } from "../../services/admin/drugs_service";
+import * as XLSX from "xlsx";
+import { usePapaParse } from "react-papaparse";
 
 const DrugManagementPage: React.FC = () => {
   // Khai báo state để quản lý dữ liệu và trạng thái UI
@@ -47,6 +49,9 @@ const DrugManagementPage: React.FC = () => {
     delimiter: ",",
     utf8WithBom: true,
   };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { readString } = usePapaParse();
 
   // Fetch drugs from API when component mounts
   useEffect(() => {
@@ -155,6 +160,57 @@ const DrugManagementPage: React.FC = () => {
     }
   };
 
+  // Hàm xử lý import file
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const fileName = file.name.toLowerCase();
+    if (fileName.endsWith(".csv")) {
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const csv = evt.target?.result as string;
+        readString(csv, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (results) => {
+            console.log("CSV to JSON:", results.data);
+            showMessage(
+              "Đã parse file CSV, xem console để biết chi tiết.",
+              "info"
+            );
+          },
+          error: (err) => {
+            showMessage("Lỗi khi parse file CSV", "error");
+          },
+        });
+      };
+      reader.readAsText(file);
+    } else if (fileName.endsWith(".xlsx") || fileName.endsWith(".xls")) {
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const data = evt.target?.result;
+        const workbook = XLSX.read(data, { type: "binary" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+        console.log("XLSX/XLS to JSON:", json);
+        showMessage(
+          "Đã parse file Excel, xem console để biết chi tiết.",
+          "info"
+        );
+      };
+      reader.readAsBinaryString(file);
+    } else {
+      showMessage("Chỉ hỗ trợ file .csv, .xlsx, .xls", "warning");
+    }
+    // Reset input để có thể chọn lại cùng 1 file
+    e.target.value = "";
+  };
+
   // Định nghĩa cấu trúc các cột cho bảng dữ liệu
   const columns: GridColDef[] = [
     {
@@ -213,7 +269,7 @@ const DrugManagementPage: React.FC = () => {
 
   return (
     <Box sx={{ height: "100%", width: "100%", padding: 0 }}>
-      {/* Phần header với nút thêm thuốc */}
+      {/* Phần header với nút thêm thuốc và import file */}
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, gap: 2 }}>
         <Button
           variant="contained"
@@ -223,6 +279,22 @@ const DrugManagementPage: React.FC = () => {
         >
           Thêm thuốc
         </Button>
+        <Button
+          variant="contained"
+          color="success"
+          startIcon={<UploadFile />}
+          onClick={handleImportClick}
+          sx={{ fontWeight: 600 }}
+        >
+          Import file
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,.xlsx,.xls"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
       </Box>
 
       {/* Bảng dữ liệu thuốc */}

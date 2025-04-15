@@ -39,6 +39,13 @@ import HistoryIcon from "@mui/icons-material/History";
 import MedicalInformationIcon from "@mui/icons-material/MedicalInformation";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+// DataGrid import
+import {
+  DataGrid,
+  GridColDef,
+  GridToolbar,
+  GridCsvExportOptions,
+} from "@mui/x-data-grid";
 import { MedicalRecord, MedicalRecordDrug, Drug } from "../../types/medical";
 import { User } from "../../types/user";
 import { formatCreatedAtDate } from "../../utils/dateUtils";
@@ -528,6 +535,26 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
     }
   };
 
+  // DataGrid columns for drugs
+  const drugGridColumns: GridColDef[] = [
+    { field: "drugName", headerName: "Tên thuốc", flex: 2, minWidth: 180 },
+    { field: "howUse", headerName: "Cách dùng", flex: 2, minWidth: 180 },
+    {
+      field: "quantity",
+      headerName: "Số lượng",
+      flex: 1,
+      minWidth: 100,
+      align: "center",
+      headerAlign: "center",
+    },
+    { field: "unit", headerName: "Đơn vị", flex: 1, minWidth: 100 },
+  ];
+  const drugCsvOptions: GridCsvExportOptions = {
+    fileName: "drugs",
+    delimiter: ",",
+    utf8WithBom: true,
+  };
+
   return (
     <Dialog
       open={open}
@@ -599,7 +626,7 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Typography variant="body2">
-                    <strong>Giới tính:</strong> {patient.sex ? "Nam" : "Nữ"}
+                    <strong>Giới tính:</strong> {patient.sex ? "Nữ" : "Nam"}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -835,57 +862,32 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
 
                   {/* Danh sách thuốc */}
                   {drugs.length > 0 ? (
-                    <TableContainer>
-                      <Table size="small">
-                        <TableHead>
-                          <TableRow>
-                            <TableCell sx={{ fontWeight: "bold" }}>
-                              Tên thuốc
-                            </TableCell>
-                            <TableCell sx={{ fontWeight: "bold" }}>
-                              Cách dùng
-                            </TableCell>
-                            <TableCell sx={{ fontWeight: "bold" }}>
-                              Số lượng
-                            </TableCell>
-                            <TableCell sx={{ fontWeight: "bold" }}>
-                              Đơn vị
-                            </TableCell>
-                            {isEditing && isDoctor && (
-                              <TableCell
-                                align="center"
-                                sx={{ fontWeight: "bold" }}
-                              >
-                                Thao tác
-                              </TableCell>
-                            )}
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {drugs.map((drug, index) => (
-                            <TableRow key={index}>
-                              <TableCell>{drug?.drug.drugName}</TableCell>
-                              <TableCell>{drug.howUse}</TableCell>
-                              <TableCell align="center">
-                                {drug.quantity}
-                              </TableCell>
-                              <TableCell>{drug?.drug.unit}</TableCell>
-                              {isEditing && isDoctor && (
-                                <TableCell align="center">
-                                  <IconButton
-                                    size="small"
-                                    color="error"
-                                    onClick={() => handleRemoveDrug(index)}
-                                  >
-                                    <DeleteIcon />
-                                  </IconButton>
-                                </TableCell>
-                              )}
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
+                    <Box sx={{ width: "100%", mt: 1 }}>
+                      <DataGrid
+                        rows={drugs.map((d, idx) => ({
+                          ...d,
+                          id: idx + 1,
+                          drugName: d.drug?.drugName || "",
+                          unit: d.drug?.unit || "",
+                        }))}
+                        columns={drugGridColumns}
+                        getRowId={(row) => row.id}
+                        hideFooterSelectedRowCount
+                        hideFooterPagination
+                        slots={{ toolbar: GridToolbar }}
+                        slotProps={{
+                          toolbar: {
+                            csvOptions: drugCsvOptions,
+                            printOptions: { disableToolbarButton: false },
+                            showQuickFilter: false,
+                          },
+                        }}
+                        disableColumnFilter
+                        disableColumnSelector
+                        // disableDensitySelector
+                        sx={{ background: "white", borderRadius: 1 }}
+                      />
+                    </Box>
                   ) : (
                     <Typography
                       color="text.secondary"
@@ -1053,42 +1055,41 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
                                 THUỐC ĐIỀU TRỊ
                               </Typography>
                               {record.drugs && record.drugs.length > 0 ? (
-                                <TableContainer>
-                                  <Table size="small">
-                                    <TableHead>
-                                      <TableRow>
-                                        <TableCell sx={{ fontWeight: "bold" }}>
-                                          Tên thuốc
-                                        </TableCell>
-                                        <TableCell sx={{ fontWeight: "bold" }}>
-                                          Cách dùng
-                                        </TableCell>
-                                        <TableCell sx={{ fontWeight: "bold" }}>
-                                          Số lượng
-                                        </TableCell>
-                                        <TableCell sx={{ fontWeight: "bold" }}>
-                                          Đơn vị
-                                        </TableCell>
-                                      </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                      {record.drugs.map((drug, index) => (
-                                        <TableRow key={index}>
-                                          <TableCell>
-                                            {drug.id?.drug?.drugName}
-                                          </TableCell>
-                                          <TableCell>{drug.howUse}</TableCell>
-                                          <TableCell align="center">
-                                            {drug.quantity}
-                                          </TableCell>
-                                          <TableCell>
-                                            {drug.id?.drug?.unit}
-                                          </TableCell>
-                                        </TableRow>
-                                      ))}
-                                    </TableBody>
-                                  </Table>
-                                </TableContainer>
+                                <Box sx={{ width: "100%", mt: 1 }}>
+                                  <DataGrid
+                                    rows={record.drugs.map((d, idx) => ({
+                                      ...d,
+                                      id: idx + 1,
+                                      drugName:
+                                        d.id?.drug?.drugName ||
+                                        d.drug?.drugName ||
+                                        "",
+                                      unit:
+                                        d.id?.drug?.unit || d.drug?.unit || "",
+                                    }))}
+                                    columns={drugGridColumns}
+                                    getRowId={(row) => row.id}
+                                    hideFooterSelectedRowCount
+                                    hideFooterPagination
+                                    slots={{ toolbar: GridToolbar }}
+                                    slotProps={{
+                                      toolbar: {
+                                        csvOptions: drugCsvOptions,
+                                        printOptions: {
+                                          disableToolbarButton: false,
+                                        },
+                                        showQuickFilter: false,
+                                      },
+                                    }}
+                                    disableColumnFilter
+                                    disableColumnSelector
+                                    // disableDensitySelector
+                                    sx={{
+                                      background: "white",
+                                      borderRadius: 1,
+                                    }}
+                                  />
+                                </Box>
                               ) : (
                                 <Typography
                                   color="text.secondary"

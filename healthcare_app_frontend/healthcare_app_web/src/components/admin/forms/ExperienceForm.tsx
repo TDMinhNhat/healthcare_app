@@ -17,6 +17,10 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { vi } from "date-fns/locale";
+import {
+  parseDateFromString,
+  formatDateToString,
+} from "../../../utils/dateUtils";
 
 interface ExperienceFormProps {
   open: boolean;
@@ -130,9 +134,11 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
   // Xử lý thay đổi ngày bắt đầu
   const handleStartDateChange = (date: Date | null) => {
     if (date) {
+      // Use formatDateToString to ensure date is in correct format (dd-MM-yyyy)
+      const formattedDate = formatDateToString(date);
       setFormData({
         ...formData,
-        startDate: date.toISOString().split("T")[0],
+        startDate: formattedDate,
       });
       if (errors["startDate"]) {
         setErrors({
@@ -146,9 +152,11 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
   // Xử lý thay đổi ngày kết thúc
   const handleEndDateChange = (date: Date | null) => {
     if (date) {
+      // Use formatDateToString to ensure date is in correct format (dd-MM-yyyy)
+      const formattedDate = formatDateToString(date);
       setFormData({
         ...formData,
-        endDate: date.toISOString().split("T")[0],
+        endDate: formattedDate,
       });
       if (errors["endDate"]) {
         setErrors({
@@ -255,7 +263,13 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
             >
               <DatePicker
                 label="Ngày bắt đầu"
-                value={formData.startDate ? new Date(formData.startDate) : null}
+                value={
+                  formData.startDate
+                    ? typeof formData.startDate === "string"
+                      ? parseDateFromString(formData.startDate)
+                      : new Date(formData.startDate)
+                    : null
+                }
                 onChange={handleStartDateChange}
                 slotProps={{
                   textField: {
@@ -276,7 +290,13 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
               >
                 <DatePicker
                   label="Ngày kết thúc"
-                  value={formData.endDate ? new Date(formData.endDate) : null}
+                  value={
+                    formData.endDate && !isCurrentJob
+                      ? typeof formData.endDate === "string"
+                        ? parseDateFromString(formData.endDate)
+                        : new Date(formData.endDate)
+                      : null
+                  }
                   onChange={handleEndDateChange}
                   disabled={isCurrentJob}
                   slotProps={{

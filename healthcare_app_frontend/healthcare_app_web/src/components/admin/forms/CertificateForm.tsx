@@ -15,6 +15,10 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { vi } from "date-fns/locale";
+import {
+  parseDateFromString,
+  formatDateToString,
+} from "../../../utils/dateUtils";
 
 interface CertificateFormProps {
   open: boolean;
@@ -35,15 +39,6 @@ const CertificateForm: React.FC<CertificateFormProps> = ({
   const [formData, setFormData] = useState<Partial<DoctorCertificate>>({
     certName: "",
     issueDate: "",
-    address: {
-      id: 0,
-      number: "",
-      street: "",
-      ward: "",
-      district: "",
-      city: "",
-      country: "",
-    },
   });
 
   // State cho validation
@@ -60,15 +55,6 @@ const CertificateForm: React.FC<CertificateFormProps> = ({
       setFormData({
         certName: "",
         issueDate: "",
-        address: {
-          id: 0,
-          number: "",
-          street: "",
-          ward: "",
-          district: "",
-          city: "",
-          country: "",
-        },
       });
     }
     // Reset errors
@@ -92,32 +78,14 @@ const CertificateForm: React.FC<CertificateFormProps> = ({
     }
   };
 
-  // Xử lý thay đổi input address
-  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      address: {
-        ...(formData.address || {}),
-        [name]: value,
-      },
-    });
-
-    // Xóa lỗi khi trường được thay đổi
-    if (errors[`address.${name}`]) {
-      setErrors({
-        ...errors,
-        [`address.${name}`]: "",
-      });
-    }
-  };
-
   // Xử lý thay đổi ngày cấp
   const handleIssueDateChange = (date: Date | null) => {
     if (date) {
+      // Use formatDateToString to ensure date is in correct format (dd-MM-yyyy)
+      const formattedDate = formatDateToString(date);
       setFormData({
         ...formData,
-        issueDate: date.toISOString().split("T")[0],
+        issueDate: formattedDate,
       });
       if (errors["issueDate"]) {
         setErrors({
@@ -138,10 +106,6 @@ const CertificateForm: React.FC<CertificateFormProps> = ({
 
     if (!formData.issueDate) {
       newErrors.issueDate = "Ngày cấp không được để trống";
-    }
-
-    if (!formData.address?.city?.trim()) {
-      newErrors["address.city"] = "Thành phố không được để trống";
     }
 
     setErrors(newErrors);
@@ -184,7 +148,13 @@ const CertificateForm: React.FC<CertificateFormProps> = ({
             >
               <DatePicker
                 label="Ngày cấp"
-                value={formData.issueDate ? new Date(formData.issueDate) : null}
+                value={
+                  formData.issueDate
+                    ? typeof formData.issueDate === "string"
+                      ? parseDateFromString(formData.issueDate)
+                      : new Date(formData.issueDate)
+                    : null
+                }
                 onChange={handleIssueDateChange}
                 slotProps={{
                   textField: {
@@ -195,74 +165,6 @@ const CertificateForm: React.FC<CertificateFormProps> = ({
                 }}
               />
             </LocalizationProvider>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Typography variant="subtitle2" gutterBottom>
-              Địa chỉ nơi cấp
-            </Typography>
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <TextField
-              name="city"
-              label="Thành phố"
-              value={formData.address?.city || ""}
-              onChange={handleAddressChange}
-              fullWidth
-              error={!!errors["address.city"]}
-              helperText={errors["address.city"]}
-            />
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <TextField
-              name="country"
-              label="Quốc gia"
-              value={formData.address?.country || ""}
-              onChange={handleAddressChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <TextField
-              name="district"
-              label="Quận/Huyện"
-              value={formData.address?.district || ""}
-              onChange={handleAddressChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={12} md={4}>
-            <TextField
-              name="ward"
-              label="Phường/Xã"
-              value={formData.address?.ward || ""}
-              onChange={handleAddressChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <TextField
-              name="street"
-              label="Đường"
-              value={formData.address?.street || ""}
-              onChange={handleAddressChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={12} md={2}>
-            <TextField
-              name="number"
-              label="Số nhà"
-              value={formData.address?.number || ""}
-              onChange={handleAddressChange}
-              fullWidth
-            />
           </Grid>
         </Grid>
       </DialogContent>

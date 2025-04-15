@@ -14,8 +14,8 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { useDispatch } from "react-redux";
-import { setUser } from "../../stores/slices/user.slice";
-import { updateInfo } from "../../services/authenticate/user_service";
+import { setUser } from "../stores/slices/user.slice";
+import { updateInfo } from "../services/authenticate/user_service";
 import { useNavigate } from "react-router";
 
 // Schema validate với Yup

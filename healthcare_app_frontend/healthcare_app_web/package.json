@@ -36,6 +36,7 @@
     "react-dom": "^18.3.1",
     "react-i18next": "^15.4.1",
     "react-leaflet": "^4.2.1",
+    "react-papaparse": "^4.4.0",
     "react-redux": "^9.2.0",
     "react-router": "^7.1.5",
     "react-toastify": "^11.0.5",
@@ -47,6 +48,7 @@
     "styled-components": "^6.1.15",
     "swiper": "^11.2.4",
     "uuid": "^11.1.0",
+    "xlsx": "^0.18.5",
     "yup": "^1.6.1",
     "zego-zim-web": "2.16.0"
   },
