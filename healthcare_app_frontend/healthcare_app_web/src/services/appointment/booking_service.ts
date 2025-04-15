@@ -14,11 +14,13 @@ export const getDoctorsFreeStartTime = async (start: string) => {
 export const createAppointment = async (
   patientId: string,
   note: string,
-  workSchedule: number
+  workSchedule: number,
+  paymentContent: string
 ) => {
   const response = await axiosConfig.post(`${prefix}`, {
     patientId: patientId,
     workSchedule: workSchedule,
+    paymentContent: paymentContent,
     note: note,
   });
   return response;
