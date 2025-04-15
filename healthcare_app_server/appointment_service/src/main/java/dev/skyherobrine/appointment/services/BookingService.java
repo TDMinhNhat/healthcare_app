@@ -65,8 +65,10 @@ public class BookingService {
         kafkaTemplate.send("insert_book_appointment", ObjectParser.convertObjectToJson(bookAppointment));
         BookAppointment target = bar.save(bookAppointment);
 
+        Thread.sleep(2000);
+
         BookAppointmentPayment bookAppointmentPayment = new BookAppointmentPayment(
-                1L,
+                getMaxIdBookAppointmentPayment(),
                 5000.0,
                 appointmentDTO.getPaymentContent(),
                 PaymentStatus.PAYED,
@@ -126,6 +128,11 @@ public class BookingService {
     private Long getMaxIdBookAppointment() {
         BookAppointment bookAppointment = bar.findTopByOrderByIdDesc().orElse(null);
         return (bookAppointment == null ? 0 : bookAppointment.getId()) + 1;
+    }
+
+    private Long getMaxIdBookAppointmentPayment() {
+        BookAppointmentPayment bookAppointmentPayment = bapr.findTopByOrderByIdDesc().orElse(null);
+        return (bookAppointmentPayment == null ? 0 : bookAppointmentPayment.getId()) + 1;
     }
 
     private int getNumericalOrders(Long workSchedule) {

@@ -48,6 +48,7 @@ public class BookingSocketController {
                 if (transaction.get("transaction_content").asText().equals(getDataNode.get("transaction_content").asText())) {
                     log.info("Booking Socket: payment found");
                     simpMessagingTemplate.convertAndSend("/patient/result_check_payment", true);
+                    return;
                 }
             }
             log.info("Booking Socket: payment not found");
