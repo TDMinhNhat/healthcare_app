@@ -11,5 +11,6 @@ public class AppointmentDTO {
 
     private String patientId;
     private Long workSchedule;
+    private String paymentContent;
     private String note;
 }

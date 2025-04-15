@@ -14,6 +14,11 @@ public class BookAppointmentProducer {
     }
 
     @Bean
+    public NewTopic addBookAppointmentPayment() {
+        return TopicBuilder.name("insert_book_appointment_payment").build();
+    }
+
+    @Bean
     public NewTopic cancelBookAppointment() {
         return TopicBuilder.name("cancel_appointment").build();
     }

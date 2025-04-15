@@ -27,4 +27,12 @@ public abstract class Payment {
         this.createdAt = LocalDateTime.now();
         this.status = PaymentStatus.WAITING_PAY;
     }
+
+    public Payment(Long id, Double price, String content, PaymentStatus status) {
+        this.id = id;
+        this.price = price;
+        this.content = content;
+        this.status = status;
+        this.createdAt = LocalDateTime.now();
+    }
 }

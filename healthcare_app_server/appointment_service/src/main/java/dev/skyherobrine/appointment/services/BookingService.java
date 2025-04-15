@@ -4,10 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.skyherobrine.appointment.dtos.AppointmentDTO;
 import dev.skyherobrine.appointment.enums.AppointmentStatus;
+import dev.skyherobrine.appointment.enums.PaymentStatus;
 import dev.skyherobrine.appointment.feigns.UserFeign;
 import dev.skyherobrine.appointment.feigns.WorkScheduleFeign;
 import dev.skyherobrine.appointment.messages.consumers.responses.WorkScheduleResponseConsumer;
 import dev.skyherobrine.appointment.models.mongodb.BookAppointment;
+import dev.skyherobrine.appointment.models.mongodb.BookAppointmentPayment;
+import dev.skyherobrine.appointment.repositories.mongodb.BookAppointmentPaymentRepository;
 import dev.skyherobrine.appointment.repositories.mongodb.BookAppointmentRepository;
 import dev.skyherobrine.appointment.utils.ObjectParser;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,14 +31,16 @@ public class BookingService {
 
     private final KafkaTemplate<String,String> kafkaTemplate;
     private final BookAppointmentRepository bar;
+    private final BookAppointmentPaymentRepository bapr;
     private final UserFeign userFeign;
     private final WorkScheduleFeign workScheduleFeign;
     private final BookAppointmentRepository bookAppointmentRepository;
     private final WorkScheduleResponseConsumer workScheduleResponseConsumer;
 
-    public BookingService(KafkaTemplate<String, String> kafkaTemplate, BookAppointmentRepository bar, UserFeign userFeign, WorkScheduleFeign workScheduleFeign, BookAppointmentRepository bookAppointmentRepository, WorkScheduleResponseConsumer workScheduleResponseConsumer) {
+    public BookingService(KafkaTemplate<String, String> kafkaTemplate, BookAppointmentRepository bar, BookAppointmentPaymentRepository bapr, UserFeign userFeign, WorkScheduleFeign workScheduleFeign, BookAppointmentRepository bookAppointmentRepository, WorkScheduleResponseConsumer workScheduleResponseConsumer) {
         this.kafkaTemplate = kafkaTemplate;
         this.bar = bar;
+        this.bapr = bapr;
         this.userFeign = userFeign;
         this.workScheduleFeign = workScheduleFeign;
         this.bookAppointmentRepository = bookAppointmentRepository;
@@ -58,10 +63,18 @@ public class BookingService {
                 appointmentDTO.getNote()
         );
         kafkaTemplate.send("insert_book_appointment", ObjectParser.convertObjectToJson(bookAppointment));
-        bar.save(bookAppointment);
+        BookAppointment target = bar.save(bookAppointment);
 
-        result.put("book_appointment", bookAppointment);
+        BookAppointmentPayment bookAppointmentPayment = new BookAppointmentPayment(
+                1L,
+                5000.0,
+                appointmentDTO.getPaymentContent(),
+                PaymentStatus.PAYED,
+                target
+        );
+        kafkaTemplate.send("insert_book_appointment_payment", ObjectParser.convertObjectToJson(bookAppointmentPayment));
 
+        result.put("book_appointment", bapr.save(bookAppointmentPayment));
         return result;
     }
 
