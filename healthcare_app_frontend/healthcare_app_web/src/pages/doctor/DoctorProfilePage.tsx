@@ -2,6 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { Container, Grid, Box, IconButton, Alert } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import LockIcon from "@mui/icons-material/Lock";
+import Button from "@mui/material/Button";
+import { useNavigate } from "react-router";
 // Import các component cho phần thông tin cá nhân và chuyên môn của bác sĩ
 import { PersonalInfoSection } from "../../components/profile/PersonalInfoSection";
 import { DoctorExperienceSection } from "../../components/doctor/DoctorExperienceSection";
@@ -118,6 +121,7 @@ const DoctorProfilePage: React.FC = () => {
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false); // Trạng thái hiển thị modal tải lên avatar
   const [error, setError] = useState<string | null>(null); // Lưu thông báo lỗi nếu có
   const user = useSelector((state: any) => state.user.user); // Lấy thông tin người dùng từ Redux
+  const navigate = useNavigate(); // Hook chuyển trang
 
   useEffect(() => {
     // Hàm lấy dữ liệu bác sĩ từ API
@@ -234,6 +238,25 @@ const DoctorProfilePage: React.FC = () => {
             >
               <EditIcon />
             </IconButton>
+            {/* Nút đổi mật khẩu */}
+            <Button
+              variant="outlined"
+              startIcon={<LockIcon />}
+              size="small"
+              sx={{
+                position: "absolute",
+                top: "12px",
+                right: "52px",
+                zIndex: 1,
+                bgcolor: "background.paper",
+                boxShadow: 1,
+                minWidth: 0,
+                px: 1.5,
+              }}
+              onClick={() => navigate("/change-password")}
+            >
+              Đổi mật khẩu
+            </Button>
           </Box>
         </Grid>
         {/* Phần thông tin kinh nghiệm */}

@@ -8,6 +8,7 @@ import MedicalRecordPage from "../pages/doctor/MedicalRecordPage";
 import DoctorAppointmentDetailsPage from "../pages/doctor/DoctorAppointmentDetailsPage";
 import PatientAppointmentDetailsPage from "../pages/patient/PatientAppointmentDetailsPage";
 import EmergencyPage from "../pages/doctor/EmergencyPage"; // Import the new EmergencyPage
+import ChangePasswordPage from "../pages/user/ChangePasswordPage"; // Import ChangePasswordPage
 
 // Import layout components
 import AdminLayout from "../layouts/AdminLayout";
@@ -44,6 +45,8 @@ export const AppRoutes = () => {
           <Route path={ROUTING.REGISTER} element={<RegisterPage />} />
           <Route path={ROUTING.LOGIN} element={<LoginPage />} />
           <Route path={ROUTING.VERIFY_EMAIL} element={<VerifyEmailPage />} />
+          {/* Route đổi mật khẩu riêng */}
+          <Route path="/change-password" element={<ChangePasswordPage />} />
 
           {/* Standalone Examination Room route */}
           <Route

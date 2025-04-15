@@ -155,7 +155,7 @@ const PatientDashboard: React.FC = () => {
         console.log("Fetching patient dashboard data for userId:", user.userId);
         const response = await getPatientDashboard(user.userId);
         const dashboardData: DashboardResponse = response.data;
-        // console.log("Dashboard data:", dashboardData);
+        console.log("Dashboard data:", dashboardData);
 
         // Update appointment stats
         setAppointmentStats({
