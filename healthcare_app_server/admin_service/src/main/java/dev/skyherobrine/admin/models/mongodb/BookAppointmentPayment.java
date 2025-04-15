@@ -1,5 +1,6 @@
 package dev.skyherobrine.admin.models.mongodb;
 
+import dev.skyherobrine.admin.enums.PaymentStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,10 +10,15 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Getter @Setter
 @NoArgsConstructor
 public class BookAppointmentPayment extends Payment {
-    private String bookAppointmentId;
+    private BookAppointment bookAppointment;
 
-    public BookAppointmentPayment(Long id, Double price, String content, String bookAppointmentId) {
+    public BookAppointmentPayment(Long id, Double price, String content, BookAppointment bookAppointment) {
         super(id, price, content);
-        this.bookAppointmentId = bookAppointmentId;
+        this.bookAppointment = bookAppointment;
+    }
+
+    public BookAppointmentPayment(Long id, Double price, String content, PaymentStatus status, BookAppointment bookAppointment) {
+        super(id, price, content, status);
+        this.bookAppointment = bookAppointment;
     }
 }

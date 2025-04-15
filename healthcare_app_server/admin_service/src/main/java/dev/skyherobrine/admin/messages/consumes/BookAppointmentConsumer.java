@@ -3,8 +3,11 @@ package dev.skyherobrine.admin.messages.consumes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.skyherobrine.admin.enums.AppointmentStatus;
+import dev.skyherobrine.admin.enums.PaymentStatus;
 import dev.skyherobrine.admin.models.mongodb.BookAppointment;
+import dev.skyherobrine.admin.models.mongodb.BookAppointmentPayment;
 import dev.skyherobrine.admin.repositories.mariadb.PatientRepository;
+import dev.skyherobrine.admin.repositories.mongodb.BookAppointmentPaymentRepository;
 import dev.skyherobrine.admin.repositories.mongodb.BookAppointmentRepository;
 import dev.skyherobrine.admin.repositories.mongodb.WorkScheduleRepository;
 import dev.skyherobrine.admin.utils.ObjectParser;
@@ -19,11 +22,13 @@ public class BookAppointmentConsumer {
 
     private final PatientRepository patientRepository;
     private final BookAppointmentRepository bookAppointmentRepository;
+    private final BookAppointmentPaymentRepository bookAppointmentPaymentRepository;
     private final WorkScheduleRepository workScheduleRepository;
 
-    public BookAppointmentConsumer(PatientRepository patientRepository, BookAppointmentRepository bookAppointmentRepository, WorkScheduleRepository workScheduleRepository) {
+    public BookAppointmentConsumer(PatientRepository patientRepository, BookAppointmentRepository bookAppointmentRepository, BookAppointmentPaymentRepository bookAppointmentPaymentRepository, WorkScheduleRepository workScheduleRepository) {
         this.patientRepository = patientRepository;
         this.bookAppointmentRepository = bookAppointmentRepository;
+        this.bookAppointmentPaymentRepository = bookAppointmentPaymentRepository;
         this.workScheduleRepository = workScheduleRepository;
     }
 
@@ -49,6 +54,34 @@ public class BookAppointmentConsumer {
             );
             bookAppointmentRepository.save(bookAppointment);
             log.info("Book Appointment Consumer: The book appointment has been inserted");
+        } catch (Exception e) {
+            log.error("Book Appointment Consumer: The consumer thrown an exception");
+            log.error(e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "insert_book_appointment_payment", groupId = "admin_insert_book_appointment_payment")
+    public void insertBookAppointmentPayment(String message) {
+        try {
+            log.info("Book Appointment Consumer: listen the message for inserting the book appointment payment");
+            log.info("Book Appointment Consumer: {}", message);
+
+            JsonNode node = new ObjectMapper().readTree(message);
+            Long getId = node.get("id").asLong();
+            Double getPrice = node.get("price").asDouble();
+            String getContent = node.get("content").asText();
+            Long getBookAppointmentId = node.get("bookAppointmentId").get("id").asLong();
+
+            BookAppointment bookAppointment = bookAppointmentRepository.findById(getBookAppointmentId).orElseThrow(() -> new EntityNotFoundException("The book appointment was not found!"));
+            BookAppointmentPayment bookAppointmentPayment = new BookAppointmentPayment(
+                    getId,
+                    getPrice,
+                    getContent,
+                    PaymentStatus.PAYED,
+                    bookAppointment
+            );
+            bookAppointmentPaymentRepository.save(bookAppointmentPayment);
+            log.info("Book Appointment Consumer: The book appointment payment has been inserted");
         } catch (Exception e) {
             log.error("Book Appointment Consumer: The consumer thrown an exception");
             log.error(e.getMessage());
