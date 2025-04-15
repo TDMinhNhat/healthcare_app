@@ -75,13 +75,13 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
     handleNext();
   };
 
-  const handlePaymentComplete = async () => {
+  const handlePaymentComplete = async (paymentContent: string) => {
     try {
       setLoading(true);
       setError(null);
       setPaymentCompleted(true);
 
-      await createAppointment(patientId, note, workSchedule.id);
+      await createAppointment(patientId, note, workSchedule.id, paymentContent);
 
       handleNext();
     } catch (err) {
@@ -181,7 +181,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
         </Box>
       )}
 
-      {/* {activeStep === 3 && (
+      {activeStep === 3 && (
         <PaymentCheckout
           onPaymentComplete={handlePaymentComplete}
           // onBack={handleBack}
@@ -189,7 +189,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
           workSchedule={workSchedule}
           loading={loading}
         />
-      )} */}
+      )}
 
       {activeStep === 4 && (
         <ConfirmAppointment

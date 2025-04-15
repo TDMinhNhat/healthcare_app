@@ -15,7 +15,7 @@ import { useSelector } from "react-redux";
 import { Client } from "@stomp/stompjs";
 
 interface PaymentCheckoutProps {
-  onPaymentComplete: () => Promise<void>; // Hàm gọi khi thanh toán hoàn tất
+  onPaymentComplete: (paymentContent: string) => Promise<void>; // Hàm gọi khi thanh toán hoàn tất
   workSchedule: any; // Thông tin lịch làm việc của bác sĩ
   loading: boolean; // Trạng thái đang xử lý
 }
@@ -56,7 +56,7 @@ const PaymentCheckout: React.FC<PaymentCheckoutProps> = ({
       })});
 
       if(verifyingPayment) {
-        onPaymentComplete().catch((error) => {
+        onPaymentComplete(code).catch((error) => {
           console.log(error);
           setPaymentError("Có lỗi xảy ra trong quá trình xác minh thanh toán.");
         });
