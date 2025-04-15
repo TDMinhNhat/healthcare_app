@@ -482,7 +482,7 @@ export default function DashboardTab() {
                   style={styles.appointmentItem}
                   activeOpacity={0.7}
                   onPress={() => {
-                    navigateToAppointmentDetail(item.id);
+                    navigateToAppointmentDetail(item.workScheduleId);
                   }}
                 >
                   <View style={styles.appointmentHeader}>
