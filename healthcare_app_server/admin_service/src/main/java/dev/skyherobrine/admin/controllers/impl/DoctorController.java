@@ -114,7 +114,7 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
     }
 
     @PostMapping("/import")
-    public ResponseEntity<Response> importDoctorBaseInfo(@RequestBody List<DoctorDTO> doctors) {
+    public ResponseEntity<Response> importDoctor(@RequestBody List<DoctorDTO> doctors) {
         try {
             log.info("Doctor: Call the api import doctor base info");
             return ResponseEntity.ok(new Response(
