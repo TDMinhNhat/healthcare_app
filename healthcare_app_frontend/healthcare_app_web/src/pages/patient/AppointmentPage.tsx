@@ -212,6 +212,7 @@ const AppointmentPage = () => {
   // Xử lý khi người dùng đóng form đặt lịch
   const handleBookingClose = () => {
     setShowBooking(false);
+    fetchAppointments(); // Tải lại lịch hẹn sau khi đóng form
   };
 
   // Các hàm điều hướng lịch

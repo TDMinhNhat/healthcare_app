@@ -13,6 +13,7 @@ import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import SettingsIcon from "@mui/icons-material/Settings";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
+import EventBusyIcon from "@mui/icons-material/EventBusy";
 import { useNavigate } from "react-router";
 import { Outlet } from "react-router";
 
@@ -64,6 +65,15 @@ export const AdminLayout: React.FC = () => {
             <MedicalServicesIcon />
           </ListItemIcon>
           <ListItemText primary="Quản lí dịch vụ" />
+        </ListItemButton>
+        {/* Hoàn tiền */}
+        <ListItemButton
+          onClick={() => handleNavigation("/admin/cancel-appointment")}
+        >
+          <ListItemIcon>
+            <EventBusyIcon />
+          </ListItemIcon>
+          <ListItemText primary="Huỷ Lịch hẹn" />
         </ListItemButton>
       </List>
 

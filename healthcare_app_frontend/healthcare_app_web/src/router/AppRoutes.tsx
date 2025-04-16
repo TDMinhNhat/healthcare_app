@@ -9,6 +9,7 @@ import DoctorAppointmentDetailsPage from "../pages/doctor/DoctorAppointmentDetai
 import PatientAppointmentDetailsPage from "../pages/patient/PatientAppointmentDetailsPage";
 import EmergencyPage from "../pages/doctor/EmergencyPage"; // Import the new EmergencyPage
 import ChangePasswordPage from "../pages/ChangePasswordPage"; // Import ChangePasswordPage
+import ForgetPasswordPage from "../pages/ForgetPasswordPage"; // Import trang quên mật khẩu
 
 // Import layout components
 import AdminLayout from "../layouts/AdminLayout";
@@ -32,6 +33,7 @@ import DoctorManagementPage from "../pages/admin/DoctorManagementPage";
 import ShiftManagementPage from "../pages/admin/ShiftManagementPage";
 import AdminDashboardPage from "../pages/admin/AdminDashboardPage"; // Import the new admin dashboard
 import DiseasManagementPage from "../pages/admin/DiseasManagementPage";
+import CancelAppointmentPage from "../pages/admin/CancelAppointmentPage";
 
 // const ChatPage = lazy(() => import("../pages/ChatPage"));
 
@@ -50,6 +52,11 @@ export const AppRoutes = () => {
             path={ROUTING.CHANGE_PASSWORD}
             element={<ChangePasswordPage />}
           />
+          {/* Route quên mật khẩu */}
+          <Route
+            path={ROUTING.FORGET_PASSWORD}
+            element={<ForgetPasswordPage />}
+          />
 
           {/* Standalone Examination Room route */}
           <Route
@@ -67,6 +74,10 @@ export const AppRoutes = () => {
             <Route path={ROUTING.DRUG} element={<DrugManagementPage />} />
             <Route path={ROUTING.SHIFTS} element={<ShiftManagementPage />} />
             <Route path={ROUTING.DISEASES} element={<DiseasManagementPage />} />
+            <Route
+              path={ROUTING.CANCEL_APPOINTMENT}
+              element={<CancelAppointmentPage />}
+            />
           </Route>
 
           {/* Doctor routes */}

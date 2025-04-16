@@ -13,6 +13,11 @@ import {
   Avatar,
   Divider,
   Paper,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 import EventIcon from "@mui/icons-material/Event";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
@@ -21,9 +26,16 @@ import PersonIcon from "@mui/icons-material/Person";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import DescriptionIcon from "@mui/icons-material/Description";
 import VideoCallIcon from "@mui/icons-material/VideoCall";
+import CancelIcon from "@mui/icons-material/Cancel";
 import MedicalRecordModal from "../../components/medical/MedicalRecordModal";
-import { getAppointmentPatientDetail } from "../../services/appointment/booking_service";
-import { formatTimeFromTimeString } from "../../utils/dateUtils";
+import {
+  getAppointmentPatientDetail,
+  cancelAppointment,
+} from "../../services/appointment/booking_service";
+import {
+  formatTimeFromTimeString,
+  parseDateTimeFromString,
+} from "../../utils/dateUtils";
 import { useNavigate } from "react-router";
 import { ROUTING } from "../../constants/routing";
 
@@ -43,6 +55,8 @@ const PatientAppointmentDetailsPage: React.FC = () => {
     useState<boolean>(false);
   const user = useSelector((state: any) => state.user.user);
   const navigate = useNavigate();
+  const [openCancelDialog, setOpenCancelDialog] = useState(false);
+  const [cancellationSuccess, setCancellationSuccess] = useState(false);
 
   const getStatus = (status: string) => {
     switch (status) {
@@ -59,56 +73,56 @@ const PatientAppointmentDetailsPage: React.FC = () => {
     }
   };
 
+  const fetchAppointmentDetails = async () => {
+    try {
+      const result = await getAppointmentPatientDetail(
+        user.userId,
+        appointmentId
+      )
+        .then((response) => response.data.data)
+        .catch((error) => {
+          console.error("Lỗi khi tải thông tin cuộc hẹn:", error);
+          setLoading(false);
+        });
+
+      const data = {
+        id: result.book_appointment.id,
+        workScheduleId: result.work_schedule.id,
+        date: result.work_schedule.dateAppointment,
+        time: `${formatTimeFromTimeString(
+          result.work_schedule.shift.start,
+          "string"
+        )} - ${formatTimeFromTimeString(
+          result.work_schedule.shift.end,
+          "string"
+        )}`,
+        // location: "Phòng 302, Tòa nhà chính",
+        status: getStatus(result.book_appointment.status),
+        patientInfo: {
+          id: result.book_appointment.patientId,
+          numericalOrder: result.book_appointment.numericalOrder,
+        },
+        doctorInfo: {
+          id: result.work_schedule.doctor.userId,
+          name: `${result.work_schedule.doctor.firstName} ${result.work_schedule.doctor.lastName}`,
+          typeDisease: result.work_schedule.doctor.typeDisease.name,
+          avatar: result.work_schedule.doctor.avatar,
+          specialization: result.work_schedule.doctor.specialization || "",
+        },
+        hasMedicalRecord: true,
+        createdAt: result.book_appointment.createdAt,
+      };
+      setAppointment(data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Lỗi khi tải thông tin cuộc hẹn:", error);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    // Mô phỏng gọi API
-    const fetchAppointmentDetails = async () => {
-      try {
-        const result = await getAppointmentPatientDetail(
-          user.userId,
-          appointmentId
-        )
-          .then((response) => response.data.data)
-          .catch((error) => {
-            console.error("Lỗi khi tải thông tin cuộc hẹn:", error);
-            setLoading(false);
-          });
-
-        const data = {
-          id: result.book_appointment.id,
-          workScheduleId: result.work_schedule.id,
-          date: result.work_schedule.dateAppointment,
-          time: `${formatTimeFromTimeString(
-            result.work_schedule.shift.start,
-            "string"
-          )} - ${formatTimeFromTimeString(
-            result.work_schedule.shift.end,
-            "string"
-          )}`,
-          // location: "Phòng 302, Tòa nhà chính",
-          status: getStatus(result.book_appointment.status),
-          patientInfo: {
-            id: result.book_appointment.patientId,
-            numericalOrder: result.book_appointment.numericalOrder,
-          },
-          doctorInfo: {
-            id: result.work_schedule.doctor.userId,
-            name: `${result.work_schedule.doctor.firstName} ${result.work_schedule.doctor.lastName}`,
-            typeDisease: result.work_schedule.doctor.typeDisease.name,
-            avatar: result.work_schedule.doctor.avatar,
-            specialization: result.work_schedule.doctor.specialization || "",
-          },
-          hasMedicalRecord: true,
-        };
-        setAppointment(data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Lỗi khi tải thông tin cuộc hẹn:", error);
-        setLoading(false);
-      }
-    };
-
     fetchAppointmentDetails();
-  }, [appointmentId]);
+  }, [appointmentId, cancellationSuccess]);
 
   // Hiển thị trạng thái đang tải
   if (loading) {
@@ -198,6 +212,59 @@ const PatientAppointmentDetailsPage: React.FC = () => {
         numericalOrder: numericalOrder,
       },
     });
+  };
+
+  /**
+   * Kiểm tra xem cuộc hẹn có thể huỷ hay không
+   * Chỉ cho phép huỷ nếu đặt trong vòng 24h
+   */
+  const canCancelAppointment = (createdAt: string, status: string) => {
+    // Kiểm tra trạng thái cuộc hẹn
+    if (status !== "Đang chờ") return false;
+
+    try {
+      // Sử dụng hàm từ dateUtils để parse chuỗi ngày đặt lịch hẹn
+      const createdDate = parseDateTimeFromString(createdAt);
+      const now = new Date();
+
+      // Tính thời gian chênh lệch (milliseconds)
+      const timeDiff = now.getTime() - createdDate.getTime();
+      const hoursDiff = timeDiff / (1000 * 60 * 60);
+
+      // Chỉ cho phép huỷ nếu đặt trong vòng 24h
+      return hoursDiff <= 24;
+    } catch (error) {
+      console.error("Lỗi khi xử lý ngày tháng:", error);
+      return false;
+    }
+  };
+
+  /**
+   * Mở dialog xác nhận huỷ lịch hẹn
+   */
+  const handleOpenCancelDialog = () => {
+    setOpenCancelDialog(true);
+  };
+
+  /**
+   * Đóng dialog xác nhận huỷ lịch hẹn
+   */
+  const handleCloseCancelDialog = () => {
+    setOpenCancelDialog(false);
+  };
+
+  /**
+   * Xử lý huỷ lịch hẹn
+   */
+  const handleCancelAppointment = async () => {
+    try {
+      await cancelAppointment(appointment.id);
+      setCancellationSuccess(true);
+      handleCloseCancelDialog();
+      fetchAppointmentDetails(); // Tải lại thông tin cuộc hẹn sau khi huỷ
+    } catch (error) {
+      console.error("Lỗi khi huỷ lịch hẹn:", error);
+    }
   };
 
   return (
@@ -292,6 +359,19 @@ const PatientAppointmentDetailsPage: React.FC = () => {
 
           {/* Nút xem hồ sơ y tế và tham gia khám */}
           <Box mt={3} display="flex" justifyContent="flex-end" gap={2}>
+            {canCancelAppointment(
+              appointment.createdAt,
+              appointment.status
+            ) && (
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<CancelIcon />}
+                onClick={handleOpenCancelDialog}
+              >
+                Huỷ lịch hẹn
+              </Button>
+            )}
             {canJoinExamination(appointment.status) && (
               <Button
                 variant="contained"
@@ -403,6 +483,36 @@ const PatientAppointmentDetailsPage: React.FC = () => {
         }}
         isDoctor={false}
       />
+
+      {/* Dialog xác nhận huỷ lịch hẹn */}
+      <Dialog
+        open={openCancelDialog}
+        onClose={handleCloseCancelDialog}
+        aria-labelledby="cancel-dialog-title"
+        aria-describedby="cancel-dialog-description"
+      >
+        <DialogTitle id="cancel-dialog-title">
+          Xác nhận huỷ lịch hẹn
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="cancel-dialog-description">
+            Bạn có chắc chắn muốn huỷ lịch hẹn khám này không? Thao tác này
+            không thể hoàn tác.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseCancelDialog} color="primary">
+            Hủy bỏ
+          </Button>
+          <Button
+            onClick={handleCancelAppointment}
+            color="error"
+            variant="contained"
+          >
+            Xác nhận huỷ
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

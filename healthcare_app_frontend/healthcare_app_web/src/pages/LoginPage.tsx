@@ -161,7 +161,7 @@ export default function LoginPage() {
 
             <Grid2 size={{ xs: 12 }}>
               <Link
-                href="/forgot-password"
+                href={ROUTING.FORGET_PASSWORD}
                 sx={{
                   display: "block",
                   textAlign: "right",

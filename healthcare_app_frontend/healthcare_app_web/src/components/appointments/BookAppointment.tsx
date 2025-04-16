@@ -110,6 +110,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
     setWorkSchedule(null);
     setNote("");
     onClose();
+    // redirect to appointment list page or show success message
   };
 
   const handleNoteChange = (value: string) => {

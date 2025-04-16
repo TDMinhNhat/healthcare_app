@@ -6,6 +6,7 @@ export const ROUTING = {
   VERIFY_EMAIL: "/verify-email",
   CHANGE_PASSWORD: "/change-password", // New route for password change
   EXAMINATION_ROOM: "/examination/:scheduleId", // New standalone examination room route
+  FORGET_PASSWORD: "/forgot-password", // New route for forgot password
 
   // Role root paths
   ADMIN: "/admin",
@@ -19,6 +20,7 @@ export const ROUTING = {
   DRUG: "drugs",
   SHIFTS: "shifts",
   DISEASES: "diseases",
+  CANCEL_APPOINTMENT: "cancel-appointment",
 
   // Doctor routes (nested under /doctor)
   APPOINTMENTS: "appointments",
