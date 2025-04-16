@@ -10,16 +10,24 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getAppointmentPatientDetail } from "@/services/appointment/booking_service";
+import {
+  getAppointmentPatientDetail,
+  cancelAppointment,
+} from "@/services/appointment/booking_service";
 import {
   AntDesign,
   Ionicons,
   MaterialIcons,
   FontAwesome,
+  MaterialCommunityIcons,
 } from "@expo/vector-icons";
-import { formatTimeFromTimeString } from "@/utils/dateUtils";
+import {
+  formatTimeFromTimeString,
+  parseDateTimeFromString,
+} from "@/utils/dateUtils";
 
 export default function AppointmentDetailsScreen() {
   const params = useLocalSearchParams();
@@ -28,6 +36,8 @@ export default function AppointmentDetailsScreen() {
   const [appointment, setAppointment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [openCancelDialog, setOpenCancelDialog] = useState(false);
+  const [cancellationSuccess, setCancellationSuccess] = useState(false);
 
   // Lấy thông tin người dùng từ Redux store
   const user = useSelector((state: any) => state.user.user);
@@ -127,6 +137,71 @@ export default function AppointmentDetailsScreen() {
     }
   };
 
+  /**
+   * Kiểm tra xem cuộc hẹn có thể huỷ hay không
+   * Chỉ cho phép huỷ nếu đặt trong vòng 24h và có trạng thái Đang chờ
+   */
+  const canCancelAppointment = (createdAt: string, status: string) => {
+    // Kiểm tra trạng thái cuộc hẹn
+    if (status !== "Đang chờ") return false;
+
+    try {
+      // Sử dụng hàm từ dateUtils để parse chuỗi ngày đặt lịch hẹn
+      const createdDate = parseDateTimeFromString(createdAt);
+      const now = new Date();
+
+      // Tính thời gian chênh lệch (milliseconds)
+      const timeDiff = now.getTime() - createdDate.getTime();
+      const hoursDiff = timeDiff / (1000 * 60 * 60);
+
+      // Chỉ cho phép huỷ nếu đặt trong vòng 24h
+      return hoursDiff <= 24;
+    } catch (error) {
+      console.error("Lỗi khi xử lý ngày tháng:", error);
+      return false;
+    }
+  };
+
+  /**
+   * Mở dialog xác nhận huỷ lịch hẹn
+   */
+  const handleOpenCancelDialog = () => {
+    setOpenCancelDialog(true);
+  };
+
+  /**
+   * Đóng dialog xác nhận huỷ lịch hẹn
+   */
+  const handleCloseCancelDialog = () => {
+    setOpenCancelDialog(false);
+  };
+
+  /**
+   * Xử lý huỷ lịch hẹn
+   */
+  const handleCancelAppointment = async () => {
+    try {
+      await cancelAppointment(appointment.id);
+      setCancellationSuccess(true);
+      setOpenCancelDialog(false);
+
+      // Cập nhật trạng thái cuộc hẹn thành "Đã hủy" trực tiếp trong state
+      setAppointment({
+        ...appointment,
+        status: "Đã hủy",
+      });
+
+      Alert.alert("Thành công", "Cuộc hẹn đã được hủy thành công", [
+        { text: "OK" },
+      ]);
+    } catch (error) {
+      console.error("Lỗi khi huỷ lịch hẹn:", error);
+      Alert.alert("Lỗi", "Không thể hủy cuộc hẹn. Vui lòng thử lại sau.", [
+        { text: "Đóng" },
+      ]);
+    }
+  };
+
   useEffect(() => {
     const fetchAppointmentDetails = async () => {
       if (!appointmentId || !user?.userId) {
@@ -170,6 +245,7 @@ export default function AppointmentDetailsScreen() {
               result.work_schedule.doctor.specialization || "Bác sĩ",
           },
           hasMedicalRecord: true, // Giả định điều này hiện tại
+          createdAt: result.book_appointment.createdAt, // Đảm bảo có trường createdAt
         };
 
         setAppointment(data);
@@ -182,7 +258,7 @@ export default function AppointmentDetailsScreen() {
     };
 
     fetchAppointmentDetails();
-  }, [appointmentId, user]);
+  }, [appointmentId, user, cancellationSuccess]);
 
   // Hiển thị trạng thái đang tải
   if (loading) {
@@ -275,6 +351,18 @@ export default function AppointmentDetailsScreen() {
 
           {/* Nút hành động */}
           <View style={styles.actionContainer}>
+            {canCancelAppointment(
+              appointment.createdAt,
+              appointment.status
+            ) && (
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={handleOpenCancelDialog}
+              >
+                <MaterialCommunityIcons name="cancel" size={20} color="#fff" />
+                <Text style={styles.buttonText}>Huỷ lịch hẹn</Text>
+              </TouchableOpacity>
+            )}
             {canJoinExamination(appointment.status) && (
               <TouchableOpacity
                 style={styles.joinButton}
@@ -353,6 +441,38 @@ export default function AppointmentDetailsScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Modal xác nhận huỷ lịch hẹn */}
+      <Modal
+        visible={openCancelDialog}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={handleCloseCancelDialog}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Xác nhận huỷ lịch hẹn</Text>
+            <Text style={styles.modalContent}>
+              Bạn có chắc chắn muốn huỷ lịch hẹn khám này không? Thao tác này
+              không thể hoàn tác.
+            </Text>
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={handleCloseCancelDialog}
+              >
+                <Text style={styles.modalCancelButtonText}>Hủy bỏ</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalConfirmButton}
+                onPress={handleCancelAppointment}
+              >
+                <Text style={styles.modalConfirmButtonText}>Xác nhận huỷ</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -459,8 +579,17 @@ const styles = StyleSheet.create({
   actionContainer: {
     flexDirection: "row",
     justifyContent: "flex-end",
+    flexWrap: "wrap",
     gap: 10,
     marginTop: 8,
+  },
+  cancelButton: {
+    backgroundColor: "#f44336",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 4,
   },
   joinButton: {
     backgroundColor: "#4caf50",
@@ -573,5 +702,58 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalContainer: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 20,
+    width: "90%",
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 15,
+    color: "#333",
+  },
+  modalContent: {
+    fontSize: 16,
+    marginBottom: 20,
+    color: "#555",
+    lineHeight: 22,
+  },
+  modalButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 10,
+  },
+  modalCancelButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: "#ccc",
+  },
+  modalCancelButtonText: {
+    color: "#555",
+    fontWeight: "500",
+  },
+  modalConfirmButton: {
+    backgroundColor: "#f44336",
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 4,
+  },
+  modalConfirmButtonText: {
+    color: "white",
+    fontWeight: "500",
   },
 });
