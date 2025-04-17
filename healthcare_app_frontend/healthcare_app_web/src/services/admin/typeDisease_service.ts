@@ -25,3 +25,8 @@ export const deleteTypeDisease = async (id: string) => {
   const response = await axiosConfig.delete(`${prefix}/${id}`);
   return response.data;
 };
+
+export const importTypeDisease = async (diseases: any) => {
+  const response = await axiosConfig.post(`${prefix}/import`, diseases);
+  return response.data;
+};

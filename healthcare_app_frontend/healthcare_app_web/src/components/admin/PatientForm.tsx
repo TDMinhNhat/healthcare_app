@@ -156,8 +156,8 @@ const PatientForm: React.FC<PatientFormProps> = ({
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 >
-                  <MenuItem value={true}>Nam</MenuItem>
-                  <MenuItem value={false}>Nữ</MenuItem>
+                  <MenuItem value={false}>Nam</MenuItem>
+                  <MenuItem value={true}>Nữ</MenuItem>
                 </Select>
                 {formik.touched.sex && formik.errors.sex && (
                   <FormHelperText>{formik.errors.sex as string}</FormHelperText>

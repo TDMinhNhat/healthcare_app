@@ -21,7 +21,11 @@ import { Edit, Delete, Add, Visibility, UploadFile } from "@mui/icons-material";
 import { Doctor } from "../../types/doctor";
 import DoctorForm from "../../components/admin/DoctorForm";
 import DoctorDetailModal from "../../components/admin/DoctorDetailModal";
-import { getAllDoctors, addDoctor } from "../../services/admin/doctor_service";
+import {
+  getAllDoctors,
+  addDoctor,
+  importDoctor,
+} from "../../services/admin/doctor_service";
 import { format } from "date-fns";
 import * as XLSX from "xlsx";
 import { Address } from "../../types/address";
@@ -39,6 +43,7 @@ const DoctorManagementPage: React.FC = () => {
   const [formMode, setFormMode] = useState<"add" | "edit">("add"); // Chế độ form: thêm mới/chỉnh sửa
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null); // Bác sĩ đang được chọn
   const [loading, setLoading] = useState<boolean>(true); // Trạng thái loading
+  const [importing, setImporting] = useState<boolean>(false); // Trạng thái import dữ liệu
   const [error, setError] = useState<string | null>(null); // Lỗi nếu có
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
@@ -49,7 +54,7 @@ const DoctorManagementPage: React.FC = () => {
     message: "",
     severity: "info",
   });
-  const [submitting, setSubmitting] = useState<boolean>(false); // New state for form submission loading
+  const [submitting, setSubmitting] = useState<boolean>(false); // Trạng thái đang gửi form
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -59,34 +64,35 @@ const DoctorManagementPage: React.FC = () => {
     utf8WithBom: true,
   };
 
-  // Fetch doctors from API when component mounts
-  useEffect(() => {
-    const fetchDoctors = async () => {
-      try {
-        setLoading(true);
-        const response = await getAllDoctors();
-        if (response && response.data) {
-          setDoctors(response.data);
-        } else {
-          setError("Không thể tải danh sách bác sĩ");
-        }
-      } catch (error) {
-        console.error("Error fetching doctors:", error);
-        setError("Đã xảy ra lỗi khi tải danh sách bác sĩ");
-      } finally {
-        setLoading(false);
+  // Hàm lấy danh sách bác sĩ từ API
+  const fetchDoctors = async () => {
+    try {
+      setLoading(true);
+      const response = await getAllDoctors();
+      if (response && response.data) {
+        setDoctors(response.data);
+      } else {
+        setError("Không thể tải danh sách bác sĩ");
       }
-    };
+    } catch (error) {
+      console.error("Error fetching doctors:", error);
+      setError("Đã xảy ra lỗi khi tải danh sách bác sĩ");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Lấy danh sách bác sĩ khi component được tải
+  useEffect(() => {
     fetchDoctors();
   }, []);
 
-  // Close snackbar
+  // Đóng snackbar thông báo
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  // Show snackbar message
+  // Hiển thị thông báo
   const showMessage = (
     message: string,
     severity: "success" | "error" | "info" | "warning"
@@ -341,10 +347,10 @@ const DoctorManagementPage: React.FC = () => {
     // Tách các học vấn bằng dấu chấm phẩy
     return eduStr.split(";").map((edu) => {
       // Tách thông tin chi tiết của từng học vấn bằng dấu phẩy
-      const [schoolName, joinedDate, graduateDate, diploma] = edu.split(",");
+      const [schoolName, joinDate, graduateDate, diploma] = edu.split(",");
       return {
         schoolName,
-        joinedDate,
+        joinDate,
         graduateDate,
         diploma,
       };
@@ -474,8 +480,99 @@ const DoctorManagementPage: React.FC = () => {
     };
   };
 
+  // Hàm xử lý định dạng ngày tháng để hỗ trợ nhiều định dạng khác nhau
+  const formatDateString = (dateValue: any): string => {
+    if (!dateValue) return "";
+
+    try {
+      // Trường hợp 1: Nếu là chuỗi có định dạng YYYY-MM-DD (với dấu gạch ngang)
+      if (typeof dateValue === "string" && dateValue.includes("-")) {
+        // Kiểm tra xem có đúng định dạng YYYY-MM-DD không
+        const match = dateValue.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+        if (match) {
+          const year = match[1];
+          let month = match[2];
+          let day = match[3];
+
+          // Thêm số 0 ở đầu nếu cần
+          day = day.padStart(2, "0");
+          month = month.padStart(2, "0");
+
+          // Trả về định dạng "dd-MM-yyyy"
+          return `${day}-${month}-${year}`;
+        }
+      }
+
+      // Trường hợp 2: Nếu là chuỗi có định dạng DD/MM/YYYY
+      if (typeof dateValue === "string" && dateValue.includes("/")) {
+        const parts = dateValue.split("/");
+        if (parts.length !== 3) return dateValue;
+
+        let day = parts[0];
+        let month = parts[1];
+        const year = parts[2];
+
+        // Thêm số 0 ở đầu nếu cần
+        day = day.padStart(2, "0");
+        month = month.padStart(2, "0");
+
+        return `${day}-${month}-${year}`;
+      }
+
+      // Trường hợp 3: Nếu là số (Excel date serial)
+      if (typeof dateValue === "number" || !isNaN(Number(dateValue))) {
+        // Tạo đối tượng Date sử dụng UTC để tránh vấn đề múi giờ
+        const excelEpoch = new Date(Date.UTC(1899, 11, 30)); // 30/12/1899 ở UTC
+        const daysSinceEpoch = Number(dateValue);
+        const millisecondsSinceEpoch = daysSinceEpoch * 24 * 60 * 60 * 1000;
+        const date = new Date(excelEpoch.getTime() + millisecondsSinceEpoch);
+
+        // Lấy các thành phần ngày tháng ở định dạng UTC để tránh dịch ngày
+        const day = String(date.getUTCDate()).padStart(2, "0");
+        const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+        const year = date.getUTCFullYear();
+
+        return `${day}-${month}-${year}`;
+      }
+    } catch (error) {
+      console.error("Lỗi định dạng ngày tháng:", error, dateValue);
+      return String(dateValue);
+    }
+
+    // Trả về giá trị gốc nếu không thể xử lý
+    return String(dateValue);
+  };
+
+  // Hàm hỗ trợ xử lý và định dạng ngày tháng trong hồ sơ học vấn
+  const formatEducationDates = (educations: Partial<DoctorEducation>[]) => {
+    return educations.map((edu) => ({
+      ...edu,
+      joinDate: edu.joinDate ? formatDateString(edu.joinDate) : "",
+      graduateDate: edu.graduateDate ? formatDateString(edu.graduateDate) : "",
+    }));
+  };
+
+  // Hàm hỗ trợ xử lý và định dạng ngày tháng trong hồ sơ chứng chỉ
+  const formatCertificateDates = (
+    certificates: Partial<DoctorCertificate>[]
+  ) => {
+    return certificates.map((cert) => ({
+      ...cert,
+      issueDate: cert.issueDate ? formatDateString(cert.issueDate) : "",
+    }));
+  };
+
+  // Hàm hỗ trợ xử lý và định dạng ngày tháng trong hồ sơ kinh nghiệm
+  const formatExperienceDates = (experiences: Partial<DoctorExperience>[]) => {
+    return experiences.map((exp) => ({
+      ...exp,
+      startDate: exp.startDate ? formatDateString(exp.startDate) : "",
+      endDate: exp.endDate ? formatDateString(exp.endDate) : "",
+    }));
+  };
+
   // Hàm xử lý khi người dùng chọn file để import
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -488,7 +585,8 @@ const DoctorManagementPage: React.FC = () => {
       fileName.endsWith(".xlsx") ||
       fileName.endsWith(".xls")
     ) {
-      reader.onload = (evt) => {
+      setImporting(true); // Đặt trạng thái đang import
+      reader.onload = async (evt) => {
         try {
           // Đọc dữ liệu file
           const data = evt.target?.result;
@@ -499,42 +597,88 @@ const DoctorManagementPage: React.FC = () => {
 
           // Xử lý từng dòng dữ liệu và phân tích các trường phức tạp
           const processedData = json.map((row: any) => {
-            // console.log("Processing row:", row);
-
             let address = null;
             if (row.address && row.address !== "null") {
               address = parseAddress(row.address);
-              // console.log("Parsed main address:", address);
+            }
+
+            // Phân tích chứng chỉ, học vấn và kinh nghiệm
+            const certificates = parseCertificates(row.certificates || "");
+            const educations = parseEducations(row.educations || "");
+            const experiences = parseExperiences(row.experiences || "");
+
+            // Định dạng ngày sinh
+            const formattedDob = row.dob ? formatDateString(row.dob) : "";
+
+            console.log(
+              `Ngày sinh gốc: ${row.dob}, Đã định dạng: ${formattedDob}`
+            ); // Ghi log gỡ lỗi
+
+            // Định dạng các trường ngày tháng khác
+            const formattedCertificates = formatCertificateDates(certificates);
+            const formattedEducations = formatEducationDates(educations);
+            const formattedExperiences = formatExperienceDates(experiences);
+
+            // Sửa dữ liệu giới tính về giá trị đúng:
+            let correctedSex = row.sex;
+            if (typeof row.sex === "string") {
+              // Chuyển đổi biểu diễn chuỗi sang giá trị boolean đúng
+              if (
+                row.sex.toLowerCase() === "nữ" ||
+                row.sex.toLowerCase() === "nu" ||
+                row.sex === "1" ||
+                row.sex === "true"
+              ) {
+                correctedSex = true; // Nữ
+              } else if (
+                row.sex.toLowerCase() === "nam" ||
+                row.sex === "0" ||
+                row.sex === "false"
+              ) {
+                correctedSex = false; // Nam
+              }
             }
 
             return {
               ...row,
+              dob: formattedDob, // Sử dụng ngày sinh đã định dạng
+              sex: correctedSex, // Sử dụng giới tính đã được sửa
               typeDisease: row.typeDisease || "",
               address: address,
-              certificates: parseCertificates(row.certificates),
-              educations: parseEducations(row.educations),
-              experiences: parseExperiences(row.experiences),
+              certificates: formattedCertificates,
+              educations: formattedEducations,
+              experiences: formattedExperiences,
             };
           });
 
           console.log("Dữ liệu bác sĩ đã xử lý:", processedData);
 
-          // Hiển thị thông báo thành công
-          showMessage(
-            `Đã parse file ${
-              fileName.endsWith(".csv") ? "CSV" : "Excel"
-            } thành công. Xem console để biết chi tiết.`,
-            "success"
-          );
-
-          // Ở đây thường sẽ gọi API để import hàng loạt bác sĩ
-          // Tạm thời chỉ log dữ liệu để kiểm tra
-        } catch (error) {
-          console.error("Lỗi khi phân tích file:", error);
+          // Gọi API import bác sĩ
+          try {
+            const response = await importDoctor(processedData);
+            if (response && response.data) {
+              showMessage("Import dữ liệu bác sĩ thành công", "success");
+              // Làm mới danh sách bác sĩ sau khi import thành công
+              fetchDoctors();
+            } else {
+              showMessage("Đã xảy ra lỗi khi import dữ liệu bác sĩ", "error");
+            }
+          } catch (apiError) {
+            console.error("Lỗi khi import bác sĩ:", apiError);
+            showMessage(
+              "Đã xảy ra lỗi khi gửi dữ liệu bác sĩ đến server",
+              "error"
+            );
+          } finally {
+            setImporting(false);
+          }
+        } catch (parseError) {
+          console.error("Lỗi khi phân tích file:", parseError);
           showMessage(
             `Lỗi khi parse file ${fileName.endsWith(".csv") ? "CSV" : "Excel"}`,
             "error"
           );
+          setImporting(false);
         }
       };
       reader.readAsBinaryString(file);
@@ -681,11 +825,18 @@ const DoctorManagementPage: React.FC = () => {
         <Button
           variant="contained"
           color="success"
-          startIcon={<UploadFile />}
+          startIcon={
+            importing ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              <UploadFile />
+            )
+          }
           onClick={handleImportClick}
+          disabled={importing}
           sx={{ fontWeight: 600 }}
         >
-          Import file
+          {importing ? "Đang import..." : "Import file"}
         </Button>
         <input
           ref={fileInputRef}

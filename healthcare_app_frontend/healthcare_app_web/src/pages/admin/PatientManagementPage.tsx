@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   DataGrid,
   GridColDef,
@@ -15,16 +15,22 @@ import {
   Button,
   Snackbar,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 import { Edit, Delete, Add, UploadFile } from "@mui/icons-material";
 import { User } from "../../types/user";
 import PatientForm from "../../components/admin/PatientForm";
 import * as XLSX from "xlsx";
 import { Address } from "../../types/address";
+import {
+  getPatients,
+  importPatient,
+} from "../../services/admin/patients_service";
 
 const PatientManagementPage: React.FC = () => {
   // Khai báo state để quản lý dữ liệu và trạng thái UI
-  const [patients, setPatients] = useState<User[]>(mockPatients); // Danh sách bệnh nhân
+  const [patients, setPatients] = useState<User[]>([]); // Danh sách bệnh nhân - no longer using mock data
+  const [loading, setLoading] = useState<boolean>(true); // Loading state
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false); // Trạng thái hiển thị form
   const [formMode, setFormMode] = useState<"add" | "edit">("add"); // Chế độ form: thêm mới/chỉnh sửa
   const [selectedPatient, setSelectedPatient] = useState<User | null>(null); // Bệnh nhân đang được chọn
@@ -39,6 +45,40 @@ const PatientManagementPage: React.FC = () => {
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch patients data when component mounts
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        setLoading(true);
+        const response = await getPatients();
+
+        // Transform the date format from DD-MM-YYYY to YYYY-MM-DD for UI compatibility
+        const transformedData = response.data.map((patient: any) => {
+          // Convert date from DD-MM-YYYY to YYYY-MM-DD
+          const dateParts = patient.dob
+            ? patient.dob.split("-")
+            : ["01", "01", "1970"];
+          const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+
+          return {
+            ...patient,
+            dob: formattedDate,
+          };
+        });
+
+        setPatients(transformedData);
+        showMessage("Dữ liệu bệnh nhân đã được tải thành công", "success");
+      } catch (error) {
+        console.error("Error fetching patients:", error);
+        showMessage("Lỗi khi tải dữ liệu bệnh nhân", "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPatients();
+  }, []);
 
   const csvOptions: GridCsvExportOptions = {
     fileName: "patients",
@@ -159,7 +199,7 @@ const PatientManagementPage: React.FC = () => {
   };
 
   // Hàm xử lý khi người dùng chọn file để import
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -172,7 +212,7 @@ const PatientManagementPage: React.FC = () => {
       fileName.endsWith(".xlsx") ||
       fileName.endsWith(".xls")
     ) {
-      reader.onload = (evt) => {
+      reader.onload = async (evt) => {
         try {
           // Đọc dữ liệu file
           const data = evt.target?.result;
@@ -188,27 +228,8 @@ const PatientManagementPage: React.FC = () => {
               address = parseAddress(row.address);
             }
 
-            // Tạo ID và UserID mới
-            const lastId = Math.max(
-              ...patients.map((patient) => patient.id),
-              0
-            );
-            const lastUserId =
-              patients.length > 0
-                ? parseInt(
-                    patients[patients.length - 1].userId.replace("BN", "")
-                  )
-                : 0;
-
-            const newId = lastId + json.indexOf(row) + 1;
-            const newUserId = `BN${String(
-              lastUserId + json.indexOf(row) + 1
-            ).padStart(3, "0")}`;
-
             return {
               ...row,
-              id: newId,
-              userId: newUserId,
               address: address,
               status: row.status === "true" || row.status === true,
               sex: row.sex === "true" || row.sex === true,
@@ -218,16 +239,29 @@ const PatientManagementPage: React.FC = () => {
 
           console.log("Dữ liệu bệnh nhân đã xử lý:", processedData);
 
-          // Cập nhật danh sách bệnh nhân với dữ liệu mới
-          setPatients([...patients, ...processedData]);
+          try {
+            const patientsResponse = await getPatients();
+            setPatients(
+              patientsResponse.data.map((patient: any) => {
+                const dateParts = patient.dob
+                  ? patient.dob.split("-")
+                  : ["01", "01", "1970"];
+                const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+                return {
+                  ...patient,
+                  dob: formattedDate,
+                };
+              })
+            );
 
-          // Hiển thị thông báo thành công
-          showMessage(
-            `Đã import ${processedData.length} bệnh nhân thành công từ file ${
-              fileName.endsWith(".csv") ? "CSV" : "Excel"
-            }.`,
-            "success"
-          );
+            showMessage(
+              `Đã import ${processedData.length} bệnh nhân thành công.`,
+              "success"
+            );
+          } catch (error) {
+            console.error("Lỗi khi import bệnh nhân:", error);
+            showMessage("Lỗi khi import bệnh nhân", "error");
+          }
         } catch (error) {
           console.error("Lỗi khi phân tích file:", error);
           showMessage(
@@ -288,8 +322,8 @@ const PatientManagementPage: React.FC = () => {
       flex: 0.7,
       renderCell: (params: GridRenderCellParams) => (
         <Chip
-          label={params.value ? "Nam" : "Nữ"}
-          color={params.value ? "info" : "secondary"}
+          label={params.value ? "Nữ" : "Nam"}
+          color={params.value ? "secondary" : "info"}
           size="small"
         />
       ),
@@ -388,28 +422,41 @@ const PatientManagementPage: React.FC = () => {
 
       {/* Bảng dữ liệu bệnh nhân */}
       <Paper sx={{ width: "100%" }}>
-        <DataGrid
-          rows={patients}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 10 },
-            },
-          }}
-          pageSizeOptions={[5, 10, 25, 50, 100]}
-          slots={{ toolbar: GridToolbar }}
-          slotProps={{
-            toolbar: {
-              showQuickFilter: true,
-              quickFilterProps: { debounceMs: 500 },
-              csvOptions: csvOptions,
-            },
-          }}
-          disableRowSelectionOnClick
-          disableColumnFilter={false}
-          disableDensitySelector={false}
-          disableColumnSelector={false}
-        />
+        {loading ? (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "400px",
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        ) : (
+          <DataGrid
+            rows={patients}
+            columns={columns}
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 10 },
+              },
+            }}
+            pageSizeOptions={[5, 10, 25, 50, 100]}
+            slots={{ toolbar: GridToolbar }}
+            slotProps={{
+              toolbar: {
+                showQuickFilter: true,
+                quickFilterProps: { debounceMs: 500 },
+                csvOptions: csvOptions,
+              },
+            }}
+            disableRowSelectionOnClick
+            disableColumnFilter={false}
+            disableDensitySelector={false}
+            disableColumnSelector={false}
+          />
+        )}
       </Paper>
 
       {/* Form thêm mới/chỉnh sửa bệnh nhân */}
@@ -439,133 +486,6 @@ const PatientManagementPage: React.FC = () => {
   );
 };
 
-// Dữ liệu mẫu cho danh sách bệnh nhân
-const mockPatients: User[] = [
-  {
-    id: 1,
-    userId: "BN001",
-    firstName: "Nguyễn",
-    lastName: "Văn An",
-    sex: true,
-    dob: "1985-05-15",
-    phone: "0987654321",
-    email: "nguyenvanan@example.com",
-    password: "hashedpassword",
-    avatar: "https://i.pravatar.cc/150?img=1",
-    status: true,
-  },
-  {
-    id: 2,
-    userId: "BN002",
-    firstName: "Trần",
-    lastName: "Thị Bình",
-    sex: false,
-    dob: "1990-08-22",
-    phone: "0912345678",
-    email: "tranthibinh@example.com",
-    password: "hashedpassword",
-    status: true,
-  },
-  {
-    id: 3,
-    userId: "BN003",
-    firstName: "Lê",
-    lastName: "Văn Cường",
-    sex: true,
-    dob: "1978-12-03",
-    phone: "0923456789",
-    email: "levancuong@example.com",
-    password: "hashedpassword",
-    avatar: "https://i.pravatar.cc/150?img=3",
-    status: false,
-  },
-  {
-    id: 4,
-    userId: "BN004",
-    firstName: "Phạm",
-    lastName: "Thị Dung",
-    sex: false,
-    dob: "1995-03-18",
-    phone: "0934567890",
-    email: "phamthidung@example.com",
-    password: "hashedpassword",
-    status: true,
-  },
-  {
-    id: 5,
-    userId: "BN005",
-    firstName: "Hoàng",
-    lastName: "Văn Em",
-    sex: true,
-    dob: "1982-10-30",
-    phone: "0945678901",
-    email: "hoangvanem@example.com",
-    password: "hashedpassword",
-    avatar: "https://i.pravatar.cc/150?img=5",
-    status: true,
-  },
-  {
-    id: 6,
-    userId: "BN006",
-    firstName: "Vũ",
-    lastName: "Thị Phương",
-    sex: false,
-    dob: "1988-07-12",
-    phone: "0956789012",
-    email: "vuthiphuong@example.com",
-    password: "hashedpassword",
-    status: true,
-  },
-  {
-    id: 7,
-    userId: "BN007",
-    firstName: "Đỗ",
-    lastName: "Văn Giang",
-    sex: true,
-    dob: "1975-02-25",
-    phone: "0967890123",
-    email: "dovangiang@example.com",
-    password: "hashedpassword",
-    avatar: "https://i.pravatar.cc/150?img=7",
-    status: false,
-  },
-  {
-    id: 8,
-    userId: "BN008",
-    firstName: "Ngô",
-    lastName: "Thị Hồng",
-    sex: false,
-    dob: "1992-11-05",
-    phone: "0978901234",
-    email: "ngothihong@example.com",
-    password: "hashedpassword",
-    status: true,
-  },
-  {
-    id: 9,
-    userId: "BN009",
-    firstName: "Trịnh",
-    lastName: "Văn Khoa",
-    sex: true,
-    dob: "1980-06-17",
-    phone: "0989012345",
-    email: "trinhvankhoa@example.com",
-    password: "hashedpassword",
-    avatar: "https://i.pravatar.cc/150?img=9",
-    status: true,
-  },
-  {
-    id: 10,
-    userId: "BN010",
-    firstName: "Mai",
-    lastName: "Thị Lan",
-    sex: false,
-    dob: "1998-09-20",
-    phone: "0990123456",
-    email: "maithilan@example.com",
-    password: "hashedpassword",
-    status: true,
-  },
-];
+// Removed mock data since we're fetching real data now
 
 export default PatientManagementPage;

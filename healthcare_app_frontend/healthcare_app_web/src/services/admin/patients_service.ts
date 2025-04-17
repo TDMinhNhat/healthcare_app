@@ -1,8 +1,13 @@
 import axiosConfig from "../axiosConfig";
 
-const prefix = "/authenticate/api/v1/user/patient";
+const prefix = "/admin/api/v1/patients";
 
-export const updatePatient = async (id: string, data: any) => {
-  const response = await axiosConfig.put(`${prefix}/${id}`, data);
+export const importPatient = async (patients: any) => {
+  const response = await axiosConfig.post(`${prefix}/import`, patients);
+  return response.data;
+};
+
+export const getPatients = async () => {
+  const response = await axiosConfig.get(`${prefix}`);
   return response.data;
 };

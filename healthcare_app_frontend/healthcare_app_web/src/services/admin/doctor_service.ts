@@ -11,3 +11,8 @@ export const addDoctor = async (doctor: any) => {
   const response = await axiosConfig.post(`${prefix}`, doctor);
   return response.data;
 };
+
+export const importDoctor = async (doctors: any) => {
+  const response = await axiosConfig.post(`${prefix}/import`, doctors);
+  return response.data;
+};

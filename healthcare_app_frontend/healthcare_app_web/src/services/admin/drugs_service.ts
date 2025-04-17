@@ -16,3 +16,8 @@ export const updateDrug = async (id: string, drug: any) => {
   const response = await axiosConfig.put(`${prefix}/${id}`, drug);
   return response.data;
 };
+
+export const importDrug = async (drugs: any) => {
+  const response = await axiosConfig.post(`${prefix}/import`, drugs);
+  return response.data;
+};

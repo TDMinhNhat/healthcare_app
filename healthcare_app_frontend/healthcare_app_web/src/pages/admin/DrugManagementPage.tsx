@@ -22,6 +22,7 @@ import {
   getDrugs,
   addDrug,
   updateDrug,
+  importDrug,
 } from "../../services/admin/drugs_service";
 import * as XLSX from "xlsx";
 
@@ -42,6 +43,7 @@ const DrugManagementPage: React.FC = () => {
     message: "",
     severity: "info",
   });
+  const [importing, setImporting] = useState<boolean>(false); // Add this state for importing status
 
   const csvOptions: GridCsvExportOptions = {
     fileName: "drugs",
@@ -51,25 +53,25 @@ const DrugManagementPage: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const fetchDrugs = async () => {
+    try {
+      setLoading(true);
+      const response = await getDrugs();
+      if (response && response.data) {
+        setDrugs(response.data);
+      } else {
+        setError("Không thể tải danh sách thuốc");
+      }
+    } catch (error) {
+      console.error("Error fetching drugs:", error);
+      setError("Đã xảy ra lỗi khi tải danh sách thuốc");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Fetch drugs from API when component mounts
   useEffect(() => {
-    const fetchDrugs = async () => {
-      try {
-        setLoading(true);
-        const response = await getDrugs();
-        if (response && response.data) {
-          setDrugs(response.data);
-        } else {
-          setError("Không thể tải danh sách thuốc");
-        }
-      } catch (error) {
-        console.error("Error fetching drugs:", error);
-        setError("Đã xảy ra lỗi khi tải danh sách thuốc");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDrugs();
   }, []);
 
@@ -163,7 +165,7 @@ const DrugManagementPage: React.FC = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -175,7 +177,8 @@ const DrugManagementPage: React.FC = () => {
       fileName.endsWith(".xlsx") ||
       fileName.endsWith(".xls")
     ) {
-      reader.onload = (evt) => {
+      setImporting(true); // Set importing status to true
+      reader.onload = async (evt) => {
         try {
           const data = evt.target?.result;
           const workbook = XLSX.read(data, { type: "binary" });
@@ -183,18 +186,33 @@ const DrugManagementPage: React.FC = () => {
           const worksheet = workbook.Sheets[sheetName];
           const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
           console.log("File to JSON:", json);
+
+          // Call the import API
+          try {
+            const response = await importDrug(json);
+            if (response && response.data) {
+              showMessage("Import dữ liệu thuốc thành công", "success");
+              // Refresh drug list after successful import
+              fetchDrugs();
+            } else {
+              showMessage("Đã xảy ra lỗi khi import dữ liệu thuốc", "error");
+            }
+          } catch (apiError) {
+            console.error("Error importing drugs:", apiError);
+            showMessage(
+              "Đã xảy ra lỗi khi gửi dữ liệu thuốc đến server",
+              "error"
+            );
+          } finally {
+            setImporting(false);
+          }
+        } catch (parseError) {
+          console.error("Error parsing file:", parseError);
           showMessage(
-            `Đã parse file ${
-              fileName.endsWith(".csv") ? "CSV" : "Excel"
-            }, xem console để biết chi tiết.`,
-            "info"
-          );
-        } catch (error) {
-          console.error("Error parsing file:", error);
-          showMessage(
-            `Lỗi khi parse file ${fileName.endsWith(".csv") ? "CSV" : "Excel"}`,
+            `Lỗi khi xử lý file ${fileName.endsWith(".csv") ? "CSV" : "Excel"}`,
             "error"
           );
+          setImporting(false);
         }
       };
       reader.readAsBinaryString(file);
@@ -276,11 +294,18 @@ const DrugManagementPage: React.FC = () => {
         <Button
           variant="contained"
           color="success"
-          startIcon={<UploadFile />}
+          startIcon={
+            importing ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              <UploadFile />
+            )
+          }
           onClick={handleImportClick}
+          disabled={importing}
           sx={{ fontWeight: 600 }}
         >
-          Import file
+          {importing ? "Đang import..." : "Import file"}
         </Button>
         <input
           ref={fileInputRef}

@@ -56,6 +56,8 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state: any) => state.user.user);
+  const role = localStorage.getItem("role");
+  const isAdmin = role === "admin";
 
   const handleDrawerToggle = () => {
     setOpen(!open);
@@ -134,7 +136,9 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              <MenuItem onClick={handleProfile}>Trang cá nhân</MenuItem>
+              {!isAdmin && (
+                <MenuItem onClick={handleProfile}>Trang cá nhân</MenuItem>
+              )}
               <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
             </Menu>
           </div>
