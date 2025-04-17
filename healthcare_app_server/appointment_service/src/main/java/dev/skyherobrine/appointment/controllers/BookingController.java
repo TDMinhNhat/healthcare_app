@@ -69,7 +69,7 @@ public class BookingController {
         }
     }
 
-    @PutMapping("/cancel")
+    @DeleteMapping("/cancel")
     public ResponseEntity<Response> cancelAppointment(
             @RequestParam("bookAppointmentId") String bookAppointmentId
     ) {
