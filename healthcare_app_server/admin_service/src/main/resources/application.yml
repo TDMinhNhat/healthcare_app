@@ -47,3 +47,4 @@ springdoc:
     path: /admin/v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+domain-host-name: localhost
