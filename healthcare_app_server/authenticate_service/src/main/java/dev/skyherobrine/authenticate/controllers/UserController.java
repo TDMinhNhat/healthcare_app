@@ -1,8 +1,10 @@
 package dev.skyherobrine.authenticate.controllers;
 
+import dev.skyherobrine.authenticate.dtos.PatientAccountBankDTO;
 import dev.skyherobrine.authenticate.dtos.PatientRegisterDTO;
 import dev.skyherobrine.authenticate.models.mariadb.Doctor;
 import dev.skyherobrine.authenticate.models.mariadb.Patient;
+import dev.skyherobrine.authenticate.models.mariadb.PatientAccountBank;
 import dev.skyherobrine.authenticate.models.mariadb.Response;
 import dev.skyherobrine.authenticate.repositories.mariadb.*;
 import dev.skyherobrine.authenticate.repositories.mariadb.*;
@@ -32,8 +34,9 @@ public class UserController {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final UserService userService;
     private final AvatarService avatarService;
+    private final PatientAccountBankRepository patientAccountBankRepository;
 
-    public UserController(PatientRepository pr, DoctorRepository dr, DoctorCertificateRepository doctorCertificateRepository, DoctorEducationRepository doctorEducationRepository, DoctorExperienceRepository doctorExperienceRepository, KafkaTemplate<String, String> kafkaTemplate, UserService userService, AvatarService avatarService) {
+    public UserController(PatientRepository pr, DoctorRepository dr, DoctorCertificateRepository doctorCertificateRepository, DoctorEducationRepository doctorEducationRepository, DoctorExperienceRepository doctorExperienceRepository, KafkaTemplate<String, String> kafkaTemplate, UserService userService, AvatarService avatarService, PatientAccountBankRepository patientAccountBankRepository) {
         this.pr = pr;
         this.dr = dr;
         this.doctorCertificateRepository = doctorCertificateRepository;
@@ -42,6 +45,7 @@ public class UserController {
         this.kafkaTemplate = kafkaTemplate;
         this.userService = userService;
         this.avatarService = avatarService;
+        this.patientAccountBankRepository = patientAccountBankRepository;
     }
 
     @GetMapping("/patient")
@@ -170,6 +174,43 @@ public class UserController {
             return ResponseEntity.ok(new Response(
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "The server can't update the patient avatar",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @PutMapping("/patient/account_bank")
+    public ResponseEntity<Response> updatePatientAccountBank(
+            @RequestBody PatientAccountBankDTO dto
+    ) {
+        try {
+            log.info("User: Call api update the patient account bank");
+
+            Patient patient = pr.findPatientByUserId(dto.getPatientId()).orElse(null);
+            if(patient != null) {
+                kafkaTemplate.send("insert_patient_account_bank", ObjectParser.convertObjectToJson(dto));
+
+                PatientAccountBank patientAccountBank = new PatientAccountBank(
+                        patient, dto.getBankName(), dto.getAccountNumber()
+                );
+                PatientAccountBank result = patientAccountBankRepository.save(patientAccountBank);
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.OK.value(),
+                        "Update patient account bank successfully!",
+                        result
+                ));
+            }
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.NOT_FOUND.value(),
+                    "Can't find the patient",
+                    null
+            ));
+        } catch (Exception e) {
+            log.error("User: Can't update the patient account bank");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The server can't update the patient account bank",
                     e.getMessage()
             ));
         }

@@ -27,4 +27,9 @@ public class PatientProducer {
     public NewTopic updatePatientAvatar() {
         return TopicBuilder.name("update_patient_avatar").build();
     }
+
+    @Bean
+    public NewTopic updatePatientAccountBank() {
+        return TopicBuilder.name("insert_patient_account_bank").build();
+    }
 }

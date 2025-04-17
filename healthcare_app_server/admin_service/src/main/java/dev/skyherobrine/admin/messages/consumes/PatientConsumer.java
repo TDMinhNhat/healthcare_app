@@ -106,4 +106,9 @@ public class PatientConsumer {
             log.error(e.getMessage());
         }
     }
+
+    @KafkaListener(topics = "insert_patient_account_bank", groupId = "admin_insert_patient_account_bank")
+    public void updatePatientAccountBank(String message) {
+
+    }
 }
