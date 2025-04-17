@@ -230,4 +230,24 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
             ));
         }
     }
+
+    @PostMapping("/education/{doctorId}")
+    public ResponseEntity<Response> addDoctorEducation() {
+
+    }
+
+    @PutMapping("/education/update/{id}")
+    public ResponseEntity<Response> updateDoctorEducation() {
+
+    }
+
+    @PostMapping("/experience/{doctorId}")
+    public ResponseEntity<Response> addDoctorExperience() {
+
+    }
+
+    @PutMapping("/experience/update/{id}")
+    public ResponseEntity<Response> updateDoctorExperience() {
+
+    }
 }
