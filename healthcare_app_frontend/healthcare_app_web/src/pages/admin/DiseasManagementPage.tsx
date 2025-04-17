@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   DataGrid,
   GridColDef,
@@ -16,7 +16,7 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import { Edit, Delete, Add } from "@mui/icons-material";
+import { Edit, Delete, Add, UploadFile } from "@mui/icons-material";
 import { Disease } from "../../types/typeDisease";
 import DiseaseForm from "../../components/admin/DiseaseForm";
 import {
@@ -24,6 +24,7 @@ import {
   addTypeDisease,
   deleteTypeDisease,
 } from "../../services/admin/typeDisease_service";
+import * as XLSX from "xlsx";
 
 const DiseasManagementPage: React.FC = () => {
   // Khai báo state để quản lý dữ liệu và trạng thái UI
@@ -42,6 +43,8 @@ const DiseasManagementPage: React.FC = () => {
     message: "",
     severity: "info",
   });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // CSV options
   const csvOptions: GridCsvExportOptions = {
@@ -163,6 +166,53 @@ const DiseasManagementPage: React.FC = () => {
     }
   };
 
+  // Hàm xử lý import file
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    const fileName = file.name.toLowerCase();
+
+    if (
+      fileName.endsWith(".csv") ||
+      fileName.endsWith(".xlsx") ||
+      fileName.endsWith(".xls")
+    ) {
+      reader.onload = (evt) => {
+        try {
+          const data = evt.target?.result;
+          const workbook = XLSX.read(data, { type: "binary" });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+          console.log("File to JSON:", json);
+          showMessage(
+            `Đã parse file ${
+              fileName.endsWith(".csv") ? "CSV" : "Excel"
+            }, xem console để biết chi tiết.`,
+            "info"
+          );
+        } catch (error) {
+          console.error("Error parsing file:", error);
+          showMessage(
+            `Lỗi khi parse file ${fileName.endsWith(".csv") ? "CSV" : "Excel"}`,
+            "error"
+          );
+        }
+      };
+      reader.readAsBinaryString(file);
+    } else {
+      showMessage("Chỉ hỗ trợ file .csv, .xlsx, .xls", "warning");
+    }
+    // Reset input để có thể chọn lại cùng 1 file
+    e.target.value = "";
+  };
+
   // Định nghĩa cấu trúc các cột cho bảng dữ liệu
   const columns: GridColDef[] = [
     {
@@ -222,7 +272,7 @@ const DiseasManagementPage: React.FC = () => {
 
   return (
     <Box sx={{ height: "100%", width: "100%", padding: 0 }}>
-      {/* Phần header với nút thêm loại bệnh */}
+      {/* Phần header với nút thêm loại bệnh và import file */}
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, gap: 2 }}>
         <Button
           variant="contained"
@@ -232,6 +282,22 @@ const DiseasManagementPage: React.FC = () => {
         >
           Thêm loại bệnh
         </Button>
+        <Button
+          variant="contained"
+          color="success"
+          startIcon={<UploadFile />}
+          onClick={handleImportClick}
+          sx={{ fontWeight: 600 }}
+        >
+          Import file
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,.xlsx,.xls"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
       </Box>
 
       {/* Bảng dữ liệu loại bệnh */}

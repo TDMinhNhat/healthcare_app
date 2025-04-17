@@ -24,7 +24,6 @@ import {
   updateDrug,
 } from "../../services/admin/drugs_service";
 import * as XLSX from "xlsx";
-import { usePapaParse } from "react-papaparse";
 
 const DrugManagementPage: React.FC = () => {
   // Khai báo state để quản lý dữ liệu và trạng thái UI
@@ -51,7 +50,6 @@ const DrugManagementPage: React.FC = () => {
   };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { readString } = usePapaParse();
 
   // Fetch drugs from API when component mounts
   useEffect(() => {
@@ -168,40 +166,36 @@ const DrugManagementPage: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const reader = new FileReader();
     const fileName = file.name.toLowerCase();
-    if (fileName.endsWith(".csv")) {
-      const reader = new FileReader();
+
+    if (
+      fileName.endsWith(".csv") ||
+      fileName.endsWith(".xlsx") ||
+      fileName.endsWith(".xls")
+    ) {
       reader.onload = (evt) => {
-        const csv = evt.target?.result as string;
-        readString(csv, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => {
-            console.log("CSV to JSON:", results.data);
-            showMessage(
-              "Đã parse file CSV, xem console để biết chi tiết.",
-              "info"
-            );
-          },
-          error: (err) => {
-            showMessage("Lỗi khi parse file CSV", "error");
-          },
-        });
-      };
-      reader.readAsText(file);
-    } else if (fileName.endsWith(".xlsx") || fileName.endsWith(".xls")) {
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        const data = evt.target?.result;
-        const workbook = XLSX.read(data, { type: "binary" });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-        console.log("XLSX/XLS to JSON:", json);
-        showMessage(
-          "Đã parse file Excel, xem console để biết chi tiết.",
-          "info"
-        );
+        try {
+          const data = evt.target?.result;
+          const workbook = XLSX.read(data, { type: "binary" });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+          console.log("File to JSON:", json);
+          showMessage(
+            `Đã parse file ${
+              fileName.endsWith(".csv") ? "CSV" : "Excel"
+            }, xem console để biết chi tiết.`,
+            "info"
+          );
+        } catch (error) {
+          console.error("Error parsing file:", error);
+          showMessage(
+            `Lỗi khi parse file ${fileName.endsWith(".csv") ? "CSV" : "Excel"}`,
+            "error"
+          );
+        }
       };
       reader.readAsBinaryString(file);
     } else {

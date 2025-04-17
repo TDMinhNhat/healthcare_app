@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   DataGrid,
   GridColDef,
@@ -17,12 +17,19 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import { Edit, Delete, Add, Visibility } from "@mui/icons-material";
+import { Edit, Delete, Add, Visibility, UploadFile } from "@mui/icons-material";
 import { Doctor } from "../../types/doctor";
 import DoctorForm from "../../components/admin/DoctorForm";
 import DoctorDetailModal from "../../components/admin/DoctorDetailModal";
 import { getAllDoctors, addDoctor } from "../../services/admin/doctor_service";
 import { format } from "date-fns";
+import * as XLSX from "xlsx";
+import { Address } from "../../types/address";
+import {
+  DoctorCertificate,
+  DoctorEducation,
+  DoctorExperience,
+} from "../../types/doctor";
 
 const DoctorManagementPage: React.FC = () => {
   // Khai báo state để quản lý dữ liệu và trạng thái UI
@@ -43,6 +50,8 @@ const DoctorManagementPage: React.FC = () => {
     severity: "info",
   });
   const [submitting, setSubmitting] = useState<boolean>(false); // New state for form submission loading
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const csvOptions: GridCsvExportOptions = {
     fileName: "doctors",
@@ -188,6 +197,355 @@ const DoctorManagementPage: React.FC = () => {
     );
   };
 
+  // Hàm xử lý import file
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Hàm phân tích chuỗi thành đối tượng địa chỉ - hỗ trợ cả 2 định dạng
+  // 1. Trong ngoặc đơn: (số,đường,phường,quận/huyện,thành phố,quốc gia) - dùng cho experiences, certificates
+  // 2. Không có ngoặc đơn: các phần địa chỉ ngăn cách bởi dấu phẩy - dùng cho địa chỉ độc lập
+  const parseAddress = (addressStr: string): Partial<Address> | null => {
+    if (!addressStr || addressStr === "null") return null;
+
+    // console.log("Parsing address:", addressStr);
+
+    // Kiểm tra xem chuỗi có nằm trong ngoặc đơn không
+    if (addressStr.startsWith("(") && addressStr.endsWith(")")) {
+      // Format 1: Địa chỉ trong ngoặc đơn, phân tách bằng dấu phẩy
+      const cleanAddress = addressStr
+        .substring(1, addressStr.length - 1)
+        .trim();
+      const parts = cleanAddress.split(",").map((part) => part.trim());
+
+      if (parts.length < 3) {
+        console.error(
+          "Định dạng địa chỉ trong ngoặc đơn không hợp lệ:",
+          addressStr
+        );
+        return null;
+      }
+
+      // Xử lý linh hoạt các trường hợp thiếu thành phần địa chỉ
+      const address: Partial<Address> = {};
+
+      if (parts.length >= 1) address.number = parts[0];
+      if (parts.length >= 2) address.street = parts[1];
+      if (parts.length >= 3) {
+        if (parts.length <= 4) {
+          // Thiếu phường hoặc quận, coi là city và country
+          address.city = parts[2];
+          if (parts.length === 4) address.country = parts[3];
+        } else {
+          // Đủ các thành phần
+          address.ward = parts[2];
+          address.district = parts[3];
+          address.city = parts[4];
+          if (parts.length >= 6) address.country = parts[5];
+        }
+      }
+
+      return address;
+    } else {
+      // Format 2: Địa chỉ không có ngoặc đơn, phân tách bằng dấu phẩy
+      // Hỗ trợ các định dạng trong ví dụ: "15, Đường số 12/1,Hồ Chí Minh,Việt Nam"
+      const parts = addressStr.split(",").map((part) => part.trim());
+
+      if (parts.length < 2) {
+        console.error(
+          "Định dạng địa chỉ không ngoặc đơn không hợp lệ:",
+          addressStr
+        );
+        return null;
+      }
+
+      // Xử lý linh hoạt các trường hợp thiếu thành phần địa chỉ
+      const address: Partial<Address> = {};
+
+      if (parts.length >= 1) address.number = parts[0];
+      if (parts.length >= 2) address.street = parts[1];
+      if (parts.length >= 3) {
+        if (parts.length <= 4) {
+          // Thiếu phường hoặc quận, coi là city và country
+          address.city = parts[2];
+          if (parts.length === 4) address.country = parts[3];
+        } else {
+          // Đủ các thành phần
+          address.ward = parts[2];
+          address.district = parts[3];
+          address.city = parts[4];
+          if (parts.length >= 6) address.country = parts[5];
+        }
+      }
+
+      // console.log("Parsed standalone address:", address);
+      return address;
+    }
+  };
+
+  // Hàm phân tích chuỗi thành danh sách chứng chỉ
+  // Cấu trúc: tên chứng chỉ,ngày cấp,địa chỉ;tên chứng chỉ,ngày cấp,địa chỉ;...
+  const parseCertificates = (certStr: string): Partial<DoctorCertificate>[] => {
+    if (!certStr || certStr === "null") return [];
+
+    // Tách các chứng chỉ bằng dấu chấm phẩy
+    return certStr
+      .split(";")
+      .map((cert) => {
+        // Tách thông tin chi tiết của từng chứng chỉ bằng dấu phẩy
+        const parts = cert.split(",");
+
+        if (parts.length < 2) {
+          console.error("Định dạng chứng chỉ không hợp lệ:", cert);
+          return null;
+        }
+
+        const certName = parts[0].trim();
+        const issueDate = parts[1].trim();
+
+        // Kiểm tra xem có địa chỉ không (có thể nằm trong phần còn lại)
+        let address: Partial<Address> | null = null;
+        if (parts.length > 2) {
+          // Nếu có địa chỉ trong ngoặc đơn
+          const addrStr = parts.slice(2).join(",");
+          if (addrStr.includes("(") && addrStr.includes(")")) {
+            const openParenPos = addrStr.indexOf("(");
+            const closeParenPos = addrStr.lastIndexOf(")");
+            if (openParenPos !== -1 && closeParenPos !== -1) {
+              const addressPart = addrStr.substring(
+                openParenPos,
+                closeParenPos + 1
+              );
+              address = parseAddress(addressPart);
+            }
+          } else {
+            // Thử xem nếu phần còn lại là địa chỉ theo định dạng cũ
+            address = parseAddress(addrStr);
+          }
+        }
+
+        return {
+          certName,
+          issueDate,
+          address: address,
+        };
+      })
+      .filter((cert) => cert !== null) as Partial<DoctorCertificate>[];
+  };
+
+  // Hàm phân tích chuỗi thành danh sách học vấn
+  // Cấu trúc: tên trường,ngày bắt đầu,ngày tốt nghiệp,bằng cấp;...
+  const parseEducations = (eduStr: string): Partial<DoctorEducation>[] => {
+    if (!eduStr || eduStr === "null") return [];
+
+    // Tách các học vấn bằng dấu chấm phẩy
+    return eduStr.split(";").map((edu) => {
+      // Tách thông tin chi tiết của từng học vấn bằng dấu phẩy
+      const [schoolName, joinedDate, graduateDate, diploma] = edu.split(",");
+      return {
+        schoolName,
+        joinedDate,
+        graduateDate,
+        diploma,
+      };
+    });
+  };
+
+  // Hàm phân tích chuỗi thành danh sách kinh nghiệm làm việc
+  // Cấu trúc phức tạp: tên công ty,chuyên môn,ngày bắt đầu,ngày kết thúc, (địa chỉ trong ngoặc đơn),mô tả;...
+  const parseExperiences = (expStr: string): Partial<DoctorExperience>[] => {
+    if (!expStr || expStr === "null") return [];
+
+    // Tách các kinh nghiệm bằng dấu chấm phẩy
+    return expStr
+      .split(";")
+      .map((exp) => {
+        // Vì địa chỉ giờ đây nằm trong ngoặc đơn, nên cần tìm ngoặc đơn để xử lý
+        const openParenPos = exp.indexOf("(");
+        const closeParenPos = exp.indexOf(")", openParenPos);
+
+        if (openParenPos === -1 || closeParenPos === -1) {
+          // Thử format cũ nếu không tìm thấy ngoặc đơn
+          console.warn(
+            "Không tìm thấy ngoặc đơn cho địa chỉ, thử dùng format cũ:",
+            exp
+          );
+          return parseExperienceOldFormat(exp);
+        }
+
+        // Tách các phần trước địa chỉ
+        const beforeAddress = exp.substring(0, openParenPos).trim();
+        const parts = beforeAddress.split(",");
+
+        if (parts.length < 4) {
+          console.error(
+            "Định dạng kinh nghiệm không hợp lệ (thiếu trường):",
+            exp
+          );
+          return null;
+        }
+
+        // Trích xuất 4 trường đầu tiên
+        const compName = parts[0].trim();
+        const specialization = parts[1].trim();
+        const startDate = parts[2].trim();
+        const endDate = parts[3].trim();
+
+        // Trích xuất địa chỉ từ trong ngoặc đơn và dùng hàm parseAddress
+        const addressStr = exp
+          .substring(openParenPos, closeParenPos + 1)
+          .trim();
+        const compAddress = parseAddress(addressStr);
+
+        // Tìm mô tả (phần sau dấu ngoặc đóng và dấu phẩy tiếp theo nếu có)
+        let description = "";
+        if (closeParenPos < exp.length - 1) {
+          const restPart = exp.substring(closeParenPos + 1).trim();
+          // Nếu phần còn lại bắt đầu với dấu phẩy, bỏ nó đi
+          description = restPart.startsWith(",")
+            ? restPart.substring(1).trim()
+            : restPart;
+        }
+
+        // console.log("Thông tin kinh nghiệm đã phân tích (format mới):", {
+        //   compName,
+        //   specialization,
+        //   startDate,
+        //   endDate,
+        //   addressStr,
+        //   description,
+        // });
+
+        return {
+          compName,
+          specialization,
+          startDate,
+          endDate: endDate === "null" ? undefined : endDate,
+          compAddress,
+          description: description === "null" ? "" : description,
+        };
+      })
+      .filter((exp) => exp !== null) as Partial<DoctorExperience>[];
+  };
+
+  // Hàm hỗ trợ để xử lý format cũ (trong trường hợp cần)
+  const parseExperienceOldFormat = (
+    exp: string
+  ): Partial<DoctorExperience> | null => {
+    const firstCommaPos = exp.indexOf(",");
+    const secondCommaPos = exp.indexOf(",", firstCommaPos + 1);
+    const thirdCommaPos = exp.indexOf(",", secondCommaPos + 1);
+    const fourthCommaPos = exp.indexOf(",", thirdCommaPos + 1);
+
+    // Kiểm tra tính hợp lệ của định dạng
+    if (
+      firstCommaPos === -1 ||
+      secondCommaPos === -1 ||
+      thirdCommaPos === -1 ||
+      fourthCommaPos === -1
+    ) {
+      console.error("Định dạng kinh nghiệm không hợp lệ:", exp);
+      return null;
+    }
+
+    // Trích xuất 4 trường đầu tiên
+    const compName = exp.substring(0, firstCommaPos);
+    const specialization = exp.substring(firstCommaPos + 1, secondCommaPos);
+    const startDate = exp.substring(secondCommaPos + 1, thirdCommaPos);
+    const endDate = exp.substring(thirdCommaPos + 1, fourthCommaPos);
+
+    // Tìm dấu phẩy cuối cùng để tách mô tả
+    const lastCommaPos = exp.lastIndexOf(",");
+
+    // Trích xuất địa chỉ và mô tả
+    const addressStr = exp.substring(fourthCommaPos + 1, lastCommaPos);
+    const description = exp.substring(lastCommaPos + 1);
+
+    // Sử dụng hàm parseAddress chung để xử lý địa chỉ
+    const compAddress = parseAddress(addressStr);
+
+    return {
+      compName,
+      specialization,
+      startDate,
+      endDate: endDate === "null" ? undefined : endDate,
+      compAddress,
+      description: description === "null" ? "" : description,
+    };
+  };
+
+  // Hàm xử lý khi người dùng chọn file để import
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    const fileName = file.name.toLowerCase();
+
+    // Kiểm tra loại file
+    if (
+      fileName.endsWith(".csv") ||
+      fileName.endsWith(".xlsx") ||
+      fileName.endsWith(".xls")
+    ) {
+      reader.onload = (evt) => {
+        try {
+          // Đọc dữ liệu file
+          const data = evt.target?.result;
+          const workbook = XLSX.read(data, { type: "binary" });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+          // Xử lý từng dòng dữ liệu và phân tích các trường phức tạp
+          const processedData = json.map((row: any) => {
+            // console.log("Processing row:", row);
+
+            let address = null;
+            if (row.address && row.address !== "null") {
+              address = parseAddress(row.address);
+              // console.log("Parsed main address:", address);
+            }
+
+            return {
+              ...row,
+              typeDisease: row.typeDisease || "",
+              address: address,
+              certificates: parseCertificates(row.certificates),
+              educations: parseEducations(row.educations),
+              experiences: parseExperiences(row.experiences),
+            };
+          });
+
+          console.log("Dữ liệu bác sĩ đã xử lý:", processedData);
+
+          // Hiển thị thông báo thành công
+          showMessage(
+            `Đã parse file ${
+              fileName.endsWith(".csv") ? "CSV" : "Excel"
+            } thành công. Xem console để biết chi tiết.`,
+            "success"
+          );
+
+          // Ở đây thường sẽ gọi API để import hàng loạt bác sĩ
+          // Tạm thời chỉ log dữ liệu để kiểm tra
+        } catch (error) {
+          console.error("Lỗi khi phân tích file:", error);
+          showMessage(
+            `Lỗi khi parse file ${fileName.endsWith(".csv") ? "CSV" : "Excel"}`,
+            "error"
+          );
+        }
+      };
+      reader.readAsBinaryString(file);
+    } else {
+      showMessage("Chỉ hỗ trợ file .csv, .xlsx, .xls", "warning");
+    }
+
+    // Reset input để có thể chọn lại cùng 1 file
+    e.target.value = "";
+  };
+
   // Định nghĩa cấu trúc các cột cho bảng dữ liệu
   const columns: GridColDef[] = [
     {
@@ -310,7 +668,7 @@ const DoctorManagementPage: React.FC = () => {
 
   return (
     <Box sx={{ height: "100%", width: "100%", padding: 0 }}>
-      {/* Phần header với nút thêm bác sĩ */}
+      {/* Phần header với nút thêm bác sĩ và import */}
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, gap: 2 }}>
         <Button
           variant="contained"
@@ -320,6 +678,22 @@ const DoctorManagementPage: React.FC = () => {
         >
           Thêm bác sĩ
         </Button>
+        <Button
+          variant="contained"
+          color="success"
+          startIcon={<UploadFile />}
+          onClick={handleImportClick}
+          sx={{ fontWeight: 600 }}
+        >
+          Import file
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,.xlsx,.xls"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
       </Box>
 
       {/* Bảng dữ liệu bác sĩ */}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   DataGrid,
   GridColDef,
@@ -6,10 +6,21 @@ import {
   GridRenderCellParams,
   GridToolbar,
 } from "@mui/x-data-grid";
-import { Box, Chip, Avatar, IconButton, Paper, Button } from "@mui/material";
-import { Edit, Delete, Add } from "@mui/icons-material";
+import {
+  Box,
+  Chip,
+  Avatar,
+  IconButton,
+  Paper,
+  Button,
+  Snackbar,
+  Alert,
+} from "@mui/material";
+import { Edit, Delete, Add, UploadFile } from "@mui/icons-material";
 import { User } from "../../types/user";
 import PatientForm from "../../components/admin/PatientForm";
+import * as XLSX from "xlsx";
+import { Address } from "../../types/address";
 
 const PatientManagementPage: React.FC = () => {
   // Khai báo state để quản lý dữ liệu và trạng thái UI
@@ -17,6 +28,17 @@ const PatientManagementPage: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false); // Trạng thái hiển thị form
   const [formMode, setFormMode] = useState<"add" | "edit">("add"); // Chế độ form: thêm mới/chỉnh sửa
   const [selectedPatient, setSelectedPatient] = useState<User | null>(null); // Bệnh nhân đang được chọn
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error" | "info" | "warning";
+  }>({
+    open: false,
+    message: "",
+    severity: "info",
+  });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const csvOptions: GridCsvExportOptions = {
     fileName: "patients",
@@ -43,6 +65,48 @@ const PatientManagementPage: React.FC = () => {
     setIsFormOpen(false);
   };
 
+  // Show snackbar message
+  const showMessage = (
+    message: string,
+    severity: "success" | "error" | "info" | "warning"
+  ) => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
+  };
+
+  // Close snackbar
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  // Hàm phân tích chuỗi thành đối tượng địa chỉ (không cần xử lý ngoặc đơn)
+  const parseAddress = (addressStr: string): Partial<Address> | null => {
+    if (!addressStr || addressStr === "null") return null;
+
+    // Format: các phần địa chỉ ngăn cách bởi dấu phẩy
+    const parts = addressStr.split(",").map((part) => part.trim());
+
+    if (parts.length < 2) {
+      console.error("Định dạng địa chỉ không hợp lệ:", addressStr);
+      return null;
+    }
+
+    // Xử lý linh hoạt các trường hợp thiếu thành phần địa chỉ
+    const address: Partial<Address> = {};
+
+    if (parts.length >= 1) address.number = parts[0];
+    if (parts.length >= 2) address.street = parts[1];
+    if (parts.length >= 3) address.ward = parts[2];
+    if (parts.length >= 4) address.district = parts[3];
+    if (parts.length >= 5) address.city = parts[4];
+    if (parts.length >= 6) address.country = parts[5];
+
+    return address;
+  };
+
   // Hàm xử lý khi submit form (áp dụng cho cả thêm mới và chỉnh sửa)
   const handleFormSubmit = (patientData: Partial<User>) => {
     if (formMode === "add") {
@@ -65,6 +129,7 @@ const PatientManagementPage: React.FC = () => {
       };
 
       setPatients([...patients, patientToAdd]);
+      showMessage("Thêm bệnh nhân thành công", "success");
     } else {
       // Xử lý chỉnh sửa thông tin bệnh nhân
       if (selectedPatient) {
@@ -75,6 +140,7 @@ const PatientManagementPage: React.FC = () => {
               : patient
           )
         );
+        showMessage("Cập nhật bệnh nhân thành công", "success");
       }
     }
     setIsFormOpen(false);
@@ -84,6 +150,99 @@ const PatientManagementPage: React.FC = () => {
   const handleDeleteClick = (id: number) => {
     // TODO: Thêm xác nhận trước khi xóa
     setPatients(patients.filter((patient) => patient.id !== id));
+    showMessage("Xóa bệnh nhân thành công", "success");
+  };
+
+  // Hàm xử lý import file
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Hàm xử lý khi người dùng chọn file để import
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    const fileName = file.name.toLowerCase();
+
+    // Kiểm tra loại file
+    if (
+      fileName.endsWith(".csv") ||
+      fileName.endsWith(".xlsx") ||
+      fileName.endsWith(".xls")
+    ) {
+      reader.onload = (evt) => {
+        try {
+          // Đọc dữ liệu file
+          const data = evt.target?.result;
+          const workbook = XLSX.read(data, { type: "binary" });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+          // Xử lý từng dòng dữ liệu và phân tích địa chỉ
+          const processedData = json.map((row: any) => {
+            let address = null;
+            if (row.address && row.address !== "null") {
+              address = parseAddress(row.address);
+            }
+
+            // Tạo ID và UserID mới
+            const lastId = Math.max(
+              ...patients.map((patient) => patient.id),
+              0
+            );
+            const lastUserId =
+              patients.length > 0
+                ? parseInt(
+                    patients[patients.length - 1].userId.replace("BN", "")
+                  )
+                : 0;
+
+            const newId = lastId + json.indexOf(row) + 1;
+            const newUserId = `BN${String(
+              lastUserId + json.indexOf(row) + 1
+            ).padStart(3, "0")}`;
+
+            return {
+              ...row,
+              id: newId,
+              userId: newUserId,
+              address: address,
+              status: row.status === "true" || row.status === true,
+              sex: row.sex === "true" || row.sex === true,
+              password: "defaultpassword",
+            };
+          });
+
+          console.log("Dữ liệu bệnh nhân đã xử lý:", processedData);
+
+          // Cập nhật danh sách bệnh nhân với dữ liệu mới
+          setPatients([...patients, ...processedData]);
+
+          // Hiển thị thông báo thành công
+          showMessage(
+            `Đã import ${processedData.length} bệnh nhân thành công từ file ${
+              fileName.endsWith(".csv") ? "CSV" : "Excel"
+            }.`,
+            "success"
+          );
+        } catch (error) {
+          console.error("Lỗi khi phân tích file:", error);
+          showMessage(
+            `Lỗi khi parse file ${fileName.endsWith(".csv") ? "CSV" : "Excel"}`,
+            "error"
+          );
+        }
+      };
+      reader.readAsBinaryString(file);
+    } else {
+      showMessage("Chỉ hỗ trợ file .csv, .xlsx, .xls", "warning");
+    }
+
+    // Reset input để có thể chọn lại cùng 1 file
+    e.target.value = "";
   };
 
   // Định nghĩa cấu trúc các cột cho bảng dữ liệu
@@ -199,7 +358,7 @@ const PatientManagementPage: React.FC = () => {
 
   return (
     <Box sx={{ height: "100%", width: "100%", padding: 0 }}>
-      {/* Phần header với nút thêm bệnh nhân */}
+      {/* Phần header với nút thêm bệnh nhân và import */}
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, gap: 2 }}>
         <Button
           variant="contained"
@@ -209,6 +368,22 @@ const PatientManagementPage: React.FC = () => {
         >
           Thêm bệnh nhân
         </Button>
+        <Button
+          variant="contained"
+          color="success"
+          startIcon={<UploadFile />}
+          onClick={handleImportClick}
+          sx={{ fontWeight: 600 }}
+        >
+          Import file
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,.xlsx,.xls"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
       </Box>
 
       {/* Bảng dữ liệu bệnh nhân */}
@@ -245,6 +420,21 @@ const PatientManagementPage: React.FC = () => {
         patient={selectedPatient}
         mode={formMode}
       />
+
+      {/* Snackbar cho thông báo */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
