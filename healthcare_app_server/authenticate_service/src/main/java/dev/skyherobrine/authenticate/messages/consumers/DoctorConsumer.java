@@ -1,5 +1,7 @@
 package dev.skyherobrine.authenticate.messages.consumers;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.skyherobrine.authenticate.models.mariadb.*;
 import dev.skyherobrine.authenticate.repositories.mariadb.*;
 import dev.skyherobrine.authenticate.models.mariadb.*;
@@ -8,6 +10,9 @@ import dev.skyherobrine.authenticate.utils.ObjectParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Component
 @Slf4j
@@ -83,6 +88,32 @@ public class DoctorConsumer {
             log.info("Doctor Consumer: insert doctor experience successfully");
         } catch (Exception e) {
             log.error("Doctor Consumer: insert doctor experience failed!");
+            log.error(e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "update_doctor_certificate", groupId = "authenticate_update_doctor_certificate")
+    public void updateDoctorCertificate(String message) {
+        try {
+            log.info("Doctor Consumer: listen update doctor certificate message");
+            log.info("Doctor Consumer: {}", message);
+
+            JsonNode node = new ObjectMapper().readTree(message);
+            Long id = node.get("id").asLong();
+            String getCertName = node.get("certName").asText();
+            String getIssueDate = node.get("issueDate").asText();
+
+            DoctorCertificate doctorCertificate = doctorCertificateRepository.findById(id).orElse(null);
+            if(doctorCertificate != null) {
+                doctorCertificate.setCertName(getCertName);
+                doctorCertificate.setIssueDate(LocalDate.parse(getIssueDate, DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                doctorCertificateRepository.save(doctorCertificate);
+                log.info("Doctor Consumer: update doctor certificate successfully");
+                return;
+            }
+            log.warn("Doctor Consumer: can't found the doctor");
+        } catch (Exception e) {
+            log.error("Doctor Consumer: update doctor certificate failed!");
             log.error(e.getMessage());
         }
     }

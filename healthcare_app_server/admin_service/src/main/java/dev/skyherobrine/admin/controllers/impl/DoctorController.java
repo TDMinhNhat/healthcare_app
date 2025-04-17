@@ -3,15 +3,26 @@ package dev.skyherobrine.admin.controllers.impl;
 import dev.skyherobrine.admin.controllers.IManagement;
 import dev.skyherobrine.admin.dtos.DoctorDTO;
 import dev.skyherobrine.admin.models.mariadb.Doctor;
+import dev.skyherobrine.admin.models.mariadb.DoctorCertificate;
 import dev.skyherobrine.admin.models.mariadb.Response;
+import dev.skyherobrine.admin.repositories.mariadb.DoctorCertificateRepository;
+import dev.skyherobrine.admin.repositories.mariadb.DoctorEducationRepository;
+import dev.skyherobrine.admin.repositories.mariadb.DoctorExperienceRepository;
 import dev.skyherobrine.admin.repositories.mariadb.DoctorRepository;
 import dev.skyherobrine.admin.services.DoctorService;
+import dev.skyherobrine.admin.utils.ObjectParser;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin/api/v1/doctors")
@@ -20,10 +31,18 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
 
     private final DoctorRepository doctorRepository;
     private final DoctorService doctorService;
+    private final DoctorCertificateRepository doctorCertificateRepository;
+    private final DoctorEducationRepository doctorEducationRepository;
+    private final DoctorExperienceRepository doctorExperienceRepository;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public DoctorController(DoctorRepository doctorRepository, DoctorService doctorService) {
+    public DoctorController(DoctorRepository doctorRepository, DoctorService doctorService, DoctorCertificateRepository doctorCertificateRepository, DoctorEducationRepository doctorEducationRepository, DoctorExperienceRepository doctorExperienceRepository, KafkaTemplate<String, String> kafkaTemplate) {
         this.doctorRepository = doctorRepository;
         this.doctorService = doctorService;
+        this.doctorCertificateRepository = doctorCertificateRepository;
+        this.doctorEducationRepository = doctorEducationRepository;
+        this.doctorExperienceRepository = doctorExperienceRepository;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @GetMapping
@@ -134,6 +153,79 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
             return ResponseEntity.ok(new Response(
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "The api import doctor base info return an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @PostMapping("/certification/{doctorId}")
+    public ResponseEntity<Response> addCertification(
+            @PathVariable("doctorId") String doctorId,
+            @RequestBody List<DoctorDTO.DoctorCertificateDTO> certs
+     ) {
+        try {
+            log.info("Doctor: Call the api add doctor certification");
+            for(DoctorDTO.DoctorCertificateDTO cert : certs) {
+                DoctorCertificate doctorCertificate = new DoctorCertificate(
+                        doctorRepository.findDoctorByUserId(doctorId).orElseThrow(() -> new EntityNotFoundException("The doctor wasn't found!")),
+                        cert.getCertName(),
+                        LocalDate.parse(cert.getIssueDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                );
+                kafkaTemplate.send("insert_doctor_certificate", ObjectParser.convertObjectToJson(doctorCertificate));
+                doctorCertificateRepository.save(doctorCertificate);
+            }
+
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Add doctor certification successfully",
+                    true
+            ));
+        } catch (Exception e) {
+            log.error("Doctor: The api return an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api add doctor certification return an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @PutMapping("/certification/update/{id}")
+    public ResponseEntity<Response> updateDoctorCertificate(
+            @PathVariable("id") Long id,
+            @RequestBody DoctorDTO.DoctorCertificateDTO cert
+    ) {
+        try {
+            log.info("Doctor: Call the api update doctor certification");
+            DoctorCertificate doctorCertificate = doctorCertificateRepository.findById(id).orElse(null);
+            if(doctorCertificate != null) {
+                doctorCertificate.setCertName(cert.getCertName());
+                doctorCertificate.setIssueDate(LocalDate.parse(cert.getIssueDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+
+                Map<String,Object> dataSend = new HashMap<>() {{
+                    put("id", id);
+                    put("cert", cert);
+                }};
+                kafkaTemplate.send("update_doctor_certificate", ObjectParser.convertObjectToJson(dataSend));
+
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.OK.value(),
+                        "Update doctor certificate successfully",
+                        doctorCertificateRepository.save(doctorCertificate)
+                ));
+            }
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.NOT_FOUND.value(),
+                    "The doctor certificate wasn't found",
+                    null
+            ));
+        } catch (Exception e) {
+            log.error("Doctor: The api return an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api update doctor certification return an error",
                     e.getMessage()
             ));
         }

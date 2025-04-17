@@ -27,4 +27,19 @@ public class DoctorProducer {
     public NewTopic insertDoctorExperience() {
         return TopicBuilder.name("insert_doctor_experience").build();
     }
+
+    @Bean
+    public NewTopic updateDoctorCertificate() {
+        return TopicBuilder.name("update_doctor_certificate").build();
+    }
+
+    @Bean
+    public NewTopic updateDoctorEducation() {
+        return TopicBuilder.name("update_doctor_education").build();
+    }
+
+    @Bean
+    public NewTopic updateDoctorExperience() {
+        return TopicBuilder.name("update_doctor_experience").build();
+    }
 }

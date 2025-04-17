@@ -46,14 +46,14 @@ public class DoctorDTO {
 
     @Getter @Setter
     @AllArgsConstructor
-    static class DoctorCertificateDTO {
+    public static class DoctorCertificateDTO {
         private String certName;
         private String issueDate;
     }
 
     @Getter @Setter
     @AllArgsConstructor
-    static class DoctorEducationDTO {
+    public static class DoctorEducationDTO {
         private String schoolName;
         private String joinDate;
         private String graduateDate;
@@ -62,7 +62,7 @@ public class DoctorDTO {
 
     @Getter @Setter
     @AllArgsConstructor
-    static class DoctorExperienceDTO {
+    public static class DoctorExperienceDTO {
         private String companyName;
         private String specialization;
         private String startDate;
