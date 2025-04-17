@@ -3,6 +3,8 @@ package dev.skyherobrine.admin.messages.consumes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.skyherobrine.admin.models.mariadb.Patient;
+import dev.skyherobrine.admin.models.mariadb.PatientAccountBank;
+import dev.skyherobrine.admin.repositories.mariadb.PatientAccountBankRepository;
 import dev.skyherobrine.admin.repositories.mariadb.PatientRepository;
 import dev.skyherobrine.admin.utils.ObjectParser;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,9 +20,11 @@ import java.time.format.DateTimeFormatter;
 public class PatientConsumer {
 
     private final PatientRepository pr;
+    private final PatientAccountBankRepository patientAccountBankRepository;
 
-    public PatientConsumer(PatientRepository pr) {
+    public PatientConsumer(PatientRepository pr, PatientAccountBankRepository patientAccountBankRepository) {
         this.pr = pr;
+        this.patientAccountBankRepository = patientAccountBankRepository;
     }
 
     @KafkaListener(topics = "insert_patient", groupId = "admin_insert_patient")
@@ -109,6 +113,25 @@ public class PatientConsumer {
 
     @KafkaListener(topics = "insert_patient_account_bank", groupId = "admin_insert_patient_account_bank")
     public void updatePatientAccountBank(String message) {
+        try {
+            log.info("Patient Consumer: listen the message insert patient account bank");
+            log.info("Patient Consumer: {}", message);
 
+            JsonNode node = new ObjectMapper().readTree(message);
+            String getPatientId = node.get("patientId").asText();
+            String getBankName = node.get("bankName").asText();
+            String getAccountNumber = node.get("accountNumber").asText();
+
+            PatientAccountBank patientAccountBank = new PatientAccountBank(
+                    pr.findPatientByUserId(getPatientId).orElseThrow(() -> new EntityNotFoundException("Patient wasn't found!")),
+                    getBankName,
+                    getAccountNumber
+            );
+            patientAccountBankRepository.save(patientAccountBank);
+            log.info("Patient Consumer: Patient account bank saved successfully");
+        } catch (Exception e) {
+            log.error("Patient Consumer: the listener failed to save the patient account bank");
+            log.error(e.getMessage());
+        }
     }
 }
