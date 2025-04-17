@@ -1,8 +1,10 @@
 package dev.skyherobrine.authenticate.services;
 
 import dev.skyherobrine.authenticate.dtos.PatientRegisterDTO;
+import dev.skyherobrine.authenticate.models.mariadb.Admin;
 import dev.skyherobrine.authenticate.models.mariadb.Patient;
 import dev.skyherobrine.authenticate.models.mariadb.User;
+import dev.skyherobrine.authenticate.repositories.mariadb.AdminRepository;
 import dev.skyherobrine.authenticate.repositories.mariadb.AuthenticateProviderRepository;
 import dev.skyherobrine.authenticate.repositories.mariadb.DoctorRepository;
 import dev.skyherobrine.authenticate.repositories.mariadb.PatientRepository;
@@ -24,13 +26,15 @@ public class AuthenticateService {
 
     private final PatientRepository pr;
     private final DoctorRepository dr;
+    private final AdminRepository ar;
     private final SendMailUtil sendMail;
     private final AuthenticateProviderRepository apr;
     private final KafkaTemplate<String,String> kafkaTemplate;
 
-    public AuthenticateService(PatientRepository pr, DoctorRepository dr, SendMailUtil sendMail, AuthenticateProviderRepository apr, KafkaTemplate<String, String> kafkaTemplate) {
+    public AuthenticateService(PatientRepository pr, DoctorRepository dr, AdminRepository ar, SendMailUtil sendMail, AuthenticateProviderRepository apr, KafkaTemplate<String, String> kafkaTemplate) {
         this.pr = pr;
         this.dr = dr;
+        this.ar = ar;
         this.sendMail = sendMail;
         this.apr = apr;
         this.kafkaTemplate = kafkaTemplate;
@@ -52,6 +56,13 @@ public class AuthenticateService {
         if(doctor != null) {
             log.info("Authenticate Service: Found the doctor");
             return doctor;
+        }
+
+        // Check the admin
+        Admin admin = ar.findByEmailAndPassword(email, password).orElse(null);
+        if(admin != null) {
+            log.info("Authenticate Service: Found the admin");
+            return admin;
         }
 
         log.warn("Authenticate Service: Nobody found with those email and password");
