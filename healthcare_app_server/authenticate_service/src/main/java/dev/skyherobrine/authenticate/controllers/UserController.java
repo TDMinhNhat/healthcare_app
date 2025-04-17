@@ -179,8 +179,8 @@ public class UserController {
         }
     }
 
-    @PutMapping("/patient/account_bank")
-    public ResponseEntity<Response> updatePatientAccountBank(
+    @PostMapping("/patient/account_bank")
+    public ResponseEntity<Response> addPatientAccountBank(
             @RequestBody PatientAccountBankDTO dto
     ) {
         try {
