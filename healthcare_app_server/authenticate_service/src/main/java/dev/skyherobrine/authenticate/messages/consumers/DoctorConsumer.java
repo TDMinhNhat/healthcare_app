@@ -2,12 +2,16 @@ package dev.skyherobrine.authenticate.messages.consumers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.skyherobrine.authenticate.enums.Diploma;
 import dev.skyherobrine.authenticate.models.mariadb.*;
 import dev.skyherobrine.authenticate.repositories.mariadb.*;
 import dev.skyherobrine.authenticate.models.mariadb.*;
 import dev.skyherobrine.authenticate.repositories.mariadb.*;
 import dev.skyherobrine.authenticate.utils.ObjectParser;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -99,9 +103,27 @@ public class DoctorConsumer {
             log.info("Doctor Consumer: {}", message);
 
             JsonNode node = new ObjectMapper().readTree(message);
-            
+            String doctorId = node.get("doctorId").asText();
+            Long certId = node.get("certId").asLong();
+            JsonNode cert = node.get("cert");
 
-            log.warn("Doctor Consumer: can't found the doctor");
+            DoctorCertificate doctorCertificate = doctorCertificateRepository.findById(certId).orElse(null);
+            if(doctorCertificate != null) {
+                doctorCertificate.setCertName(cert.get("certName").asText());
+                doctorCertificate.setIssueDate(LocalDate.parse(cert.get("issueDate").asText(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+
+                doctorCertificateRepository.save(doctorCertificate);
+                log.info("Doctor Consumer: update doctor certificate successfully");
+                return;
+            }
+
+            doctorCertificate = new DoctorCertificate(
+                    doctorRepository.findDoctorByUserId(doctorId).orElseThrow(() -> new EntityNotFoundException("Doctor wasn't found!")),
+                    cert.get("certName").asText(),
+                    LocalDate.parse(cert.get("issueDate").asText(), DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+            );
+            doctorCertificateRepository.save(doctorCertificate);
+            log.info("Doctor Consumer: add doctor certificate successfully");
         } catch (Exception e) {
             log.error("Doctor Consumer: update doctor certificate failed!");
             log.error(e.getMessage());
@@ -114,7 +136,32 @@ public class DoctorConsumer {
             log.info("Doctor Consumer: listen update or insert doctor education message");
             log.info("Doctor Consumer: {}", message);
 
+            JsonNode node = new ObjectMapper().readTree(message);
+            String doctorId = node.get("doctorId").asText();
+            Long educationId = node.get("eduId").asLong();
+            JsonNode education = node.get("education");
 
+            DoctorEducation doctorEducation = doctorEducationRepository.findById(educationId).orElse(null);
+            if(doctorEducation != null) {
+                doctorEducation.setSchoolName(education.get("schoolName").asText());
+                doctorEducation.setJoinDate(LocalDate.parse(education.get("joinDate").asText(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                doctorEducation.setGraduateDate(LocalDate.parse(education.get("graduateDate").asText(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                doctorEducation.setDiploma(Diploma.valueOf(education.get("diploma").asText()));
+
+                doctorEducationRepository.save(doctorEducation);
+                log.info("Doctor Consumer: update doctor education successfully");
+                return;
+            }
+
+            doctorEducation = new DoctorEducation(
+                    doctorRepository.findDoctorByUserId(doctorId).orElseThrow(() -> new EntityNotFoundException("Doctor wasn't found!")),
+                    education.get("schoolName").asText(),
+                    LocalDate.parse(education.get("joinDate").asText(), DateTimeFormatter.ofPattern("dd-MM-yyyy")),
+                    LocalDate.parse(education.get("graduateDate").asText(), DateTimeFormatter.ofPattern("dd-MM-yyyy")),
+                    Diploma.valueOf(education.get("diploma").asText())
+            );
+            doctorEducationRepository.save(doctorEducation);
+            log.info("Doctor Consumer: add doctor education successfully");
         } catch (Exception e) {
             log.error("Doctor Consumer: update doctor education failed!");
             log.error(e.getMessage());
@@ -127,6 +174,52 @@ public class DoctorConsumer {
             log.info("Doctor Consumer: listen update or insert doctor experience message");
             log.info("Doctor Consumer: {}", message);
 
+            JsonNode node = new ObjectMapper().readTree(message);
+            String doctorId = node.get("doctorId").asText();
+            Long experienceId = node.get("experienceId").asLong();
+            JsonNode experience = node.get("experience");
+
+            DoctorExperience doctorExperience = doctorExperienceRepository.findById(experienceId).orElse(null);
+            if(doctorExperience != null) {
+                doctorExperience.setCompanyName(experience.get("companyName").asText());
+                doctorExperience.setSpecialization(experience.get("specialization").asText());
+                doctorExperience.setStartDate(LocalDate.parse(experience.get("startDate").asText(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                doctorExperience.setEndDate(LocalDate.parse(experience.get("endDate").asText(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                doctorExperience.setDescription(experience.get("description").asText());
+
+                JsonNode address = experience.get("address");
+                Address addressEntity = doctorExperience.getCompAddress();
+                addressEntity.setNumber(address.get("number").asText());
+                addressEntity.setStreet(address.get("street").asText());
+                addressEntity.setWard(address.get("ward").asText());
+                addressEntity.setDistrict(address.get("district").asText());
+                addressEntity.setCity(address.get("city").asText());
+                addressEntity.setCountry(address.get("country").asText());
+
+                doctorExperience.setCompAddress(addressRepository.save(addressEntity));
+                doctorExperienceRepository.save(doctorExperience);
+                log.info("Doctor Consumer: update doctor experience successfully");
+                return;
+            }
+
+            doctorExperience = new DoctorExperience(
+                    doctorRepository.findDoctorByUserId(doctorId).orElseThrow(() -> new EntityNotFoundException("Doctor wasn't found!")),
+                    experience.get("companyName").asText(),
+                    experience.get("specialization").asText(),
+                    LocalDate.parse(experience.get("startDate").asText(), DateTimeFormatter.ofPattern("dd-MM-yyyy")),
+                    LocalDate.parse(experience.get("endDate").asText(), DateTimeFormatter.ofPattern("dd-MM-yyyy")),
+                    addressRepository.save(new Address(
+                            experience.get("address").get("number").asText(),
+                            experience.get("address").get("street").asText(),
+                            experience.get("address").get("ward").asText(),
+                            experience.get("address").get("district").asText(),
+                            experience.get("address").get("city").asText(),
+                            experience.get("address").get("country").asText()
+                    )),
+                    experience.get("description").asText()
+            );
+            doctorExperienceRepository.save(doctorExperience);
+            log.info("Doctor Consumer: add doctor experience successfully");
         } catch (Exception e) {
             log.error("Doctor Consumer: update doctor experience failed!");
             log.error(e.getMessage());
