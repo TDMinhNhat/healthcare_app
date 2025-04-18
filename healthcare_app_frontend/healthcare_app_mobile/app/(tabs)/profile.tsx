@@ -132,6 +132,21 @@ export default function ProfileTab() {
             <Text style={styles.menuText}>Khẩn cấp</Text>
             <Ionicons name="chevron-forward" size={20} color="#ccc" />
           </TouchableOpacity>
+
+          {/* Nút tài khoản ngân hàng */}
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => router.push("/bank-account")}
+          >
+            <View
+              style={[styles.menuIconContainer, { backgroundColor: "#e8f5e9" }]}
+            >
+              <Ionicons name="card-outline" size={20} color="#4caf50" />
+            </View>
+            <Text style={styles.menuText}>Tài khoản ngân hàng</Text>
+            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+          </TouchableOpacity>
+
           {/* Nút đổi mật khẩu */}
           <TouchableOpacity
             style={styles.menuItem}

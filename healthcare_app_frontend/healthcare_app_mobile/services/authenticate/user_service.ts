@@ -23,3 +23,16 @@ export const updateInfo = async (userId: string, data: any) => {
   const response = await axiosConfig.put(`${prefix}/patient/${userId}`, data);
   return response;
 };
+
+export const addBankAccount = async (
+  patientId: string,
+  bankName: string,
+  accountNumber: string
+) => {
+  const response = await axiosConfig.post(`${prefix}/patient/account_bank`, {
+    patientId,
+    bankName,
+    accountNumber,
+  });
+  return response;
+};

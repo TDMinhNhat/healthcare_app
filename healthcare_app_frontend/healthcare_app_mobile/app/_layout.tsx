@@ -90,6 +90,14 @@ export default function Layout() {
             presentation: "card",
           }}
         />
+        <Stack.Screen
+          name={"bank-account"}
+          options={{
+            title: "Thông tin tài khoản",
+            headerShown: true,
+            presentation: "card",
+          }}
+        />
       </Stack>
     </Provider>
   );
