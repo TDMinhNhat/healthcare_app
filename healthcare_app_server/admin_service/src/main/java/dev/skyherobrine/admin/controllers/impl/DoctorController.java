@@ -2,13 +2,8 @@ package dev.skyherobrine.admin.controllers.impl;
 
 import dev.skyherobrine.admin.controllers.IManagement;
 import dev.skyherobrine.admin.dtos.DoctorDTO;
-import dev.skyherobrine.admin.models.mariadb.Doctor;
-import dev.skyherobrine.admin.models.mariadb.DoctorCertificate;
-import dev.skyherobrine.admin.models.mariadb.Response;
-import dev.skyherobrine.admin.repositories.mariadb.DoctorCertificateRepository;
-import dev.skyherobrine.admin.repositories.mariadb.DoctorEducationRepository;
-import dev.skyherobrine.admin.repositories.mariadb.DoctorExperienceRepository;
-import dev.skyherobrine.admin.repositories.mariadb.DoctorRepository;
+import dev.skyherobrine.admin.models.mariadb.*;
+import dev.skyherobrine.admin.repositories.mariadb.*;
 import dev.skyherobrine.admin.services.DoctorService;
 import dev.skyherobrine.admin.utils.ObjectParser;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,14 +30,16 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
     private final DoctorEducationRepository doctorEducationRepository;
     private final DoctorExperienceRepository doctorExperienceRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final AddressRepository addressRepository;
 
-    public DoctorController(DoctorRepository doctorRepository, DoctorService doctorService, DoctorCertificateRepository doctorCertificateRepository, DoctorEducationRepository doctorEducationRepository, DoctorExperienceRepository doctorExperienceRepository, KafkaTemplate<String, String> kafkaTemplate) {
+    public DoctorController(DoctorRepository doctorRepository, DoctorService doctorService, DoctorCertificateRepository doctorCertificateRepository, DoctorEducationRepository doctorEducationRepository, DoctorExperienceRepository doctorExperienceRepository, KafkaTemplate<String, String> kafkaTemplate, AddressRepository addressRepository) {
         this.doctorRepository = doctorRepository;
         this.doctorService = doctorService;
         this.doctorCertificateRepository = doctorCertificateRepository;
         this.doctorEducationRepository = doctorEducationRepository;
         this.doctorExperienceRepository = doctorExperienceRepository;
         this.kafkaTemplate = kafkaTemplate;
+        this.addressRepository = addressRepository;
     }
 
     @GetMapping
@@ -158,67 +155,45 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
         }
     }
 
-    @PostMapping("/certification/{doctorId}")
-    public ResponseEntity<Response> addCertification(
-            @PathVariable("doctorId") String doctorId,
-            @RequestBody List<DoctorDTO.DoctorCertificateDTO> certs
-     ) {
-        try {
-            log.info("Doctor: Call the api add doctor certification");
-            for(DoctorDTO.DoctorCertificateDTO cert : certs) {
-                DoctorCertificate doctorCertificate = new DoctorCertificate(
-                        doctorRepository.findDoctorByUserId(doctorId).orElseThrow(() -> new EntityNotFoundException("The doctor wasn't found!")),
-                        cert.getCertName(),
-                        LocalDate.parse(cert.getIssueDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy"))
-                );
-                kafkaTemplate.send("insert_doctor_certificate", ObjectParser.convertObjectToJson(doctorCertificate));
-                doctorCertificateRepository.save(doctorCertificate);
-            }
-
-            return ResponseEntity.ok(new Response(
-                    HttpStatus.OK.value(),
-                    "Add doctor certification successfully",
-                    true
-            ));
-        } catch (Exception e) {
-            log.error("Doctor: The api return an error");
-            log.error(e.getMessage());
-            return ResponseEntity.ok(new Response(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "The api add doctor certification return an error",
-                    e.getMessage()
-            ));
-        }
-    }
-
-    @PutMapping("/certification/update/{id}")
+    @PutMapping("/certification/update/{doctorId}/{certificateId}")
     public ResponseEntity<Response> updateDoctorCertificate(
-            @PathVariable("id") Long id,
+            @PathVariable("doctorId") String doctorId,
+            @PathVariable(name = "certificateId", required = false) Long certId,
             @RequestBody DoctorDTO.DoctorCertificateDTO cert
     ) {
         try {
             log.info("Doctor: Call the api update doctor certification");
-            DoctorCertificate doctorCertificate = doctorCertificateRepository.findById(id).orElse(null);
-            if(doctorCertificate != null) {
-                doctorCertificate.setCertName(cert.getCertName());
-                doctorCertificate.setIssueDate(LocalDate.parse(cert.getIssueDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+            Map<String,Object> dataSend = new HashMap<>() {{
+                put("doctorId", doctorId);
+                put("certId", certId);
+                put("cert", cert);
+            }};
+            kafkaTemplate.send("update_doctor_certificate", ObjectParser.convertObjectToJson(dataSend));
 
-                Map<String,Object> dataSend = new HashMap<>() {{
-                    put("id", id);
-                    put("cert", cert);
-                }};
-                kafkaTemplate.send("update_doctor_certificate", ObjectParser.convertObjectToJson(dataSend));
+            if(certId != null) {
+                DoctorCertificate doctorCertificate = doctorCertificateRepository.findById(certId).orElse(null);
+                if(doctorCertificate != null) {
+                    doctorCertificate.setCertName(cert.getCertName());
+                    doctorCertificate.setIssueDate(LocalDate.parse(cert.getIssueDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
 
-                return ResponseEntity.ok(new Response(
-                        HttpStatus.OK.value(),
-                        "Update doctor certificate successfully",
-                        doctorCertificateRepository.save(doctorCertificate)
-                ));
+                    return ResponseEntity.ok(new Response(
+                            HttpStatus.OK.value(),
+                            "Update doctor certificate",
+                            doctorCertificateRepository.save(doctorCertificate)
+                    ));
+                }
             }
+
+            DoctorCertificate doctorCertificate = new DoctorCertificate(
+                    doctorRepository.findDoctorByUserId(doctorId).orElseThrow(() -> new EntityNotFoundException("Doctor wasn't found!")),
+                    cert.getCertName(),
+                    LocalDate.parse(cert.getIssueDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+            );
+
             return ResponseEntity.ok(new Response(
                     HttpStatus.NOT_FOUND.value(),
-                    "The doctor certificate wasn't found",
-                    null
+                    "Add doctor certificate",
+                    doctorCertificateRepository.save(doctorCertificate)
             ));
         } catch (Exception e) {
             log.error("Doctor: The api return an error");
@@ -231,23 +206,132 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
         }
     }
 
-    @PostMapping("/education/{doctorId}")
-    public ResponseEntity<Response> addDoctorEducation() {
-        return null;
+    @PutMapping("/education/update/{doctorId}/{educationId}")
+    public ResponseEntity<Response> updateDoctorEducation(
+            @PathVariable("doctorId") String doctorId,
+            @PathVariable(value = "educationId", required = false) Long educationId,
+            @RequestBody DoctorDTO.DoctorEducationDTO education
+    ) {
+        try {
+            log.info("Doctor: Call the api update doctor education");
+            Map<String,Object> dataSend = new HashMap<>() {{
+                put("doctorId", doctorId);
+                put("educationId", educationId);
+                put("education", education);
+            }};
+            kafkaTemplate.send("update_doctor_education", ObjectParser.convertObjectToJson(dataSend));
+
+            if(educationId != null) {
+                DoctorEducation doctorEducation = doctorEducationRepository.findById(educationId).orElse(null);
+                if(doctorEducation != null) {
+                    doctorEducation.setSchoolName(education.getSchoolName());
+                    doctorEducation.setJoinDate(LocalDate.parse(education.getJoinDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                    doctorEducation.setGraduateDate(LocalDate.parse(education.getGraduateDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                    doctorEducation.setDiploma(education.getDiploma());
+                    return ResponseEntity.ok(new Response(
+                            HttpStatus.OK.value(),
+                            "Update doctor education",
+                            doctorEducationRepository.save(doctorEducation)
+                    ));
+                }
+            }
+
+            DoctorEducation doctorEducation = new DoctorEducation(
+                    doctorRepository.findDoctorByUserId(doctorId).orElseThrow(() -> new EntityNotFoundException("Doctor wasn't found!")),
+                    education.getSchoolName(),
+                    LocalDate.parse(education.getJoinDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")),
+                    LocalDate.parse(education.getGraduateDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")),
+                    education.getDiploma()
+            );
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.NOT_FOUND.value(),
+                    "Add doctor education",
+                    doctorEducationRepository.save(doctorEducation)
+            ));
+
+        } catch (Exception e) {
+            log.error("Doctor: The api return an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api update doctor education return an error",
+                    e.getMessage()
+            ));
+        }
     }
 
-    @PutMapping("/education/update/{id}")
-    public ResponseEntity<Response> updateDoctorEducation() {
-        return null;
-    }
+    @PutMapping("/experience/update/{doctorId}/{experienceId}")
+    public ResponseEntity<Response> updateDoctorExperience(
+            @PathVariable("doctorId") String doctorId,
+            @PathVariable(value = "experienceId", required = false) Long experienceId,
+            @RequestBody DoctorDTO.DoctorExperienceDTO experience
+    ) {
+        try {
+            log.info("Doctor: Call the api update doctor experience");
+            Map<String,Object> dataSend = new HashMap<>() {{
+                put("doctorId", doctorId);
+                put("experienceId", experienceId);
+                put("experience", experience);
+            }};
+            kafkaTemplate.send("update_doctor_experience", ObjectParser.convertObjectToJson(dataSend));
 
-    @PostMapping("/experience/{doctorId}")
-    public ResponseEntity<Response> addDoctorExperience() {
-        return null;
-    }
+            if(experienceId != null) {
+                DoctorExperience doctorExperience = doctorExperienceRepository.findById(experienceId).orElse(null);
+                if(doctorExperience != null) {
+                    doctorExperience.setCompanyName(experience.getCompanyName());
+                    doctorExperience.setSpecialization(experience.getSpecialization());
+                    doctorExperience.setStartDate(LocalDate.parse(experience.getStartDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                    doctorExperience.setEndDate(LocalDate.parse(experience.getEndDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                    doctorExperience.setDescription(experience.getDescription());
 
-    @PutMapping("/experience/update/{id}")
-    public ResponseEntity<Response> updateDoctorExperience() {
-        return null;
+                    Address address = doctorExperience.getCompAddress();
+                    address.setNumber(experience.getAddress().getNumber());
+                    address.setStreet(experience.getAddress().getStreet());
+                    address.setWard(experience.getAddress().getWard());
+                    address.setDistrict(experience.getAddress().getDistrict());
+                    address.setCity(experience.getAddress().getCity());
+                    address.setCountry(experience.getAddress().getCountry());
+                    Address result = addressRepository.save(address);
+                    doctorExperience.setCompAddress(result);
+
+                    return ResponseEntity.ok(new Response(
+                            HttpStatus.OK.value(),
+                            "Update doctor experience",
+                            doctorExperienceRepository.save(doctorExperience)
+                    ));
+                }
+            }
+
+            Address address = new Address(
+                    experience.getAddress().getNumber(),
+                    experience.getAddress().getStreet(),
+                    experience.getAddress().getWard(),
+                    experience.getAddress().getDistrict(),
+                    experience.getAddress().getCity(),
+                    experience.getAddress().getCountry()
+            );
+            DoctorExperience doctorExperience = new DoctorExperience(
+                    doctorRepository.findDoctorByUserId(doctorId).orElseThrow(() -> new EntityNotFoundException("Doctor wasn't found!")),
+                    experience.getCompanyName(),
+                    experience.getSpecialization(),
+                    LocalDate.parse(experience.getStartDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")),
+                    LocalDate.parse(experience.getEndDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")),
+                    addressRepository.save(address),
+                    experience.getDescription()
+            );
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.NOT_FOUND.value(),
+                    "Add doctor experience",
+                    doctorExperienceRepository.save(doctorExperience)
+            ));
+        } catch (Exception e) {
+            log.error("Doctor: The api return an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api update doctor experience return an error",
+                    e.getMessage()
+            ));
+        }
     }
 }
