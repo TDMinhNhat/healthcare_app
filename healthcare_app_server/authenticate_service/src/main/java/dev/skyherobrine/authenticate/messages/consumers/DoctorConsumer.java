@@ -99,21 +99,36 @@ public class DoctorConsumer {
             log.info("Doctor Consumer: {}", message);
 
             JsonNode node = new ObjectMapper().readTree(message);
-            Long id = node.get("id").asLong();
-            String getCertName = node.get("certName").asText();
-            String getIssueDate = node.get("issueDate").asText();
+            
 
-            DoctorCertificate doctorCertificate = doctorCertificateRepository.findById(id).orElse(null);
-            if(doctorCertificate != null) {
-                doctorCertificate.setCertName(getCertName);
-                doctorCertificate.setIssueDate(LocalDate.parse(getIssueDate, DateTimeFormatter.ofPattern("dd-MM-yyyy")));
-                doctorCertificateRepository.save(doctorCertificate);
-                log.info("Doctor Consumer: update doctor certificate successfully");
-                return;
-            }
             log.warn("Doctor Consumer: can't found the doctor");
         } catch (Exception e) {
             log.error("Doctor Consumer: update doctor certificate failed!");
+            log.error(e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "update_doctor_education", groupId = "authenticate_update_doctor_education")
+    public void updateDoctorEducation(String message) {
+        try {
+            log.info("Doctor Consumer: listen update or insert doctor education message");
+            log.info("Doctor Consumer: {}", message);
+
+
+        } catch (Exception e) {
+            log.error("Doctor Consumer: update doctor education failed!");
+            log.error(e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "update_doctor_experience", groupId = "authenticate_update_doctor_experience")
+    public void updateDoctorExperience(String message) {
+        try {
+            log.info("Doctor Consumer: listen update or insert doctor experience message");
+            log.info("Doctor Consumer: {}", message);
+
+        } catch (Exception e) {
+            log.error("Doctor Consumer: update doctor experience failed!");
             log.error(e.getMessage());
         }
     }
