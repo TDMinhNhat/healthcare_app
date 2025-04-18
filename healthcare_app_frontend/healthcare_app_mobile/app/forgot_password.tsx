@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import * as Yup from "yup";
 import { Formik } from "formik";
+import { resetPassword } from "../services/authenticate/auth_service";
+import { useRouter } from "expo-router";
 
 const validationSchema = Yup.object({
   email: Yup.string()
@@ -18,21 +20,11 @@ const validationSchema = Yup.object({
     .required("Email là bắt buộc"),
 });
 
-const requestPasswordReset = async (email: string) => {
-  // Simulate API call
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        success: true,
-        message: "Yêu cầu đặt lại mật khẩu đã được gửi",
-      });
-    }, 1500);
-  });
-};
-
 export default function ForgotPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState("");
+  const router = useRouter();
 
   if (isSubmitted) {
     return (
@@ -42,11 +34,12 @@ export default function ForgotPassword() {
             Yêu cầu đặt lại mật khẩu đã được gửi!
           </Text>
           <Text style={styles.successMessage}>
-            Vui lòng kiểm tra email của bạn để nhận mật khẩu mới.
+            Chúng tôi đã gửi mật khẩu mới đến email {submittedEmail}. Vui lòng
+            kiểm tra hộp thư của bạn.
           </Text>
           <TouchableOpacity
             style={[styles.button, styles.fullWidthButton]}
-            onPress={() => setIsSubmitted(false)}
+            onPress={() => router.replace("/")}
           >
             <Text style={styles.buttonText}>Quay lại</Text>
           </TouchableOpacity>
@@ -63,9 +56,10 @@ export default function ForgotPassword() {
         onSubmit={async (values) => {
           try {
             setIsLoading(true);
-            const response: any = await requestPasswordReset(values.email);
+            const response = await resetPassword(values.email);
 
-            if (response.success) {
+            if (response.data.code === 200 && response.data.data === true) {
+              setSubmittedEmail(values.email);
               setIsSubmitted(true);
               Alert.alert(
                 "Thành công",
@@ -74,7 +68,7 @@ export default function ForgotPassword() {
             } else {
               Alert.alert(
                 "Lỗi",
-                response.message || "Không thể đặt lại mật khẩu."
+                response.data.message || "Không thể đặt lại mật khẩu."
               );
             }
           } catch (error) {
