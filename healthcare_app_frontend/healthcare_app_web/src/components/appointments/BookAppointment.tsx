@@ -202,6 +202,14 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
         />
       )}
 
+      {activeStep === 0 && (
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button onClick={onClose} sx={{ mr: 1 }} disabled={loading}>
+            Hủy
+          </Button>
+        </Box>
+      )}
+
       {activeStep !== 0 && activeStep !== 4 && activeStep !== steps.length && (
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
           <Button onClick={handleBack} disabled={activeStep === 0 || loading}>

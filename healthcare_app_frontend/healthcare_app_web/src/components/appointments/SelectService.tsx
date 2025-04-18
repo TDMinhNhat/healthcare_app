@@ -5,7 +5,6 @@ import {
   Grid,
   Card,
   CardContent,
-  CardMedia,
   Button,
   CircularProgress,
   Paper,
@@ -107,15 +106,6 @@ const SelectService: React.FC<SelectSpecialtyProps> = ({ onSelect }) => {
                     }}
                     onClick={() => onSelect(service)}
                   >
-                    <CardMedia
-                      component="img"
-                      sx={{ height: 140, objectFit: "cover" }}
-                      image={
-                        service.imageUrl ||
-                        `https://picsum.photos/200/140?random=${service.id}`
-                      }
-                      alt={service.name}
-                    />
                     <CardContent
                       sx={{
                         flexGrow: 1,
@@ -123,6 +113,7 @@ const SelectService: React.FC<SelectSpecialtyProps> = ({ onSelect }) => {
                         alignItems: "center",
                         justifyContent: "center",
                         textAlign: "center",
+                        padding: 2, // Added padding to improve appearance without image
                       }}
                     >
                       <Typography variant="h6" component="div">

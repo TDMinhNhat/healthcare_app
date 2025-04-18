@@ -306,26 +306,19 @@ const DoctorList: React.FC<DoctorListProps> = ({
                     md={6}
                     key={doctor.id || `doctor-${index}`}
                   >
-                    <Card sx={{ display: "flex", height: "100%" }}>
-                      <CardMedia
-                        component="img"
-                        sx={{ width: 120, objectFit: "cover" }}
-                        image={
-                          doctor.image ||
-                          "https://picsum.photos/120/160?random=1"
-                        }
-                        alt={
-                          doctor.firstName + " " + doctor.lastName || "Doctor"
-                        }
-                      />
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          width: "100%",
-                        }}
-                      >
-                        <CardContent sx={{ flex: "1 0 auto" }}>
+                    <Card sx={{ height: "100%" }}>
+                      <Box sx={{ display: "flex", p: 2 }}>
+                        <Avatar
+                          sx={{ width: 80, height: 80 }}
+                          src={
+                            doctor.image ||
+                            "https://picsum.photos/120/120?random=1"
+                          }
+                          alt={
+                            doctor.firstName + " " + doctor.lastName || "Doctor"
+                          }
+                        />
+                        <Box sx={{ ml: 2, flex: 1 }}>
                           <Typography component="div" variant="h6">
                             {doctor.firstName + " " + doctor.lastName ||
                               "Unknown Doctor"}
@@ -335,58 +328,26 @@ const DoctorList: React.FC<DoctorListProps> = ({
                               label={doctor.specialization}
                               size="small"
                               color="primary"
-                              sx={{ mt: 1, mb: 1 }}
+                              sx={{ mt: 1 }}
                             />
                           )}
-                          <Typography
-                            variant="subtitle2"
-                            color="text.secondary"
-                            component="div"
-                          >
-                            {t("doctor.profile.experience")}:{" "}
-                            {doctor.experience || 0} {t("doctor.profile.years")}
-                          </Typography>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              mt: 1,
-                            }}
-                          >
-                            <Rating
-                              value={doctor.rating || 0}
-                              precision={0.1}
-                              readOnly
-                              size="small"
-                            />
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{ ml: 1 }}
-                            >
-                              ({doctor.reviews || 0}{" "}
-                              {t("doctor.profile.reviews")})
-                            </Typography>
-                          </Box>
-                        </CardContent>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            pl: 1,
-                            pb: 1,
-                            justifyContent: "flex-end",
-                            pr: 2,
-                          }}
-                        >
-                          <Button
-                            size="small"
-                            onClick={() => onSelect(doctor)}
-                            variant="contained"
-                          >
-                            {t("patient.appointments.select")}
-                          </Button>
                         </Box>
+                      </Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          p: 2,
+                          pt: 0,
+                        }}
+                      >
+                        <Button
+                          size="small"
+                          onClick={() => onSelect(doctor)}
+                          variant="contained"
+                        >
+                          {t("patient.appointments.select")}
+                        </Button>
                       </Box>
                     </Card>
                   </Grid>
