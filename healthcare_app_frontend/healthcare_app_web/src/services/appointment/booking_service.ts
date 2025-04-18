@@ -78,23 +78,10 @@ export const getDetailDoctorAppointment = async (
   });
 };
 
-export const cancelAppointment = (appointmentId: number) => {
-  console.log(`Simulating cancellation for appointment ID: ${appointmentId}`);
-
-  // Giả lập gọi API bằng cách trả về Promise sau một khoảng thời gian ngắn
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      console.log(`Successfully cancelled appointment ID: ${appointmentId}`);
-      resolve({
-        data: {
-          success: true,
-          message: "Cuộc hẹn đã được hủy thành công",
-          data: {
-            appointmentId: appointmentId,
-            status: "CANCEL",
-          },
-        },
-      });
-    }, 800); // Delay 800ms để giả lập độ trễ của mạng
+export const cancelAppointment = (bookAppointmentId: string) => {
+  return axiosConfig.delete(`${prefix}/cancel`, {
+    params: {
+      bookAppointmentId: bookAppointmentId,
+    },
   });
 };

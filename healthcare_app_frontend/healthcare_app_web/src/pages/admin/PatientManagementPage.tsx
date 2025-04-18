@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   DataGrid,
   GridColDef,
@@ -17,15 +17,11 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import { Edit, Delete, Add, UploadFile } from "@mui/icons-material";
+import { Edit, Delete, Add } from "@mui/icons-material";
 import { User } from "../../types/user";
 import PatientForm from "../../components/admin/PatientForm";
-import * as XLSX from "xlsx";
-import { Address } from "../../types/address";
-import {
-  getPatients,
-  importPatient,
-} from "../../services/admin/patients_service";
+import { getPatients } from "../../services/admin/patients_service";
+import { updateInfo } from "../../services/authenticate/user_service";
 
 const PatientManagementPage: React.FC = () => {
   // Khai báo state để quản lý dữ liệu và trạng thái UI
@@ -43,8 +39,6 @@ const PatientManagementPage: React.FC = () => {
     message: "",
     severity: "info",
   });
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch patients data when component mounts
   useEffect(() => {
@@ -122,33 +116,8 @@ const PatientManagementPage: React.FC = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  // Hàm phân tích chuỗi thành đối tượng địa chỉ (không cần xử lý ngoặc đơn)
-  const parseAddress = (addressStr: string): Partial<Address> | null => {
-    if (!addressStr || addressStr === "null") return null;
-
-    // Format: các phần địa chỉ ngăn cách bởi dấu phẩy
-    const parts = addressStr.split(",").map((part) => part.trim());
-
-    if (parts.length < 2) {
-      console.error("Định dạng địa chỉ không hợp lệ:", addressStr);
-      return null;
-    }
-
-    // Xử lý linh hoạt các trường hợp thiếu thành phần địa chỉ
-    const address: Partial<Address> = {};
-
-    if (parts.length >= 1) address.number = parts[0];
-    if (parts.length >= 2) address.street = parts[1];
-    if (parts.length >= 3) address.ward = parts[2];
-    if (parts.length >= 4) address.district = parts[3];
-    if (parts.length >= 5) address.city = parts[4];
-    if (parts.length >= 6) address.country = parts[5];
-
-    return address;
-  };
-
   // Hàm xử lý khi submit form (áp dụng cho cả thêm mới và chỉnh sửa)
-  const handleFormSubmit = (patientData: Partial<User>) => {
+  const handleFormSubmit = async (patientData: Partial<User>) => {
     if (formMode === "add") {
       // Xử lý thêm mới bệnh nhân
       const lastId = Math.max(...patients.map((patient) => patient.id), 0);
@@ -171,16 +140,44 @@ const PatientManagementPage: React.FC = () => {
       setPatients([...patients, patientToAdd]);
       showMessage("Thêm bệnh nhân thành công", "success");
     } else {
-      // Xử lý chỉnh sửa thông tin bệnh nhân
+      // Xử lý chỉnh sửa thông tin bệnh nhân thông qua API
       if (selectedPatient) {
-        setPatients(
-          patients.map((patient) =>
-            patient.id === selectedPatient.id
-              ? { ...selectedPatient, ...patientData }
-              : patient
-          )
-        );
-        showMessage("Cập nhật bệnh nhân thành công", "success");
+        try {
+          setLoading(true);
+
+          // Create a copy of patientData with properly formatted date
+          const formattedPatientData = { ...patientData };
+
+          // Convert date from YYYY-MM-DD to DD-MM-YYYY format
+          if (formattedPatientData.dob) {
+            const dateParts = formattedPatientData.dob.split("-");
+            if (dateParts.length === 3) {
+              formattedPatientData.dob = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+            }
+          }
+
+          const response = await updateInfo(
+            selectedPatient.userId,
+            formattedPatientData
+          );
+
+          if (response.status === 200) {
+            // Update local state with the returned patient data
+            setPatients(
+              patients.map((patient) =>
+                patient.id === selectedPatient.id
+                  ? { ...patient, ...response.data }
+                  : patient
+              )
+            );
+            showMessage("Cập nhật bệnh nhân thành công", "success");
+          }
+        } catch (error) {
+          console.error("Error updating patient:", error);
+          showMessage("Lỗi khi cập nhật thông tin bệnh nhân", "error");
+        } finally {
+          setLoading(false);
+        }
       }
     }
     setIsFormOpen(false);
@@ -191,92 +188,6 @@ const PatientManagementPage: React.FC = () => {
     // TODO: Thêm xác nhận trước khi xóa
     setPatients(patients.filter((patient) => patient.id !== id));
     showMessage("Xóa bệnh nhân thành công", "success");
-  };
-
-  // Hàm xử lý import file
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  // Hàm xử lý khi người dùng chọn file để import
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    const fileName = file.name.toLowerCase();
-
-    // Kiểm tra loại file
-    if (
-      fileName.endsWith(".csv") ||
-      fileName.endsWith(".xlsx") ||
-      fileName.endsWith(".xls")
-    ) {
-      reader.onload = async (evt) => {
-        try {
-          // Đọc dữ liệu file
-          const data = evt.target?.result;
-          const workbook = XLSX.read(data, { type: "binary" });
-          const sheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[sheetName];
-          const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-
-          // Xử lý từng dòng dữ liệu và phân tích địa chỉ
-          const processedData = json.map((row: any) => {
-            let address = null;
-            if (row.address && row.address !== "null") {
-              address = parseAddress(row.address);
-            }
-
-            return {
-              ...row,
-              address: address,
-              status: row.status === "true" || row.status === true,
-              sex: row.sex === "true" || row.sex === true,
-              password: "defaultpassword",
-            };
-          });
-
-          console.log("Dữ liệu bệnh nhân đã xử lý:", processedData);
-
-          try {
-            const patientsResponse = await getPatients();
-            setPatients(
-              patientsResponse.data.map((patient: any) => {
-                const dateParts = patient.dob
-                  ? patient.dob.split("-")
-                  : ["01", "01", "1970"];
-                const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-                return {
-                  ...patient,
-                  dob: formattedDate,
-                };
-              })
-            );
-
-            showMessage(
-              `Đã import ${processedData.length} bệnh nhân thành công.`,
-              "success"
-            );
-          } catch (error) {
-            console.error("Lỗi khi import bệnh nhân:", error);
-            showMessage("Lỗi khi import bệnh nhân", "error");
-          }
-        } catch (error) {
-          console.error("Lỗi khi phân tích file:", error);
-          showMessage(
-            `Lỗi khi parse file ${fileName.endsWith(".csv") ? "CSV" : "Excel"}`,
-            "error"
-          );
-        }
-      };
-      reader.readAsBinaryString(file);
-    } else {
-      showMessage("Chỉ hỗ trợ file .csv, .xlsx, .xls", "warning");
-    }
-
-    // Reset input để có thể chọn lại cùng 1 file
-    e.target.value = "";
   };
 
   // Định nghĩa cấu trúc các cột cho bảng dữ liệu
@@ -392,7 +303,7 @@ const PatientManagementPage: React.FC = () => {
 
   return (
     <Box sx={{ height: "100%", width: "100%", padding: 0 }}>
-      {/* Phần header với nút thêm bệnh nhân và import */}
+      {/* Phần header với nút thêm bệnh nhân */}
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, gap: 2 }}>
         <Button
           variant="contained"
@@ -402,22 +313,6 @@ const PatientManagementPage: React.FC = () => {
         >
           Thêm bệnh nhân
         </Button>
-        <Button
-          variant="contained"
-          color="success"
-          startIcon={<UploadFile />}
-          onClick={handleImportClick}
-          sx={{ fontWeight: 600 }}
-        >
-          Import file
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".csv,.xlsx,.xls"
-          style={{ display: "none" }}
-          onChange={handleFileChange}
-        />
       </Box>
 
       {/* Bảng dữ liệu bệnh nhân */}
@@ -485,7 +380,5 @@ const PatientManagementPage: React.FC = () => {
     </Box>
   );
 };
-
-// Removed mock data since we're fetching real data now
 
 export default PatientManagementPage;

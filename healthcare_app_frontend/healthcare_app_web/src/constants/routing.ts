@@ -39,4 +39,5 @@ export const ROUTING = {
   PATIENT_APPOINTMENT: "appointments",
   PATIENT_APPOINTMENT_DETAILS: "appointments/:appointmentId", // New route for patient appointment details
   WATING_ROOM: "wating-room/:scheduleId", // New route for patient examination room
+  BANK_ACCOUNT: "bank-account", // Thêm route mới để quản lý tài khoản ngân hàng
 };

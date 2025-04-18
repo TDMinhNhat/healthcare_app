@@ -14,6 +14,7 @@ import {
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { ROUTING } from "../constants/routing";
+import { resetPassword } from "../services/authenticate/auth_service";
 
 // Định nghĩa schema validation
 const validationSchema = Yup.object({
@@ -21,19 +22,6 @@ const validationSchema = Yup.object({
     .email("Địa chỉ email không hợp lệ")
     .required("Email là bắt buộc"),
 });
-
-// Hàm này sẽ được thay thế bằng API thực tế
-const requestPasswordReset = async (email: string) => {
-  // Giả lập API call - cần thay thế bằng API thực tế
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        success: true,
-        message: "Yêu cầu đặt lại mật khẩu đã được gửi",
-      });
-    }, 1500);
-  });
-};
 
 export default function ForgetPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -49,14 +37,14 @@ export default function ForgetPasswordPage() {
       try {
         setIsLoading(true);
         // Gọi API để yêu cầu đặt lại mật khẩu
-        const response: any = await requestPasswordReset(values.email);
+        const response = await resetPassword(values.email);
 
-        if (response.success) {
+        if (response.data.code === 200 && response.data.data === true) {
           setIsSubmitted(true);
           toast.success("Mật khẩu mới đã được gửi đến email của bạn!");
         } else {
           toast.error(
-            response.message ||
+            response.data.message ||
               "Không thể đặt lại mật khẩu. Vui lòng thử lại sau."
           );
         }

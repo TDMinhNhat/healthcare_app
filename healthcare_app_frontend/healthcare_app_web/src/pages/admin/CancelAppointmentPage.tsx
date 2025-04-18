@@ -23,6 +23,7 @@ interface CanceledAppointment {
   bankAccount: string;
   bankName: string;
   appointmentId: string;
+  isRefunded: boolean; // Added field to track refund status
 }
 
 export default function CancelAppointmentPage() {
@@ -31,6 +32,18 @@ export default function CancelAppointmentPage() {
   const [canceledAppointments, setCanceledAppointments] = useState<
     CanceledAppointment[]
   >(mockCanceledAppointments);
+
+  // Handle refund status toggle
+  const handleRefundToggle = (id: number) => {
+    setCanceledAppointments((prevAppointments) =>
+      prevAppointments.map((appointment) =>
+        appointment.id === id
+          ? { ...appointment, isRefunded: !appointment.isRefunded }
+          : appointment
+      )
+    );
+    // In a real application, an API call would be made here to update the backend
+  };
 
   // Tùy chọn xuất CSV
   const csvOptions: GridCsvExportOptions = {
@@ -76,6 +89,22 @@ export default function CancelAppointmentPage() {
       headerName: "Mã lịch hẹn",
       width: 120,
       flex: 0.8,
+    },
+    {
+      field: "isRefunded",
+      headerName: "Trạng thái hoàn tiền",
+      width: 150,
+      flex: 1,
+      renderCell: (params) => (
+        <Button
+          variant={params.row.isRefunded ? "contained" : "outlined"}
+          color={params.row.isRefunded ? "success" : "primary"}
+          size="small"
+          onClick={() => handleRefundToggle(params.row.id)}
+        >
+          {params.row.isRefunded ? "Đã hoàn tiền" : "Chưa hoàn tiền"}
+        </Button>
+      ),
     },
   ];
 
@@ -156,6 +185,7 @@ const mockCanceledAppointments: CanceledAppointment[] = [
     bankAccount: "19038211111",
     bankName: "Vietcombank",
     appointmentId: "LH001",
+    isRefunded: false,
   },
   {
     id: 2,
@@ -165,6 +195,7 @@ const mockCanceledAppointments: CanceledAppointment[] = [
     bankAccount: "19038222222",
     bankName: "BIDV",
     appointmentId: "LH002",
+    isRefunded: true,
   },
   {
     id: 3,
@@ -174,6 +205,7 @@ const mockCanceledAppointments: CanceledAppointment[] = [
     bankAccount: "19038233333",
     bankName: "Agribank",
     appointmentId: "LH003",
+    isRefunded: false,
   },
   {
     id: 4,
@@ -183,6 +215,7 @@ const mockCanceledAppointments: CanceledAppointment[] = [
     bankAccount: "19038244444",
     bankName: "Techcombank",
     appointmentId: "LH004",
+    isRefunded: false,
   },
   {
     id: 5,
@@ -192,5 +225,6 @@ const mockCanceledAppointments: CanceledAppointment[] = [
     bankAccount: "19038255555",
     bankName: "ACB",
     appointmentId: "LH005",
+    isRefunded: false,
   },
 ];

@@ -5,6 +5,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import LockIcon from "@mui/icons-material/Lock";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router";
+import CreditCardIcon from "@mui/icons-material/CreditCard"; // Import icon cho tài khoản ngân hàng
 
 // Import các component dùng cho hồ sơ
 import { PersonalInfoSection } from "../../components/profile/PersonalInfoSection";
@@ -157,24 +158,30 @@ const PatientProfilePage: React.FC = () => {
             >
               <EditIcon />
             </IconButton>
+          </Box>
+        </Grid>
+
+        {/* Phần nút chức năng */}
+        <Grid item xs={12}>
+          <Box
+            sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 2 }}
+          >
             {/* Nút đổi mật khẩu */}
             <Button
               variant="outlined"
               startIcon={<LockIcon />}
-              size="small"
-              sx={{
-                position: "absolute",
-                top: "12px",
-                right: "52px",
-                zIndex: 1,
-                bgcolor: "background.paper",
-                boxShadow: 1,
-                minWidth: 0,
-                px: 1.5,
-              }}
               onClick={() => navigate(ROUTING.CHANGE_PASSWORD)}
             >
               Đổi mật khẩu
+            </Button>
+
+            {/* Nút quản lý tài khoản ngân hàng */}
+            <Button
+              variant="outlined"
+              startIcon={<CreditCardIcon />}
+              onClick={() => navigate(`../${ROUTING.BANK_ACCOUNT}`)}
+            >
+              Tài khoản ngân hàng
             </Button>
           </Box>
         </Grid>

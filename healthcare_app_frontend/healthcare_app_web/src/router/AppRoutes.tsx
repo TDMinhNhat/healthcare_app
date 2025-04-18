@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { Loading } from "../components/global/Loading/Loading";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router";
 import { ROUTING } from "../constants/routing";
 import PatientProfilePage from "../pages/patient/PatientProfilePage";
 import DoctorProfilePage from "../pages/doctor/DoctorProfilePage";
@@ -10,6 +10,7 @@ import PatientAppointmentDetailsPage from "../pages/patient/PatientAppointmentDe
 import EmergencyPage from "../pages/doctor/EmergencyPage"; // Import the new EmergencyPage
 import ChangePasswordPage from "../pages/ChangePasswordPage"; // Import ChangePasswordPage
 import ForgetPasswordPage from "../pages/ForgetPasswordPage"; // Import trang quên mật khẩu
+import BankAccountPage from "../pages/patient/BankAccountPage"; // Import trang quản lý tài khoản ngân hàng
 
 // Import layout components
 import AdminLayout from "../layouts/AdminLayout";
@@ -38,100 +39,104 @@ import CancelAppointmentPage from "../pages/admin/CancelAppointmentPage";
 // const ChatPage = lazy(() => import("../pages/ChatPage"));
 
 export const AppRoutes = () => {
+  const role = localStorage.getItem("role");
+
+  // Define public routes accessible to everyone
+  const publicRoutes = (
+    <>
+      <Route path={ROUTING.HOME} element={<HomePage />} />
+      <Route path={ROUTING.REGISTER} element={<RegisterPage />} />
+      <Route path={ROUTING.LOGIN} element={<LoginPage />} />
+      <Route path={ROUTING.VERIFY_EMAIL} element={<VerifyEmailPage />} />
+      <Route path={ROUTING.CHANGE_PASSWORD} element={<ChangePasswordPage />} />
+      <Route path={ROUTING.FORGET_PASSWORD} element={<ForgetPasswordPage />} />
+    </>
+  );
+
+  // Admin-specific routes
+  const adminRoutes = (
+    <Route path={ROUTING.ADMIN} element={<AdminLayout />}>
+      <Route path={ROUTING.DASHBOARD} element={<AdminDashboardPage />} />
+      <Route index element={<AdminDashboardPage />} />
+      <Route path={ROUTING.USERS} element={<PatientManagementPage />} />
+      <Route path={ROUTING.DOCTORS} element={<DoctorManagementPage />} />
+      <Route path={ROUTING.DRUG} element={<DrugManagementPage />} />
+      <Route path={ROUTING.SHIFTS} element={<ShiftManagementPage />} />
+      <Route path={ROUTING.DISEASES} element={<DiseasManagementPage />} />
+      <Route
+        path={ROUTING.CANCEL_APPOINTMENT}
+        element={<CancelAppointmentPage />}
+      />
+    </Route>
+  );
+
+  // Doctor-specific routes
+  const doctorRoutes = (
+    <>
+      <Route
+        path={ROUTING.EXAMINATION_ROOM}
+        element={<ExaminationRoomPage />}
+      />
+      <Route path={ROUTING.DOCTOR} element={<DoctorLayout />}>
+        <Route path={ROUTING.DASHBOARD} element={<DoctorDashboard />} />
+        <Route index element={<DoctorDashboard />} />
+        <Route path={ROUTING.PROFILE} element={<DoctorProfilePage />} />
+        <Route
+          path={ROUTING.SCHEDULE_DETAIL}
+          element={<DoctorAppointmentDetailsPage />}
+        />
+        <Route path={ROUTING.SCHEDULE} element={<DoctorSchedulePage />} />
+        <Route
+          path={ROUTING.CURRENT_SCHEDULE}
+          element={<DoctorCurrentSchedulePage />}
+        />
+        <Route path={ROUTING.EMERGENCY} element={<EmergencyPage />} />
+        <Route path={ROUTING.PATIENTS} element={<div>Patients</div>} />
+        <Route
+          path={ROUTING.PRESCRIPTIONS}
+          element={<div>Prescriptions</div>}
+        />
+        <Route path={ROUTING.CHAT} element={<div>Chat</div>} />
+      </Route>
+    </>
+  );
+
+  // Patient-specific routes
+  const patientRoutes = (
+    <Route path={ROUTING.PATIENT} element={<PatientLayout />}>
+      <Route path={ROUTING.DASHBOARD} element={<PatientDashboard />} />
+      <Route index element={<PatientDashboard />} />
+      <Route path={ROUTING.PROFILE} element={<PatientProfilePage />} />
+      <Route path={ROUTING.APPOINTMENTS} element={<AppointmentPage />} />
+      <Route
+        path={ROUTING.PATIENT_APPOINTMENT_DETAILS}
+        element={<PatientAppointmentDetailsPage />}
+      />
+      <Route path={ROUTING.WATING_ROOM} element={<WaitingRoomPage />} />
+      <Route path={ROUTING.FIND_DOCTOR} element={<div>Find Doctor</div>} />
+      <Route
+        path={ROUTING.MEDICAL_RECORDS}
+        element={<PatientMedicalRecord />}
+      />
+      <Route path={ROUTING.CHAT} element={<div>Chat</div>} />
+      <Route path={ROUTING.BANK_ACCOUNT} element={<BankAccountPage />} />
+    </Route>
+  );
+
   return (
     <Suspense fallback={<Loading />}>
       <BrowserRouter>
         <Routes>
-          {/* Public routes */}
-          <Route path={ROUTING.HOME} element={<HomePage />} />
-          <Route path={ROUTING.REGISTER} element={<RegisterPage />} />
-          <Route path={ROUTING.LOGIN} element={<LoginPage />} />
-          <Route path={ROUTING.VERIFY_EMAIL} element={<VerifyEmailPage />} />
-          {/* Route đổi mật khẩu riêng */}
-          <Route
-            path={ROUTING.CHANGE_PASSWORD}
-            element={<ChangePasswordPage />}
-          />
-          {/* Route quên mật khẩu */}
-          <Route
-            path={ROUTING.FORGET_PASSWORD}
-            element={<ForgetPasswordPage />}
-          />
+          {/* Public routes always rendered */}
+          {publicRoutes}
 
-          {/* Standalone Examination Room route */}
-          <Route
-            path={ROUTING.EXAMINATION_ROOM}
-            element={<ExaminationRoomPage />}
-          />
+          {/* Role-based routes */}
+          {role === "admin" && adminRoutes}
+          {role === "doctor" && doctorRoutes}
+          {role === "patient" && patientRoutes}
 
-          {/* Admin routes */}
-          <Route path={ROUTING.ADMIN} element={<AdminLayout />}>
-            <Route path={ROUTING.DASHBOARD} element={<AdminDashboardPage />} />
-            <Route index element={<AdminDashboardPage />} />
-            {/* Add other admin routes as needed */}
-            <Route path={ROUTING.USERS} element={<PatientManagementPage />} />
-            <Route path={ROUTING.DOCTORS} element={<DoctorManagementPage />} />
-            <Route path={ROUTING.DRUG} element={<DrugManagementPage />} />
-            <Route path={ROUTING.SHIFTS} element={<ShiftManagementPage />} />
-            <Route path={ROUTING.DISEASES} element={<DiseasManagementPage />} />
-            <Route
-              path={ROUTING.CANCEL_APPOINTMENT}
-              element={<CancelAppointmentPage />}
-            />
-          </Route>
-
-          {/* Doctor routes */}
-          <Route path={ROUTING.DOCTOR} element={<DoctorLayout />}>
-            <Route path={ROUTING.DASHBOARD} element={<DoctorDashboard />} />
-            <Route index element={<DoctorDashboard />} />
-            <Route path={ROUTING.PROFILE} element={<DoctorProfilePage />} />
-            <Route
-              path={ROUTING.SCHEDULE_DETAIL}
-              element={<DoctorAppointmentDetailsPage />}
-            />
-            <Route path={ROUTING.SCHEDULE} element={<DoctorSchedulePage />} />
-            <Route
-              path={ROUTING.CURRENT_SCHEDULE}
-              element={<DoctorCurrentSchedulePage />}
-            />
-            <Route path={ROUTING.EMERGENCY} element={<EmergencyPage />} />
-            <Route path={ROUTING.PATIENTS} element={<div>Patients</div>} />
-            <Route
-              path={ROUTING.PRESCRIPTIONS}
-              element={<div>Prescriptions</div>}
-            />
-            <Route path={ROUTING.CHAT} element={<div>Chat</div>} />
-            {/* Keep the nested route for backward compatibility */}
-            {/* <Route
-              path={ROUTING.EXAMINATION_ROOM}
-              element={<DoctorExaminationRoomPage />}
-            /> */}
-          </Route>
-
-          {/* Patient routes */}
-          <Route path={ROUTING.PATIENT} element={<PatientLayout />}>
-            <Route path={ROUTING.DASHBOARD} element={<PatientDashboard />} />
-            <Route index element={<PatientDashboard />} />
-            <Route path={ROUTING.PROFILE} element={<PatientProfilePage />} />
-            <Route path={ROUTING.APPOINTMENTS} element={<AppointmentPage />} />
-            <Route
-              path={ROUTING.PATIENT_APPOINTMENT_DETAILS}
-              element={<PatientAppointmentDetailsPage />}
-            />
-            <Route
-              path={ROUTING.WATING_ROOM}
-              element={<WaitingRoomPage />} // This component is now correctly named WaitingRoom internally
-            />
-            <Route
-              path={ROUTING.FIND_DOCTOR}
-              element={<div>Find Doctor</div>}
-            />
-            <Route
-              path={ROUTING.MEDICAL_RECORDS}
-              element={<PatientMedicalRecord />}
-            />
-            <Route path={ROUTING.CHAT} element={<div>Chat</div>} />
-          </Route>
+          {/* Redirect unauthorized access to home */}
+          <Route path="*" element={<Navigate to={ROUTING.HOME} replace />} />
         </Routes>
       </BrowserRouter>
     </Suspense>
