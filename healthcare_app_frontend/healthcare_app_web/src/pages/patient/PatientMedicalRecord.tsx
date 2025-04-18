@@ -44,7 +44,7 @@ const MOCK_PATIENT: User = {
   userId: "patient-001",
   firstName: "Hùng",
   lastName: "Nguyễn Văn",
-  sex: true, // true = nam, false = nữ
+  sex: true, // true = nữ, false = nam
   dob: "15-05-1985",
   address: {
     id: 1,
@@ -244,7 +244,7 @@ const PatientMedicalRecord: React.FC = () => {
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="body1">
-                      <strong>Giới tính:</strong> {patient.sex ? "Nam" : "Nữ"}
+                      <strong>Giới tính:</strong> {patient.sex ? "Nữ" : "Nam"}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>

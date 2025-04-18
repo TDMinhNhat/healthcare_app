@@ -291,9 +291,9 @@ const DoctorList: React.FC<DoctorListProps> = ({
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                 {t("patient.appointments.try_different_service")}
               </Typography>
-              <Button variant="outlined" onClick={onBack} sx={{ mt: 2 }}>
+              {/* <Button variant="outlined" onClick={onBack} sx={{ mt: 2 }}>
                 {t("patient.appointments.select_different_service")}
-              </Button>
+              </Button> */}
             </Paper>
           ) : (
             <>

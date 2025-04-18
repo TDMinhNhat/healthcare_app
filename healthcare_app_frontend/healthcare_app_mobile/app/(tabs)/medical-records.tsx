@@ -170,7 +170,7 @@ export default function MedicalRecordsScreen() {
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Giới tính:</Text>
-              <Text style={styles.infoValue}>{user?.sex ? "Nam" : "Nữ"}</Text>
+              <Text style={styles.infoValue}>{user?.sex ? "Nữ" : "Nam"}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Ngày sinh:</Text>
