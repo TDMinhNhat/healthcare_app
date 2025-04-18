@@ -3,15 +3,16 @@ package dev.skyherobrine.admin.controllers.impl;
 import dev.skyherobrine.admin.enums.AppointmentStatus;
 import dev.skyherobrine.admin.enums.PaymentStatus;
 import dev.skyherobrine.admin.models.mariadb.Response;
+import dev.skyherobrine.admin.models.mongodb.BookAppointment;
+import dev.skyherobrine.admin.models.mongodb.BookAppointmentPayment;
 import dev.skyherobrine.admin.repositories.mongodb.BookAppointmentPaymentRepository;
 import dev.skyherobrine.admin.repositories.mongodb.BookAppointmentRepository;
+import dev.skyherobrine.admin.utils.ObjectParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/admin/api/v1/appointments")
@@ -20,10 +21,12 @@ public class BookAppointmentController {
 
     private final BookAppointmentRepository bookAppointmentRepository;
     private final BookAppointmentPaymentRepository bookAppointmentPaymentRepository;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public BookAppointmentController(BookAppointmentRepository bookAppointmentRepository, BookAppointmentPaymentRepository bookAppointmentPaymentRepository) {
+    public BookAppointmentController(BookAppointmentRepository bookAppointmentRepository, BookAppointmentPaymentRepository bookAppointmentPaymentRepository, KafkaTemplate<String, String> kafkaTemplate) {
         this.bookAppointmentRepository = bookAppointmentRepository;
         this.bookAppointmentPaymentRepository = bookAppointmentPaymentRepository;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @GetMapping
@@ -58,5 +61,48 @@ public class BookAppointmentController {
                 "Get all book appointments by payment status successfully",
                 bookAppointmentPaymentRepository.findByStatus(PaymentStatus.valueOf(paymentStatus))
         ));
+    }
+
+    @PostMapping("/assign_paybackment")
+    public ResponseEntity<Response> assignPaybackment(
+            @RequestParam("bookAppointmentId") String bookAppointmentId
+    ) {
+        try {
+            log.info("Book Appointment: Call the api assign paybackment");
+            BookAppointment bookAppointment = bookAppointmentRepository.findById(Long.parseLong(bookAppointmentId)).orElse(null);
+            if(bookAppointment != null) {
+                BookAppointmentPayment bookAppointmentPayment = bookAppointmentPaymentRepository.findByBookAppointment(bookAppointment).orElse(null);
+                if(bookAppointmentPayment != null) {
+                    bookAppointmentPayment.setStatus(PaymentStatus.PAY_BACK);
+                    kafkaTemplate.send("assign_payback", ObjectParser.convertObjectToJson(bookAppointment.getId() + ""));
+                    log.info("Book Appointment: Assign paybackment successfully");
+                    return ResponseEntity.ok(new Response(
+                            HttpStatus.OK.value(),
+                            "Assign paybackment successfully",
+                            bookAppointmentPaymentRepository.save(bookAppointmentPayment)
+                    ));
+                }
+                log.warn("Book Appointment: Book appointment not found");
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.NOT_FOUND.value(),
+                        "Book appointment not found",
+                        null
+                ));
+            } else {
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.NOT_FOUND.value(),
+                        "Book appointment not found",
+                        null
+                ));
+            }
+        } catch (Exception e) {
+            log.error("Book Appointment: Error when assign paybackment");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Error when assign paybackment",
+                    e.getMessage()
+            ));
+        }
     }
 }
