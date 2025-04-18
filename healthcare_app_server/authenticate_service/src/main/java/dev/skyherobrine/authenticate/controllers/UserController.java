@@ -224,7 +224,7 @@ public class UserController {
             log.info("User: Call api get the patient account bank");
             Patient patient = patientRepository.findPatientByUserId(patientId).orElse(null);
             if(patient != null) {
-                PatientAccountBank patientAccountBank = patientAccountBankRepository.findByPatient(patient).orElse(null);
+                PatientAccountBank patientAccountBank = patientAccountBankRepository.findByPatient(patient).orElse(null     );
                 if(patientAccountBank != null) {
                     return ResponseEntity.ok(new Response(
                             HttpStatus.OK.value(),
