@@ -423,11 +423,11 @@ const DoctorManagementPage: React.FC = () => {
         // });
 
         return {
-          compName,
+          companyName: compName,
           specialization,
           startDate,
           endDate: endDate === "null" ? undefined : endDate,
-          compAddress,
+          address: compAddress,
           description: description === "null" ? "" : description,
         };
       })
