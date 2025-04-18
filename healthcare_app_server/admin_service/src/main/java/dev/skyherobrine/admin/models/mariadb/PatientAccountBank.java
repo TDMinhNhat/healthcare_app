@@ -13,7 +13,7 @@ public class PatientAccountBank {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToOne @JoinColumn(name = "patient_id", referencedColumnName = "id", nullable = false) @NonNull
+    @OneToOne @JoinColumn(name = "patient_id", referencedColumnName = "id", nullable = false, unique = true) @NonNull
     private Patient patient;
     @Column(name = "bank_name", nullable = false, length = 100) @NonNull
     private String bankName;

@@ -21,10 +21,12 @@ public class PatientConsumer {
 
     private final PatientRepository pr;
     private final PatientAccountBankRepository patientAccountBankRepository;
+    private final PatientRepository patientRepository;
 
-    public PatientConsumer(PatientRepository pr, PatientAccountBankRepository patientAccountBankRepository) {
+    public PatientConsumer(PatientRepository pr, PatientAccountBankRepository patientAccountBankRepository, PatientRepository patientRepository) {
         this.pr = pr;
         this.patientAccountBankRepository = patientAccountBankRepository;
+        this.patientRepository = patientRepository;
     }
 
     @KafkaListener(topics = "insert_patient", groupId = "admin_insert_patient")
@@ -112,7 +114,7 @@ public class PatientConsumer {
     }
 
     @KafkaListener(topics = "insert_patient_account_bank", groupId = "admin_insert_patient_account_bank")
-    public void updatePatientAccountBank(String message) {
+    public void addPatientAccountBank(String message) {
         try {
             log.info("Patient Consumer: listen the message insert patient account bank");
             log.info("Patient Consumer: {}", message);
@@ -131,6 +133,35 @@ public class PatientConsumer {
             log.info("Patient Consumer: Patient account bank saved successfully");
         } catch (Exception e) {
             log.error("Patient Consumer: the listener failed to save the patient account bank");
+            log.error(e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "update_patient_account_bank", groupId = "admin_update_patient_account_bank")
+    public void updatePatientAccountBank(String message) {
+        try {
+            log.info("Patient Consumer: listen the message update patient account bank");
+            log.info("Patient Consumer: {}", message);
+
+            JsonNode node = new ObjectMapper().readTree(message);
+            String getPatientId = node.get("patientId").asText();
+            String getBankName = node.get("bankName").asText();
+            String getAccountNumber = node.get("accountNumber").asText();
+
+            Patient patient = patientRepository.findPatientByUserId(getPatientId).orElse(null);
+            if(patient != null) {
+                PatientAccountBank patientAccountBank = patientAccountBankRepository.findByPatient(patient).orElse(null);
+                if(patientAccountBank != null) {
+                    patientAccountBank.setBankName(getBankName);
+                    patientAccountBank.setAccountNumber(getAccountNumber);
+                    patientAccountBankRepository.save(patientAccountBank);
+                    log.info("Patient Consumer: Patient account bank updated successfully");
+                }
+                log.warn("Patient Consumer: Patient account bank was not found");
+            }
+            log.warn("Patient Consumer: Patient was not found");
+        } catch (Exception e) {
+            log.error("Patient Consumer: the listener failed to update the patient account bank");
             log.error(e.getMessage());
         }
     }

@@ -29,7 +29,12 @@ public class PatientProducer {
     }
 
     @Bean
-    public NewTopic updatePatientAccountBank() {
+    public NewTopic insertPatientAccountBank() {
         return TopicBuilder.name("insert_patient_account_bank").build();
+    }
+
+    @Bean
+    public NewTopic updatePatientAccountBank() {
+        return TopicBuilder.name("update_patient_account_bank").build();
     }
 }

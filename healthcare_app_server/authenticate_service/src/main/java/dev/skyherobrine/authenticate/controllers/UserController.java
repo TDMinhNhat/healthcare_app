@@ -35,8 +35,9 @@ public class UserController {
     private final UserService userService;
     private final AvatarService avatarService;
     private final PatientAccountBankRepository patientAccountBankRepository;
+    private final PatientRepository patientRepository;
 
-    public UserController(PatientRepository pr, DoctorRepository dr, DoctorCertificateRepository doctorCertificateRepository, DoctorEducationRepository doctorEducationRepository, DoctorExperienceRepository doctorExperienceRepository, KafkaTemplate<String, String> kafkaTemplate, UserService userService, AvatarService avatarService, PatientAccountBankRepository patientAccountBankRepository) {
+    public UserController(PatientRepository pr, DoctorRepository dr, DoctorCertificateRepository doctorCertificateRepository, DoctorEducationRepository doctorEducationRepository, DoctorExperienceRepository doctorExperienceRepository, KafkaTemplate<String, String> kafkaTemplate, UserService userService, AvatarService avatarService, PatientAccountBankRepository patientAccountBankRepository, PatientRepository patientRepository) {
         this.pr = pr;
         this.dr = dr;
         this.doctorCertificateRepository = doctorCertificateRepository;
@@ -46,6 +47,7 @@ public class UserController {
         this.userService = userService;
         this.avatarService = avatarService;
         this.patientAccountBankRepository = patientAccountBankRepository;
+        this.patientRepository = patientRepository;
     }
 
     @GetMapping("/patient")
@@ -200,6 +202,88 @@ public class UserController {
                         result
                 ));
             }
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.NOT_FOUND.value(),
+                    "Can't find the patient",
+                    null
+            ));
+        } catch (Exception e) {
+            log.error("User: Can't update the patient account bank");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The server can't update the patient account bank",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/patient/account_bank")
+    public ResponseEntity<Response> getPatientAccountBank(@RequestParam("patientId") String patientId) {
+        try {
+            log.info("User: Call api get the patient account bank");
+            Patient patient = patientRepository.findPatientByUserId(patientId).orElse(null);
+            if(patient != null) {
+                PatientAccountBank patientAccountBank = patientAccountBankRepository.findByPatient(patient).orElse(null);
+                if(patientAccountBank != null) {
+                    return ResponseEntity.ok(new Response(
+                            HttpStatus.OK.value(),
+                            "Get the patient account bank successfully",
+                            patientAccountBank
+                    ));
+                }
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.NOT_FOUND.value(),
+                        "The patient account bank not found",
+                        null
+                ));
+            }
+            log.warn("User: Can't find the patient account bank");
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.NOT_FOUND.value(),
+                    "The patient not found",
+                    null
+            ));
+        } catch (Exception e) {
+            log.error("User: Can't get the patient account bank");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The server can't get the patient account bank",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @PutMapping("/patient/account_bank")
+    public ResponseEntity<Response> updatePatientBankAccount(
+            @RequestBody PatientAccountBankDTO dto
+    ) {
+        try {
+            log.info("User: Call api update the patient account bank");
+            kafkaTemplate.send("update_patient_account_bank", ObjectParser.convertObjectToJson(dto));
+
+            Patient patient = patientRepository.findPatientByUserId(dto.getPatientId()).orElse(null);
+            if(patient != null) {
+                PatientAccountBank patientAccountBank = patientAccountBankRepository.findByPatient(patient).orElse(null);
+                if(patientAccountBank != null) {
+                    patientAccountBank.setBankName(dto.getBankName());
+                    patientAccountBank.setAccountNumber(dto.getAccountNumber());
+                    PatientAccountBank result = patientAccountBankRepository.save(patientAccountBank);
+                    return ResponseEntity.ok(new Response(
+                            HttpStatus.OK.value(),
+                            "Update patient account bank successfully!",
+                            result
+                    ));
+                }
+                log.warn("User: Can't find the patient account bank. This user doesn't have account bank");
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.NOT_FOUND.value(),
+                        "Can't find the patient account bank",
+                        null
+                ));
+            }
+            log.warn("User: Can't find the patient account bank");
             return ResponseEntity.ok(new Response(
                     HttpStatus.NOT_FOUND.value(),
                     "Can't find the patient",
