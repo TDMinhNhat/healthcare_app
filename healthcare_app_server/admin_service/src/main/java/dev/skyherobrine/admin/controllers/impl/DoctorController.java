@@ -191,7 +191,7 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
             );
 
             return ResponseEntity.ok(new Response(
-                    HttpStatus.NOT_FOUND.value(),
+                    HttpStatus.OK.value(),
                     "Add doctor certificate",
                     doctorCertificateRepository.save(doctorCertificate)
             ));
@@ -244,7 +244,7 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
                     education.getDiploma()
             );
             return ResponseEntity.ok(new Response(
-                    HttpStatus.NOT_FOUND.value(),
+                    HttpStatus.OK.value(),
                     "Add doctor education",
                     doctorEducationRepository.save(doctorEducation)
             ));
@@ -320,7 +320,7 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
                     experience.getDescription()
             );
             return ResponseEntity.ok(new Response(
-                    HttpStatus.NOT_FOUND.value(),
+                    HttpStatus.OK.value(),
                     "Add doctor experience",
                     doctorExperienceRepository.save(doctorExperience)
             ));
