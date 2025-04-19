@@ -47,3 +47,4 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 bearer-sepay: XVEYDNH2M7OASF6LGIMAT13REWQOCAK9VYWBBGX90HRNS5N8TUQOXKGC15JJYOFC
+domain-host-name: localhost

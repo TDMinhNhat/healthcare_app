@@ -36,8 +36,9 @@ public class BookingController {
     private final UserFeign userFeign;
     private final MedicalRecordRepository medicalRecordRepository;
     private final MedicalRecordDrugRepository medicalRecordDrugRepository;
+    private final BookAppointmentRepository bookAppointmentRepository;
 
-    public BookingController(BookAppointmentRepository bar, BookingService bookingService, DoctorFeign doctorFeign, KafkaTemplate<String, String> kafkaTemplate, WorkScheduleFeign workScheduleFeign, UserFeign userFeign, MedicalRecordRepository medicalRecordRepository, MedicalRecordDrugRepository medicalRecordDrugRepository) {
+    public BookingController(BookAppointmentRepository bar, BookingService bookingService, DoctorFeign doctorFeign, KafkaTemplate<String, String> kafkaTemplate, WorkScheduleFeign workScheduleFeign, UserFeign userFeign, MedicalRecordRepository medicalRecordRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, BookAppointmentRepository bookAppointmentRepository) {
         this.bar = bar;
         this.bookingService = bookingService;
         this.doctorFeign = doctorFeign;
@@ -46,6 +47,7 @@ public class BookingController {
         this.userFeign = userFeign;
         this.medicalRecordRepository = medicalRecordRepository;
         this.medicalRecordDrugRepository = medicalRecordDrugRepository;
+        this.bookAppointmentRepository = bookAppointmentRepository;
     }
 
     @PostMapping
@@ -255,5 +257,26 @@ public class BookingController {
                     e.getMessage()
             ));
         }
+    }
+
+    @GetMapping("/status_done/work_schedule")
+    public ResponseEntity<Response> getPatientDoneInWorkSchedule(
+            @RequestParam("workScheduleId") String workScheduleId
+    ) {
+        log.info("Booking: Call the api get patient done in work schedule");
+        List<Map<String,Object>> result = new ArrayList<>();
+
+        bookAppointmentRepository.findByWorkScheduleAndStatus(Long.parseLong(workScheduleId), AppointmentStatus.DONE).forEach(item -> {
+            Map<String,Object> data = new HashMap<>();
+            data.put("bookAppointment", item);
+            data.put("patient", userFeign.getPatientByUserId(item.getPatientId()).getBody().getData());
+            result.add(data);
+        });
+
+        return ResponseEntity.ok(new Response(
+                HttpStatus.OK.value(),
+                "Get patient done in work schedule successfully",
+                result
+        ));
     }
 }
