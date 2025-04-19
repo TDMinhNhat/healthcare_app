@@ -25,6 +25,7 @@ import {
 } from "../../services/admin/book_service";
 import { getPatientBankAccount } from "../../services/authenticate/user_service";
 import { formatTimeFromTimeString } from "../../utils/dateUtils";
+import { PaymentStatus } from "../../types/enums";
 
 export default function CancelAppointmentPage() {
   const [loading, setLoading] = useState<boolean>(false);
@@ -53,11 +54,14 @@ export default function CancelAppointmentPage() {
       return [];
     }
 
-    return apiData
-      .map((appointment) => {
+    // console.log("Số lượng dữ liệu trước khi chuyển đổi:", apiData.length);
+
+    const transformed = apiData
+      .map((appointment, index) => {
         try {
           // Định dạng ngày và giờ
-          const dateStr = appointment.bookAppointment.workSchedule.dateAppointment;
+          const dateStr =
+            appointment.bookAppointment.workSchedule.dateAppointment;
           const timeStr =
             formatTimeFromTimeString(
               appointment.bookAppointment.workSchedule.shift.start,
@@ -69,22 +73,38 @@ export default function CancelAppointmentPage() {
               "string"
             );
 
+          // Debug để kiểm tra trạng thái hoàn tiền
+          // console.log(
+          //   `Appointment ${index} - Payment status:`,
+          //   appointment.bookAppointmentPayment.status
+          // );
+
           return {
             id: appointment.bookAppointment.id,
-            patientId: appointment.bookAppointment.patient.userId, // Sử dụng userId để hiển thị
-            patientUserId: appointment.bookAppointment.patient.userId, // Lưu userId cho các cuộc gọi API
+            patientId: appointment.bookAppointment.patient.userId,
+            patientUserId: appointment.bookAppointment.patient.userId,
             patientName: `${appointment.bookAppointment.patient.lastName} ${appointment.bookAppointment.patient.firstName}`,
             appointmentDateTime: `${dateStr} ${timeStr}`,
             appointmentId: appointment.bookAppointment.id,
-            isRefunded: appointment.bookAppointmentPayment.status || false, // Mặc định là false nếu không được đặt
+            isRefunded:
+              appointment.bookAppointmentPayment.status ===
+              PaymentStatus.PAY_BACK,
+            paymentStatus: appointment.bookAppointmentPayment.status,
             rawData: appointment.bookAppointment,
           };
         } catch (error) {
-          console.error("Lỗi khi chuyển đổi dữ liệu cuộc hẹn:", error);
+          console.error(`Lỗi khi chuyển đổi dữ liệu cuộc hẹn ${index}:`, error);
+          // console.error(
+          //   "Chi tiết appointment gây lỗi:",
+          //   JSON.stringify(appointment, null, 2)
+          // );
           return null;
         }
       })
-      .filter(Boolean); // Loại bỏ các giá trị null từ các chuyển đổi thất bại
+      .filter(Boolean);
+
+    // console.log("Số lượng dữ liệu sau khi chuyển đổi:", transformed.length);
+    return transformed;
   };
 
   const fetchCanceledAppointments = async () => {
@@ -96,19 +116,18 @@ export default function CancelAppointmentPage() {
       console.log("Phản hồi API:", response);
 
       // Kiểm tra cấu trúc dữ liệu
-      if (response && response.data) {
-        // Xử lý cả hai cấu trúc có thể có
-        let appointmentsArray;
-        if (Array.isArray(response.data)) {
-          appointmentsArray = response.data;
-        } else if (response.data.data && Array.isArray(response.data.data)) {
+      if (response && response.data && response.data.code === 200) {
+        // API luôn trả về một cấu trúc nhất quán với mảng nằm trong response.data.data
+        let appointmentsArray = [];
+
+        if (response.data.data && Array.isArray(response.data.data)) {
           appointmentsArray = response.data.data;
         } else {
           console.error("Cấu trúc dữ liệu không mong đợi:", response.data);
-          appointmentsArray = [];
         }
-
+        // console.log("Danh sách cuộc hẹn đã hủy:", appointmentsArray);
         const transformedData = transformAppointmentData(appointmentsArray);
+        console.log("Dữ liệu đã chuyển đổi:", transformedData);
         setCanceledAppointments(transformedData);
       } else {
         throw new Error("Định dạng phản hồi không hợp lệ");
@@ -228,20 +247,44 @@ export default function CancelAppointmentPage() {
       flex: 0.8,
     },
     {
-      field: "isRefunded",
-      headerName: "Trạng thái hoàn tiền",
+      field: "paymentStatus",
+      headerName: "Trạng thái thanh toán",
       width: 150,
       flex: 1,
-      renderCell: (params) => (
-        <span
-          style={{
-            color: params.row.isRefunded ? "green" : "red",
-            fontWeight: "bold",
-          }}
-        >
-          {params.row.isRefunded ? "Đã hoàn tiền" : "Chưa hoàn tiền"}
-        </span>
-      ),
+      renderCell: (params) => {
+        let color = "gray";
+        let statusText = "Chưa xác định";
+
+        switch (params.row.paymentStatus) {
+          case PaymentStatus.PAY_BACK:
+            color = "green";
+            statusText = "Đã hoàn tiền";
+            break;
+          case PaymentStatus.PAYED:
+            color = "orange";
+            statusText = "Đã thanh toán";
+            break;
+          case PaymentStatus.CANCELED:
+            color = "red";
+            statusText = "Đã hủy thanh toán";
+            break;
+          case PaymentStatus.WAITING_PAY:
+            color = "blue";
+            statusText = "Đang chờ thanh toán";
+            break;
+        }
+
+        return (
+          <span
+            style={{
+              color: color,
+              fontWeight: "bold",
+            }}
+          >
+            {statusText}
+          </span>
+        );
+      },
     },
     {
       field: "actions",

@@ -64,7 +64,7 @@ export const AdminLayout: React.FC = () => {
           <ListItemIcon>
             <MedicalServicesIcon />
           </ListItemIcon>
-          <ListItemText primary="Quản lí dịch vụ" />
+          <ListItemText primary="Quản lí nhóm bệnh" />
         </ListItemButton>
         {/* Hoàn tiền */}
         <ListItemButton
@@ -73,7 +73,7 @@ export const AdminLayout: React.FC = () => {
           <ListItemIcon>
             <EventBusyIcon />
           </ListItemIcon>
-          <ListItemText primary="Huỷ Lịch hẹn" />
+          <ListItemText primary="Quản lí Lịch hẹn" />
         </ListItemButton>
       </List>
 
