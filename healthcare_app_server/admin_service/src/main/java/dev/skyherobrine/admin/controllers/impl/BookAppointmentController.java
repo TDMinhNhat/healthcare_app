@@ -82,10 +82,10 @@ public class BookAppointmentController {
                             bookAppointmentPaymentRepository.save(bookAppointmentPayment)
                     ));
                 }
-                log.warn("Book Appointment: Book appointment not found");
+                log.warn("Book Appointment: Book appointment payment was not found");
                 return ResponseEntity.ok(new Response(
                         HttpStatus.NOT_FOUND.value(),
-                        "Book appointment not found",
+                        "Book appointment payment was not found",
                         null
                 ));
             } else {
