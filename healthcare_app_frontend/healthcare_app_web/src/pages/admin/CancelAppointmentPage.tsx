@@ -57,27 +57,27 @@ export default function CancelAppointmentPage() {
       .map((appointment) => {
         try {
           // Định dạng ngày và giờ
-          const dateStr = appointment.workSchedule.dateAppointment;
+          const dateStr = appointment.bookAppointment.workSchedule.dateAppointment;
           const timeStr =
             formatTimeFromTimeString(
-              appointment.workSchedule.shift.start,
+              appointment.bookAppointment.workSchedule.shift.start,
               "string"
             ) +
             "-" +
             formatTimeFromTimeString(
-              appointment.workSchedule.shift.end,
+              appointment.bookAppointment.workSchedule.shift.end,
               "string"
             );
 
           return {
-            id: appointment.id,
-            patientId: appointment.patient.userId, // Sử dụng userId để hiển thị
-            patientUserId: appointment.patient.userId, // Lưu userId cho các cuộc gọi API
-            patientName: `${appointment.patient.lastName} ${appointment.patient.firstName}`,
+            id: appointment.bookAppointment.id,
+            patientId: appointment.bookAppointment.patient.userId, // Sử dụng userId để hiển thị
+            patientUserId: appointment.bookAppointment.patient.userId, // Lưu userId cho các cuộc gọi API
+            patientName: `${appointment.bookAppointment.patient.lastName} ${appointment.bookAppointment.patient.firstName}`,
             appointmentDateTime: `${dateStr} ${timeStr}`,
-            appointmentId: appointment.id,
-            isRefunded: appointment.isRefunded || false, // Mặc định là false nếu không được đặt
-            rawData: appointment,
+            appointmentId: appointment.bookAppointment.id,
+            isRefunded: appointment.bookAppointmentPayment.status || false, // Mặc định là false nếu không được đặt
+            rawData: appointment.bookAppointment,
           };
         } catch (error) {
           console.error("Lỗi khi chuyển đổi dữ liệu cuộc hẹn:", error);
