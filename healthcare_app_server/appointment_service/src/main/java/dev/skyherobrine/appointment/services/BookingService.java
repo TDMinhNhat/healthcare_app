@@ -81,6 +81,7 @@ public class BookingService {
     }
 
     public Map<String,Object> getAppointmentDetail(Long workSchedule) {
+        log.info("Booking Service: Get the appointment detail");
         Map<String,Object> result = new HashMap<>();
         result.put("information", new HashMap<>(){{
             put("total_book", bar.findByWorkSchedule(workSchedule).size());
