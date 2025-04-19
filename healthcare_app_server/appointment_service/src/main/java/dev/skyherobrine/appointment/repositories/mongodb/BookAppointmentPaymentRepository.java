@@ -12,5 +12,5 @@ import java.util.Optional;
 public interface BookAppointmentPaymentRepository extends MongoRepository<BookAppointmentPayment,Long> {
     Optional<BookAppointmentPayment> findTopByOrderByIdDesc();
 
-    Optional<BookAppointmentPayment> findByBookAppointmentId(BookAppointment bookAppointmentId);
+    Optional<BookAppointmentPayment> findByBookAppointmentId_Id(Long bookAppointmentId);
 }

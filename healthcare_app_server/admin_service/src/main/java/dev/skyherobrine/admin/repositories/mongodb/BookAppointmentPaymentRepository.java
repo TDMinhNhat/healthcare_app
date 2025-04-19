@@ -13,5 +13,5 @@ import java.util.Optional;
 public interface BookAppointmentPaymentRepository extends MongoRepository<BookAppointmentPayment,Long> {
     List<BookAppointmentPayment> findByStatus(PaymentStatus status);
 
-    Optional<BookAppointmentPayment> findByBookAppointment(BookAppointment bookAppointment);
+    Optional<BookAppointmentPayment> findByBookAppointment_Id(Long bookAppointmentId);
 }

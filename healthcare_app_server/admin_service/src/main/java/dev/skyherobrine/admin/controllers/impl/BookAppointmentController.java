@@ -71,7 +71,7 @@ public class BookAppointmentController {
             log.info("Book Appointment: Call the api assign paybackment");
             BookAppointment bookAppointment = bookAppointmentRepository.findById(Long.parseLong(bookAppointmentId)).orElse(null);
             if(bookAppointment != null) {
-                BookAppointmentPayment bookAppointmentPayment = bookAppointmentPaymentRepository.findByBookAppointment(bookAppointment).orElse(null);
+                BookAppointmentPayment bookAppointmentPayment = bookAppointmentPaymentRepository.findByBookAppointment_Id(bookAppointment.getId()).orElse(null);
                 if(bookAppointmentPayment != null) {
                     bookAppointmentPayment.setStatus(PaymentStatus.PAY_BACK);
                     kafkaTemplate.send("assign_payback", ObjectParser.convertObjectToJson(bookAppointment.getId() + ""));

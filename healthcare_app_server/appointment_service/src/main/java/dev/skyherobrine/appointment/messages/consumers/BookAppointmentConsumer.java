@@ -56,11 +56,12 @@ public class BookAppointmentConsumer {
             String getBookAppointmentId = ObjectParser.convertJsonToObject(message, String.class);
             BookAppointment bookAppointment = bookAppointmentRepository.findById(Long.parseLong(getBookAppointmentId)).orElse(null);
             if(bookAppointment != null) {
-                BookAppointmentPayment bookAppointmentPayment = bookAppointmentPaymentRepository.findByBookAppointmentId(bookAppointment).orElse(null);
+                BookAppointmentPayment bookAppointmentPayment = bookAppointmentPaymentRepository.findByBookAppointmentId_Id(bookAppointment.getId()).orElse(null);
                 if(bookAppointmentPayment != null) {
                     bookAppointmentPayment.setStatus(PaymentStatus.PAY_BACK);
                     bookAppointmentPaymentRepository.save(bookAppointmentPayment);
                     log.info("Book Appointment Consumer: assign payback successfully!");
+                    return;
                 }
                 log.warn("Book Appointment Consumer: can't found the book appointment payment!");
             }
