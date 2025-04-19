@@ -7,10 +7,10 @@ import DoctorProfilePage from "../pages/doctor/DoctorProfilePage";
 import MedicalRecordPage from "../pages/doctor/MedicalRecordPage";
 import DoctorAppointmentDetailsPage from "../pages/doctor/DoctorAppointmentDetailsPage";
 import PatientAppointmentDetailsPage from "../pages/patient/PatientAppointmentDetailsPage";
-import EmergencyPage from "../pages/doctor/EmergencyPage"; // Import the new EmergencyPage
-import ChangePasswordPage from "../pages/ChangePasswordPage"; // Import ChangePasswordPage
-import ForgetPasswordPage from "../pages/ForgetPasswordPage"; // Import trang quên mật khẩu
-import BankAccountPage from "../pages/patient/BankAccountPage"; // Import trang quản lý tài khoản ngân hàng
+import EmergencyPage from "../pages/doctor/EmergencyPage";
+import ChangePasswordPage from "../pages/ChangePasswordPage";
+import ForgetPasswordPage from "../pages/ForgetPasswordPage";
+import BankAccountPage from "../pages/patient/BankAccountPage";
 
 // Import layout components
 import AdminLayout from "../layouts/AdminLayout";
@@ -25,115 +25,102 @@ import PatientDashboard from "../pages/patient/PatientDashboard";
 import AppointmentPage from "../pages/patient/AppointmentPage";
 import DoctorSchedulePage from "../pages/doctor/DoctorSchedulePage";
 import DoctorCurrentSchedulePage from "../pages/doctor/DoctorCurrentSchedulePage";
-import ExaminationRoomPage from "../pages/ExaminationRoomPage"; // Import from new location
+import ExaminationRoomPage from "../pages/ExaminationRoomPage";
 import WaitingRoomPage from "../pages/patient/WatingRoomPage";
 import PatientManagementPage from "../pages/admin/PatientManagementPage";
 import PatientMedicalRecord from "../pages/patient/PatientMedicalRecord";
 import DrugManagementPage from "../pages/admin/DrugManagementPage";
 import DoctorManagementPage from "../pages/admin/DoctorManagementPage";
 import ShiftManagementPage from "../pages/admin/ShiftManagementPage";
-import AdminDashboardPage from "../pages/admin/AdminDashboardPage"; // Import the new admin dashboard
+import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
 import DiseasManagementPage from "../pages/admin/DiseasManagementPage";
 import CancelAppointmentPage from "../pages/admin/CancelAppointmentPage";
 
-// const ChatPage = lazy(() => import("../pages/ChatPage"));
-
 export const AppRoutes = () => {
-  const role = localStorage.getItem("role");
-
-  // Define public routes accessible to everyone
-  const publicRoutes = (
-    <>
-      <Route path={ROUTING.HOME} element={<HomePage />} />
-      <Route path={ROUTING.REGISTER} element={<RegisterPage />} />
-      <Route path={ROUTING.LOGIN} element={<LoginPage />} />
-      <Route path={ROUTING.VERIFY_EMAIL} element={<VerifyEmailPage />} />
-      <Route path={ROUTING.CHANGE_PASSWORD} element={<ChangePasswordPage />} />
-      <Route path={ROUTING.FORGET_PASSWORD} element={<ForgetPasswordPage />} />
-    </>
-  );
-
-  // Admin-specific routes
-  const adminRoutes = (
-    <Route path={ROUTING.ADMIN} element={<AdminLayout />}>
-      <Route path={ROUTING.DASHBOARD} element={<AdminDashboardPage />} />
-      <Route index element={<AdminDashboardPage />} />
-      <Route path={ROUTING.USERS} element={<PatientManagementPage />} />
-      <Route path={ROUTING.DOCTORS} element={<DoctorManagementPage />} />
-      <Route path={ROUTING.DRUG} element={<DrugManagementPage />} />
-      <Route path={ROUTING.SHIFTS} element={<ShiftManagementPage />} />
-      <Route path={ROUTING.DISEASES} element={<DiseasManagementPage />} />
-      <Route
-        path={ROUTING.CANCEL_APPOINTMENT}
-        element={<CancelAppointmentPage />}
-      />
-    </Route>
-  );
-
-  // Doctor-specific routes
-  const doctorRoutes = (
-    <>
-      <Route
-        path={ROUTING.EXAMINATION_ROOM}
-        element={<ExaminationRoomPage />}
-      />
-      <Route path={ROUTING.DOCTOR} element={<DoctorLayout />}>
-        <Route path={ROUTING.DASHBOARD} element={<DoctorDashboard />} />
-        <Route index element={<DoctorDashboard />} />
-        <Route path={ROUTING.PROFILE} element={<DoctorProfilePage />} />
-        <Route
-          path={ROUTING.SCHEDULE_DETAIL}
-          element={<DoctorAppointmentDetailsPage />}
-        />
-        <Route path={ROUTING.SCHEDULE} element={<DoctorSchedulePage />} />
-        <Route
-          path={ROUTING.CURRENT_SCHEDULE}
-          element={<DoctorCurrentSchedulePage />}
-        />
-        <Route path={ROUTING.EMERGENCY} element={<EmergencyPage />} />
-        <Route path={ROUTING.PATIENTS} element={<div>Patients</div>} />
-        <Route
-          path={ROUTING.PRESCRIPTIONS}
-          element={<div>Prescriptions</div>}
-        />
-        <Route path={ROUTING.CHAT} element={<div>Chat</div>} />
-      </Route>
-    </>
-  );
-
-  // Patient-specific routes
-  const patientRoutes = (
-    <Route path={ROUTING.PATIENT} element={<PatientLayout />}>
-      <Route path={ROUTING.DASHBOARD} element={<PatientDashboard />} />
-      <Route index element={<PatientDashboard />} />
-      <Route path={ROUTING.PROFILE} element={<PatientProfilePage />} />
-      <Route path={ROUTING.APPOINTMENTS} element={<AppointmentPage />} />
-      <Route
-        path={ROUTING.PATIENT_APPOINTMENT_DETAILS}
-        element={<PatientAppointmentDetailsPage />}
-      />
-      <Route path={ROUTING.WATING_ROOM} element={<WaitingRoomPage />} />
-      <Route path={ROUTING.FIND_DOCTOR} element={<div>Find Doctor</div>} />
-      <Route
-        path={ROUTING.MEDICAL_RECORDS}
-        element={<PatientMedicalRecord />}
-      />
-      <Route path={ROUTING.CHAT} element={<div>Chat</div>} />
-      <Route path={ROUTING.BANK_ACCOUNT} element={<BankAccountPage />} />
-    </Route>
-  );
+  // const role = localStorage.getItem("role");
 
   return (
     <Suspense fallback={<Loading />}>
       <BrowserRouter>
         <Routes>
-          {/* Public routes always rendered */}
-          {publicRoutes}
+          {/* Public routes accessible to everyone */}
+          <Route path={ROUTING.HOME} element={<HomePage />} />
+          <Route path={ROUTING.REGISTER} element={<RegisterPage />} />
+          <Route path={ROUTING.LOGIN} element={<LoginPage />} />
+          <Route path={ROUTING.VERIFY_EMAIL} element={<VerifyEmailPage />} />
+          <Route
+            path={ROUTING.CHANGE_PASSWORD}
+            element={<ChangePasswordPage />}
+          />
+          <Route
+            path={ROUTING.FORGET_PASSWORD}
+            element={<ForgetPasswordPage />}
+          />
 
-          {/* Role-based routes */}
-          {role === "admin" && adminRoutes}
-          {role === "doctor" && doctorRoutes}
-          {role === "patient" && patientRoutes}
+          {/* Admin routes - no conditional rendering */}
+          <Route path={ROUTING.ADMIN} element={<AdminLayout />}>
+            <Route path={ROUTING.DASHBOARD} element={<AdminDashboardPage />} />
+            <Route index element={<AdminDashboardPage />} />
+            <Route path={ROUTING.USERS} element={<PatientManagementPage />} />
+            <Route path={ROUTING.DOCTORS} element={<DoctorManagementPage />} />
+            <Route path={ROUTING.DRUG} element={<DrugManagementPage />} />
+            <Route path={ROUTING.SHIFTS} element={<ShiftManagementPage />} />
+            <Route path={ROUTING.DISEASES} element={<DiseasManagementPage />} />
+            <Route
+              path={ROUTING.CANCEL_APPOINTMENT}
+              element={<CancelAppointmentPage />}
+            />
+          </Route>
+
+          {/* Doctor routes - no conditional rendering */}
+          <Route
+            path={ROUTING.EXAMINATION_ROOM}
+            element={<ExaminationRoomPage />}
+          />
+          <Route path={ROUTING.DOCTOR} element={<DoctorLayout />}>
+            <Route path={ROUTING.DASHBOARD} element={<DoctorDashboard />} />
+            <Route index element={<DoctorDashboard />} />
+            <Route path={ROUTING.PROFILE} element={<DoctorProfilePage />} />
+            <Route
+              path={ROUTING.SCHEDULE_DETAIL}
+              element={<DoctorAppointmentDetailsPage />}
+            />
+            <Route path={ROUTING.SCHEDULE} element={<DoctorSchedulePage />} />
+            <Route
+              path={ROUTING.CURRENT_SCHEDULE}
+              element={<DoctorCurrentSchedulePage />}
+            />
+            <Route path={ROUTING.EMERGENCY} element={<EmergencyPage />} />
+            <Route path={ROUTING.PATIENTS} element={<div>Patients</div>} />
+            <Route
+              path={ROUTING.PRESCRIPTIONS}
+              element={<div>Prescriptions</div>}
+            />
+            <Route path={ROUTING.CHAT} element={<div>Chat</div>} />
+          </Route>
+
+          {/* Patient routes - no conditional rendering */}
+          <Route path={ROUTING.PATIENT} element={<PatientLayout />}>
+            <Route path={ROUTING.DASHBOARD} element={<PatientDashboard />} />
+            <Route index element={<PatientDashboard />} />
+            <Route path={ROUTING.PROFILE} element={<PatientProfilePage />} />
+            <Route path={ROUTING.APPOINTMENTS} element={<AppointmentPage />} />
+            <Route
+              path={ROUTING.PATIENT_APPOINTMENT_DETAILS}
+              element={<PatientAppointmentDetailsPage />}
+            />
+            <Route path={ROUTING.WATING_ROOM} element={<WaitingRoomPage />} />
+            <Route
+              path={ROUTING.FIND_DOCTOR}
+              element={<div>Find Doctor</div>}
+            />
+            <Route
+              path={ROUTING.MEDICAL_RECORDS}
+              element={<PatientMedicalRecord />}
+            />
+            <Route path={ROUTING.CHAT} element={<div>Chat</div>} />
+            <Route path={ROUTING.BANK_ACCOUNT} element={<BankAccountPage />} />
+          </Route>
 
           {/* Redirect unauthorized access to home */}
           <Route path="*" element={<Navigate to={ROUTING.HOME} replace />} />

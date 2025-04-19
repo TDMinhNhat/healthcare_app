@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -12,7 +12,12 @@ import {
   Select,
   MenuItem,
   FormHelperText,
+  CircularProgress,
+  Alert,
+  Collapse,
 } from "@mui/material";
+import { Formik, Form, Field, FormikProps } from "formik";
+import * as Yup from "yup";
 import { DoctorEducation } from "../../../types/doctor";
 import { Diploma } from "../../../types/enums";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -27,9 +32,21 @@ import {
 interface EducationFormProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: DoctorEducation) => void;
+  onSubmit: (
+    data: DoctorEducation
+  ) => Promise<{ success: boolean; message: string }>;
   education: DoctorEducation | null;
   mode: "add" | "edit";
+  isSubmitting?: boolean;
+}
+
+// Define the form values interface
+interface EducationFormValues {
+  schoolName: string;
+  joinedDate: string;
+  joinDate?: string;
+  graduateDate: string;
+  diploma: keyof typeof Diploma;
 }
 
 const EducationForm: React.FC<EducationFormProps> = ({
@@ -38,127 +55,109 @@ const EducationForm: React.FC<EducationFormProps> = ({
   onSubmit,
   education,
   mode,
+  isSubmitting = false,
 }) => {
-  // State để lưu trữ dữ liệu form
-  const [formData, setFormData] = useState<Partial<DoctorEducation>>({
+  // State for handling response messages
+  const [responseMessage, setResponseMessage] = useState<{
+    type: "success" | "error" | "info";
+    message: string;
+    show: boolean;
+  }>({
+    type: "info",
+    message: "",
+    show: false,
+  });
+
+  // Define validation schema with Yup
+  const validationSchema = Yup.object({
+    schoolName: Yup.string().required("Tên trường không được để trống"),
+    joinedDate: Yup.string().required("Ngày bắt đầu không được để trống"),
+    graduateDate: Yup.string().required("Ngày kết thúc không được để trống"),
+    diploma: Yup.string().required("Bằng cấp không được để trống"),
+  });
+
+  // Initial form values
+  const initialValues: EducationFormValues = {
     schoolName: "",
     joinedDate: "",
     graduateDate: "",
     diploma: "BACHELOR",
-  });
+  };
 
-  // State cho validation
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  // Prepare form values when education data changes
+  const getInitialValues = (): EducationFormValues => {
+    if (!education) return initialValues;
 
-  // Cập nhật dữ liệu form khi prop education thay đổi
-  useEffect(() => {
-    if (education && mode === "edit") {
-      // Create a copy of education to avoid mutation
-      const formattedEducation = { ...education };
+    return {
+      schoolName: education.schoolName || "",
+      joinedDate: education.joinedDate || education.joinDate || "",
+      joinDate: education.joinDate || education.joinedDate || "",
+      graduateDate: education.graduateDate || "",
+      diploma: education.diploma || "BACHELOR",
+    };
+  };
 
-      // No need to modify dates here, we'll handle in the DatePicker component
-      setFormData(formattedEducation);
-    } else {
-      // Reset form khi thêm mới
-      setFormData({
-        schoolName: "",
-        joinedDate: "",
-        graduateDate: "",
-        diploma: "BACHELOR",
-      });
-    }
-    // Reset errors
-    setErrors({});
-  }, [education, mode, open]);
-
-  // Xử lý thay đổi input
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
+  // Submit handler
+  const handleFormSubmit = async (
+    values: EducationFormValues,
+    { setSubmitting }: any
   ) => {
-    const { name, value } = e.target;
-    if (name) {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
-      // Xóa lỗi khi trường được thay đổi
-      if (errors[name]) {
-        setErrors({
-          ...errors,
-          [name]: "",
+    try {
+      // Prepare data for API submission
+      const submissionData: Partial<DoctorEducation> = {
+        schoolName: values.schoolName,
+        joinedDate: values.joinedDate,
+        joinDate: values.joinedDate, // Ensure API compatibility
+        graduateDate: values.graduateDate,
+        diploma: values.diploma,
+      };
+
+      // Call onSubmit and handle the response
+      const result = await onSubmit(submissionData as DoctorEducation);
+
+      if (result.success) {
+        setResponseMessage({
+          type: "success",
+          message: result.message || "Thao tác thành công!",
+          show: true,
+        });
+
+        // Optionally close the form after success with a delay
+        setTimeout(() => {
+          onClose();
+        }, 1500);
+      } else {
+        setResponseMessage({
+          type: "error",
+          message: result.message || "Đã xảy ra lỗi!",
+          show: true,
         });
       }
+    } catch (error) {
+      console.error("Error submitting education data:", error);
+      setResponseMessage({
+        type: "error",
+        message: "Đã xảy ra lỗi khi lưu thông tin học vấn!",
+        show: true,
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // Xử lý thay đổi ngày
-  const handleJoinedDateChange = (date: Date | null) => {
-    if (date) {
-      // Use formatDateToString to ensure date is in correct format (dd-MM-yyyy)
-      const formattedDate = formatDateToString(date);
-      setFormData({
-        ...formData,
-        joinedDate: formattedDate,
-      });
-      if (errors["joinedDate"]) {
-        setErrors({
-          ...errors,
-          joinedDate: "",
-        });
-      }
-    }
-  };
+  // Custom date validation
+  const validateDates = (values: EducationFormValues) => {
+    const errors: { graduateDate?: string } = {};
 
-  const handleGraduateDateChange = (date: Date | null) => {
-    if (date) {
-      // Use formatDateToString to ensure date is in correct format (dd-MM-yyyy)
-      const formattedDate = formatDateToString(date);
-      setFormData({
-        ...formData,
-        graduateDate: formattedDate,
-      });
-      if (errors["graduateDate"]) {
-        setErrors({
-          ...errors,
-          graduateDate: "",
-        });
-      }
-    }
-  };
-
-  // Validate form trước khi submit
-  const validateForm = () => {
-    const newErrors: { [key: string]: string } = {};
-
-    if (!formData.schoolName?.trim()) {
-      newErrors.schoolName = "Tên trường không được để trống";
-    }
-
-    if (!formData.joinedDate) {
-      newErrors.joinedDate = "Ngày bắt đầu không được để trống";
-    }
-
-    if (!formData.graduateDate) {
-      newErrors.graduateDate = "Ngày kết thúc không được để trống";
-    }
-
-    if (formData.joinedDate && formData.graduateDate) {
-      const joinedDate = new Date(formData.joinedDate);
-      const graduateDate = new Date(formData.graduateDate);
+    if (values.joinedDate && values.graduateDate) {
+      const joinedDate = new Date(values.joinedDate);
+      const graduateDate = new Date(values.graduateDate);
       if (joinedDate > graduateDate) {
-        newErrors.graduateDate = "Ngày kết thúc phải sau ngày bắt đầu";
+        errors.graduateDate = "Ngày kết thúc phải sau ngày bắt đầu";
       }
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  // Xử lý submit form
-  const handleSubmit = () => {
-    if (validateForm()) {
-      onSubmit(formData as DoctorEducation);
-    }
+    return errors;
   };
 
   return (
@@ -167,104 +166,165 @@ const EducationForm: React.FC<EducationFormProps> = ({
         {mode === "add" ? "Thêm học vấn mới" : "Chỉnh sửa thông tin học vấn"}
       </DialogTitle>
 
-      <DialogContent>
-        <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={12}>
-            <TextField
-              name="schoolName"
-              label="Tên trường"
-              value={formData.schoolName || ""}
-              onChange={handleChange}
-              fullWidth
-              error={!!errors.schoolName}
-              helperText={errors.schoolName}
-            />
-          </Grid>
+      <Formik
+        initialValues={getInitialValues()}
+        validationSchema={validationSchema}
+        onSubmit={handleFormSubmit}
+        validate={validateDates}
+        enableReinitialize
+      >
+        {(formik: FormikProps<EducationFormValues>) => (
+          <Form>
+            <DialogContent>
+              {/* Response message alert */}
+              <Collapse in={responseMessage.show}>
+                <Alert
+                  severity={responseMessage.type}
+                  sx={{ mb: 2 }}
+                  onClose={() =>
+                    setResponseMessage((prev) => ({ ...prev, show: false }))
+                  }
+                >
+                  {responseMessage.message}
+                </Alert>
+              </Collapse>
 
-          <Grid item xs={12} md={6}>
-            <FormControl fullWidth error={!!errors.diploma}>
-              <InputLabel>Bằng cấp</InputLabel>
-              <Select
-                name="diploma"
-                value={formData.diploma || ""}
-                label="Bằng cấp"
-                onChange={handleChange}
+              <Grid container spacing={2} sx={{ mt: 1 }}>
+                <Grid item xs={12}>
+                  <Field
+                    as={TextField}
+                    name="schoolName"
+                    label="Tên trường"
+                    fullWidth
+                    error={
+                      formik.touched.schoolName &&
+                      Boolean(formik.errors.schoolName)
+                    }
+                    helperText={
+                      formik.touched.schoolName && formik.errors.schoolName
+                    }
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <FormControl
+                    fullWidth
+                    error={
+                      formik.touched.diploma && Boolean(formik.errors.diploma)
+                    }
+                  >
+                    <InputLabel>Bằng cấp</InputLabel>
+                    <Field as={Select} name="diploma" label="Bằng cấp">
+                      <MenuItem value="BACHELOR">Cử nhân</MenuItem>
+                      <MenuItem value="MASTER">Thạc sĩ</MenuItem>
+                      <MenuItem value="DOCTOR">Tiến sĩ</MenuItem>
+                      <MenuItem value="PROFESSOR">Giáo sư</MenuItem>
+                    </Field>
+                    {formik.touched.diploma && formik.errors.diploma && (
+                      <FormHelperText>{formik.errors.diploma}</FormHelperText>
+                    )}
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <LocalizationProvider
+                    dateAdapter={AdapterDateFns}
+                    adapterLocale={vi}
+                  >
+                    <DatePicker
+                      label="Ngày bắt đầu"
+                      value={
+                        formik.values.joinedDate
+                          ? parseDateFromString(formik.values.joinedDate)
+                          : null
+                      }
+                      onChange={(date) => {
+                        if (date) {
+                          const formattedDate = formatDateToString(date);
+                          formik.setFieldValue("joinedDate", formattedDate);
+                          formik.setFieldValue("joinDate", formattedDate); // Set both for API compatibility
+                        }
+                      }}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          error:
+                            formik.touched.joinedDate &&
+                            Boolean(formik.errors.joinedDate),
+                          helperText:
+                            formik.touched.joinedDate &&
+                            formik.errors.joinedDate,
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <LocalizationProvider
+                    dateAdapter={AdapterDateFns}
+                    adapterLocale={vi}
+                  >
+                    <DatePicker
+                      label="Ngày kết thúc"
+                      value={
+                        formik.values.graduateDate
+                          ? parseDateFromString(formik.values.graduateDate)
+                          : null
+                      }
+                      onChange={(date) => {
+                        if (date) {
+                          const formattedDate = formatDateToString(date);
+                          formik.setFieldValue("graduateDate", formattedDate);
+                        }
+                      }}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          error:
+                            formik.touched.graduateDate &&
+                            Boolean(formik.errors.graduateDate),
+                          helperText:
+                            formik.touched.graduateDate &&
+                            formik.errors.graduateDate,
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </Grid>
+              </Grid>
+            </DialogContent>
+
+            <DialogActions>
+              <Button
+                onClick={onClose}
+                disabled={formik.isSubmitting || isSubmitting}
               >
-                <MenuItem value="BACHELOR">Cử nhân</MenuItem>
-                <MenuItem value="MASTER">Thạc sĩ</MenuItem>
-                <MenuItem value="DOCTOR">Tiến sĩ</MenuItem>
-                <MenuItem value="PROFESSOR">Giáo sư</MenuItem>
-              </Select>
-              {errors.diploma && (
-                <FormHelperText>{errors.diploma}</FormHelperText>
-              )}
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <LocalizationProvider
-              dateAdapter={AdapterDateFns}
-              adapterLocale={vi}
-            >
-              <DatePicker
-                label="Ngày bắt đầu"
-                value={
-                  formData.joinedDate
-                    ? typeof formData.joinedDate === "string"
-                      ? parseDateFromString(formData.joinedDate)
-                      : new Date(formData.joinedDate)
-                    : formData.joinDate
-                    ? typeof formData.joinDate === "string"
-                      ? parseDateFromString(formData.joinDate)
-                      : new Date(formData.joinDate)
-                    : null
+                Hủy
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={
+                  formik.isSubmitting || isSubmitting || !formik.isValid
                 }
-                onChange={handleJoinedDateChange}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    error: !!errors.joinedDate,
-                    helperText: errors.joinedDate,
-                  },
-                }}
-              />
-            </LocalizationProvider>
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <LocalizationProvider
-              dateAdapter={AdapterDateFns}
-              adapterLocale={vi}
-            >
-              <DatePicker
-                label="Ngày kết thúc"
-                value={
-                  formData.graduateDate
-                    ? typeof formData.graduateDate === "string"
-                      ? parseDateFromString(formData.graduateDate)
-                      : new Date(formData.graduateDate)
-                    : null
-                }
-                onChange={handleGraduateDateChange}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    error: !!errors.graduateDate,
-                    helperText: errors.graduateDate,
-                  },
-                }}
-              />
-            </LocalizationProvider>
-          </Grid>
-        </Grid>
-      </DialogContent>
-
-      <DialogActions>
-        <Button onClick={onClose}>Hủy</Button>
-        <Button onClick={handleSubmit} variant="contained" color="primary">
-          {mode === "add" ? "Thêm" : "Lưu thay đổi"}
-        </Button>
-      </DialogActions>
+              >
+                {formik.isSubmitting || isSubmitting ? (
+                  <>
+                    <CircularProgress size={24} sx={{ mr: 1 }} />
+                    {mode === "add" ? "Đang thêm..." : "Đang lưu..."}
+                  </>
+                ) : mode === "add" ? (
+                  "Thêm"
+                ) : (
+                  "Lưu thay đổi"
+                )}
+              </Button>
+            </DialogActions>
+          </Form>
+        )}
+      </Formik>
     </Dialog>
   );
 };

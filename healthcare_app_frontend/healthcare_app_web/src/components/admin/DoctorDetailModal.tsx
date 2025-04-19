@@ -41,6 +41,11 @@ import CertificateForm from "./forms/CertificateForm";
 import ExperienceForm from "./forms/ExperienceForm";
 import { getDoctorInfo } from "../../services/authenticate/user_service";
 import { parseDateFromString } from "../../utils/dateUtils";
+import {
+  updateAddCertificate,
+  updateAddEducation,
+  updateAddExperience,
+} from "../../services/admin/doctor_service";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -97,6 +102,9 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
   const [experiences, setExperiences] = useState<DoctorExperience[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Add state for tracking API calls
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Reset tab khi modal đóng/mở
   useEffect(() => {
@@ -211,40 +219,90 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
   };
 
   // Xử lý lưu thông tin học vấn
-  const handleSaveEducation = (educationData: DoctorEducation) => {
-    if (!doctor) return;
+  const handleSaveEducation = async (educationData: DoctorEducation) => {
+    if (!doctor)
+      return { success: false, message: "Không tìm thấy thông tin bác sĩ" };
 
-    let updatedEducations = [...educations];
+    try {
+      setIsSubmitting(true);
 
-    if (formMode === "add") {
-      // Tạo ID mới
-      const newId =
-        updatedEducations.length > 0
-          ? Math.max(...updatedEducations.map((e) => e.id)) + 1
-          : 1;
+      // Format data according to API expectations
+      const educationPayload = {
+        schoolName: educationData.schoolName,
+        joinDate: educationData.joinedDate || educationData.joinDate, // Handle both field names
+        graduateDate: educationData.graduateDate,
+        diploma: educationData.diploma,
+      };
 
-      updatedEducations.push({
-        ...educationData,
-        id: newId,
-        doctorId: doctor.id,
-      });
-    } else if (selectedEducation) {
-      // Cập nhật học vấn hiện có
-      updatedEducations = updatedEducations.map((edu) =>
-        edu.id === selectedEducation.id
-          ? { ...educationData, doctorId: doctor.id }
-          : edu
+      // Determine if we're adding or updating
+      const educationId =
+        formMode === "edit" && selectedEducation
+          ? selectedEducation.id.toString()
+          : undefined;
+
+      // Call API
+      const response = await updateAddEducation(
+        doctor.userId.toString(),
+        educationPayload,
+        educationId
       );
+
+      // If successful, update the UI
+      if (response && response.status === 200) {
+        let updatedEducations = [...educations];
+
+        if (formMode === "add") {
+          // Create new ID for UI
+          const newId =
+            updatedEducations.length > 0
+              ? Math.max(...updatedEducations.map((e) => e.id)) + 1
+              : 1;
+
+          updatedEducations.push({
+            ...educationData,
+            id: newId,
+            doctorId: doctor.id,
+          });
+        } else if (selectedEducation) {
+          // Update existing education
+          updatedEducations = updatedEducations.map((edu) =>
+            edu.id === selectedEducation.id
+              ? { ...educationData, doctorId: doctor.id }
+              : edu
+          );
+        }
+
+        setEducations(updatedEducations);
+        const updatedDoctor = {
+          ...doctor,
+          educations: updatedEducations,
+        };
+
+        onUpdate(updatedDoctor);
+        setIsEducationFormOpen(false);
+
+        return {
+          success: true,
+          message:
+            formMode === "add"
+              ? "Thêm học vấn thành công"
+              : "Cập nhật học vấn thành công",
+        };
+      } else {
+        return {
+          success: false,
+          message: "Không thể lưu thông tin học vấn. Vui lòng thử lại sau.",
+        };
+      }
+    } catch (error) {
+      console.error("Error saving education:", error);
+      return {
+        success: false,
+        message: "Đã xảy ra lỗi khi lưu thông tin học vấn.",
+      };
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setEducations(updatedEducations);
-    const updatedDoctor = {
-      ...doctor,
-      educations: updatedEducations,
-    };
-
-    onUpdate(updatedDoctor);
-    setIsEducationFormOpen(false);
   };
 
   // Xử lý xóa học vấn
@@ -261,40 +319,88 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
   };
 
   // Xử lý lưu thông tin chứng chỉ
-  const handleSaveCertificate = (certificateData: DoctorCertificate) => {
-    if (!doctor) return;
+  const handleSaveCertificate = async (certificateData: DoctorCertificate) => {
+    if (!doctor)
+      return { success: false, message: "Không tìm thấy thông tin bác sĩ" };
 
-    let updatedCertificates = [...certificates];
+    try {
+      setIsSubmitting(true);
 
-    if (formMode === "add") {
-      // Tạo ID mới
-      const newId =
-        updatedCertificates.length > 0
-          ? Math.max(...updatedCertificates.map((c) => c.id)) + 1
-          : 1;
+      // Format data according to API expectations
+      const certificatePayload = {
+        certName: certificateData.certName,
+        issueDate: certificateData.issueDate,
+      };
 
-      updatedCertificates.push({
-        ...certificateData,
-        id: newId,
-        doctorId: doctor.id,
-      });
-    } else if (selectedCertificate) {
-      // Cập nhật chứng chỉ hiện có
-      updatedCertificates = updatedCertificates.map((cert) =>
-        cert.id === selectedCertificate.id
-          ? { ...certificateData, doctorId: doctor.id }
-          : cert
+      // Determine if we're adding or updating
+      const certId =
+        formMode === "edit" && selectedCertificate
+          ? selectedCertificate.id.toString()
+          : undefined;
+
+      // Call API
+      const response = await updateAddCertificate(
+        doctor.userId.toString(),
+        certificatePayload,
+        certId
       );
+
+      // If successful, update the UI
+      if (response && response.status === 200) {
+        let updatedCertificates = [...certificates];
+
+        if (formMode === "add") {
+          // Create new ID for UI
+          const newId =
+            updatedCertificates.length > 0
+              ? Math.max(...updatedCertificates.map((c) => c.id)) + 1
+              : 1;
+
+          updatedCertificates.push({
+            ...certificateData,
+            id: newId,
+            doctorId: doctor.id,
+          });
+        } else if (selectedCertificate) {
+          // Update existing certificate
+          updatedCertificates = updatedCertificates.map((cert) =>
+            cert.id === selectedCertificate.id
+              ? { ...certificateData, doctorId: doctor.id }
+              : cert
+          );
+        }
+
+        setCertificates(updatedCertificates);
+        const updatedDoctor = {
+          ...doctor,
+          certificates: updatedCertificates,
+        };
+
+        onUpdate(updatedDoctor);
+        setIsCertificateFormOpen(false);
+
+        return {
+          success: true,
+          message:
+            formMode === "add"
+              ? "Thêm chứng chỉ thành công"
+              : "Cập nhật chứng chỉ thành công",
+        };
+      } else {
+        return {
+          success: false,
+          message: "Không thể lưu thông tin chứng chỉ. Vui lòng thử lại sau.",
+        };
+      }
+    } catch (error) {
+      console.error("Error saving certificate:", error);
+      return {
+        success: false,
+        message: "Đã xảy ra lỗi khi lưu thông tin chứng chỉ.",
+      };
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setCertificates(updatedCertificates);
-    const updatedDoctor = {
-      ...doctor,
-      certificates: updatedCertificates,
-    };
-
-    onUpdate(updatedDoctor);
-    setIsCertificateFormOpen(false);
   };
 
   // Xử lý xóa chứng chỉ
@@ -311,40 +417,99 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
   };
 
   // Update the experience save handler
-  const handleSaveExperience = (experienceData: DoctorExperience) => {
-    if (!doctor) return;
+  const handleSaveExperience = async (experienceData: DoctorExperience) => {
+    if (!doctor)
+      return { success: false, message: "Không tìm thấy thông tin bác sĩ" };
 
-    let updatedExperiences = [...experiences];
+    try {
+      setIsSubmitting(true);
 
-    if (formMode === "add") {
-      // Create new ID
-      const newId =
-        updatedExperiences.length > 0
-          ? Math.max(...updatedExperiences.map((e) => e.id)) + 1
-          : 1;
+      // Format data according to API expectations
+      const experiencePayload = {
+        companyName: experienceData.compName || experienceData.companyName,
+        specialization: experienceData.specialization,
+        startDate: experienceData.startDate,
+        endDate: experienceData.endDate || "",
+        address: {
+          number: experienceData.compAddress?.number || "",
+          street: experienceData.compAddress?.street || "",
+          ward: experienceData.compAddress?.ward || "",
+          district: experienceData.compAddress?.district || "",
+          city: experienceData.compAddress?.city || "",
+          country: experienceData.compAddress?.country || "",
+        },
+        description: experienceData.description || "",
+      };
 
-      updatedExperiences.push({
-        ...experienceData,
-        id: newId,
-        doctorId: doctor.id,
-      });
-    } else if (selectedExperience) {
-      // Update existing experience
-      updatedExperiences = updatedExperiences.map((exp) =>
-        exp.id === selectedExperience.id
-          ? { ...experienceData, doctorId: doctor.id }
-          : exp
+      // Determine if we're adding or updating
+      const experienceId =
+        formMode === "edit" && selectedExperience
+          ? selectedExperience.id.toString()
+          : undefined;
+
+      // Call API
+      const response = await updateAddExperience(
+        doctor.userId.toString(),
+        experiencePayload,
+        experienceId
       );
+
+      // If successful, update the UI
+      if (response && response.status === 200) {
+        let updatedExperiences = [...experiences];
+
+        if (formMode === "add") {
+          // Create new ID for UI
+          const newId =
+            updatedExperiences.length > 0
+              ? Math.max(...updatedExperiences.map((e) => e.id)) + 1
+              : 1;
+
+          updatedExperiences.push({
+            ...experienceData,
+            id: newId,
+            doctorId: doctor.id,
+          });
+        } else if (selectedExperience) {
+          // Update existing experience
+          updatedExperiences = updatedExperiences.map((exp) =>
+            exp.id === selectedExperience.id
+              ? { ...experienceData, doctorId: doctor.id }
+              : exp
+          );
+        }
+
+        setExperiences(updatedExperiences);
+        const updatedDoctor = {
+          ...doctor,
+          experiences: updatedExperiences,
+        };
+
+        onUpdate(updatedDoctor);
+        setIsExperienceFormOpen(false);
+
+        return {
+          success: true,
+          message:
+            formMode === "add"
+              ? "Thêm kinh nghiệm thành công"
+              : "Cập nhật kinh nghiệm thành công",
+        };
+      } else {
+        return {
+          success: false,
+          message: "Không thể lưu thông tin kinh nghiệm. Vui lòng thử lại sau.",
+        };
+      }
+    } catch (error) {
+      console.error("Error saving experience:", error);
+      return {
+        success: false,
+        message: "Đã xảy ra lỗi khi lưu thông tin kinh nghiệm.",
+      };
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setExperiences(updatedExperiences);
-    const updatedDoctor = {
-      ...doctor,
-      experiences: updatedExperiences,
-    };
-
-    onUpdate(updatedDoctor);
-    setIsExperienceFormOpen(false);
   };
 
   // Render nội dung modal
@@ -367,7 +532,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
         </IconButton>
       </DialogTitle>
 
-      <DialogContent>
+      <DialogContent dividers sx={{ p: 0 }}>
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
             <CircularProgress />
@@ -726,6 +891,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
         onSubmit={handleSaveEducation}
         education={selectedEducation}
         mode={formMode}
+        isSubmitting={isSubmitting}
       />
 
       {/* Form chỉnh sửa chứng chỉ */}
@@ -735,6 +901,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
         onSubmit={handleSaveCertificate}
         certificate={selectedCertificate}
         mode={formMode}
+        isSubmitting={isSubmitting}
       />
 
       {/* Form chỉnh sửa kinh nghiệm */}
@@ -744,6 +911,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
         onSubmit={handleSaveExperience}
         experience={selectedExperience}
         mode={formMode}
+        isSubmitting={isSubmitting}
       />
     </Dialog>
   );

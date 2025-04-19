@@ -19,7 +19,7 @@ export const importDoctor = async (doctors: any) => {
 };
 
 // api dành cho việc thêm và update chứng chỉ của bác sĩ
-// nếu có certId thì là update, không có thì là add
+// nếu certId khác 0 thì là update, không có thì là add
 export const updateAddCertificate = async (
   doctorId: string, // userId của bác sĩ
   certificate: {
@@ -36,7 +36,7 @@ export const updateAddCertificate = async (
 };
 
 // api dành cho việc thêm và update kinh nghiệm của bác sĩ
-// nếu có experienceId thì là update, không có thì là add
+// nếu experienceId khác 0 thì là update, không có thì là add
 export const updateAddExperience = async (
   doctorId: string, // userId của bác sĩ
   experience: {
@@ -64,7 +64,7 @@ export const updateAddExperience = async (
 };
 
 // api dành cho việc thêm và update thông tin học vấn của bác sĩ
-// nếu có educationId thì là update, không có thì là add
+// nếu educationId khác 0 thì là update, không có thì là add
 export const updateAddEducation = async (
   doctorId: string, // userId của bác sĩ
   education: {

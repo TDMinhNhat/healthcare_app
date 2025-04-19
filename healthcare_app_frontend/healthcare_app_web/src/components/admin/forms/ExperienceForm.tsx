@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -11,7 +11,12 @@ import {
   FormControlLabel,
   Checkbox,
   Box,
+  CircularProgress,
+  Alert,
+  Collapse,
 } from "@mui/material";
+import { Formik, Form, Field, FormikProps } from "formik";
+import * as Yup from "yup";
 import { DoctorExperience } from "../../../types/doctor";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -25,9 +30,30 @@ import {
 interface ExperienceFormProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: DoctorExperience) => void;
+  onSubmit: (
+    data: DoctorExperience
+  ) => Promise<{ success: boolean; message: string }>;
   experience: DoctorExperience | null;
-  mode?: "add" | "edit"; // Add this optional prop
+  mode?: "add" | "edit";
+  isSubmitting?: boolean;
+}
+
+interface ExperienceFormValues {
+  compName: string;
+  specialization: string;
+  startDate: string;
+  endDate?: string;
+  description: string;
+  compAddress: {
+    id?: number;
+    number: string;
+    street: string;
+    ward: string;
+    district: string;
+    city: string;
+    country: string;
+  };
+  isCurrentJob: boolean;
 }
 
 const ExperienceForm: React.FC<ExperienceFormProps> = ({
@@ -35,10 +61,29 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
   onClose,
   onSubmit,
   experience,
-  mode = "add", // Default to "add" if not provided
+  mode = "add",
+  isSubmitting = false,
 }) => {
-  // State để lưu trữ dữ liệu form
-  const [formData, setFormData] = useState<Partial<DoctorExperience>>({
+  const [responseMessage, setResponseMessage] = useState<{
+    type: "success" | "error" | "info";
+    message: string;
+    show: boolean;
+  }>({
+    type: "info",
+    message: "",
+    show: false,
+  });
+
+  const validationSchema = Yup.object({
+    compName: Yup.string().required("Tên công ty không được để trống"),
+    specialization: Yup.string().required("Chuyên môn không được để trống"),
+    startDate: Yup.string().required("Ngày bắt đầu không được để trống"),
+    compAddress: Yup.object({
+      city: Yup.string().required("Thành phố không được để trống"),
+    }),
+  });
+
+  const initialValues: ExperienceFormValues = {
     compName: "",
     specialization: "",
     startDate: "",
@@ -53,173 +98,93 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
       city: "",
       country: "",
     },
-  });
-
-  // State cho validation
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-
-  // State để kiểm soát tùy chọn "Hiện tại đang làm việc"
-  const [isCurrentJob, setIsCurrentJob] = useState(false);
-
-  // Cập nhật dữ liệu form khi prop experience thay đổi
-  useEffect(() => {
-    if (experience) {
-      setFormData({
-        ...experience,
-      });
-
-      // Kiểm tra nếu không có endDate thì đó là công việc hiện tại
-      setIsCurrentJob(!experience.endDate);
-    } else {
-      // Reset form khi thêm mới
-      setFormData({
-        compName: "",
-        specialization: "",
-        startDate: "",
-        endDate: "",
-        description: "",
-        compAddress: {
-          id: 0,
-          number: "",
-          street: "",
-          ward: "",
-          district: "",
-          city: "",
-          country: "",
-        },
-      });
-      setIsCurrentJob(false);
-    }
-    // Reset errors
-    setErrors({});
-  }, [experience, open]);
-
-  // Xử lý thay đổi input
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-
-    // Clear error when field is changed
-    if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: "",
-      });
-    }
+    isCurrentJob: false,
   };
 
-  // Xử lý thay đổi input address
-  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
+  const getInitialValues = (): ExperienceFormValues => {
+    if (!experience) return initialValues;
+
+    return {
+      compName: experience.compName || experience.companyName || "",
+      specialization: experience.specialization || "",
+      startDate: experience.startDate || "",
+      endDate: experience.endDate || "",
+      description: experience.description || "",
       compAddress: {
-        ...(formData.compAddress || {}),
-        [name]: value,
+        id: experience.compAddress?.id || 0,
+        number: experience.compAddress?.number || "",
+        street: experience.compAddress?.street || "",
+        ward: experience.compAddress?.ward || "",
+        district: experience.compAddress?.district || "",
+        city: experience.compAddress?.city || "",
+        country: experience.compAddress?.country || "",
       },
-    });
-
-    // Clear error when field is changed
-    if (errors[`compAddress.${name}`]) {
-      setErrors({
-        ...errors,
-        [`compAddress.${name}`]: "",
-      });
-    }
+      isCurrentJob: !experience.endDate,
+    };
   };
 
-  // Xử lý thay đổi ngày bắt đầu
-  const handleStartDateChange = (date: Date | null) => {
-    if (date) {
-      // Use formatDateToString to ensure date is in correct format (dd-MM-yyyy)
-      const formattedDate = formatDateToString(date);
-      setFormData({
-        ...formData,
-        startDate: formattedDate,
-      });
-      if (errors["startDate"]) {
-        setErrors({
-          ...errors,
-          startDate: "",
+  const handleFormSubmit = async (
+    values: ExperienceFormValues,
+    { setSubmitting }: any
+  ) => {
+    try {
+      const submissionData: Partial<DoctorExperience> = {
+        compName: values.compName,
+        companyName: values.compName,
+        specialization: values.specialization,
+        startDate: values.startDate,
+        endDate: values.isCurrentJob ? undefined : values.endDate,
+        description: values.description,
+        compAddress: values.compAddress,
+      };
+
+      const result = await onSubmit(submissionData as DoctorExperience);
+
+      if (result.success) {
+        setResponseMessage({
+          type: "success",
+          message: result.message || "Thao tác thành công!",
+          show: true,
+        });
+
+        setTimeout(() => {
+          onClose();
+        }, 1500);
+      } else {
+        setResponseMessage({
+          type: "error",
+          message: result.message || "Đã xảy ra lỗi!",
+          show: true,
         });
       }
-    }
-  };
-
-  // Xử lý thay đổi ngày kết thúc
-  const handleEndDateChange = (date: Date | null) => {
-    if (date) {
-      // Use formatDateToString to ensure date is in correct format (dd-MM-yyyy)
-      const formattedDate = formatDateToString(date);
-      setFormData({
-        ...formData,
-        endDate: formattedDate,
+    } catch (error) {
+      console.error("Error submitting experience data:", error);
+      setResponseMessage({
+        type: "error",
+        message: "Đã xảy ra lỗi khi lưu thông tin kinh nghiệm!",
+        show: true,
       });
-      if (errors["endDate"]) {
-        setErrors({
-          ...errors,
-          endDate: "",
-        });
-      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // Xử lý khi checkbox "Hiện tại đang làm việc" thay đổi
-  const handleCurrentJobChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setIsCurrentJob(e.target.checked);
-    if (e.target.checked) {
-      // Nếu là công việc hiện tại, xóa ngày kết thúc
-      setFormData({
-        ...formData,
-        endDate: undefined,
-      });
-    }
-  };
+  const validateDates = (values: ExperienceFormValues) => {
+    const errors: { endDate?: string } = {};
 
-  // Validate form trước khi submit
-  const validateForm = () => {
-    const newErrors: { [key: string]: string } = {};
-
-    if (!formData.compName?.trim()) {
-      newErrors.compName = "Tên công ty không được để trống";
+    if (!values.isCurrentJob && !values.endDate) {
+      errors.endDate = "Ngày kết thúc không được để trống";
     }
 
-    if (!formData.specialization?.trim()) {
-      newErrors.specialization = "Chuyên môn không được để trống";
-    }
-
-    if (!formData.startDate) {
-      newErrors.startDate = "Ngày bắt đầu không được để trống";
-    }
-
-    if (!isCurrentJob && !formData.endDate) {
-      newErrors.endDate = "Ngày kết thúc không được để trống";
-    }
-
-    if (formData.startDate && formData.endDate) {
-      const startDate = new Date(formData.startDate);
-      const endDate = new Date(formData.endDate);
+    if (values.startDate && values.endDate) {
+      const startDate = new Date(values.startDate);
+      const endDate = new Date(values.endDate);
       if (startDate > endDate) {
-        newErrors.endDate = "Ngày kết thúc phải sau ngày bắt đầu";
+        errors.endDate = "Ngày kết thúc phải sau ngày bắt đầu";
       }
     }
 
-    if (!formData.compAddress?.city?.trim()) {
-      newErrors["compAddress.city"] = "Thành phố không được để trống";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  // Xử lý submit form
-  const handleSubmit = () => {
-    if (validateForm()) {
-      onSubmit(formData as DoctorExperience);
-    }
+    return errors;
   };
 
   return (
@@ -230,188 +195,260 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
           : "Thêm kinh nghiệm mới"}
       </DialogTitle>
 
-      <DialogContent>
-        <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={12} md={6}>
-            <TextField
-              name="compName"
-              label="Tên công ty/Cơ sở y tế"
-              value={formData.compName || ""}
-              onChange={handleChange}
-              fullWidth
-              error={!!errors.compName}
-              helperText={errors.compName}
-            />
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <TextField
-              name="specialization"
-              label="Chuyên môn/Vị trí"
-              value={formData.specialization || ""}
-              onChange={handleChange}
-              fullWidth
-              error={!!errors.specialization}
-              helperText={errors.specialization}
-            />
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <LocalizationProvider
-              dateAdapter={AdapterDateFns}
-              adapterLocale={vi}
-            >
-              <DatePicker
-                label="Ngày bắt đầu"
-                value={
-                  formData.startDate
-                    ? typeof formData.startDate === "string"
-                      ? parseDateFromString(formData.startDate)
-                      : new Date(formData.startDate)
-                    : null
-                }
-                onChange={handleStartDateChange}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    error: !!errors.startDate,
-                    helperText: errors.startDate,
-                  },
-                }}
-              />
-            </LocalizationProvider>
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
-              <LocalizationProvider
-                dateAdapter={AdapterDateFns}
-                adapterLocale={vi}
-              >
-                <DatePicker
-                  label="Ngày kết thúc"
-                  value={
-                    formData.endDate && !isCurrentJob
-                      ? typeof formData.endDate === "string"
-                        ? parseDateFromString(formData.endDate)
-                        : new Date(formData.endDate)
-                      : null
+      <Formik
+        initialValues={getInitialValues()}
+        validationSchema={validationSchema}
+        onSubmit={handleFormSubmit}
+        validate={validateDates}
+        enableReinitialize
+      >
+        {(formik: FormikProps<ExperienceFormValues>) => (
+          <Form>
+            <DialogContent>
+              <Collapse in={responseMessage.show}>
+                <Alert
+                  severity={responseMessage.type}
+                  sx={{ mb: 2 }}
+                  onClose={() =>
+                    setResponseMessage((prev) => ({ ...prev, show: false }))
                   }
-                  onChange={handleEndDateChange}
-                  disabled={isCurrentJob}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      error: !!errors.endDate,
-                      helperText: errors.endDate,
-                    },
-                  }}
-                />
-              </LocalizationProvider>
+                >
+                  {responseMessage.message}
+                </Alert>
+              </Collapse>
 
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={isCurrentJob}
-                    onChange={handleCurrentJobChange}
-                    name="currentJob"
-                    color="primary"
+              <Grid container spacing={2} sx={{ mt: 1 }}>
+                <Grid item xs={12} md={6}>
+                  <Field
+                    as={TextField}
+                    name="compName"
+                    label="Tên công ty/Cơ sở y tế"
+                    fullWidth
+                    error={
+                      formik.touched.compName && Boolean(formik.errors.compName)
+                    }
+                    helperText={
+                      formik.touched.compName && formik.errors.compName
+                    }
                   />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <Field
+                    as={TextField}
+                    name="specialization"
+                    label="Chuyên môn/Vị trí"
+                    fullWidth
+                    error={
+                      formik.touched.specialization &&
+                      Boolean(formik.errors.specialization)
+                    }
+                    helperText={
+                      formik.touched.specialization &&
+                      formik.errors.specialization
+                    }
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <LocalizationProvider
+                    dateAdapter={AdapterDateFns}
+                    adapterLocale={vi}
+                  >
+                    <DatePicker
+                      label="Ngày bắt đầu"
+                      value={
+                        formik.values.startDate
+                          ? parseDateFromString(formik.values.startDate)
+                          : null
+                      }
+                      onChange={(date) => {
+                        if (date) {
+                          const formattedDate = formatDateToString(date);
+                          formik.setFieldValue("startDate", formattedDate);
+                        }
+                      }}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          error:
+                            formik.touched.startDate &&
+                            Boolean(formik.errors.startDate),
+                          helperText:
+                            formik.touched.startDate && formik.errors.startDate,
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    <LocalizationProvider
+                      dateAdapter={AdapterDateFns}
+                      adapterLocale={vi}
+                    >
+                      <DatePicker
+                        label="Ngày kết thúc"
+                        value={
+                          formik.values.endDate && !formik.values.isCurrentJob
+                            ? parseDateFromString(formik.values.endDate)
+                            : null
+                        }
+                        onChange={(date) => {
+                          if (date) {
+                            const formattedDate = formatDateToString(date);
+                            formik.setFieldValue("endDate", formattedDate);
+                          }
+                        }}
+                        disabled={formik.values.isCurrentJob}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            error:
+                              formik.touched.endDate &&
+                              Boolean(formik.errors.endDate),
+                            helperText:
+                              formik.touched.endDate && formik.errors.endDate,
+                          },
+                        }}
+                      />
+                    </LocalizationProvider>
+
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formik.values.isCurrentJob}
+                          onChange={(e) => {
+                            formik.setFieldValue(
+                              "isCurrentJob",
+                              e.target.checked
+                            );
+                            if (e.target.checked) {
+                              formik.setFieldValue("endDate", undefined);
+                            }
+                          }}
+                          name="isCurrentJob"
+                          color="primary"
+                        />
+                      }
+                      label="Hiện tại đang làm việc"
+                      sx={{ mt: 1 }}
+                    />
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Địa chỉ công ty
+                  </Typography>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <Field
+                    as={TextField}
+                    name="compAddress.city"
+                    label="Thành phố"
+                    fullWidth
+                    error={
+                      formik.touched.compAddress?.city &&
+                      Boolean(formik.errors.compAddress?.city)
+                    }
+                    helperText={
+                      formik.touched.compAddress?.city &&
+                      formik.errors.compAddress?.city
+                    }
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <Field
+                    as={TextField}
+                    name="compAddress.country"
+                    label="Quốc gia"
+                    fullWidth
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <Field
+                    as={TextField}
+                    name="compAddress.district"
+                    label="Quận/Huyện"
+                    fullWidth
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={4}>
+                  <Field
+                    as={TextField}
+                    name="compAddress.ward"
+                    label="Phường/Xã"
+                    fullWidth
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <Field
+                    as={TextField}
+                    name="compAddress.street"
+                    label="Đường"
+                    fullWidth
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={2}>
+                  <Field
+                    as={TextField}
+                    name="compAddress.number"
+                    label="Số nhà"
+                    fullWidth
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Field
+                    as={TextField}
+                    name="description"
+                    label="Mô tả công việc"
+                    fullWidth
+                    multiline
+                    rows={4}
+                  />
+                </Grid>
+              </Grid>
+            </DialogContent>
+
+            <DialogActions>
+              <Button
+                onClick={onClose}
+                disabled={formik.isSubmitting || isSubmitting}
+              >
+                Hủy
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={
+                  formik.isSubmitting || isSubmitting || !formik.isValid
                 }
-                label="Hiện tại đang làm việc"
-                sx={{ mt: 1 }}
-              />
-            </Box>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Typography variant="subtitle2" gutterBottom>
-              Địa chỉ công ty
-            </Typography>
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <TextField
-              name="city"
-              label="Thành phố"
-              value={formData.compAddress?.city || ""}
-              onChange={handleAddressChange}
-              fullWidth
-              error={!!errors["compAddress.city"]}
-              helperText={errors["compAddress.city"]}
-            />
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <TextField
-              name="country"
-              label="Quốc gia"
-              value={formData.compAddress?.country || ""}
-              onChange={handleAddressChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <TextField
-              name="district"
-              label="Quận/Huyện"
-              value={formData.compAddress?.district || ""}
-              onChange={handleAddressChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={12} md={4}>
-            <TextField
-              name="ward"
-              label="Phường/Xã"
-              value={formData.compAddress?.ward || ""}
-              onChange={handleAddressChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <TextField
-              name="street"
-              label="Đường"
-              value={formData.compAddress?.street || ""}
-              onChange={handleAddressChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={12} md={2}>
-            <TextField
-              name="number"
-              label="Số nhà"
-              value={formData.compAddress?.number || ""}
-              onChange={handleAddressChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              name="description"
-              label="Mô tả công việc"
-              value={formData.description || ""}
-              onChange={handleChange}
-              fullWidth
-              multiline
-              rows={4}
-            />
-          </Grid>
-        </Grid>
-      </DialogContent>
-
-      <DialogActions>
-        <Button onClick={onClose}>Hủy</Button>
-        <Button onClick={handleSubmit} variant="contained" color="primary">
-          {experience ? "Lưu thay đổi" : "Thêm"}
-        </Button>
-      </DialogActions>
+              >
+                {formik.isSubmitting || isSubmitting ? (
+                  <>
+                    <CircularProgress size={24} sx={{ mr: 1 }} />
+                    {mode === "add" ? "Đang thêm..." : "Đang lưu..."}
+                  </>
+                ) : experience ? (
+                  "Lưu thay đổi"
+                ) : (
+                  "Thêm"
+                )}
+              </Button>
+            </DialogActions>
+          </Form>
+        )}
+      </Formik>
     </Dialog>
   );
 };
