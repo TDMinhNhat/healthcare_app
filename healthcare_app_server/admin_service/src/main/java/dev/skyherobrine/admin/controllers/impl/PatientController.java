@@ -96,4 +96,17 @@ public class PatientController implements IManagement<Patient,Long> {
             ));
         }
     }
+
+    @GetMapping("/patient_id")
+    public ResponseEntity<Response> getPatientByPatientId(
+            @RequestParam("patientId") String patientId
+    ) {
+        log.info("Patient: Call the api get patient by patient id");
+        Patient patient = patientRepository.findPatientByUserId(patientId).orElse(null);
+        return ResponseEntity.ok(new Response(
+                HttpStatus.OK.value(),
+                "Get patient by patient id",
+                patient
+        ));
+    }
 }
