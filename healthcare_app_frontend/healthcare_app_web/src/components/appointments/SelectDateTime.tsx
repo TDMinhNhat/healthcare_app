@@ -136,7 +136,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
         if (!shiftsMap.has(item.shift.id)) {
           shiftsMap.set(item.shift.id, {
             id: item.shift.id,
-            shift: `Ca ${item.shift.id}`,
+            shift: `Ca ${item.shift.shift}`,
             start: item.shift.start,
             end: item.shift.end,
             isAvailable: true,
