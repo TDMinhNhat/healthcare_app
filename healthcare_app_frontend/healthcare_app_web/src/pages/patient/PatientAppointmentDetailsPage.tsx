@@ -66,7 +66,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
         return "Đang khám";
       case "DONE":
         return "Đã hoàn thành";
-      case "CANCEL":
+      case "CANCELLED":
         return "Đã hủy";
       default:
         return "default";
@@ -237,6 +237,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
       console.error("Lỗi khi xử lý ngày tháng:", error);
       return false;
     }
+    // return true;
   };
 
   /**
