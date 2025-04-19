@@ -64,7 +64,7 @@ export default function AppointmentDetailsScreen() {
         return "Đang khám";
       case "DONE":
         return "Đã hoàn thành";
-      case "CANCEL":
+      case "CANCELLED":
         return "Đã hủy";
       default:
         return "Không xác định";
@@ -186,10 +186,11 @@ export default function AppointmentDetailsScreen() {
       setOpenCancelDialog(false);
 
       // Cập nhật trạng thái cuộc hẹn thành "Đã hủy" trực tiếp trong state
-      setAppointment({
-        ...appointment,
-        status: "Đã hủy",
-      });
+      // setAppointment({
+      //   ...appointment,
+      //   status: "Đã hủy",
+      // });
+      fetchAppointmentDetails();
 
       Alert.alert("Thành công", "Cuộc hẹn đã được hủy thành công", [
         { text: "OK" },
@@ -201,62 +202,61 @@ export default function AppointmentDetailsScreen() {
       ]);
     }
   };
+  const fetchAppointmentDetails = async () => {
+    if (!appointmentId || !user?.userId) {
+      setError("Thông tin cuộc hẹn không hợp lệ");
+      setLoading(false);
+      return;
+    }
 
-  useEffect(() => {
-    const fetchAppointmentDetails = async () => {
-      if (!appointmentId || !user?.userId) {
-        setError("Thông tin cuộc hẹn không hợp lệ");
+    try {
+      const response = await getAppointmentPatientDetail(
+        user.userId,
+        Number(appointmentId)
+      );
+
+      if (!response?.data?.data) {
+        setError("Không tìm thấy thông tin cuộc hẹn");
         setLoading(false);
         return;
       }
 
-      try {
-        const response = await getAppointmentPatientDetail(
-          user.userId,
-          Number(appointmentId)
-        );
+      const result = response.data.data;
 
-        if (!response?.data?.data) {
-          setError("Không tìm thấy thông tin cuộc hẹn");
-          setLoading(false);
-          return;
-        }
+      const data = {
+        id: result.book_appointment.id,
+        workScheduleId: result.work_schedule.id,
+        date: result.work_schedule.dateAppointment,
+        time: `${formatTimeForDisplay(
+          result.work_schedule.shift.start
+        )} - ${formatTimeForDisplay(result.work_schedule.shift.end)}`,
+        status: getStatus(result.book_appointment.status),
+        patientInfo: {
+          id: result.book_appointment.patientId,
+          numericalOrder: result.book_appointment.numericalOrder,
+        },
+        doctorInfo: {
+          id: result.work_schedule.doctor.userId,
+          name: `${result.work_schedule.doctor.firstName} ${result.work_schedule.doctor.lastName}`,
+          typeDisease: result.work_schedule.doctor.typeDisease.name,
+          avatar: result.work_schedule.doctor.avatar || null,
+          specialization:
+            result.work_schedule.doctor.specialization || "Bác sĩ",
+        },
+        hasMedicalRecord: true, // Giả định điều này hiện tại
+        createdAt: result.book_appointment.createdAt, // Đảm bảo có trường createdAt
+      };
 
-        const result = response.data.data;
+      setAppointment(data);
+    } catch (error) {
+      console.error("Error fetching appointment details:", error);
+      setError("Lỗi khi tải thông tin cuộc hẹn");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        const data = {
-          id: result.book_appointment.id,
-          workScheduleId: result.work_schedule.id,
-          date: result.work_schedule.dateAppointment,
-          time: `${formatTimeForDisplay(
-            result.work_schedule.shift.start
-          )} - ${formatTimeForDisplay(result.work_schedule.shift.end)}`,
-          status: getStatus(result.book_appointment.status),
-          patientInfo: {
-            id: result.book_appointment.patientId,
-            numericalOrder: result.book_appointment.numericalOrder,
-          },
-          doctorInfo: {
-            id: result.work_schedule.doctor.userId,
-            name: `${result.work_schedule.doctor.firstName} ${result.work_schedule.doctor.lastName}`,
-            typeDisease: result.work_schedule.doctor.typeDisease.name,
-            avatar: result.work_schedule.doctor.avatar || null,
-            specialization:
-              result.work_schedule.doctor.specialization || "Bác sĩ",
-          },
-          hasMedicalRecord: true, // Giả định điều này hiện tại
-          createdAt: result.book_appointment.createdAt, // Đảm bảo có trường createdAt
-        };
-
-        setAppointment(data);
-      } catch (error) {
-        console.error("Error fetching appointment details:", error);
-        setError("Lỗi khi tải thông tin cuộc hẹn");
-      } finally {
-        setLoading(false);
-      }
-    };
-
+  useEffect(() => {
     fetchAppointmentDetails();
   }, [appointmentId, user, cancellationSuccess]);
 
