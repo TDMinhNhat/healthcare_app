@@ -17,6 +17,7 @@ import {
   getAppointmentPatientDetail,
   cancelAppointment,
 } from "@/services/appointment/booking_service";
+import { getPatientBankAccount } from "@/services/authenticate/user_service";
 import {
   AntDesign,
   Ionicons,
@@ -38,6 +39,7 @@ export default function AppointmentDetailsScreen() {
   const [error, setError] = useState<string | null>(null);
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [cancellationSuccess, setCancellationSuccess] = useState(false);
+  const [hasBankAccount, setHasBankAccount] = useState<boolean>(false);
 
   // Lấy thông tin người dùng từ Redux store
   const user = useSelector((state: any) => state.user.user);
@@ -139,7 +141,7 @@ export default function AppointmentDetailsScreen() {
 
   /**
    * Kiểm tra xem cuộc hẹn có thể huỷ hay không
-   * Chỉ cho phép huỷ nếu đặt trong vòng 24h và có trạng thái Đang chờ
+   * Chỉ cho phép huỷ nếu đặt trong vòng 24h và có trạng thái Đang chờ và có tài khoản ngân hàng
    */
   const canCancelAppointment = (createdAt: string, status: string) => {
     // Kiểm tra trạng thái cuộc hẹn
@@ -181,15 +183,19 @@ export default function AppointmentDetailsScreen() {
    */
   const handleCancelAppointment = async () => {
     try {
+      if (!hasBankAccount) {
+        Alert.alert(
+          "Không thể huỷ lịch hẹn",
+          "Bạn cần có tài khoản ngân hàng để có thể huỷ lịch hẹn. Vui lòng cập nhật tài khoản ngân hàng trong thông tin cá nhân.",
+          [{ text: "Đã hiểu" }]
+        );
+        return;
+      }
       await cancelAppointment(appointment.id);
       setCancellationSuccess(true);
       setOpenCancelDialog(false);
 
       // Cập nhật trạng thái cuộc hẹn thành "Đã hủy" trực tiếp trong state
-      // setAppointment({
-      //   ...appointment,
-      //   status: "Đã hủy",
-      // });
       fetchAppointmentDetails();
 
       Alert.alert("Thành công", "Cuộc hẹn đã được hủy thành công", [
@@ -258,6 +264,20 @@ export default function AppointmentDetailsScreen() {
 
   useEffect(() => {
     fetchAppointmentDetails();
+
+    // Check if patient has bank account
+    const checkBankAccount = async () => {
+      try {
+        const response = await getPatientBankAccount(user.userId);
+        // If response status is 200, patient has bank account
+        setHasBankAccount(response.data.code === 200);
+      } catch (error) {
+        console.error("Error checking bank account:", error);
+        setHasBankAccount(false);
+      }
+    };
+
+    checkBankAccount();
   }, [appointmentId, user, cancellationSuccess]);
 
   // Hiển thị trạng thái đang tải
@@ -351,18 +371,39 @@ export default function AppointmentDetailsScreen() {
 
           {/* Nút hành động */}
           <View style={styles.actionContainer}>
-            {canCancelAppointment(
-              appointment.createdAt,
-              appointment.status
-            ) && (
+            {appointment.status === "Đang chờ" && !hasBankAccount ? (
               <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={handleOpenCancelDialog}
+                style={[styles.cancelButton, { opacity: 0.6 }]}
+                onPress={() =>
+                  Alert.alert(
+                    "Không thể huỷ lịch hẹn",
+                    "Bạn cần có tài khoản ngân hàng để có thể huỷ lịch hẹn. Vui lòng cập nhật tài khoản ngân hàng trong thông tin cá nhân.",
+                    [{ text: "Đã hiểu" }]
+                  )
+                }
               >
                 <MaterialCommunityIcons name="cancel" size={20} color="#fff" />
                 <Text style={styles.buttonText}>Huỷ lịch hẹn</Text>
               </TouchableOpacity>
+            ) : (
+              canCancelAppointment(
+                appointment.createdAt,
+                appointment.status
+              ) && (
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={handleOpenCancelDialog}
+                >
+                  <MaterialCommunityIcons
+                    name="cancel"
+                    size={20}
+                    color="#fff"
+                  />
+                  <Text style={styles.buttonText}>Huỷ lịch hẹn</Text>
+                </TouchableOpacity>
+              )
             )}
+
             {canJoinExamination(appointment.status) && (
               <TouchableOpacity
                 style={styles.joinButton}

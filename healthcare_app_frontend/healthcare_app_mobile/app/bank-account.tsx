@@ -14,7 +14,11 @@ import { useSelector } from "react-redux";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { router } from "expo-router";
-import { addBankAccount } from "../services/authenticate/user_service";
+import {
+  addBankAccount,
+  getPatientBankAccount,
+  updateBankAccount,
+} from "../services/authenticate/user_service";
 
 // Define the BankAccount interface
 interface BankAccount {
@@ -67,11 +71,6 @@ export default function BankAccountScreen() {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
 
-  // Mock data để sử dụng thay cho API thực tế
-  const [mockBankAccount, setMockBankAccount] = useState<BankAccount | null>(
-    null
-  );
-
   // Khởi tạo Formik
   const formik = useFormik({
     initialValues: {
@@ -85,53 +84,6 @@ export default function BankAccountScreen() {
     enableReinitialize: true,
   });
 
-  // Mock implementation for getBankAccount since real API is not yet available
-  const getBankAccount = async (userId: string) => {
-    console.log(`Đang lấy thông tin tài khoản ngân hàng cho userId: ${userId}`);
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (mockBankAccount) {
-          resolve({
-            data: {
-              code: 200,
-              message: "Lấy thông tin tài khoản ngân hàng thành công",
-              data: mockBankAccount,
-            },
-          });
-        } else {
-          resolve({
-            data: {
-              code: 404,
-              message: "Không tìm thấy thông tin tài khoản ngân hàng",
-              data: null,
-            },
-          });
-        }
-      }, 500);
-    });
-  };
-
-  // Mock implementation for updateBankAccount since real API is not yet available
-  const updateBankAccount = async (bankAccountData: BankAccount) => {
-    console.log(
-      `Đang cập nhật tài khoản ngân hàng: ${JSON.stringify(bankAccountData)}`
-    );
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Update the mock data in component state
-        setMockBankAccount(bankAccountData);
-
-        resolve({
-          data: {
-            code: 200,
-            message: "Cập nhật tài khoản ngân hàng thành công",
-            data: bankAccountData,
-          },
-        });
-      }, 500);
-    });
-  };
-
   // Lấy thông tin tài khoản ngân hàng khi component được tải
   useEffect(() => {
     const fetchBankAccountData = async () => {
@@ -143,7 +95,7 @@ export default function BankAccountScreen() {
 
       try {
         setLoading(true);
-        const response = await getBankAccount(user.userId);
+        const response = await getPatientBankAccount(user.userId);
 
         if (response.data.code === 200 && response.data.data) {
           // Đã có tài khoản ngân hàng
@@ -183,13 +135,12 @@ export default function BankAccountScreen() {
 
       let response;
       if (bankAccount) {
-        // Using mock implementation for update
-        response = await updateBankAccount({
-          id: bankAccount.id,
-          userId: user.userId,
-          accountNumber: values.accountNumber,
-          bankName: values.bankName,
-        });
+        // Using real API implementation for update
+        response = await updateBankAccount(
+          user.userId,
+          values.bankName,
+          values.accountNumber
+        );
         setSuccess("Cập nhật tài khoản ngân hàng thành công!");
       } else {
         // Using real API for adding new bank account
@@ -198,12 +149,6 @@ export default function BankAccountScreen() {
           values.bankName,
           values.accountNumber
         );
-
-        // Also update our mock data for future use
-        if (response.data.code === 200) {
-          setMockBankAccount(response.data.data);
-        }
-
         setSuccess("Thêm tài khoản ngân hàng thành công!");
       }
 

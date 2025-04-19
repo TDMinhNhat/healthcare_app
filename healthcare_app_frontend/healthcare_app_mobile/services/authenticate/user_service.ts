@@ -36,3 +36,27 @@ export const addBankAccount = async (
   });
   return response;
 };
+
+export const updateBankAccount = async (
+  patientId: string,
+  bankName: string,
+  accountNumber: string
+) => {
+  const response = await axiosConfig.put(`${prefix}/patient/account_bank`, {
+    patientId,
+    bankName,
+    accountNumber,
+  });
+  return response;
+};
+
+// Dùng để check, lấy thông tin tài khoản ngân hàng của bệnh nhân
+// Nếu trả về code 200 của data thì có tài khoản ngân hàng
+export const getPatientBankAccount = async (patientId: string) => {
+  const response = await axiosConfig.get(`${prefix}/patient/account_bank`, {
+    params: {
+      patientId: patientId,
+    },
+  });
+  return response;
+};
