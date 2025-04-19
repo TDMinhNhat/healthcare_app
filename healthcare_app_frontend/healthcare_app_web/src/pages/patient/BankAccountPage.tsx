@@ -23,16 +23,28 @@ import { useNavigate } from "react-router";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useSelector } from "react-redux";
 import { ROUTING } from "../../constants/routing";
-import { addBankAccount } from "../../services/authenticate/user_service";
+import {
+  addBankAccount,
+  getPatientBankAccount,
+  updateBankAccount,
+} from "../../services/authenticate/user_service";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
-// Define the BankAccount interface locally since we're not using bank_service
+// Define the BankAccount interface based on the actual API response
 interface BankAccount {
   id?: number;
-  userId: string;
-  accountNumber: string;
+  patient?: {
+    id: number;
+    userId: string;
+    firstName: string;
+    lastName: string;
+    // other patient fields...
+  };
   bankName: string;
+  accountNumber: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Danh sách các ngân hàng phổ biến ở Việt Nam
@@ -66,9 +78,6 @@ const bankAccountSchema = Yup.object({
 /**
  * Component quản lý tài khoản ngân hàng của bệnh nhân
  * Cho phép xem, thêm và cập nhật thông tin tài khoản ngân hàng
- *
- * Note: Currently only addBankAccount is a real API call,
- * getBankAccount and updateBankAccount are mock implementations
  */
 const BankAccountPage: React.FC = () => {
   // Lấy thông tin người dùng từ Redux store
@@ -83,11 +92,6 @@ const BankAccountPage: React.FC = () => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
 
-  // Mock data to use instead of localStorage
-  const [mockBankAccount, setMockBankAccount] = useState<BankAccount | null>(
-    null
-  );
-
   // Khởi tạo Formik
   const formik = useFormik({
     initialValues: {
@@ -101,53 +105,6 @@ const BankAccountPage: React.FC = () => {
     enableReinitialize: true,
   });
 
-  // Mock implementation for getBankAccount since real API is not yet available
-  const getBankAccount = async (userId: string) => {
-    console.log(`Đang lấy thông tin tài khoản ngân hàng cho userId: ${userId}`);
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (mockBankAccount) {
-          resolve({
-            data: {
-              code: 200,
-              message: "Lấy thông tin tài khoản ngân hàng thành công",
-              data: mockBankAccount,
-            },
-          });
-        } else {
-          resolve({
-            data: {
-              code: 404,
-              message: "Không tìm thấy thông tin tài khoản ngân hàng",
-              data: null,
-            },
-          });
-        }
-      }, 500);
-    });
-  };
-
-  // Mock implementation for updateBankAccount since real API is not yet available
-  const updateBankAccount = async (bankAccountData: BankAccount) => {
-    console.log(
-      `Đang cập nhật tài khoản ngân hàng: ${JSON.stringify(bankAccountData)}`
-    );
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Update the mock data in component state
-        setMockBankAccount(bankAccountData);
-
-        resolve({
-          data: {
-            code: 200,
-            message: "Cập nhật tài khoản ngân hàng thành công",
-            data: bankAccountData,
-          },
-        });
-      }, 500);
-    });
-  };
-
   // Lấy thông tin tài khoản ngân hàng khi component được tải
   useEffect(() => {
     const fetchBankAccountData = async () => {
@@ -159,7 +116,7 @@ const BankAccountPage: React.FC = () => {
 
       try {
         setLoading(true);
-        const response = await getBankAccount(user.userId);
+        const response = await getPatientBankAccount(user.userId);
 
         if (response.data.code === 200 && response.data.data) {
           // Đã có tài khoản ngân hàng
@@ -199,13 +156,12 @@ const BankAccountPage: React.FC = () => {
 
       let response;
       if (bankAccount) {
-        // Using mock implementation for update
-        response = await updateBankAccount({
-          id: bankAccount.id,
-          userId: user.userId,
-          accountNumber: values.accountNumber,
-          bankName: values.bankName,
-        });
+        // Using real API implementation for update
+        response = await updateBankAccount(
+          user.userId,
+          values.bankName,
+          values.accountNumber
+        );
         setSuccess("Cập nhật tài khoản ngân hàng thành công!");
       } else {
         // Using real API for adding new bank account
@@ -214,12 +170,6 @@ const BankAccountPage: React.FC = () => {
           values.bankName,
           values.accountNumber
         );
-
-        // Also update our mock data for future use
-        if (response.data.code === 200) {
-          setMockBankAccount(response.data.data);
-        }
-
         setSuccess("Thêm tài khoản ngân hàng thành công!");
       }
 

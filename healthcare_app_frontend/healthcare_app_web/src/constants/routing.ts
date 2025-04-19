@@ -21,6 +21,7 @@ export const ROUTING = {
   SHIFTS: "shifts",
   DISEASES: "diseases",
   CANCEL_APPOINTMENT: "cancel-appointment",
+  DOCTOR_REVENUE: "doctor-revenue/:periodType/:period", // New route for doctor revenue details
 
   // Doctor routes (nested under /doctor)
   APPOINTMENTS: "appointments",

@@ -11,14 +11,6 @@ import {
   ToggleButtonGroup,
   ToggleButton,
   Alert,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Avatar,
-  Chip,
   Container,
 } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
@@ -30,6 +22,8 @@ import PeopleIcon from "@mui/icons-material/People";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import { useSelector } from "react-redux";
 import { format } from "date-fns";
+import { useNavigate } from "react-router";
+import { ROUTING } from "../../constants/routing";
 
 interface AdminDashboardResponse {
   revenue: {
@@ -42,22 +36,11 @@ interface AdminDashboardResponse {
     quarterly: Record<string, number>; // Số bệnh nhân theo quý
     monthly: Record<string, number>; // Số bệnh nhân theo tháng
   };
-  topDoctors: TopDoctor[]; // Danh sách bác sĩ hàng đầu
-}
-
-// Giao diện dữ liệu cho thông tin bác sĩ
-interface TopDoctor {
-  id: number;
-  userId: string;
-  firstName: string;
-  lastName: string;
-  avatar: string;
-  specialization: string; // Chuyên khoa
-  patientCount: number; // Số lượng bệnh nhân
-  //   revenue: number; // Doanh thu
 }
 
 const AdminDashboardPage: React.FC = () => {
+  const navigate = useNavigate();
+
   // Lấy thông tin người dùng từ Redux store
   const user = useSelector((state: any) => state.user.user);
 
@@ -85,8 +68,6 @@ const AdminDashboardPage: React.FC = () => {
   const [quarterlyPatients, setQuarterlyPatients] = useState<
     Record<string, number>
   >({});
-  // State cho danh sách bác sĩ hàng đầu
-  const [topDoctors, setTopDoctors] = useState<TopDoctor[]>([]);
   // State cho trạng thái tải
   const [isLoading, setIsLoading] = useState(true);
   // State cho lỗi
@@ -156,53 +137,6 @@ const AdminDashboardPage: React.FC = () => {
               "12": 310,
             },
           },
-          topDoctors: [
-            {
-              id: 1,
-              userId: "BS001",
-              firstName: "Nguyễn",
-              lastName: "Văn A",
-              avatar: "https://i.pravatar.cc/150?img=1",
-              specialization: "Nội khoa",
-              patientCount: 520,
-            },
-            {
-              id: 2,
-              userId: "BS002",
-              firstName: "Trần",
-              lastName: "Thị B",
-              avatar: "https://i.pravatar.cc/150?img=2",
-              specialization: "Nhi khoa",
-              patientCount: 480,
-            },
-            {
-              id: 3,
-              userId: "BS003",
-              firstName: "Lê",
-              lastName: "Minh C",
-              avatar: "https://i.pravatar.cc/150?img=3",
-              specialization: "Da liễu",
-              patientCount: 450,
-            },
-            {
-              id: 4,
-              userId: "BS004",
-              firstName: "Phạm",
-              lastName: "Thanh D",
-              avatar: "https://i.pravatar.cc/150?img=4",
-              specialization: "Tim mạch",
-              patientCount: 420,
-            },
-            {
-              id: 5,
-              userId: "BS005",
-              firstName: "Hoàng",
-              lastName: "Bảo E",
-              avatar: "https://i.pravatar.cc/150?img=5",
-              specialization: "Thần kinh",
-              patientCount: 380,
-            },
-          ],
         };
 
         // Cập nhật state với dữ liệu từ API
@@ -212,7 +146,6 @@ const AdminDashboardPage: React.FC = () => {
         setQuarterlyRevenue(dashboardData.revenue.quarterly);
         setMonthlyPatients(dashboardData.patients.monthly);
         setQuarterlyPatients(dashboardData.patients.quarterly);
-        setTopDoctors(dashboardData.topDoctors);
         setError(null);
       } catch (err) {
         console.error("Error fetching admin dashboard data:", err);
@@ -246,6 +179,18 @@ const AdminDashboardPage: React.FC = () => {
   ) => {
     if (newTimeView !== null) {
       setTimeView(newTimeView);
+    }
+  };
+
+  // Hàm xử lý khi người dùng nhấp vào điểm trên biểu đồ với kiểm tra dữ liệu đúng đắn
+  const handleChartItemClick = (dataIndex: number) => {
+    if (dataIndex !== undefined) {
+      const period =
+        timeView === "quarter" ? `Q${dataIndex + 1}` : `${dataIndex + 1}`;
+      console.log(
+        `Điều hướng đến: /admin/doctor-revenue/${timeView}/${period}`
+      );
+      navigate(`/admin/doctor-revenue/${timeView}/${period}`);
     }
   };
 
@@ -453,6 +398,9 @@ const AdminDashboardPage: React.FC = () => {
                     data: revenueChartConfig.seriesData,
                     label: "Doanh thu (VND)",
                     color: "#2196f3",
+                    highlightScope: {
+                      highlight: "item",
+                    },
                   },
                 ]}
                 height={320}
@@ -465,7 +413,36 @@ const AdminDashboardPage: React.FC = () => {
                 slotProps={{
                   legend: { hidden: false },
                 }}
+                sx={{ cursor: "pointer" }}
+                // Xử lý tất cả các sự kiện nhấp có thể để đảm bảo trải nghiệm người dùng tốt hơn
+                onAxisClick={(event, d) => {
+                  console.log("Nhấp vào trục:", d);
+                  if (d && d.dataIndex !== undefined) {
+                    handleChartItemClick(d.dataIndex);
+                  }
+                }}
+                // onLineClick={(event, d) => {
+                //   console.log("Nhấp vào đường:", d);
+                //   if (d && d.dataIndex !== undefined) {
+                //     handleChartItemClick(d.dataIndex);
+                //   }
+                // }}
+                onMarkClick={(event, d) => {
+                  console.log("Nhấp vào điểm đánh dấu:", d);
+                  if (d && d.dataIndex !== undefined) {
+                    handleChartItemClick(d.dataIndex);
+                  }
+                }}
+                // onAreaClick={(event, d) => {
+                //   console.log("Nhấp vào vùng:", d);
+                //   if (d && d.dataIndex !== undefined) {
+                //     handleChartItemClick(d.dataIndex);
+                //   }
+                // }}
               />
+              <Typography variant="body2" textAlign="center" sx={{ mt: 1 }}>
+                Nhấn vào biểu đồ để xem chi tiết doanh thu theo bác sĩ
+              </Typography>
             </Box>
           </Paper>
         </Grid>
@@ -504,61 +481,6 @@ const AdminDashboardPage: React.FC = () => {
           </Paper>
         </Grid>
       </Grid>
-
-      {/* Bảng Top Bác sĩ */}
-      <Paper sx={{ p: 2, mb: 4 }}>
-        <Typography
-          variant="h6"
-          gutterBottom
-          fontWeight="medium"
-          sx={{ mb: 2 }}
-        >
-          Top Bác Sĩ Theo Số Lượng Bệnh Nhân Trong Tháng
-        </Typography>
-
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontWeight: "bold" }}>Thứ hạng</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Bác sĩ</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Chuyên khoa</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Số bệnh nhân</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {topDoctors.map((doctor, index) => (
-                <TableRow key={doctor.id} hover>
-                  <TableCell>
-                    <Chip
-                      label={`#${index + 1}`}
-                      color={index < 3 ? "primary" : "default"}
-                      size="small"
-                      sx={{ fontWeight: "bold" }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <Avatar
-                        src={doctor.avatar}
-                        alt={doctor.lastName}
-                        sx={{ mr: 2 }}
-                      />
-                      <Typography>
-                        BS. {doctor.firstName} {doctor.lastName}
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell>{doctor.specialization}</TableCell>
-                  <TableCell>
-                    {formatPatientCount(doctor.patientCount)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
     </Container>
   );
 };

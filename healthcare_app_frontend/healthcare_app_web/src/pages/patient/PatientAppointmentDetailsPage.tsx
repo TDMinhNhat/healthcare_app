@@ -18,6 +18,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Tooltip,
+  Alert,
 } from "@mui/material";
 import EventIcon from "@mui/icons-material/Event";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
@@ -38,6 +40,7 @@ import {
 } from "../../utils/dateUtils";
 import { useNavigate } from "react-router";
 import { ROUTING } from "../../constants/routing";
+import { getPatientBankAccount } from "../../services/authenticate/user_service";
 
 /**
  * Trang hiển thị chi tiết cuộc hẹn khám bệnh của bệnh nhân
@@ -57,6 +60,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [cancellationSuccess, setCancellationSuccess] = useState(false);
+  const [hasBankAccount, setHasBankAccount] = useState<boolean>(false);
 
   const getStatus = (status: string) => {
     switch (status) {
@@ -122,7 +126,21 @@ const PatientAppointmentDetailsPage: React.FC = () => {
 
   useEffect(() => {
     fetchAppointmentDetails();
-  }, [appointmentId, cancellationSuccess]);
+
+    // Check if patient has bank account
+    const checkBankAccount = async () => {
+      try {
+        const response = await getPatientBankAccount(user.userId);
+        // If response status is 200, patient has bank account
+        setHasBankAccount(response.data.code === 200);
+      } catch (error) {
+        console.error("Error checking bank account:", error);
+        setHasBankAccount(false);
+      }
+    };
+
+    checkBankAccount();
+  }, [appointmentId, cancellationSuccess, user.userId]);
 
   // Hiển thị trạng thái đang tải
   if (loading) {
@@ -216,7 +234,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
 
   /**
    * Kiểm tra xem cuộc hẹn có thể huỷ hay không
-   * Chỉ cho phép huỷ nếu đặt trong vòng 24h
+   * Chỉ cho phép huỷ nếu đặt trong vòng 24h và có tài khoản ngân hàng
    */
   const canCancelAppointment = (createdAt: string, status: string) => {
     // Kiểm tra trạng thái cuộc hẹn
@@ -237,7 +255,6 @@ const PatientAppointmentDetailsPage: React.FC = () => {
       console.error("Lỗi khi xử lý ngày tháng:", error);
       return false;
     }
-    // return true;
   };
 
   /**
@@ -259,6 +276,13 @@ const PatientAppointmentDetailsPage: React.FC = () => {
    */
   const handleCancelAppointment = async () => {
     try {
+      // Check nếu có tài khoản ngân hàng
+      if (!hasBankAccount) {
+        alert(
+          "Bạn cần có tài khoản ngân hàng để có thể huỷ lịch hẹn. Vui lòng liên hệ bệnh viện để biết thêm chi tiết."
+        );
+        return;
+      }
       await cancelAppointment(appointment.id);
       setCancellationSuccess(true);
       handleCloseCancelDialog();
@@ -360,18 +384,33 @@ const PatientAppointmentDetailsPage: React.FC = () => {
 
           {/* Nút xem hồ sơ y tế và tham gia khám */}
           <Box mt={3} display="flex" justifyContent="flex-end" gap={2}>
-            {canCancelAppointment(
-              appointment.createdAt,
-              appointment.status
-            ) && (
-              <Button
-                variant="outlined"
-                color="error"
-                startIcon={<CancelIcon />}
-                onClick={handleOpenCancelDialog}
-              >
-                Huỷ lịch hẹn
-              </Button>
+            {appointment.status === "Đang chờ" && !hasBankAccount ? (
+              <Tooltip title="Bạn cần có tài khoản ngân hàng để có thể huỷ lịch hẹn">
+                <span>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<CancelIcon />}
+                    disabled={true}
+                  >
+                    Huỷ lịch hẹn
+                  </Button>
+                </span>
+              </Tooltip>
+            ) : (
+              canCancelAppointment(
+                appointment.createdAt,
+                appointment.status
+              ) && (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<CancelIcon />}
+                  onClick={handleOpenCancelDialog}
+                >
+                  Huỷ lịch hẹn
+                </Button>
+              )
             )}
             {canJoinExamination(appointment.status) && (
               <Button

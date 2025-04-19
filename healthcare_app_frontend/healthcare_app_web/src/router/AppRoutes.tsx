@@ -35,6 +35,7 @@ import ShiftManagementPage from "../pages/admin/ShiftManagementPage";
 import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
 import DiseasManagementPage from "../pages/admin/DiseasManagementPage";
 import CancelAppointmentPage from "../pages/admin/CancelAppointmentPage";
+import DoctorRevenueDetailsPage from "../pages/admin/DoctorRevenueDetailsPage";
 
 export const AppRoutes = () => {
   // const role = localStorage.getItem("role");
@@ -69,6 +70,10 @@ export const AppRoutes = () => {
             <Route
               path={ROUTING.CANCEL_APPOINTMENT}
               element={<CancelAppointmentPage />}
+            />
+            <Route
+              path={ROUTING.DOCTOR_REVENUE}
+              element={<DoctorRevenueDetailsPage />}
             />
           </Route>
 
