@@ -14,6 +14,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/admin/api/v1/appointments")
 @Slf4j
@@ -44,10 +49,17 @@ public class BookAppointmentController {
             @RequestParam("status") String status
     ) {
         log.info("Book Appointment: Call the api get all book appointments by status");
+        List<Map<String,Object>> result = new ArrayList<>();
+        bookAppointmentRepository.findByStatus(AppointmentStatus.CANCELLED).forEach(item -> {
+            Map<String,Object> data = new HashMap<>();
+            data.put("bookAppointment", item);
+            data.put("bookAppointmentPayment", bookAppointmentPaymentRepository.findByBookAppointment_Id(item.getId()).orElse(null));
+            result.add(data);
+        });
         return ResponseEntity.ok(new Response(
                 HttpStatus.OK.value(),
                 "Get all book appointments by status successfully",
-                bookAppointmentRepository.findByStatus(AppointmentStatus.valueOf(status))
+                result
         ));
     }
 
