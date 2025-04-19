@@ -97,7 +97,11 @@ public class BookAppointmentConsumer {
             String getBookAppointmentId = ObjectParser.convertJsonToObject(message, String.class);
             BookAppointment target = bookAppointmentRepository.findById(Long.parseLong(getBookAppointmentId)).orElseThrow(() -> new EntityNotFoundException("The book appointment was not found!"));
             target.setStatus(AppointmentStatus.CANCELLED);
-            bookAppointmentRepository.save(target);
+            BookAppointment result = bookAppointmentRepository.save(target);
+            BookAppointmentPayment bookAppointmentPayment = bookAppointmentPaymentRepository.findByBookAppointment_Id(result.getId()).orElseThrow(() -> new EntityNotFoundException("The book appointment payment was not found!"));
+            bookAppointmentPayment.setBookAppointment(result);
+            bookAppointmentPaymentRepository.save(bookAppointmentPayment);
+
             log.info("Book Appointment Consumer: set cancel the book appointment successfully!");
         } catch (Exception e) {
             log.error("Book Appointment Consumer: The consumer thrown an exception");

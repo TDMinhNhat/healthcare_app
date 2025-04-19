@@ -7,6 +7,8 @@ import dev.skyherobrine.appointment.feigns.UserFeign;
 import dev.skyherobrine.appointment.feigns.WorkScheduleFeign;
 import dev.skyherobrine.appointment.models.Response;
 import dev.skyherobrine.appointment.models.mongodb.BookAppointment;
+import dev.skyherobrine.appointment.models.mongodb.BookAppointmentPayment;
+import dev.skyherobrine.appointment.repositories.mongodb.BookAppointmentPaymentRepository;
 import dev.skyherobrine.appointment.repositories.mongodb.BookAppointmentRepository;
 import dev.skyherobrine.appointment.repositories.mongodb.MedicalRecordDrugRepository;
 import dev.skyherobrine.appointment.repositories.mongodb.MedicalRecordRepository;
@@ -28,6 +30,7 @@ import java.util.Map;
 @Slf4j
 public class BookingController {
 
+    private final BookAppointmentPaymentRepository bookAppointmentPaymentRepository;
     private final BookAppointmentRepository bar;
     private final BookingService bookingService;
     private final DoctorFeign doctorFeign;
@@ -38,7 +41,8 @@ public class BookingController {
     private final MedicalRecordDrugRepository medicalRecordDrugRepository;
     private final BookAppointmentRepository bookAppointmentRepository;
 
-    public BookingController(BookAppointmentRepository bar, BookingService bookingService, DoctorFeign doctorFeign, KafkaTemplate<String, String> kafkaTemplate, WorkScheduleFeign workScheduleFeign, UserFeign userFeign, MedicalRecordRepository medicalRecordRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, BookAppointmentRepository bookAppointmentRepository) {
+    public BookingController(BookAppointmentPaymentRepository bookAppointmentPaymentRepository, BookAppointmentRepository bar, BookingService bookingService, DoctorFeign doctorFeign, KafkaTemplate<String, String> kafkaTemplate, WorkScheduleFeign workScheduleFeign, UserFeign userFeign, MedicalRecordRepository medicalRecordRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, BookAppointmentRepository bookAppointmentRepository) {
+        this.bookAppointmentPaymentRepository = bookAppointmentPaymentRepository;
         this.bar = bar;
         this.bookingService = bookingService;
         this.doctorFeign = doctorFeign;
@@ -82,6 +86,10 @@ public class BookingController {
             BookAppointment bookAppointment = bar.findById(Long.parseLong(bookAppointmentId)).orElseThrow(() -> new EntityNotFoundException("The book appointment was not found!"));
             bookAppointment.setStatus(AppointmentStatus.CANCELLED);
             BookAppointment result = bar.save(bookAppointment);
+
+            BookAppointmentPayment bookAppointmentPayment = bookAppointmentPaymentRepository.findByBookAppointmentId_Id(result.getId()).orElseThrow(() -> new EntityNotFoundException("The book appointment payment was not found!"));
+            bookAppointmentPayment.setBookAppointmentId(result);
+            bookAppointmentPaymentRepository.save(bookAppointmentPayment);
 
             log.info("Booking: The appointment was canceled");
             return ResponseEntity.ok(new Response(
