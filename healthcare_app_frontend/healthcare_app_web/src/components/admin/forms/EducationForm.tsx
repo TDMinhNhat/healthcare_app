@@ -40,7 +40,7 @@ interface EducationFormProps {
   isSubmitting?: boolean;
 }
 
-// Define the form values interface
+// Định nghĩa interface cho giá trị của form
 interface EducationFormValues {
   schoolName: string;
   joinedDate: string;
@@ -57,7 +57,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
   mode,
   isSubmitting = false,
 }) => {
-  // State for handling response messages
+  // State để xử lý thông báo phản hồi
   const [responseMessage, setResponseMessage] = useState<{
     type: "success" | "error" | "info";
     message: string;
@@ -68,7 +68,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
     show: false,
   });
 
-  // Define validation schema with Yup
+  // Định nghĩa schema xác thực với Yup
   const validationSchema = Yup.object({
     schoolName: Yup.string().required("Tên trường không được để trống"),
     joinedDate: Yup.string().required("Ngày bắt đầu không được để trống"),
@@ -76,7 +76,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
     diploma: Yup.string().required("Bằng cấp không được để trống"),
   });
 
-  // Initial form values
+  // Giá trị khởi tạo của form
   const initialValues: EducationFormValues = {
     schoolName: "",
     joinedDate: "",
@@ -84,7 +84,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
     diploma: "BACHELOR",
   };
 
-  // Prepare form values when education data changes
+  // Chuẩn bị giá trị form khi dữ liệu học vấn thay đổi
   const getInitialValues = (): EducationFormValues => {
     if (!education) return initialValues;
 
@@ -97,22 +97,22 @@ const EducationForm: React.FC<EducationFormProps> = ({
     };
   };
 
-  // Submit handler
+  // Xử lý khi submit form
   const handleFormSubmit = async (
     values: EducationFormValues,
     { setSubmitting }: any
   ) => {
     try {
-      // Prepare data for API submission
+      // Chuẩn bị dữ liệu cho API
       const submissionData: Partial<DoctorEducation> = {
         schoolName: values.schoolName,
         joinedDate: values.joinedDate,
-        joinDate: values.joinedDate, // Ensure API compatibility
+        joinDate: values.joinedDate, // Đảm bảo tương thích với API
         graduateDate: values.graduateDate,
         diploma: values.diploma,
       };
 
-      // Call onSubmit and handle the response
+      // Gọi onSubmit và xử lý phản hồi
       const result = await onSubmit(submissionData as DoctorEducation);
 
       if (result.success) {
@@ -122,7 +122,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
           show: true,
         });
 
-        // Optionally close the form after success with a delay
+        // Tùy chọn đóng form sau khi thành công với độ trễ
         setTimeout(() => {
           onClose();
         }, 1500);
@@ -134,7 +134,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
         });
       }
     } catch (error) {
-      console.error("Error submitting education data:", error);
+      console.error("Lỗi khi gửi dữ liệu học vấn:", error);
       setResponseMessage({
         type: "error",
         message: "Đã xảy ra lỗi khi lưu thông tin học vấn!",
@@ -145,7 +145,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
     }
   };
 
-  // Custom date validation
+  // Xác thực tùy chỉnh cho ngày tháng
   const validateDates = (values: EducationFormValues) => {
     const errors: { graduateDate?: string } = {};
 
@@ -176,7 +176,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
         {(formik: FormikProps<EducationFormValues>) => (
           <Form>
             <DialogContent>
-              {/* Response message alert */}
+              {/* Thông báo phản hồi */}
               <Collapse in={responseMessage.show}>
                 <Alert
                   severity={responseMessage.type}
@@ -242,7 +242,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
                         if (date) {
                           const formattedDate = formatDateToString(date);
                           formik.setFieldValue("joinedDate", formattedDate);
-                          formik.setFieldValue("joinDate", formattedDate); // Set both for API compatibility
+                          formik.setFieldValue("joinDate", formattedDate); // Đặt cả hai để tương thích với API
                         }
                       }}
                       slotProps={{

@@ -35,7 +35,7 @@ interface CertificateFormProps {
   isSubmitting?: boolean;
 }
 
-// Define the form values interface
+// Định nghĩa interface cho giá trị của form
 interface CertificateFormValues {
   certName: string;
   issueDate: string;
@@ -49,7 +49,7 @@ const CertificateForm: React.FC<CertificateFormProps> = ({
   mode,
   isSubmitting = false,
 }) => {
-  // State for handling response messages
+  // State để xử lý thông báo phản hồi
   const [responseMessage, setResponseMessage] = useState<{
     type: "success" | "error" | "info";
     message: string;
@@ -60,32 +60,32 @@ const CertificateForm: React.FC<CertificateFormProps> = ({
     show: false,
   });
 
-  // Define validation schema with Yup
+  // Định nghĩa schema xác thực với Yup
   const validationSchema = Yup.object({
     certName: Yup.string().required("Tên chứng chỉ không được để trống"),
     issueDate: Yup.string().required("Ngày cấp không được để trống"),
   });
 
-  // Initial form values
+  // Giá trị khởi tạo của form
   const initialValues: CertificateFormValues = {
     certName: "",
     issueDate: "",
   };
 
-  // Prepare form values when certificate data changes
+  // Chuẩn bị giá trị form khi dữ liệu chứng chỉ thay đổi
   const getInitialValues = (): CertificateFormValues => {
     if (!certificate) return initialValues;
 
-    // Make sure we have a valid issueDate
+    // Đảm bảo ngày cấp hợp lệ
     let validIssueDate = certificate.issueDate || "";
 
     if (typeof validIssueDate === "string" && validIssueDate) {
       try {
-        // Try to parse the date to make sure it's valid
+        // Thử phân tích ngày để đảm bảo nó hợp lệ
         parseDateFromString(validIssueDate);
       } catch (error) {
-        console.error("Error parsing issueDate", error);
-        // If parsing fails, set a default valid date format
+        console.error("Lỗi khi phân tích ngày cấp", error);
+        // Nếu phân tích thất bại, đặt một định dạng ngày hợp lệ mặc định
         validIssueDate = format(new Date(), "dd-MM-yyyy");
       }
     }
@@ -96,22 +96,22 @@ const CertificateForm: React.FC<CertificateFormProps> = ({
     };
   };
 
-  // Submit handler
+  // Xử lý khi submit form
   const handleFormSubmit = async (
     values: CertificateFormValues,
     { setSubmitting }: any
   ) => {
     try {
-      // Log the values for debugging
-      console.log("Submitting certificate values:", values);
+      // Ghi log giá trị để gỡ lỗi
+      console.log("Đang gửi giá trị chứng chỉ:", values);
 
-      // Prepare data for API submission
+      // Chuẩn bị dữ liệu cho API
       const submissionData: Partial<DoctorCertificate> = {
         certName: values.certName,
         issueDate: values.issueDate,
       };
 
-      // Call onSubmit and handle the response
+      // Gọi onSubmit và xử lý phản hồi
       const result = await onSubmit(submissionData as DoctorCertificate);
 
       if (result.success) {
@@ -121,7 +121,7 @@ const CertificateForm: React.FC<CertificateFormProps> = ({
           show: true,
         });
 
-        // Optionally close the form after success with a delay
+        // Tùy chọn đóng form sau khi thành công với độ trễ
         setTimeout(() => {
           onClose();
         }, 1500);
@@ -133,7 +133,7 @@ const CertificateForm: React.FC<CertificateFormProps> = ({
         });
       }
     } catch (error) {
-      console.error("Error submitting certificate data:", error);
+      console.error("Lỗi khi gửi dữ liệu chứng chỉ:", error);
       setResponseMessage({
         type: "error",
         message: "Đã xảy ra lỗi khi lưu thông tin chứng chỉ!",
@@ -161,7 +161,7 @@ const CertificateForm: React.FC<CertificateFormProps> = ({
         {(formik: FormikProps<CertificateFormValues>) => (
           <Form>
             <DialogContent>
-              {/* Response message alert */}
+              {/* Thông báo phản hồi */}
               <Collapse in={responseMessage.show}>
                 <Alert
                   severity={responseMessage.type}

@@ -64,6 +64,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
   mode = "add",
   isSubmitting = false,
 }) => {
+  // State để xử lý thông báo phản hồi
   const [responseMessage, setResponseMessage] = useState<{
     type: "success" | "error" | "info";
     message: string;
@@ -128,6 +129,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     { setSubmitting }: any
   ) => {
     try {
+      // Chuẩn bị dữ liệu cho API
       const submissionData: Partial<DoctorExperience> = {
         compName: values.compName,
         companyName: values.compName,
@@ -158,7 +160,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
         });
       }
     } catch (error) {
-      console.error("Error submitting experience data:", error);
+      console.error("Lỗi khi gửi dữ liệu kinh nghiệm:", error);
       setResponseMessage({
         type: "error",
         message: "Đã xảy ra lỗi khi lưu thông tin kinh nghiệm!",
@@ -169,6 +171,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     }
   };
 
+  // Kiểm tra hợp lệ cho ngày tháng
   const validateDates = (values: ExperienceFormValues) => {
     const errors: { endDate?: string } = {};
 
