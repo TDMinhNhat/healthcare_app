@@ -386,17 +386,20 @@ export default function ExaminationRoomPage() {
         setIsModalOpen(false);
       }
 
-      // Refresh danh sách bệnh nhân đã khám
+      // Refresh danh sách bệnh nhân đã khám sau một khoảng thời gian ngắn
+      // để đảm bảo backend đã xử lý xong
       if (!isPatient && scheduleId) {
-        getPatientDoneInWorkSchedule(scheduleId)
-          .then((response) => {
-            if (response.data?.code === 200 && response.data?.data) {
-              setDonePatients(response.data.data);
-            }
-          })
-          .catch((error) => {
-            console.error("Error fetching updated done patients:", error);
-          });
+        setTimeout(() => {
+          getPatientDoneInWorkSchedule(scheduleId)
+            .then((response) => {
+              if (response.data?.code === 200 && response.data?.data) {
+                setDonePatients(response.data.data);
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching updated done patients:", error);
+            });
+        }, 1000); // Đợi 1 giây để đảm bảo backend đã cập nhật
       }
     }
   };
@@ -649,107 +652,117 @@ export default function ExaminationRoomPage() {
             )}
           </Box>
 
-          {/* Danh sách bệnh nhân đã khám từ API */}
-          {donePatients.length > 0 && (
-            <>
-              <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
-                Đã Khám Xong
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Box>
-                {donePatients.map((item, index) => (
-                  <Paper
-                    key={`done-${index}`}
-                    elevation={1}
-                    sx={{
-                      p: 2,
-                      mb: 1,
-                      borderRadius: 1,
-                      backgroundColor: "#f5fff5",
-                      border: "1px solid #c8e6c9",
-                    }}
-                  >
-                    <Typography
-                      variant="subtitle1"
-                      component="span"
-                      sx={{ fontWeight: "bold", display: "block" }}
-                    >
-                      {`${item.patient.firstName} ${item.patient.lastName}`}
-                    </Typography>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Chip
-                        label="Đã khám"
-                        color="success"
-                        variant="outlined"
-                        size="small"
-                      />
-                      {item.bookAppointment.numericalOrder && (
-                        <Chip
-                          label={`STT: ${item.bookAppointment.numericalOrder}`}
-                          size="small"
-                          variant="outlined"
-                          sx={{ ml: 1 }}
-                        />
-                      )}
-                    </Box>
-                  </Paper>
-                ))}
-              </Box>
-            </>
-          )}
+          {/* Danh sách bệnh nhân đã khám */}
+          <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
+            Đã Khám Xong
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          <Box>
+            {/* Hiển thị danh sách bệnh nhân đã khám từ API */}
+            {donePatients.map((item, index) => (
+              <Paper
+                key={`done-${item.patient.userId}-${index}`}
+                elevation={1}
+                sx={{
+                  p: 2,
+                  mb: 1,
+                  borderRadius: 1,
+                  backgroundColor: "#f5fff5",
+                  border: "1px solid #c8e6c9",
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  component="span"
+                  sx={{ fontWeight: "bold", display: "block" }}
+                >
+                  {`${item.patient.firstName} ${item.patient.lastName}`}
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Chip
+                    label="Đã khám"
+                    color="success"
+                    variant="outlined"
+                    size="small"
+                  />
+                  {item.bookAppointment.numericalOrder && (
+                    <Chip
+                      label={`STT: ${item.bookAppointment.numericalOrder}`}
+                      size="small"
+                      variant="outlined"
+                      sx={{ ml: 1 }}
+                    />
+                  )}
+                </Box>
+              </Paper>
+            ))}
 
-          {/* Hiển thị bệnh nhân đã khám trong phiên hiện tại (nếu không có dữ liệu từ API) */}
-          {donePatients.length === 0 && examinedPatients.length > 0 && (
-            <>
-              <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
-                Đã Khám Xong
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Box>
-                {examinedPatients.map((patient, index) => (
-                  <Paper
-                    key={`examined-${index}`}
-                    elevation={1}
+            {/* Hiển thị bệnh nhân đã khám trong phiên hiện tại (nhưng chưa được cập nhật từ API) */}
+            {examinedPatients
+              .filter(
+                (local) =>
+                  !donePatients.some(
+                    (api) => api.patient.userId === local.userId
+                  )
+              )
+              .map((patient, index) => (
+                <Paper
+                  key={`examined-${patient.userId}-${index}`}
+                  elevation={1}
+                  sx={{
+                    p: 2,
+                    mb: 1,
+                    borderRadius: 1,
+                    backgroundColor: "#f5fff5",
+                    border: "1px solid #c8e6c9",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    component="span"
+                    sx={{ fontWeight: "bold", display: "block" }}
+                  >
+                    {patient.name}
+                  </Typography>
+                  <Box
                     sx={{
-                      p: 2,
-                      mb: 1,
-                      borderRadius: 1,
-                      backgroundColor: "#f5fff5",
-                      border: "1px solid #c8e6c9",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
                     }}
                   >
-                    <Typography
-                      variant="subtitle1"
-                      component="span"
-                      sx={{ fontWeight: "bold", display: "block" }}
-                    >
-                      {patient.name}
-                    </Typography>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
+                    <Chip
+                      label="Đã khám"
+                      color="success"
+                      variant="outlined"
+                      size="small"
+                    />
+                    {patient.numericalOrder && (
                       <Chip
-                        label="Đã khám"
-                        color="success"
-                        variant="outlined"
+                        label={`STT: ${patient.numericalOrder}`}
                         size="small"
+                        variant="outlined"
+                        sx={{ ml: 1 }}
                       />
-                    </Box>
-                  </Paper>
-                ))}
-              </Box>
-            </>
-          )}
+                    )}
+                  </Box>
+                </Paper>
+              ))}
+
+            {/* Hiển thị thông báo nếu không có bệnh nhân nào đã khám */}
+            {donePatients.length === 0 && examinedPatients.length === 0 && (
+              <Typography color="text.secondary">
+                Chưa có bệnh nhân nào được khám xong
+              </Typography>
+            )}
+          </Box>
+
           {/* Modal hồ sơ y tế */}
           {currentPatient && (
             <MedicalRecordModal
