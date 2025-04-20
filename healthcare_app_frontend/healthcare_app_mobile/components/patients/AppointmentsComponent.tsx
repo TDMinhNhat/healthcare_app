@@ -259,8 +259,39 @@ export default function AppointmentsComponent() {
   };
 
   // Kiểm tra xem cuộc hẹn có thể tham gia khám trực tuyến không
-  const canJoinExamination = (status: string) => {
-    return status === "IN_PROGRESS" || status === "WAITING"; // Chỉ "Đang khám" hoặc "Chờ khám" mới có thể tham gia
+  const canJoinExamination = (
+    status: string,
+    date: string,
+    startTime: string,
+    endTime: string
+  ) => {
+    // Kiểm tra trạng thái cuộc hẹn phải là "đang chờ" hoặc "đang khám"
+    if (status !== "WAITING" && status !== "IN_PROGRESS") return false;
+
+    // Kiểm tra ngày hiện tại có phải là ngày của cuộc hẹn không
+    const today = new Date();
+    const appointmentDate = parse(date, "dd-MM-yyyy", new Date());
+    if (
+      today.getDate() !== appointmentDate.getDate() ||
+      today.getMonth() !== appointmentDate.getMonth() ||
+      today.getFullYear() !== appointmentDate.getFullYear()
+    ) {
+      return false;
+    }
+
+    // Kiểm tra thời gian hiện tại có nằm trong khoảng thời gian của ca làm việc không
+    const currentTime = today.getHours() * 60 + today.getMinutes(); // Thời gian hiện tại tính bằng phút
+    // console.log("start time", startTime);
+    // console.log("end time", endTime);
+    // Chuyển đổi thời gian bắt đầu và kết thúc từ chuỗi sang phút trong ngày
+    const [startHour, startMinute] = startTime.split("-").map(Number);
+    const [endHour, endMinute] = endTime.split("-").map(Number);
+
+    const shiftStartTime = startHour * 60 + startMinute;
+    const shiftEndTime = endHour * 60 + endMinute;
+
+    // Cho phép tham gia nếu thời gian hiện tại nằm trong khoảng thời gian của ca làm việc
+    return currentTime >= shiftStartTime && currentTime <= shiftEndTime;
   };
 
   // Xử lý khi nhấp vào một cuộc hẹn để xem chi tiết
@@ -273,6 +304,22 @@ export default function AppointmentsComponent() {
 
   // Xử lý khi tham gia cuộc gọi video
   const handleJoinExamination = (appointment: Appointment) => {
+    if (
+      !canJoinExamination(
+        appointment.status,
+        appointment.date,
+        appointment.startTime,
+        appointment.endTime
+      )
+    ) {
+      Alert.alert(
+        "Không thể tham gia",
+        "Bạn chỉ có thể tham gia khám trong ngày hẹn và trong khoảng thời gian của ca làm việc.",
+        [{ text: "Đóng" }]
+      );
+      return;
+    }
+
     router.push({
       pathname: "/waiting-room",
       params: {
@@ -337,7 +384,13 @@ export default function AppointmentsComponent() {
   // Hiển thị thẻ cuộc hẹn
   const renderAppointmentCard = (appointment: Appointment) => {
     const statusInfo = getStatusInfo(appointment.status);
-    const isEligibleForCall = canJoinExamination(appointment.status); // Kiểm tra xem có thể tham gia cuộc gọi video không
+    console.log("appointment", appointment);
+    const isEligibleForCall = canJoinExamination(
+      appointment.status,
+      appointment.date,
+      appointment.startTime,
+      appointment.endTime
+    ); // Kiểm tra xem có thể tham gia cuộc gọi video không
 
     return (
       <TouchableOpacity

@@ -90,13 +90,92 @@ export default function AppointmentDetailsScreen() {
   };
 
   // Kiểm tra xem lịch hẹn có đủ điều kiện tham gia tư vấn trực tuyến không
-  const canJoinExamination = (status: string) => {
-    return status === "Đang khám" || status === "Đang chờ";
+  const canJoinExamination = (
+    status: string,
+    appointmentDate: string,
+    startTime: string,
+    endTime: string
+  ) => {
+    // Kiểm tra trạng thái cuộc hẹn
+    if (status !== "Đang khám" && status !== "Đang chờ") return false;
+
+    // Kiểm tra ngày hiện tại có phải là ngày của cuộc hẹn không
+    const today = new Date();
+
+    // Chuyển đổi ngày của cuộc hẹn từ chuỗi sang đối tượng Date
+    const dateParts = appointmentDate.split("-");
+    if (dateParts.length !== 3) return false;
+
+    const day = parseInt(dateParts[0]);
+    const month = parseInt(dateParts[1]) - 1; // Tháng trong JS bắt đầu từ 0
+    const year = parseInt(dateParts[2]);
+
+    if (
+      today.getDate() !== day ||
+      today.getMonth() !== month ||
+      today.getFullYear() !== year
+    ) {
+      return false;
+    }
+
+    // Kiểm tra thời gian hiện tại có nằm trong khoảng thời gian của ca làm việc không
+    const currentTime = today.getHours() * 60 + today.getMinutes(); // Thời gian hiện tại tính bằng phút
+
+    // Chuyển đổi thời gian bắt đầu và kết thúc thành phút trong ngày
+    // Định dạng ban đầu: "HH:MM" hoặc "h:MM AM/PM"
+    let shiftStartTime, shiftEndTime;
+
+    // Xử lý cho cả định dạng 24h và 12h
+    if (startTime.includes(":")) {
+      // Định dạng 24h
+      const [startHour, startMinute] = startTime.split(":").map(Number);
+      const [endHour, endMinute] = endTime.split(":").map(Number);
+
+      shiftStartTime = startHour * 60 + startMinute;
+      shiftEndTime = endHour * 60 + endMinute;
+    } else {
+      // Trường hợp khác - sử dụng một hàm phân tích chung
+      // Đây là một cách đơn giản, có thể cần xử lý phức tạp hơn tùy theo định dạng thời gian
+      try {
+        const startDate = new Date(`01/01/2023 ${startTime}`);
+        const endDate = new Date(`01/01/2023 ${endTime}`);
+
+        shiftStartTime = startDate.getHours() * 60 + startDate.getMinutes();
+        shiftEndTime = endDate.getHours() * 60 + endDate.getMinutes();
+      } catch (error) {
+        console.error("Error parsing time:", error);
+        return false;
+      }
+    }
+
+    // Cho phép tham gia nếu thời gian hiện tại nằm trong khoảng thời gian của ca làm việc
+    return currentTime >= shiftStartTime && currentTime <= shiftEndTime;
   };
 
   // Xử lý tham gia cuộc gọi video
   const handleJoinExamination = () => {
     if (!appointment) return;
+
+    // Lấy thông tin thời gian từ appointment
+    const time = appointment.time.split(" - ");
+    const startTime = time[0]?.trim();
+    const endTime = time[1]?.trim();
+
+    if (
+      !canJoinExamination(
+        appointment.status,
+        appointment.date,
+        startTime,
+        endTime
+      )
+    ) {
+      Alert.alert(
+        "Không thể tham gia",
+        "Bạn chỉ có thể tham gia khám trong ngày hẹn và trong khoảng thời gian của ca làm việc.",
+        [{ text: "Đóng" }]
+      );
+      return;
+    }
 
     try {
       router.push({
@@ -404,7 +483,12 @@ export default function AppointmentDetailsScreen() {
               )
             )}
 
-            {canJoinExamination(appointment.status) && (
+            {canJoinExamination(
+              appointment.status,
+              appointment.date,
+              appointment.time.split(" - ")[0]?.trim(),
+              appointment.time.split(" - ")[1]?.trim()
+            ) && (
               <TouchableOpacity
                 style={styles.joinButton}
                 onPress={handleJoinExamination}
