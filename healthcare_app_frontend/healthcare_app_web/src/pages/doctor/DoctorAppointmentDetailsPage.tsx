@@ -217,6 +217,54 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
   };
 
   /**
+   * Kiểm tra xem ngày hiện tại có khớp với ngày khám hay không
+   */
+  const isAppointmentDate = (dateString: string): boolean => {
+    // Chuyển đổi chuỗi ngày (dd-MM-yyyy) thành đối tượng Date
+    const parts = dateString.split("-");
+    const appointmentDate = new Date(
+      parseInt(parts[2]), // year
+      parseInt(parts[1]) - 1, // month (0-based)
+      parseInt(parts[0]) // day
+    );
+
+    // Lấy ngày hiện tại (loại bỏ giờ, phút, giây)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    appointmentDate.setHours(0, 0, 0, 0);
+
+    // So sánh ngày hiện tại với ngày khám
+    return today.getTime() === appointmentDate.getTime();
+  };
+
+  /**
+   * Kiểm tra xem thời gian hiện tại có nằm trong khung giờ làm việc của ca khám không
+   */
+  const isWithinShiftHours = (timeRange: string): boolean => {
+    // Split the time range string "10:00 - 12:00" to get start and end times
+    const [startTimeStr, endTimeStr] = timeRange.split(" - ");
+
+    // Parse the time strings to create Date objects
+    const now = new Date();
+    const currentDate = new Date();
+
+    // Create date objects for start and end times
+    const startTime = new Date(currentDate);
+    const endTime = new Date(currentDate);
+
+    // Set hours and minutes for start time
+    const [startHour, startMinute] = startTimeStr.split(":").map(Number);
+    startTime.setHours(startHour, startMinute, 0);
+
+    // Set hours and minutes for end time
+    const [endHour, endMinute] = endTimeStr.split(":").map(Number);
+    endTime.setHours(endHour, endMinute, 0);
+
+    // Check if current time is within the range
+    return now >= startTime && now <= endTime;
+  };
+
+  /**
    * Xử lý chuyển đến phòng khám trực tuyến
    */
   const handleStartExamination = () => {
@@ -231,8 +279,20 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
     // Kiểm tra xem ngày khám đã qua chưa
     const isDateInPast = isPastDate(workSchedule.date);
     if (isDateInPast) {
-      // console.error("Không thể khám cho ngày đã qua");
       alert("Không thể bắt đầu khám do ngày đã qua");
+      return;
+    }
+
+    // Kiểm tra xem ngày hiện tại có phải là ngày khám không
+    if (!isAppointmentDate(workSchedule.date)) {
+      alert("Chỉ có thể bắt đầu khám đúng ngày đã hẹn");
+      return;
+    }
+
+    // Kiểm tra xem thời gian hiện tại có nằm trong khung giờ làm việc không
+    const isWithinShift = isWithinShiftHours(workSchedule.time);
+    if (!isWithinShift) {
+      alert("Chỉ có thể bắt đầu khám trong khung giờ làm việc của ca khám");
       return;
     }
 
@@ -241,8 +301,6 @@ const DoctorAppointmentDetailsPage: React.FC = () => {
       ":scheduleId",
       scheduleId.toString()
     );
-
-    // console.log(`Đang chuyển hướng đến phòng khám: ${examRoomPath}`);
 
     // Mở trang khám bệnh trong tab mới
     window.open(examRoomPath, "_blank");

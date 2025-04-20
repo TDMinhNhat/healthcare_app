@@ -322,8 +322,37 @@ const AppointmentPage = () => {
 
   // Xác định xem một cuộc hẹn có đủ điều kiện để tham gia phòng khám trực tuyến hay không
   // Chỉ các cuộc hẹn có trạng thái "ĐANG CHỜ" hoặc "ĐANG KHÁM" mới có thể tham gia
-  const canJoinExamination = (status: string) => {
-    return status === "IN_PROGRESS" || status === "WAITING";
+  const canJoinExamination = (
+    status: string,
+    date: string,
+    startTime: string,
+    endTime: string
+  ) => {
+    // Kiểm tra trạng thái cuộc hẹn
+    const validStatus = status === "IN_PROGRESS" || status === "WAITING";
+    if (!validStatus) return false;
+
+    // Kiểm tra ngày hiện tại có trùng với ngày hẹn không
+    const today = new Date();
+    const appointmentDate = date.split("-").reverse().join("-"); // Chuyển từ dd-MM-yyyy sang yyyy-MM-dd
+    const isSameDate = today.toISOString().split("T")[0] === appointmentDate;
+    if (!isSameDate) return false;
+
+    // Kiểm tra thời gian hiện tại có nằm trong khoảng thời gian của ca khám không
+    const currentHour = today.getHours();
+    const currentMinute = today.getMinutes();
+    const currentTimeInMinutes = currentHour * 60 + currentMinute;
+
+    const [startHour, startMinute] = startTime.split(":").map(Number);
+    const startTimeInMinutes = startHour * 60 + startMinute;
+
+    const [endHour, endMinute] = endTime.split(":").map(Number);
+    const endTimeInMinutes = endHour * 60 + endMinute;
+
+    return (
+      currentTimeInMinutes >= startTimeInMinutes &&
+      currentTimeInMinutes <= endTimeInMinutes
+    );
   };
 
   // Điều hướng đến trang chi tiết cuộc hẹn khi người dùng nhấp vào một cuộc hẹn cụ thể
@@ -442,7 +471,50 @@ const AppointmentPage = () => {
     };
 
     const colors = getStatusColor();
-    const isExaminationEligible = canJoinExamination(appointment.status);
+    const isExaminationEligible = canJoinExamination(
+      appointment.status,
+      appointment.date,
+      appointment.startTime,
+      appointment.endTime
+    );
+
+    // Xác định nội dung tooltip dựa trên tình trạng cuộc hẹn
+    const getTooltipContent = () => {
+      if (
+        appointment.status !== "WAITING" &&
+        appointment.status !== "IN_PROGRESS"
+      ) {
+        return "Chỉ có thể tham gia khám khi trạng thái là Đang chờ hoặc Đang khám";
+      }
+
+      const today = new Date();
+      const appointmentDate = appointment.date.split("-").reverse().join("-");
+      if (today.toISOString().split("T")[0] !== appointmentDate) {
+        return "Chỉ có thể tham gia khám vào đúng ngày hẹn";
+      }
+
+      const currentHour = today.getHours();
+      const currentMinute = today.getMinutes();
+      const currentTimeInMinutes = currentHour * 60 + currentMinute;
+
+      const [startHour, startMinute] = appointment.startTime
+        .split(":")
+        .map(Number);
+      const startTimeInMinutes = startHour * 60 + startMinute;
+
+      const [endHour, endMinute] = appointment.endTime.split(":").map(Number);
+      const endTimeInMinutes = endHour * 60 + endMinute;
+
+      if (currentTimeInMinutes < startTimeInMinutes) {
+        return `Chỉ có thể tham gia khám từ ${appointment.startTime}`;
+      }
+
+      if (currentTimeInMinutes > endTimeInMinutes) {
+        return "Đã quá thời gian khám";
+      }
+
+      return "Nhấp để tham gia phòng khám";
+    };
 
     // Hiển thị thông tin lịch hẹn với tooltip
     return (
@@ -461,6 +533,14 @@ const AppointmentPage = () => {
             <Typography variant="body2">
               Lý do: {appointment.reason || "Không có"}
             </Typography>
+            {!isExaminationEligible && (
+              <Typography
+                variant="body2"
+                sx={{ color: "orange", fontWeight: "bold", mt: 1 }}
+              >
+                {getTooltipContent()}
+              </Typography>
+            )}
           </>
         }
         arrow

@@ -85,3 +85,11 @@ export const cancelAppointment = (bookAppointmentId: string) => {
     },
   });
 };
+
+export const getPatientDoneInWorkSchedule = async (workScheduleId: string) => {
+  return await axiosConfig.get(`${prefix}/status_done/work_schedule`, {
+    params: {
+      workScheduleId: workScheduleId,
+    },
+  });
+};

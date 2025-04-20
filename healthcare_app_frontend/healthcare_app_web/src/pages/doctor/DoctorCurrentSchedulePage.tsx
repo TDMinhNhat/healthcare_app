@@ -118,6 +118,40 @@ const isPastDate = (dateString: string): boolean => {
   return date < today;
 };
 
+// Kiểm tra xem ngày hiện tại có trùng với ngày của ca làm việc không
+const isExactDate = (dateString: string): boolean => {
+  // Chuyển đổi chuỗi ngày thành đối tượng Date
+  const date = parseDateFromString(dateString);
+  // Lấy ngày hiện tại (loại bỏ giờ, phút, giây)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  date.setHours(0, 0, 0, 0);
+  // So sánh ngày hiện tại với ngày ca làm việc
+  return date.getTime() === today.getTime();
+};
+
+// Kiểm tra xem thời gian hiện tại có nằm trong khung giờ của ca làm việc không
+const isWithinShiftHours = (shift: Shift): boolean => {
+  // Lấy thời gian hiện tại
+  const now = new Date();
+  const currentDate = new Date();
+
+  // Tạo đối tượng Date cho thời gian bắt đầu và kết thúc ca làm việc
+  const startTime = new Date(currentDate);
+  const endTime = new Date(currentDate);
+
+  // Đặt giờ và phút cho thời gian bắt đầu
+  const [startHour, startMinute] = shift.start.split(":").map(Number);
+  startTime.setHours(startHour, startMinute, 0);
+
+  // Đặt giờ và phút cho thời gian kết thúc
+  const [endHour, endMinute] = shift.end.split(":").map(Number);
+  endTime.setHours(endHour, endMinute, 0);
+
+  // Kiểm tra xem thời gian hiện tại có nằm trong khoảng thời gian ca làm việc không
+  return now >= startTime && now <= endTime;
+};
+
 // Định nghĩa các ngày trong tuần với nhãn
 const DAYS_OF_WEEK = [
   { key: "MONDAY", label: "Thứ 2" },
@@ -338,6 +372,40 @@ const DoctorCurrentSchedulePage: React.FC = () => {
     );
   };
 
+  // Xử lý chuyển đến phòng khám trực tuyến
+  const handleStartExamination = (shiftSchedule: WorkSchedule) => {
+    if (!shiftSchedule || !shiftSchedule.id) {
+      alert(
+        "Không thể mở phòng khám do thiếu thông tin lịch làm việc. Vui lòng thử lại."
+      );
+      return;
+    }
+
+    // Kiểm tra xem ngày hiện tại có đúng là ngày của ca làm việc không
+    if (!isExactDate(shiftSchedule.dateAppointment)) {
+      alert("Chỉ có thể vào phòng khám đúng ngày diễn ra ca khám");
+      return;
+    }
+
+    // Kiểm tra xem thời gian hiện tại có nằm trong khung giờ của ca làm việc không
+    if (!isWithinShiftHours(shiftSchedule.shift)) {
+      alert(
+        "Chỉ có thể vào phòng khám trong khung giờ làm việc từ " +
+          shiftSchedule.shift.start +
+          " đến " +
+          shiftSchedule.shift.end
+      );
+      return;
+    }
+
+    // Tạo URL phòng khám và mở tab mới
+    const examRoomPath = ROUTING.EXAMINATION_ROOM.replace(
+      ":scheduleId",
+      shiftSchedule.id.toString()
+    );
+    window.open(examRoomPath, "_blank");
+  };
+
   // Hiển thị trạng thái các ca làm việc cho một khoảng thời gian (sáng/chiều)
   // Hỗ trợ hiển thị nhiều ca trong cùng một khoảng thời gian
   const renderPeriodStatus = (date: string, period: TimePeriod) => {
@@ -476,19 +544,7 @@ const DoctorCurrentSchedulePage: React.FC = () => {
                 fullWidth
                 onClick={(e) => {
                   e.stopPropagation();
-
-                  // Điều hướng đến phòng khám ảo
-                  if (shiftSchedule && shiftSchedule.id) {
-                    const examRoomPath = ROUTING.EXAMINATION_ROOM.replace(
-                      ":scheduleId",
-                      shiftSchedule.id.toString()
-                    );
-                    window.open(examRoomPath, "_blank");
-                  } else {
-                    alert(
-                      "Không thể mở phòng khám do thiếu thông tin lịch làm việc. Vui lòng thử lại."
-                    );
-                  }
+                  handleStartExamination(shiftSchedule);
                 }}
                 disabled={isDateInPast}
                 title={isDateInPast ? "Không thể khám cho ngày đã qua" : ""}

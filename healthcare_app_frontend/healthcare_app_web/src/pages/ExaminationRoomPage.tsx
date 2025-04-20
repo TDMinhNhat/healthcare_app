@@ -17,7 +17,10 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
 import MedicalInformationIcon from "@mui/icons-material/MedicalInformation";
 import DoneIcon from "@mui/icons-material/Done";
-import { getAppointmentPatientDetail } from "./../services/appointment/booking_service";
+import {
+  getAppointmentPatientDetail,
+  getPatientDoneInWorkSchedule,
+} from "./../services/appointment/booking_service";
 import { ROUTING } from "../constants/routing";
 import MedicalRecordModal from "../components/medical/MedicalRecordModal";
 import { set } from "date-fns";
@@ -31,6 +34,20 @@ interface PatientQueueItem {
   doctorName?: string;
   dateAppointment?: string;
   bookAppointmentId?: number;
+}
+
+// Thêm interface cho bệnh nhân đã khám xong
+interface DonePatientItem {
+  patient: {
+    userId: string;
+    firstName: string;
+    lastName: string;
+  };
+  bookAppointment: {
+    id: number;
+    numericalOrder: number;
+    status: string;
+  };
 }
 
 /**
@@ -116,6 +133,8 @@ export default function ExaminationRoomPage() {
   const [examinedPatients, setExaminedPatients] = useState<PatientQueueItem[]>(
     []
   );
+  // Thêm state cho danh sách bệnh nhân đã khám từ API
+  const [donePatients, setDonePatients] = useState<DonePatientItem[]>([]);
 
   // Kết nối socket cho giao tiếp thời gian thực
   const [socket, setSocket] = useState<Socket>(
@@ -241,6 +260,25 @@ export default function ExaminationRoomPage() {
     socket,
   ]);
 
+  // Fetch danh sách bệnh nhân đã khám
+  useEffect(() => {
+    // Chỉ bác sĩ mới cần fetch danh sách bệnh nhân đã khám
+    if (!isPatient && scheduleId) {
+      const fetchDonePatients = async () => {
+        try {
+          const response = await getPatientDoneInWorkSchedule(scheduleId);
+          if (response.data?.code === 200 && response.data?.data) {
+            setDonePatients(response.data.data);
+          }
+        } catch (error) {
+          console.error("Error fetching done patients:", error);
+        }
+      };
+
+      fetchDonePatients();
+    }
+  }, [isPatient, scheduleId]);
+
   // Tạo đường link phòng khám cho bệnh nhân sử dụng role thay vì roomID
   const generateRoomLink = () => {
     return (
@@ -328,7 +366,7 @@ export default function ExaminationRoomPage() {
   // Xử lý hoàn thành khám bệnh, chuyển bệnh nhân vào danh sách đã khám
   const finishExamination = () => {
     if (currentPatient) {
-      // Thêm bệnh nhân vào danh sách đã khám
+      // Thêm bệnh nhân vào danh sách đã khám thông qua state
       setExaminedPatients([
         ...examinedPatients,
         {
@@ -346,6 +384,19 @@ export default function ExaminationRoomPage() {
       // Close medical record if open
       if (isModalOpen) {
         setIsModalOpen(false);
+      }
+
+      // Refresh danh sách bệnh nhân đã khám
+      if (!isPatient && scheduleId) {
+        getPatientDoneInWorkSchedule(scheduleId)
+          .then((response) => {
+            if (response.data?.code === 200 && response.data?.data) {
+              setDonePatients(response.data.data);
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching updated done patients:", error);
+          });
       }
     }
   };
@@ -598,8 +649,63 @@ export default function ExaminationRoomPage() {
             )}
           </Box>
 
-          {/* Danh sách bệnh nhân đã khám */}
-          {examinedPatients.length > 0 && (
+          {/* Danh sách bệnh nhân đã khám từ API */}
+          {donePatients.length > 0 && (
+            <>
+              <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
+                Đã Khám Xong
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+              <Box>
+                {donePatients.map((item, index) => (
+                  <Paper
+                    key={`done-${index}`}
+                    elevation={1}
+                    sx={{
+                      p: 2,
+                      mb: 1,
+                      borderRadius: 1,
+                      backgroundColor: "#f5fff5",
+                      border: "1px solid #c8e6c9",
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      component="span"
+                      sx={{ fontWeight: "bold", display: "block" }}
+                    >
+                      {`${item.patient.firstName} ${item.patient.lastName}`}
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Chip
+                        label="Đã khám"
+                        color="success"
+                        variant="outlined"
+                        size="small"
+                      />
+                      {item.bookAppointment.numericalOrder && (
+                        <Chip
+                          label={`STT: ${item.bookAppointment.numericalOrder}`}
+                          size="small"
+                          variant="outlined"
+                          sx={{ ml: 1 }}
+                        />
+                      )}
+                    </Box>
+                  </Paper>
+                ))}
+              </Box>
+            </>
+          )}
+
+          {/* Hiển thị bệnh nhân đã khám trong phiên hiện tại (nếu không có dữ liệu từ API) */}
+          {donePatients.length === 0 && examinedPatients.length > 0 && (
             <>
               <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
                 Đã Khám Xong

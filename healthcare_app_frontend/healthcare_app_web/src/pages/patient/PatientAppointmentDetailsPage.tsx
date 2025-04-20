@@ -203,7 +203,62 @@ const PatientAppointmentDetailsPage: React.FC = () => {
    * Chỉ các cuộc hẹn có trạng thái "ĐANG CHỜ" hoặc "ĐANG KHÁM" mới có thể tham gia
    */
   const canJoinExamination = (status: string) => {
-    return status === "Đang khám" || status === "Đang chờ";
+    // Kiểm tra trạng thái cuộc hẹn
+    if (!(status === "Đang khám" || status === "Đang chờ")) {
+      return false;
+    }
+
+    try {
+      // Kiểm tra ngày hiện tại có trùng với ngày hẹn không
+      const today = new Date();
+      // console.log("Ngày hẹn:", appointment.date);
+      // Chuyển đổi định dạng ngày từ "DD/MM/YYYY" sang định dạng ngày JavaScript
+      const [day, month, year] = appointment.date.split("-").map(Number);
+      const appointmentDate = new Date(year, month - 1, day);
+
+      // So sánh ngày (bỏ qua giờ, phút, giây)
+      const todayDate = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+      );
+      const appointmentDateOnly = new Date(
+        appointmentDate.getFullYear(),
+        appointmentDate.getMonth(),
+        appointmentDate.getDate()
+      );
+      // console.log("Ngày hiện tại:", todayDate);
+      // console.log("Ngày hẹn:", appointmentDateOnly);
+      if (todayDate.getTime() !== appointmentDateOnly.getTime()) {
+        return false;
+      }
+
+      // Lấy thời gian bắt đầu và kết thúc từ chuỗi thời gian của appointment
+      const timeString = appointment.time; // Ví dụ: "08:00 - 11:30"
+      const [startTimeStr, endTimeStr] = timeString.split(" - ");
+
+      // Chuyển thời gian sang phút
+      const [startHour, startMinute] = startTimeStr.split(":").map(Number);
+      const startTimeInMinutes = startHour * 60 + startMinute;
+
+      const [endHour, endMinute] = endTimeStr.split(":").map(Number);
+      const endTimeInMinutes = endHour * 60 + endMinute;
+
+      // Tính thời gian hiện tại tính bằng phút
+      const currentHour = today.getHours();
+      const currentMinute = today.getMinutes();
+      const currentTimeInMinutes = currentHour * 60 + currentMinute;
+
+      // console.log("Thời gian hiện tại (phút):", currentTimeInMinutes);
+      // Kiểm tra xem thời gian hiện tại có nằm trong khoảng thời gian của ca khám không
+      return (
+        currentTimeInMinutes >= startTimeInMinutes &&
+        currentTimeInMinutes <= endTimeInMinutes
+      );
+    } catch (error) {
+      console.error("Lỗi khi kiểm tra thời gian cho cuộc hẹn:", error);
+      return false;
+    }
   };
 
   /**
