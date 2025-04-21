@@ -158,7 +158,7 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
     @PutMapping("/certification/update/{doctorId}/{certificateId}")
     public ResponseEntity<Response> updateDoctorCertificate(
             @PathVariable("doctorId") String doctorId,
-            @PathVariable(name = "certificateId", required = false) String certId,
+            @PathVariable(name = "certificateId", required = false) Long certId,
             @RequestBody DoctorDTO.DoctorCertificateDTO cert
     ) {
         try {
@@ -170,8 +170,8 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
             }};
             kafkaTemplate.send("update_doctor_certificate", ObjectParser.convertObjectToJson(dataSend));
 
-            if(certId != null) {
-                DoctorCertificate doctorCertificate = doctorCertificateRepository.findById(Long.parseLong(certId)).orElse(null);
+            if(certId == 0) {
+                DoctorCertificate doctorCertificate = doctorCertificateRepository.findById(certId).orElse(null);
                 if(doctorCertificate != null) {
                     doctorCertificate.setCertName(cert.getCertName());
                     doctorCertificate.setIssueDate(LocalDate.parse(cert.getIssueDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
@@ -209,7 +209,7 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
     @PutMapping("/education/update/{doctorId}/{educationId}")
     public ResponseEntity<Response> updateDoctorEducation(
             @PathVariable("doctorId") String doctorId,
-            @PathVariable(value = "educationId", required = false) String educationId,
+            @PathVariable(value = "educationId", required = false) Long educationId,
             @RequestBody DoctorDTO.DoctorEducationDTO education
     ) {
         try {
@@ -221,8 +221,8 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
             }};
             kafkaTemplate.send("update_doctor_education", ObjectParser.convertObjectToJson(dataSend));
 
-            if(educationId != null) {
-                DoctorEducation doctorEducation = doctorEducationRepository.findById(Long.parseLong(educationId)).orElse(null);
+            if(educationId == 0) {
+                DoctorEducation doctorEducation = doctorEducationRepository.findById(educationId).orElse(null);
                 if(doctorEducation != null) {
                     doctorEducation.setSchoolName(education.getSchoolName());
                     doctorEducation.setJoinDate(LocalDate.parse(education.getJoinDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
@@ -263,7 +263,7 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
     @PutMapping("/experience/update/{doctorId}/{experienceId}")
     public ResponseEntity<Response> updateDoctorExperience(
             @PathVariable("doctorId") String doctorId,
-            @PathVariable(value = "experienceId", required = false) String experienceId,
+            @PathVariable(value = "experienceId", required = false) Long experienceId,
             @RequestBody DoctorDTO.DoctorExperienceDTO experience
     ) {
         try {
@@ -275,8 +275,8 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
             }};
             kafkaTemplate.send("update_doctor_experience", ObjectParser.convertObjectToJson(dataSend));
 
-            if(experienceId != null) {
-                DoctorExperience doctorExperience = doctorExperienceRepository.findById(Long.parseLong(experienceId)).orElse(null);
+            if(experienceId == 0) {
+                DoctorExperience doctorExperience = doctorExperienceRepository.findById(experienceId).orElse(null);
                 if(doctorExperience != null) {
                     doctorExperience.setCompanyName(experience.getCompanyName());
                     doctorExperience.setSpecialization(experience.getSpecialization());

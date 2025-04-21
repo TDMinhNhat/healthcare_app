@@ -104,10 +104,10 @@ public class DoctorConsumer {
 
             JsonNode node = new ObjectMapper().readTree(message);
             String doctorId = node.get("doctorId").asText();
-            String certId = node.get("certId").asText();
+            Long certId = node.get("certId").asLong();
             JsonNode cert = node.get("cert");
 
-            DoctorCertificate doctorCertificate = doctorCertificateRepository.findById(Long.parseLong(certId)).orElse(null);
+            DoctorCertificate doctorCertificate = doctorCertificateRepository.findById(certId).orElse(null);
             if(doctorCertificate != null) {
                 doctorCertificate.setCertName(cert.get("certName").asText());
                 doctorCertificate.setIssueDate(LocalDate.parse(cert.get("issueDate").asText(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
@@ -138,10 +138,10 @@ public class DoctorConsumer {
 
             JsonNode node = new ObjectMapper().readTree(message);
             String doctorId = node.get("doctorId").asText();
-            String educationId = node.get("eduId").asText();
+            Long educationId = node.get("eduId").asLong();
             JsonNode education = node.get("education");
 
-            DoctorEducation doctorEducation = doctorEducationRepository.findById(Long.parseLong(educationId)).orElse(null);
+            DoctorEducation doctorEducation = doctorEducationRepository.findById(educationId).orElse(null);
             if(doctorEducation != null) {
                 doctorEducation.setSchoolName(education.get("schoolName").asText());
                 doctorEducation.setJoinDate(LocalDate.parse(education.get("joinDate").asText(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
@@ -176,10 +176,10 @@ public class DoctorConsumer {
 
             JsonNode node = new ObjectMapper().readTree(message);
             String doctorId = node.get("doctorId").asText();
-            String experienceId = node.get("experienceId").asText();
+            Long experienceId = node.get("experienceId").asLong();
             JsonNode experience = node.get("experience");
 
-            DoctorExperience doctorExperience = doctorExperienceRepository.findById(Long.parseLong(experienceId)).orElse(null);
+            DoctorExperience doctorExperience = doctorExperienceRepository.findById(experienceId).orElse(null);
             if(doctorExperience != null) {
                 doctorExperience.setCompanyName(experience.get("companyName").asText());
                 doctorExperience.setSpecialization(experience.get("specialization").asText());
