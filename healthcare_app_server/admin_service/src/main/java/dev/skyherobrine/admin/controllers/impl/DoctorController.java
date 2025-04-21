@@ -170,21 +170,19 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
             }};
             kafkaTemplate.send("update_doctor_certificate", ObjectParser.convertObjectToJson(dataSend));
 
-            if(certId == 0) {
-                DoctorCertificate doctorCertificate = doctorCertificateRepository.findById(certId).orElse(null);
-                if(doctorCertificate != null) {
-                    doctorCertificate.setCertName(cert.getCertName());
-                    doctorCertificate.setIssueDate(LocalDate.parse(cert.getIssueDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+            DoctorCertificate doctorCertificate = doctorCertificateRepository.findById(certId).orElse(null);
+            if(doctorCertificate != null) {
+                doctorCertificate.setCertName(cert.getCertName());
+                doctorCertificate.setIssueDate(LocalDate.parse(cert.getIssueDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
 
-                    return ResponseEntity.ok(new Response(
-                            HttpStatus.OK.value(),
-                            "Update doctor certificate",
-                            doctorCertificateRepository.save(doctorCertificate)
-                    ));
-                }
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.OK.value(),
+                        "Update doctor certificate",
+                        doctorCertificateRepository.save(doctorCertificate)
+                ));
             }
 
-            DoctorCertificate doctorCertificate = new DoctorCertificate(
+            doctorCertificate = new DoctorCertificate(
                     doctorRepository.findDoctorByUserId(doctorId).orElseThrow(() -> new EntityNotFoundException("Doctor wasn't found!")),
                     cert.getCertName(),
                     LocalDate.parse(cert.getIssueDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy"))
@@ -221,22 +219,20 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
             }};
             kafkaTemplate.send("update_doctor_education", ObjectParser.convertObjectToJson(dataSend));
 
-            if(educationId == 0) {
-                DoctorEducation doctorEducation = doctorEducationRepository.findById(educationId).orElse(null);
-                if(doctorEducation != null) {
-                    doctorEducation.setSchoolName(education.getSchoolName());
-                    doctorEducation.setJoinDate(LocalDate.parse(education.getJoinDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
-                    doctorEducation.setGraduateDate(LocalDate.parse(education.getGraduateDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
-                    doctorEducation.setDiploma(education.getDiploma());
-                    return ResponseEntity.ok(new Response(
-                            HttpStatus.OK.value(),
-                            "Update doctor education",
-                            doctorEducationRepository.save(doctorEducation)
-                    ));
-                }
+            DoctorEducation doctorEducation = doctorEducationRepository.findById(educationId).orElse(null);
+            if(doctorEducation != null) {
+                doctorEducation.setSchoolName(education.getSchoolName());
+                doctorEducation.setJoinDate(LocalDate.parse(education.getJoinDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                doctorEducation.setGraduateDate(LocalDate.parse(education.getGraduateDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                doctorEducation.setDiploma(education.getDiploma());
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.OK.value(),
+                        "Update doctor education",
+                        doctorEducationRepository.save(doctorEducation)
+                ));
             }
 
-            DoctorEducation doctorEducation = new DoctorEducation(
+            doctorEducation = new DoctorEducation(
                     doctorRepository.findDoctorByUserId(doctorId).orElseThrow(() -> new EntityNotFoundException("Doctor wasn't found!")),
                     education.getSchoolName(),
                     LocalDate.parse(education.getJoinDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")),
@@ -275,31 +271,29 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
             }};
             kafkaTemplate.send("update_doctor_experience", ObjectParser.convertObjectToJson(dataSend));
 
-            if(experienceId == 0) {
-                DoctorExperience doctorExperience = doctorExperienceRepository.findById(experienceId).orElse(null);
-                if(doctorExperience != null) {
-                    doctorExperience.setCompanyName(experience.getCompanyName());
-                    doctorExperience.setSpecialization(experience.getSpecialization());
-                    doctorExperience.setStartDate(LocalDate.parse(experience.getStartDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
-                    doctorExperience.setEndDate(LocalDate.parse(experience.getEndDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
-                    doctorExperience.setDescription(experience.getDescription());
+            DoctorExperience doctorExperience = doctorExperienceRepository.findById(experienceId).orElse(null);
+            if(doctorExperience != null) {
+                doctorExperience.setCompanyName(experience.getCompanyName());
+                doctorExperience.setSpecialization(experience.getSpecialization());
+                doctorExperience.setStartDate(LocalDate.parse(experience.getStartDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                doctorExperience.setEndDate(LocalDate.parse(experience.getEndDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                doctorExperience.setDescription(experience.getDescription());
 
-                    Address address = doctorExperience.getCompAddress();
-                    address.setNumber(experience.getAddress().getNumber());
-                    address.setStreet(experience.getAddress().getStreet());
-                    address.setWard(experience.getAddress().getWard());
-                    address.setDistrict(experience.getAddress().getDistrict());
-                    address.setCity(experience.getAddress().getCity());
-                    address.setCountry(experience.getAddress().getCountry());
-                    Address result = addressRepository.save(address);
-                    doctorExperience.setCompAddress(result);
+                Address address = doctorExperience.getCompAddress();
+                address.setNumber(experience.getAddress().getNumber());
+                address.setStreet(experience.getAddress().getStreet());
+                address.setWard(experience.getAddress().getWard());
+                address.setDistrict(experience.getAddress().getDistrict());
+                address.setCity(experience.getAddress().getCity());
+                address.setCountry(experience.getAddress().getCountry());
+                Address result = addressRepository.save(address);
+                doctorExperience.setCompAddress(result);
 
-                    return ResponseEntity.ok(new Response(
-                            HttpStatus.OK.value(),
-                            "Update doctor experience",
-                            doctorExperienceRepository.save(doctorExperience)
-                    ));
-                }
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.OK.value(),
+                        "Update doctor experience",
+                        doctorExperienceRepository.save(doctorExperience)
+                ));
             }
 
             Address address = new Address(
@@ -310,7 +304,7 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
                     experience.getAddress().getCity(),
                     experience.getAddress().getCountry()
             );
-            DoctorExperience doctorExperience = new DoctorExperience(
+            doctorExperience = new DoctorExperience(
                     doctorRepository.findDoctorByUserId(doctorId).orElseThrow(() -> new EntityNotFoundException("Doctor wasn't found!")),
                     experience.getCompanyName(),
                     experience.getSpecialization(),
