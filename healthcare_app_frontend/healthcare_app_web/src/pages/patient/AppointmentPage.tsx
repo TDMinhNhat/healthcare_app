@@ -519,6 +519,7 @@ const AppointmentPage = () => {
     // Hiển thị thông tin lịch hẹn với tooltip
     return (
       <Tooltip
+        key={appointment.id}
         title={
           <>
             <Typography variant="body2" sx={{ fontWeight: "bold" }}>

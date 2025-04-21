@@ -15,6 +15,11 @@ import {
   Checkbox,
   Stack,
   Grid,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 import {
   addDays,
@@ -95,6 +100,9 @@ const DoctorSchedulePage = () => {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const doctorId = user?.userId;
 
+  // Số tuần tối đa cho phép đặt lịch (1 tháng ~ 4 tuần)
+  const MAX_WEEKS_AHEAD = 4;
+
   // Lưu trữ danh sách các ca làm việc từ API
   const [shifts, setShifts] = useState<Shift[]>([]);
 
@@ -115,6 +123,11 @@ const DoctorSchedulePage = () => {
   // State lưu trữ thông báo lỗi để hiển thị cho người dùng
   const [errorMessage, setErrorMessage] = useState("");
 
+  // State cho hộp thoại xác nhận
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  // State lưu trữ lịch làm việc đang chờ lưu
+  const [pendingSchedules, setPendingSchedules] = useState<any[]>([]);
+
   // Gọi API để lấy thông tin về các ca làm việc khi component được tạo
   useEffect(() => {
     const fetchShifts = async () => {
@@ -122,10 +135,10 @@ const DoctorSchedulePage = () => {
         const response = await getShiftByStatusTrue();
         if (response.data && response.data.data) {
           setShifts(response.data.data);
-          console.log("Fetched shifts:", response.data.data);
+          console.log("Đã lấy ca làm việc:", response.data.data);
         }
       } catch (error) {
-        console.error("Error fetching shifts:", error);
+        console.error("Lỗi khi lấy ca làm việc:", error);
       }
     };
 
@@ -172,7 +185,7 @@ const DoctorSchedulePage = () => {
 
           if (data.length > 0) {
             const updatedSchedule = [...newWeekSchedule];
-            console.log("Update schedule with data:", updatedSchedule);
+            console.log("Cập nhật lịch với dữ liệu:", updatedSchedule);
 
             data.forEach((item: any) => {
               // Kiểm tra dữ liệu trả về có đầy đủ không
@@ -208,10 +221,6 @@ const DoctorSchedulePage = () => {
                       shiftNumber
                     )
                   ) {
-                    // console.log(
-                    //   `Tìm thấy ca ${shiftNumber} cho ngày:`,
-                    //   dayIndex
-                    // );
                     updatedSchedule[dayIndex].selectedShifts.push(shiftNumber);
                   }
                   // Đánh dấu ca làm việc đã được đăng ký (không thể hủy)
@@ -247,22 +256,23 @@ const DoctorSchedulePage = () => {
     return currentWeekStart.getTime() === currentWeekStartTime;
   };
 
-  const isNextWeek = () => {
-    const nextWeekStartTime = startOfWeek(addWeeks(today, 1), {
+  const isMaxWeekAhead = () => {
+    // Kiểm tra xem tuần hiện tại có phải là tuần cuối trong khoảng cho phép không
+    const maxWeekStartTime = startOfWeek(addWeeks(today, MAX_WEEKS_AHEAD), {
       weekStartsOn: 1,
     }).getTime();
-    return currentWeekStart.getTime() === nextWeekStartTime;
+    return currentWeekStart.getTime() === maxWeekStartTime;
   };
 
   const handlePrevWeek = () => {
     if (!isCurrentWeek()) {
-      setCurrentWeekStart(startOfWeek(today, { weekStartsOn: 1 }));
+      setCurrentWeekStart(subWeeks(currentWeekStart, 1));
     }
   };
 
   const handleNextWeek = () => {
-    if (!isNextWeek()) {
-      const nextWeekStart = startOfWeek(addWeeks(today, 1), {
+    if (!isMaxWeekAhead()) {
+      const nextWeekStart = startOfWeek(addWeeks(currentWeekStart, 1), {
         weekStartsOn: 1,
       });
       setCurrentWeekStart(nextWeekStart);
@@ -337,7 +347,7 @@ const DoctorSchedulePage = () => {
     setWeekSchedule(newSchedule);
   };
 
-  const handleSaveSchedule = async () => {
+  const handleSaveSchedule = () => {
     try {
       if (!doctorId) {
         setErrorMessage("Không tìm thấy thông tin người dùng");
@@ -369,11 +379,25 @@ const DoctorSchedulePage = () => {
         return;
       }
 
-      const response = await addMultipleWorkSchedule(schedulesToSave);
+      // Store schedules and open confirmation dialog
+      setPendingSchedules(schedulesToSave);
+      setOpenConfirmDialog(true);
+    } catch (error) {
+      console.error("Lỗi khi chuẩn bị lịch làm việc:", error);
+      setErrorMessage("Lỗi khi chuẩn bị lịch làm việc");
+      setTimeout(() => setErrorMessage(""), 3000);
+    }
+  };
+
+  const confirmSaveSchedule = async () => {
+    try {
+      setOpenConfirmDialog(false);
+
+      const response = await addMultipleWorkSchedule(pendingSchedules);
 
       if (response && response.data && response.data.code === 200) {
         setSuccessMessage(
-          `Lưu ${schedulesToSave.length} ca làm việc mới thành công`
+          `Đã lưu ${pendingSchedules.length} ca làm việc mới thành công. Lưu ý: Các ca làm việc đã được đăng ký không thể chỉnh sửa hoặc xóa.`
         );
 
         // Cập nhật lại lịch làm việc, chỉ cần nhập lokeckShifts, ko cần nhập lại selectedShifts
@@ -395,15 +419,22 @@ const DoctorSchedulePage = () => {
         });
 
         setWeekSchedule(updatedSchedule);
-        setTimeout(() => setSuccessMessage(""), 3000);
+        setTimeout(() => setSuccessMessage(""), 5000);
       } else {
         throw new Error("Không thể lưu lịch làm việc");
       }
     } catch (error) {
-      console.error("Error saving schedule:", error);
+      console.error("Lỗi khi lưu lịch làm việc:", error);
       setErrorMessage("Lỗi khi lưu lịch làm việc");
       setTimeout(() => setErrorMessage(""), 3000);
+    } finally {
+      setPendingSchedules([]);
     }
+  };
+
+  const handleCloseDialog = () => {
+    setOpenConfirmDialog(false);
+    setPendingSchedules([]);
   };
 
   const formatWeekRange = () => {
@@ -466,25 +497,16 @@ const DoctorSchedulePage = () => {
                     Tuần hiện tại
                   </Typography>
                 )}
-                {isNextWeek() && (
-                  <Typography
-                    variant="caption"
-                    display="block"
-                    color="secondary"
-                  >
-                    Tuần kế tiếp
-                  </Typography>
-                )}
               </Typography>
 
               <IconButton
                 onClick={handleNextWeek}
                 aria-label="Tuần sau"
-                disabled={isNextWeek()}
+                disabled={isMaxWeekAhead()}
                 sx={{
-                  color: isNextWeek() ? "text.disabled" : "inherit",
+                  color: isMaxWeekAhead() ? "text.disabled" : "inherit",
                   "&:hover": {
-                    color: isNextWeek() ? "text.disabled" : "primary.main",
+                    color: isMaxWeekAhead() ? "text.disabled" : "primary.main",
                   },
                 }}
               >
@@ -595,6 +617,38 @@ const DoctorSchedulePage = () => {
           Lưu lịch
         </Button>
       </Box>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={openConfirmDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Xác nhận thêm lịch làm việc"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            <strong>Lưu ý quan trọng:</strong> Sau khi thêm, các ca làm việc này
+            sẽ không thể chỉnh sửa hoặc xóa. Bạn có chắc chắn muốn tiếp tục
+            không?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="inherit">
+            Hủy bỏ
+          </Button>
+          <Button
+            onClick={confirmSaveSchedule}
+            color="primary"
+            variant="contained"
+            autoFocus
+          >
+            Xác nhận thêm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

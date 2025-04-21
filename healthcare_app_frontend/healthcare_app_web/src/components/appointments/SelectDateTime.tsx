@@ -194,13 +194,13 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
 
   /**
    * Kiểm tra xem một ngày có bị vô hiệu hóa không
-   * Vô hiệu hóa các ngày trong quá khứ và ngày xa hơn 14 ngày tính từ hiện tại
+   * Vô hiệu hóa các ngày trong quá khứ và ngày xa hơn 30 ngày tính từ hiện tại
    * @param date - Ngày cần kiểm tra
    * @returns true nếu ngày bị vô hiệu hóa, ngược lại false
    */
   const shouldDisableDate = (date: Date) => {
     const today = new Date();
-    const maxDate = addDays(today, 14);
+    const maxDate = addDays(today, 30); // Thay đổi từ 14 ngày thành 30 ngày (1 tháng)
 
     return (isBefore(date, today) && !isToday(date)) || isBefore(maxDate, date);
   };
