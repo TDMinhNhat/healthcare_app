@@ -42,4 +42,9 @@ public class DoctorProducer {
     public NewTopic updateDoctorExperience() {
         return TopicBuilder.name("update_doctor_experience").build();
     }
+
+    @Bean
+    public NewTopic deleteDoctor() {
+        return TopicBuilder.name("delete_doctor").build();
+    }
 }
