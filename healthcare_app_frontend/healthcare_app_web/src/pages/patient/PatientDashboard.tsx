@@ -496,9 +496,6 @@ const PatientDashboard: React.FC = () => {
                           bgcolor: "rgba(0, 0, 0, 0.04)",
                           cursor: "pointer",
                         },
-                        // borderLeft: `4px solid ${getStatusColor(
-                        //   appointment.status
-                        // )}`,
                       }}
                       onClick={() =>
                         handleAppointmentClick(appointment.workScheduleId)
@@ -546,6 +543,7 @@ const PatientDashboard: React.FC = () => {
                               <Typography
                                 variant="body2"
                                 color="text.secondary"
+                                component="span"
                               >
                                 {appointment.startTime} - {appointment.endTime}
                               </Typography>
@@ -564,13 +562,16 @@ const PatientDashboard: React.FC = () => {
                               <Typography
                                 variant="body2"
                                 color="text.secondary"
+                                component="span"
                               >
-                                {/* {appointment.specialization} -{" "} */}
                                 {appointment.reason}
                               </Typography>
                             </Box>
                           </Box>
                         }
+                        secondaryTypographyProps={{
+                          component: "div", // Change the secondary Typography to render as div instead of p
+                        }}
                       />
                     </ListItem>
                   </React.Fragment>
@@ -585,5 +586,4 @@ const PatientDashboard: React.FC = () => {
     </>
   );
 };
-
 export default PatientDashboard;

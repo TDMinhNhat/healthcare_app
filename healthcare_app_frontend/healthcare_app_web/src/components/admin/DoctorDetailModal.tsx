@@ -276,7 +276,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
           alignItems: "center",
         }}
       >
-        <Typography variant="h6">Thông tin chi tiết bác sĩ</Typography>
+        Thông tin chi tiết bác sĩ
         <IconButton onClick={onClose}>
           <CloseIcon />
         </IconButton>
@@ -316,7 +316,7 @@ const DoctorDetailModal: React.FC<DoctorDetailModalProps> = ({
                 <Typography variant="subtitle1" color="primary">
                   {doctor.specialization}
                 </Typography>
-                <Typography variant="body2">
+                <Typography variant="body2" component="div">
                   <Chip
                     label={doctor.status ? "Đang hoạt động" : "Không hoạt động"}
                     color={doctor.status ? "success" : "error"}
