@@ -109,4 +109,33 @@ public class PatientController implements IManagement<Patient,Long> {
                 patient
         ));
     }
+
+    @DeleteMapping
+    public ResponseEntity<Response> deletePatient(@RequestParam String patientId) {
+        try {
+            log.info("Patient: Call the api delete patient");
+            Patient patient = patientRepository.findPatientByUserId(patientId).orElse(null);
+            if(patient != null) {
+                patient.setStatus(false);
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.OK.value(),
+                        "Successfully deleted patient",
+                        patientRepository.save(patient)
+                ));
+            }
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.NOT_FOUND.value(),
+                    "Patient not found",
+                    null
+            ));
+        } catch (Exception e) {
+            log.error("Patient: the api thrown an error");
+            log.error("Patient: {}", e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
+                    e.getMessage()
+            ));
+        }
+    }
 }

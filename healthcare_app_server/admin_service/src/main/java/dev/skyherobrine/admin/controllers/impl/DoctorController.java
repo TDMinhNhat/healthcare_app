@@ -328,4 +328,33 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
             ));
         }
     }
+
+    @DeleteMapping
+    public ResponseEntity<Response> deleteDoctor(@RequestParam String doctorId) {
+        try {
+            log.info("Doctor: Call the api delete doctor");
+            Doctor doctor = doctorRepository.findDoctorByUserId(doctorId).orElse(null);
+            if(doctor != null) {
+                doctor.setStatus(false);
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.OK.value(),
+                        "Delete doctor successfully",
+                        doctorRepository.save(doctor)
+                ));
+            }
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.NOT_FOUND.value(),
+                    "There are no any doctor for this user id",
+                    null
+            ));
+        } catch (Exception e) {
+            log.error("Doctor: The api delete doctor return an error");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api delete doctor return an error",
+                    e.getMessage()
+            ));
+        }
+    }
 }
