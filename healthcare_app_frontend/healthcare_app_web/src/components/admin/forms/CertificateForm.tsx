@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -23,16 +23,22 @@ import {
   formatDateToString,
 } from "../../../utils/dateUtils";
 import { format } from "date-fns";
+import { updateAddCertificate } from "../../../services/admin/doctor_service";
 
+// Interface cho lỗi validation của ngày tháng
+interface DateValidationErrors {
+  hasError: boolean;
+  messages: string[];
+}
+
+// Props cho form chứng chỉ
 interface CertificateFormProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (
-    data: DoctorCertificate
-  ) => Promise<{ success: boolean; message: string }>;
+  onSuccess?: (updatedCertificate: DoctorCertificate) => void;
   certificate: DoctorCertificate | null;
   mode: "add" | "edit";
-  isSubmitting?: boolean;
+  doctorId: number;
 }
 
 // Định nghĩa interface cho giá trị của form
@@ -44,10 +50,10 @@ interface CertificateFormValues {
 const CertificateForm: React.FC<CertificateFormProps> = ({
   open,
   onClose,
-  onSubmit,
+  onSuccess,
   certificate,
   mode,
-  isSubmitting = false,
+  doctorId,
 }) => {
   // State để xử lý thông báo phản hồi
   const [responseMessage, setResponseMessage] = useState<{
@@ -60,39 +66,75 @@ const CertificateForm: React.FC<CertificateFormProps> = ({
     show: false,
   });
 
-  // Định nghĩa schema xác thực với Yup
-  const validationSchema = Yup.object({
-    certName: Yup.string().required("Tên chứng chỉ không được để trống"),
-    issueDate: Yup.string().required("Ngày cấp không được để trống"),
+  // State để xử lý trạng thái đang gửi form
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // State để quản lý giá trị ngày cấp
+  const [issueDate, setIssueDate] = useState<Date | null>(null);
+
+  // State quản lý thông báo lỗi validation ngày tháng
+  const [dateValidation, setDateValidation] = useState<DateValidationErrors>({
+    hasError: false,
+    messages: [],
   });
 
-  // Giá trị khởi tạo của form
+  // Ngày hiện tại để kiểm tra validation
+  const today = new Date();
+
+  // Cập nhật giá trị ngày cấp khi thông tin chứng chỉ thay đổi
+  useEffect(() => {
+    if (certificate && certificate.issueDate) {
+      try {
+        setIssueDate(parseDateFromString(certificate.issueDate));
+      } catch (error) {
+        console.error("Lỗi khi phân tích ngày cấp", error);
+        setIssueDate(new Date());
+      }
+    } else {
+      setIssueDate(null);
+    }
+    // Xóa thông báo lỗi khi thông tin chứng chỉ thay đổi
+    setDateValidation({ hasError: false, messages: [] });
+  }, [certificate]);
+
+  // Hàm kiểm tra lỗi ngày tháng
+  const validateDates = (): DateValidationErrors => {
+    const errors: string[] = [];
+
+    // Kiểm tra ngày cấp
+    if (!issueDate) {
+      errors.push("Ngày cấp không được để trống");
+    } else if (issueDate > today) {
+      errors.push("Ngày cấp không thể là ngày trong tương lai");
+    }
+
+    const validationResult = {
+      hasError: errors.length > 0,
+      messages: errors,
+    };
+
+    setDateValidation(validationResult);
+    return validationResult;
+  };
+
+  // Schema validation cho Formik (không bao gồm kiểm tra ngày cấp)
+  const validationSchema = Yup.object({
+    certName: Yup.string().required("Tên chứng chỉ không được để trống"),
+  });
+
+  // Giá trị mặc định của form
   const initialValues: CertificateFormValues = {
     certName: "",
     issueDate: "",
   };
 
-  // Chuẩn bị giá trị form khi dữ liệu chứng chỉ thay đổi
+  // Lấy giá trị khởi tạo từ thông tin chứng chỉ nếu có
   const getInitialValues = (): CertificateFormValues => {
     if (!certificate) return initialValues;
 
-    // Đảm bảo ngày cấp hợp lệ
-    let validIssueDate = certificate.issueDate || "";
-
-    if (typeof validIssueDate === "string" && validIssueDate) {
-      try {
-        // Thử phân tích ngày để đảm bảo nó hợp lệ
-        parseDateFromString(validIssueDate);
-      } catch (error) {
-        console.error("Lỗi khi phân tích ngày cấp", error);
-        // Nếu phân tích thất bại, đặt một định dạng ngày hợp lệ mặc định
-        validIssueDate = format(new Date(), "dd-MM-yyyy");
-      }
-    }
-
     return {
       certName: certificate.certName || "",
-      issueDate: validIssueDate,
+      issueDate: certificate.issueDate || "",
     };
   };
 
@@ -101,34 +143,69 @@ const CertificateForm: React.FC<CertificateFormProps> = ({
     values: CertificateFormValues,
     { setSubmitting }: any
   ) => {
-    try {
-      // Ghi log giá trị để gỡ lỗi
-      console.log("Đang gửi giá trị chứng chỉ:", values);
+    // Kiểm tra lỗi ngày tháng trước khi gửi form
+    const dateValidationResult = validateDates();
+    if (dateValidationResult.hasError) {
+      // Hiển thị thông báo lỗi
+      setResponseMessage({
+        type: "error",
+        message: dateValidationResult.messages.join(". "),
+        show: true,
+      });
+      setSubmitting(false);
+      return;
+    }
 
-      // Chuẩn bị dữ liệu cho API
-      const submissionData: Partial<DoctorCertificate> = {
+    try {
+      setIsSubmitting(true);
+      // Xóa thông báo lỗi cũ
+      setResponseMessage((prev) => ({ ...prev, show: false }));
+
+      // Chuẩn bị dữ liệu gửi lên server
+      const submissionData = {
         certName: values.certName,
-        issueDate: values.issueDate,
+        issueDate: issueDate ? formatDateToString(issueDate) : "",
       };
 
-      // Gọi onSubmit và xử lý phản hồi
-      const result = await onSubmit(submissionData as DoctorCertificate);
+      // Xác định ID của certificate (0 nếu là thêm mới)
+      const certificateId = certificate?.id || 0;
 
-      if (result.success) {
+      // Gọi API trực tiếp từ form
+      const response = await updateAddCertificate(
+        doctorId.toString(),
+        submissionData,
+        certificateId.toString()
+      );
+
+      if (response && response.code === 200) {
         setResponseMessage({
           type: "success",
-          message: result.message || "Thao tác thành công!",
+          message:
+            mode === "add"
+              ? "Thêm chứng chỉ thành công!"
+              : "Cập nhật chứng chỉ thành công!",
           show: true,
         });
 
-        // Tùy chọn đóng form sau khi thành công với độ trễ
+        // Nếu thành công và có hàm callback, gọi nó
+        if (onSuccess) {
+          const updatedCertificate: DoctorCertificate = {
+            ...submissionData,
+            id: certificateId || response.data?.id || Date.now(), // Fallback nếu API không trả về ID
+            doctorId: doctorId,
+          };
+          onSuccess(updatedCertificate);
+        }
+
+        // Tự động đóng form sau khi thành công
         setTimeout(() => {
           onClose();
         }, 1500);
       } else {
         setResponseMessage({
           type: "error",
-          message: result.message || "Đã xảy ra lỗi!",
+          message:
+            response?.data?.message || "Đã xảy ra lỗi khi lưu thông tin!",
           show: true,
         });
       }
@@ -141,8 +218,19 @@ const CertificateForm: React.FC<CertificateFormProps> = ({
       });
     } finally {
       setSubmitting(false);
+      setIsSubmitting(false);
     }
   };
+
+  // Xử lý khi ngày cấp thay đổi
+  const handleIssueDateChange = (date: Date | null) => {
+    setIssueDate(date);
+    // Xóa thông báo lỗi khi người dùng thay đổi giá trị
+    setDateValidation({ hasError: false, messages: [] });
+  };
+
+  // Tham chiếu đến Formik
+  const formikRef = React.useRef<FormikProps<CertificateFormValues>>(null);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -157,6 +245,7 @@ const CertificateForm: React.FC<CertificateFormProps> = ({
         validationSchema={validationSchema}
         onSubmit={handleFormSubmit}
         enableReinitialize
+        innerRef={formikRef}
       >
         {(formik: FormikProps<CertificateFormValues>) => (
           <Form>
@@ -197,25 +286,11 @@ const CertificateForm: React.FC<CertificateFormProps> = ({
                   >
                     <DatePicker
                       label="Ngày cấp"
-                      value={
-                        formik.values.issueDate
-                          ? parseDateFromString(formik.values.issueDate)
-                          : null
-                      }
-                      onChange={(date) => {
-                        if (date) {
-                          const formattedDate = formatDateToString(date);
-                          formik.setFieldValue("issueDate", formattedDate);
-                        }
-                      }}
+                      value={issueDate}
+                      onChange={handleIssueDateChange}
                       slotProps={{
                         textField: {
                           fullWidth: true,
-                          error:
-                            formik.touched.issueDate &&
-                            Boolean(formik.errors.issueDate),
-                          helperText:
-                            formik.touched.issueDate && formik.errors.issueDate,
                         },
                       }}
                     />
@@ -225,21 +300,20 @@ const CertificateForm: React.FC<CertificateFormProps> = ({
             </DialogContent>
 
             <DialogActions>
-              <Button
-                onClick={onClose}
-                disabled={formik.isSubmitting || isSubmitting}
-              >
+              <Button onClick={onClose} disabled={isSubmitting}>
                 Hủy
               </Button>
               <Button
                 type="submit"
                 variant="contained"
                 color="primary"
-                disabled={
-                  formik.isSubmitting || isSubmitting || !formik.isValid
-                }
+                disabled={isSubmitting || !formik.isValid}
+                onClick={() => {
+                  // Validate dates when user clicks submit
+                  validateDates();
+                }}
               >
-                {formik.isSubmitting || isSubmitting ? (
+                {isSubmitting ? (
                   <>
                     <CircularProgress size={24} sx={{ mr: 1 }} />
                     {mode === "add" ? "Đang thêm..." : "Đang lưu..."}

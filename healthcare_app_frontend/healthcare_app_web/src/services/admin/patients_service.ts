@@ -11,3 +11,13 @@ export const getPatients = async () => {
   const response = await axiosConfig.get(`${prefix}`);
   return response.data;
 };
+
+// delete patient là thay đổi status của patient thành false
+export const deletePatient = async (patientId: string) => {
+  const response = await axiosConfig.delete(`${prefix}`, {
+    params: {
+      patientId: patientId,
+    },
+  });
+  return response.data;
+};

@@ -20,7 +20,10 @@ import {
 import { Edit, Delete, Add } from "@mui/icons-material";
 import { User } from "../../types/user";
 import PatientForm from "../../components/admin/PatientForm";
-import { getPatients } from "../../services/admin/patients_service";
+import {
+  getPatients,
+  deletePatient,
+} from "../../services/admin/patients_service";
 import { updateInfo } from "../../services/authenticate/user_service";
 
 const PatientManagementPage: React.FC = () => {
@@ -184,10 +187,36 @@ const PatientManagementPage: React.FC = () => {
   };
 
   // Hàm xử lý xóa bệnh nhân
-  const handleDeleteClick = (id: number) => {
-    // TODO: Thêm xác nhận trước khi xóa
-    setPatients(patients.filter((patient) => patient.id !== id));
-    showMessage("Xóa bệnh nhân thành công", "success");
+  const handleDeleteClick = async (id: number) => {
+    try {
+      setLoading(true);
+      // Find the patient by id to get the userId
+      const patientToDelete = patients.find((patient) => patient.id === id);
+
+      if (!patientToDelete) {
+        showMessage("Không tìm thấy bệnh nhân", "error");
+        return;
+      }
+
+      const response = await deletePatient(patientToDelete.userId);
+
+      if (response.code === 200) {
+        // Update the patient status in the local state
+        setPatients(
+          patients.map((patient) =>
+            patient.id === id ? { ...patient, status: false } : patient
+          )
+        );
+        showMessage("Xóa bệnh nhân thành công", "success");
+      } else {
+        showMessage("Xóa bệnh nhân thất bại", "error");
+      }
+    } catch (error) {
+      console.error("Error deleting patient:", error);
+      showMessage("Lỗi khi xóa bệnh nhân", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Định nghĩa cấu trúc các cột cho bảng dữ liệu
@@ -274,20 +303,20 @@ const PatientManagementPage: React.FC = () => {
     {
       field: "actions",
       headerName: "Thao tác",
-      width: 120,
-      flex: 0.7,
+      width: 70,
+      flex: 0.5,
       sortable: false,
       disableExport: true,
       renderCell: (params: GridRenderCellParams) => (
-        <Box sx={{ display: "flex", gap: 1, height: "100%" }}>
-          <IconButton
-            size="small"
-            color="info"
-            title="Chỉnh sửa"
-            onClick={() => handleEditClick(params.row)}
-          >
-            <Edit fontSize="small" />
-          </IconButton>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1,
+            height: "100%",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <IconButton
             size="small"
             color="error"

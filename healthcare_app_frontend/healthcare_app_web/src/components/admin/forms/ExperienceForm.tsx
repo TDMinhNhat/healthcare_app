@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -8,12 +8,11 @@ import {
   TextField,
   Grid,
   Typography,
-  FormControlLabel,
-  Checkbox,
   Box,
   CircularProgress,
   Alert,
   Collapse,
+  FormHelperText,
 } from "@mui/material";
 import { Formik, Form, Field, FormikProps } from "formik";
 import * as Yup from "yup";
@@ -26,25 +25,32 @@ import {
   parseDateFromString,
   formatDateToString,
 } from "../../../utils/dateUtils";
+import { updateAddExperience } from "../../../services/admin/doctor_service";
 
+// Interface cho lỗi validation của ngày tháng
+interface DateValidationErrors {
+  hasError: boolean;
+  messages: string[];
+}
+
+// Props cho form kinh nghiệm
 interface ExperienceFormProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (
-    data: DoctorExperience
-  ) => Promise<{ success: boolean; message: string }>;
+  onSuccess?: (updatedExperience: DoctorExperience) => void;
   experience: DoctorExperience | null;
   mode?: "add" | "edit";
-  isSubmitting?: boolean;
+  doctorId: number;
 }
 
+// Định nghĩa kiểu dữ liệu cho form kinh nghiệm
 interface ExperienceFormValues {
   compName: string;
   specialization: string;
   startDate: string;
-  endDate?: string;
+  endDate: string;
   description: string;
-  compAddress: {
+  address: {
     id?: number;
     number: string;
     street: string;
@@ -53,18 +59,17 @@ interface ExperienceFormValues {
     city: string;
     country: string;
   };
-  isCurrentJob: boolean;
 }
 
 const ExperienceForm: React.FC<ExperienceFormProps> = ({
   open,
   onClose,
-  onSubmit,
+  onSuccess,
   experience,
   mode = "add",
-  isSubmitting = false,
+  doctorId,
 }) => {
-  // State để xử lý thông báo phản hồi
+  // State để hiển thị thông báo phản hồi
   const [responseMessage, setResponseMessage] = useState<{
     type: "success" | "error" | "info";
     message: string;
@@ -75,22 +80,82 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     show: false,
   });
 
+  // State để xử lý trạng thái đang gửi form
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Ngày hiện tại để kiểm tra validation
+  const today = new Date();
+
+  // State quản lý giá trị ngày tháng
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+
+  // State quản lý thông báo lỗi validation ngày tháng
+  const [dateValidation, setDateValidation] = useState<DateValidationErrors>({
+    hasError: false,
+    messages: [],
+  });
+
+  // Cập nhật giá trị ngày tháng khi thông tin kinh nghiệm thay đổi
+  useEffect(() => {
+    if (experience) {
+      if (experience.startDate) {
+        setStartDate(parseDateFromString(experience.startDate));
+      }
+      if (experience.endDate) {
+        setEndDate(parseDateFromString(experience.endDate));
+      }
+    } else {
+      setStartDate(null);
+      setEndDate(null);
+    }
+    // Xóa thông báo lỗi khi thông tin kinh nghiệm thay đổi
+    setDateValidation({ hasError: false, messages: [] });
+  }, [experience]);
+
+  // Hàm kiểm tra lỗi ngày tháng
+  const validateDates = (): DateValidationErrors => {
+    const errors: string[] = [];
+
+    // Kiểm tra ngày bắt đầu
+    if (!startDate) {
+      errors.push("Ngày bắt đầu không được để trống");
+    } else if (startDate > today) {
+      errors.push("Ngày bắt đầu không thể là ngày trong tương lai");
+    }
+
+    // Kiểm tra ngày kết thúc
+    if (!endDate) {
+      errors.push("Ngày kết thúc không được để trống");
+    } else if (endDate > today) {
+      errors.push("Ngày kết thúc không thể là ngày trong tương lai");
+    } else if (startDate && endDate && endDate < startDate) {
+      errors.push("Ngày kết thúc phải sau ngày bắt đầu");
+    }
+
+    const validationResult = {
+      hasError: errors.length > 0,
+      messages: errors,
+    };
+
+    setDateValidation(validationResult);
+    return validationResult;
+  };
+
+  // Schema validation cho Formik (không bao gồm kiểm tra ngày tháng)
   const validationSchema = Yup.object({
     compName: Yup.string().required("Tên công ty không được để trống"),
     specialization: Yup.string().required("Chuyên môn không được để trống"),
-    startDate: Yup.string().required("Ngày bắt đầu không được để trống"),
-    compAddress: Yup.object({
-      city: Yup.string().required("Thành phố không được để trống"),
-    }),
   });
 
+  // Giá trị mặc định của form
   const initialValues: ExperienceFormValues = {
     compName: "",
     specialization: "",
     startDate: "",
     endDate: "",
     description: "",
-    compAddress: {
+    address: {
       id: 0,
       number: "",
       street: "",
@@ -99,9 +164,9 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
       city: "",
       country: "",
     },
-    isCurrentJob: false,
   };
 
+  // Lấy giá trị khởi tạo từ thông tin kinh nghiệm nếu có
   const getInitialValues = (): ExperienceFormValues => {
     if (!experience) return initialValues;
 
@@ -111,7 +176,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
       startDate: experience.startDate || "",
       endDate: experience.endDate || "",
       description: experience.description || "",
-      compAddress: {
+      address: {
         id: experience.compAddress?.id || 0,
         number: experience.compAddress?.number || "",
         street: experience.compAddress?.street || "",
@@ -120,34 +185,78 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
         city: experience.compAddress?.city || "",
         country: experience.compAddress?.country || "",
       },
-      isCurrentJob: !experience.endDate,
     };
   };
 
+  // Xử lý khi submit form
   const handleFormSubmit = async (
     values: ExperienceFormValues,
     { setSubmitting }: any
   ) => {
+    // Kiểm tra lỗi ngày tháng trước khi gửi form
+    const dateValidationResult = validateDates();
+    if (dateValidationResult.hasError) {
+      // Hiển thị thông báo lỗi
+      setResponseMessage({
+        type: "error",
+        message: dateValidationResult.messages.join(". "),
+        show: true,
+      });
+      setSubmitting(false);
+      return;
+    }
+
     try {
-      // Chuẩn bị dữ liệu cho API
-      const submissionData: Partial<DoctorExperience> = {
-        compName: values.compName,
+      setIsSubmitting(true);
+      // Xóa thông báo lỗi cũ
+      setResponseMessage((prev) => ({ ...prev, show: false }));
+
+      // Chuẩn bị dữ liệu gửi lên server
+      const submissionData = {
         companyName: values.compName,
         specialization: values.specialization,
-        startDate: values.startDate,
-        endDate: values.isCurrentJob ? undefined : values.endDate,
-        description: values.description,
-        compAddress: values.compAddress,
+        startDate: startDate ? formatDateToString(startDate) : "",
+        endDate: endDate ? formatDateToString(endDate) : "",
+        address: {
+          number: values.address?.number || "",
+          street: values.address?.street || "",
+          ward: values.address?.ward || "",
+          district: values.address?.district || "",
+          city: values.address?.city || "",
+          country: values.address?.country || "",
+        },
+        description: values.description || "",
       };
 
-      const result = await onSubmit(submissionData as DoctorExperience);
+      const experienceId = experience?.id || 0;
 
-      if (result.success) {
+      const response = await updateAddExperience(
+        doctorId.toString(),
+        submissionData,
+        experienceId.toString()
+      );
+
+      if (response && response.code === 200) {
         setResponseMessage({
           type: "success",
-          message: result.message || "Thao tác thành công!",
+          message:
+            mode === "add"
+              ? "Thêm kinh nghiệm thành công!"
+              : "Cập nhật kinh nghiệm thành công!",
           show: true,
         });
+
+        if (onSuccess) {
+          const updatedExperience: DoctorExperience = {
+            ...submissionData,
+            id: experienceId || response.data?.id || Date.now(),
+            compName: values.compName,
+            companyName: values.compName,
+            compAddress: values.address,
+            doctorId: doctorId,
+          };
+          onSuccess(updatedExperience);
+        }
 
         setTimeout(() => {
           onClose();
@@ -155,7 +264,8 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
       } else {
         setResponseMessage({
           type: "error",
-          message: result.message || "Đã xảy ra lỗi!",
+          message:
+            response?.data?.message || "Đã xảy ra lỗi khi lưu thông tin!",
           show: true,
         });
       }
@@ -168,27 +278,26 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
       });
     } finally {
       setSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
-  // Kiểm tra hợp lệ cho ngày tháng
-  const validateDates = (values: ExperienceFormValues) => {
-    const errors: { endDate?: string } = {};
-
-    if (!values.isCurrentJob && !values.endDate) {
-      errors.endDate = "Ngày kết thúc không được để trống";
-    }
-
-    if (values.startDate && values.endDate) {
-      const startDate = new Date(values.startDate);
-      const endDate = new Date(values.endDate);
-      if (startDate > endDate) {
-        errors.endDate = "Ngày kết thúc phải sau ngày bắt đầu";
-      }
-    }
-
-    return errors;
+  // Xử lý khi ngày bắt đầu thay đổi
+  const handleStartDateChange = (date: Date | null) => {
+    setStartDate(date);
+    // Xóa thông báo lỗi khi người dùng thay đổi giá trị
+    setDateValidation({ hasError: false, messages: [] });
   };
+
+  // Xử lý khi ngày kết thúc thay đổi
+  const handleEndDateChange = (date: Date | null) => {
+    setEndDate(date);
+    // Xóa thông báo lỗi khi người dùng thay đổi giá trị
+    setDateValidation({ hasError: false, messages: [] });
+  };
+
+  // Tham chiếu đến Formik
+  const formikRef = React.useRef<FormikProps<ExperienceFormValues>>(null);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -202,8 +311,8 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
         initialValues={getInitialValues()}
         validationSchema={validationSchema}
         onSubmit={handleFormSubmit}
-        validate={validateDates}
         enableReinitialize
+        innerRef={formikRef}
       >
         {(formik: FormikProps<ExperienceFormValues>) => (
           <Form>
@@ -260,25 +369,11 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                   >
                     <DatePicker
                       label="Ngày bắt đầu"
-                      value={
-                        formik.values.startDate
-                          ? parseDateFromString(formik.values.startDate)
-                          : null
-                      }
-                      onChange={(date) => {
-                        if (date) {
-                          const formattedDate = formatDateToString(date);
-                          formik.setFieldValue("startDate", formattedDate);
-                        }
-                      }}
+                      value={startDate}
+                      onChange={handleStartDateChange}
                       slotProps={{
                         textField: {
                           fullWidth: true,
-                          error:
-                            formik.touched.startDate &&
-                            Boolean(formik.errors.startDate),
-                          helperText:
-                            formik.touched.startDate && formik.errors.startDate,
                         },
                       }}
                     />
@@ -286,59 +381,21 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                 </Grid>
 
                 <Grid item xs={12} md={6}>
-                  <Box sx={{ display: "flex", flexDirection: "column" }}>
-                    <LocalizationProvider
-                      dateAdapter={AdapterDateFns}
-                      adapterLocale={vi}
-                    >
-                      <DatePicker
-                        label="Ngày kết thúc"
-                        value={
-                          formik.values.endDate && !formik.values.isCurrentJob
-                            ? parseDateFromString(formik.values.endDate)
-                            : null
-                        }
-                        onChange={(date) => {
-                          if (date) {
-                            const formattedDate = formatDateToString(date);
-                            formik.setFieldValue("endDate", formattedDate);
-                          }
-                        }}
-                        disabled={formik.values.isCurrentJob}
-                        slotProps={{
-                          textField: {
-                            fullWidth: true,
-                            error:
-                              formik.touched.endDate &&
-                              Boolean(formik.errors.endDate),
-                            helperText:
-                              formik.touched.endDate && formik.errors.endDate,
-                          },
-                        }}
-                      />
-                    </LocalizationProvider>
-
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={formik.values.isCurrentJob}
-                          onChange={(e) => {
-                            formik.setFieldValue(
-                              "isCurrentJob",
-                              e.target.checked
-                            );
-                            if (e.target.checked) {
-                              formik.setFieldValue("endDate", undefined);
-                            }
-                          }}
-                          name="isCurrentJob"
-                          color="primary"
-                        />
-                      }
-                      label="Hiện tại đang làm việc"
-                      sx={{ mt: 1 }}
+                  <LocalizationProvider
+                    dateAdapter={AdapterDateFns}
+                    adapterLocale={vi}
+                  >
+                    <DatePicker
+                      label="Ngày kết thúc"
+                      value={endDate}
+                      onChange={handleEndDateChange}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                        },
+                      }}
                     />
-                  </Box>
+                  </LocalizationProvider>
                 </Grid>
 
                 <Grid item xs={12}>
@@ -423,21 +480,19 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
             </DialogContent>
 
             <DialogActions>
-              <Button
-                onClick={onClose}
-                disabled={formik.isSubmitting || isSubmitting}
-              >
+              <Button onClick={onClose} disabled={isSubmitting}>
                 Hủy
               </Button>
               <Button
                 type="submit"
                 variant="contained"
                 color="primary"
-                disabled={
-                  formik.isSubmitting || isSubmitting || !formik.isValid
-                }
+                disabled={isSubmitting || !formik.isValid}
+                onClick={() => {
+                  validateDates();
+                }}
               >
-                {formik.isSubmitting || isSubmitting ? (
+                {isSubmitting ? (
                   <>
                     <CircularProgress size={24} sx={{ mr: 1 }} />
                     {mode === "add" ? "Đang thêm..." : "Đang lưu..."}

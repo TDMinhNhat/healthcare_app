@@ -20,7 +20,11 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  TextField,
+  InputAdornment,
 } from "@mui/material";
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
 import {
   addDays,
   format,
@@ -69,6 +73,19 @@ interface ScheduleItem {
   date: Date;
   selectedShifts: number[]; // Mảng chứa các ca đã được chọn (bao gồm luôn lockedShifts)
   lockedShifts: number[]; // Mảng chứa các ca đã được đăng ký trước đó, không thể chỉnh sửa
+}
+
+// Định nghĩa schema xác thực cho maxSlots sử dụng Yup
+const MaxSlotsSchema = Yup.object().shape({
+  maxSlots: Yup.number()
+    .required("Số lượng bệnh nhân là bắt buộc")
+    .min(20, "Số lượng tối thiểu là 20 bệnh nhân")
+    .max(40, "Số lượng tối đa là 40 bệnh nhân")
+    .integer("Vui lòng nhập số nguyên"),
+});
+
+interface MaxSlotsFormValues {
+  maxSlots: number;
 }
 
 /**
@@ -127,6 +144,9 @@ const DoctorSchedulePage = () => {
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   // State lưu trữ lịch làm việc đang chờ lưu
   const [pendingSchedules, setPendingSchedules] = useState<any[]>([]);
+
+  // Thêm state để lưu giá trị maxSlots hiện tại từ Formik
+  const [currentMaxSlots, setCurrentMaxSlots] = useState<number>(20);
 
   // Gọi API để lấy thông tin về các ca làm việc khi component được tạo
   useEffect(() => {
@@ -366,7 +386,7 @@ const DoctorSchedulePage = () => {
             schedulesToSave.push({
               doctorId: doctorId,
               shift: shiftNumber,
-              maxSlots: 10,
+              maxSlots: currentMaxSlots, // Sử dụng giá trị hiện tại từ Formik
               dateAppointment: formattedDate,
             });
           }
@@ -379,7 +399,7 @@ const DoctorSchedulePage = () => {
         return;
       }
 
-      // Store schedules and open confirmation dialog
+      // Lưu trữ lịch và mở hộp thoại xác nhận
       setPendingSchedules(schedulesToSave);
       setOpenConfirmDialog(true);
     } catch (error) {
@@ -538,6 +558,62 @@ const DoctorSchedulePage = () => {
         </Grid>
       </Paper>
 
+      {/* Thay thế TextField cho maxSlots bằng Formik */}
+      <Paper sx={{ mb: 3, p: 2 }}>
+        <Formik
+          initialValues={{ maxSlots: 20 }}
+          validationSchema={MaxSlotsSchema}
+          onSubmit={(values: MaxSlotsFormValues) => {
+            // Form này không cần xử lý submit vì nó là một phần của form lớn hơn
+            // Giá trị được lưu trong state và sử dụng khi form chính được gửi đi
+          }}
+        >
+          {({ values, errors, touched, handleChange, handleBlur }) => {
+            // Update currentMaxSlots when values change using regular effect pattern
+            if (values.maxSlots !== currentMaxSlots) {
+              setCurrentMaxSlots(values.maxSlots);
+            }
+
+            return (
+              <Form>
+                <Grid container spacing={2} alignItems="center">
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle1">
+                      Số lượng bệnh nhân tối đa mỗi ca:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Field
+                      as={TextField}
+                      name="maxSlots"
+                      type="number"
+                      value={values.maxSlots}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={touched.maxSlots && Boolean(errors.maxSlots)}
+                      helperText={
+                        touched.maxSlots && errors.maxSlots
+                          ? errors.maxSlots
+                          : "Giới hạn từ 20 đến 40 bệnh nhân mỗi ca"
+                      }
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            bệnh nhân/ca
+                          </InputAdornment>
+                        ),
+                      }}
+                      size="small"
+                      fullWidth
+                    />
+                  </Grid>
+                </Grid>
+              </Form>
+            );
+          }}
+        </Formik>
+      </Paper>
+
       <Paper sx={{ mb: 3, overflow: "auto" }}>
         <TableContainer>
           <Table>
@@ -618,7 +694,7 @@ const DoctorSchedulePage = () => {
         </Button>
       </Box>
 
-      {/* Confirmation Dialog */}
+      {/* Hộp thoại xác nhận */}
       <Dialog
         open={openConfirmDialog}
         onClose={handleCloseDialog}

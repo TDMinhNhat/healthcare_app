@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -28,16 +28,22 @@ import {
   parseDateFromString,
   formatDateToString,
 } from "../../../utils/dateUtils";
+import { updateAddEducation } from "../../../services/admin/doctor_service";
 
+// Interface cho lỗi validation của ngày tháng
+interface DateValidationErrors {
+  hasError: boolean;
+  messages: string[];
+}
+
+// Props cho form học vấn
 interface EducationFormProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (
-    data: DoctorEducation
-  ) => Promise<{ success: boolean; message: string }>;
+  onSuccess?: (updatedEducation: DoctorEducation) => void;
   education: DoctorEducation | null;
   mode: "add" | "edit";
-  isSubmitting?: boolean;
+  doctorId: number;
 }
 
 // Định nghĩa interface cho giá trị của form
@@ -52,10 +58,10 @@ interface EducationFormValues {
 const EducationForm: React.FC<EducationFormProps> = ({
   open,
   onClose,
-  onSubmit,
+  onSuccess,
   education,
   mode,
-  isSubmitting = false,
+  doctorId,
 }) => {
   // State để xử lý thông báo phản hồi
   const [responseMessage, setResponseMessage] = useState<{
@@ -68,15 +74,77 @@ const EducationForm: React.FC<EducationFormProps> = ({
     show: false,
   });
 
-  // Định nghĩa schema xác thực với Yup
+  // State để xử lý trạng thái đang gửi form
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // State để quản lý giá trị ngày tháng
+  const [joinedDate, setJoinedDate] = useState<Date | null>(null);
+  const [graduateDate, setGraduateDate] = useState<Date | null>(null);
+
+  // State quản lý thông báo lỗi validation ngày tháng
+  const [dateValidation, setDateValidation] = useState<DateValidationErrors>({
+    hasError: false,
+    messages: [],
+  });
+
+  // Ngày hiện tại để kiểm tra validation
+  const today = new Date();
+
+  // Cập nhật giá trị ngày tháng khi thông tin học vấn thay đổi
+  useEffect(() => {
+    if (education) {
+      if (education.joinedDate || education.joinDate) {
+        setJoinedDate(
+          parseDateFromString(education.joinedDate || education.joinDate || "")
+        );
+      }
+      if (education.graduateDate) {
+        setGraduateDate(parseDateFromString(education.graduateDate));
+      }
+    } else {
+      setJoinedDate(null);
+      setGraduateDate(null);
+    }
+    // Xóa thông báo lỗi khi thông tin học vấn thay đổi
+    setDateValidation({ hasError: false, messages: [] });
+  }, [education]);
+
+  // Hàm kiểm tra lỗi ngày tháng
+  const validateDates = (): DateValidationErrors => {
+    const errors: string[] = [];
+
+    // Kiểm tra ngày bắt đầu
+    if (!joinedDate) {
+      errors.push("Ngày bắt đầu không được để trống");
+    } else if (joinedDate > today) {
+      errors.push("Ngày bắt đầu không thể là ngày trong tương lai");
+    }
+
+    // Kiểm tra ngày tốt nghiệp
+    if (!graduateDate) {
+      errors.push("Ngày tốt nghiệp không được để trống");
+    } else if (graduateDate > today) {
+      errors.push("Ngày tốt nghiệp không thể là ngày trong tương lai");
+    } else if (joinedDate && graduateDate && graduateDate < joinedDate) {
+      errors.push("Ngày tốt nghiệp phải sau ngày bắt đầu");
+    }
+
+    const validationResult = {
+      hasError: errors.length > 0,
+      messages: errors,
+    };
+
+    setDateValidation(validationResult);
+    return validationResult;
+  };
+
+  // Schema validation cho Formik (không bao gồm kiểm tra ngày tháng)
   const validationSchema = Yup.object({
     schoolName: Yup.string().required("Tên trường không được để trống"),
-    joinedDate: Yup.string().required("Ngày bắt đầu không được để trống"),
-    graduateDate: Yup.string().required("Ngày kết thúc không được để trống"),
     diploma: Yup.string().required("Bằng cấp không được để trống"),
   });
 
-  // Giá trị khởi tạo của form
+  // Giá trị mặc định của form
   const initialValues: EducationFormValues = {
     schoolName: "",
     joinedDate: "",
@@ -84,7 +152,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
     diploma: "BACHELOR",
   };
 
-  // Chuẩn bị giá trị form khi dữ liệu học vấn thay đổi
+  // Lấy giá trị khởi tạo từ thông tin học vấn nếu có
   const getInitialValues = (): EducationFormValues => {
     if (!education) return initialValues;
 
@@ -102,34 +170,72 @@ const EducationForm: React.FC<EducationFormProps> = ({
     values: EducationFormValues,
     { setSubmitting }: any
   ) => {
+    // Kiểm tra lỗi ngày tháng trước khi gửi form
+    const dateValidationResult = validateDates();
+    if (dateValidationResult.hasError) {
+      // Hiển thị thông báo lỗi
+      setResponseMessage({
+        type: "error",
+        message: dateValidationResult.messages.join(". "),
+        show: true,
+      });
+      setSubmitting(false);
+      return;
+    }
+
     try {
-      // Chuẩn bị dữ liệu cho API
-      const submissionData: Partial<DoctorEducation> = {
+      setIsSubmitting(true);
+      // Xóa thông báo lỗi cũ
+      setResponseMessage((prev) => ({ ...prev, show: false }));
+
+      // Chuẩn bị dữ liệu gửi lên server
+      const submissionData = {
         schoolName: values.schoolName,
-        joinedDate: values.joinedDate,
-        joinDate: values.joinedDate, // Đảm bảo tương thích với API
-        graduateDate: values.graduateDate,
+        joinDate: joinedDate ? formatDateToString(joinedDate) : "",
+        graduateDate: graduateDate ? formatDateToString(graduateDate) : "",
         diploma: values.diploma,
       };
 
-      // Gọi onSubmit và xử lý phản hồi
-      const result = await onSubmit(submissionData as DoctorEducation);
+      // Xác định ID của education (0 nếu là thêm mới)
+      const educationId = education?.id || 0;
 
-      if (result.success) {
+      // Gọi API trực tiếp từ form
+      const response = await updateAddEducation(
+        doctorId.toString(),
+        submissionData,
+        educationId.toString()
+      );
+
+      if (response && response.code === 200) {
         setResponseMessage({
           type: "success",
-          message: result.message || "Thao tác thành công!",
+          message:
+            mode === "add"
+              ? "Thêm học vấn thành công!"
+              : "Cập nhật học vấn thành công!",
           show: true,
         });
 
-        // Tùy chọn đóng form sau khi thành công với độ trễ
+        // Nếu thành công và có hàm callback, gọi nó
+        if (onSuccess) {
+          const updatedEducation: DoctorEducation = {
+            ...submissionData,
+            id: educationId || response.data?.id || Date.now(), // Fallback nếu API không trả về ID
+            joinedDate: values.joinedDate,
+            doctorId: doctorId,
+          };
+          onSuccess(updatedEducation);
+        }
+
+        // Tự động đóng form sau khi thành công
         setTimeout(() => {
           onClose();
         }, 1500);
       } else {
         setResponseMessage({
           type: "error",
-          message: result.message || "Đã xảy ra lỗi!",
+          message:
+            response?.data?.message || "Đã xảy ra lỗi khi lưu thông tin!",
           show: true,
         });
       }
@@ -142,23 +248,26 @@ const EducationForm: React.FC<EducationFormProps> = ({
       });
     } finally {
       setSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
-  // Xác thực tùy chỉnh cho ngày tháng
-  const validateDates = (values: EducationFormValues) => {
-    const errors: { graduateDate?: string } = {};
-
-    if (values.joinedDate && values.graduateDate) {
-      const joinedDate = new Date(values.joinedDate);
-      const graduateDate = new Date(values.graduateDate);
-      if (joinedDate > graduateDate) {
-        errors.graduateDate = "Ngày kết thúc phải sau ngày bắt đầu";
-      }
-    }
-
-    return errors;
+  // Xử lý khi ngày bắt đầu thay đổi
+  const handleJoinedDateChange = (date: Date | null) => {
+    setJoinedDate(date);
+    // Xóa thông báo lỗi khi người dùng thay đổi giá trị
+    setDateValidation({ hasError: false, messages: [] });
   };
+
+  // Xử lý khi ngày tốt nghiệp thay đổi
+  const handleGraduateDateChange = (date: Date | null) => {
+    setGraduateDate(date);
+    // Xóa thông báo lỗi khi người dùng thay đổi giá trị
+    setDateValidation({ hasError: false, messages: [] });
+  };
+
+  // Tham chiếu đến Formik
+  const formikRef = React.useRef<FormikProps<EducationFormValues>>(null);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -170,8 +279,8 @@ const EducationForm: React.FC<EducationFormProps> = ({
         initialValues={getInitialValues()}
         validationSchema={validationSchema}
         onSubmit={handleFormSubmit}
-        validate={validateDates}
         enableReinitialize
+        innerRef={formikRef}
       >
         {(formik: FormikProps<EducationFormValues>) => (
           <Form>
@@ -233,27 +342,11 @@ const EducationForm: React.FC<EducationFormProps> = ({
                   >
                     <DatePicker
                       label="Ngày bắt đầu"
-                      value={
-                        formik.values.joinedDate
-                          ? parseDateFromString(formik.values.joinedDate)
-                          : null
-                      }
-                      onChange={(date) => {
-                        if (date) {
-                          const formattedDate = formatDateToString(date);
-                          formik.setFieldValue("joinedDate", formattedDate);
-                          formik.setFieldValue("joinDate", formattedDate); // Đặt cả hai để tương thích với API
-                        }
-                      }}
+                      value={joinedDate}
+                      onChange={handleJoinedDateChange}
                       slotProps={{
                         textField: {
                           fullWidth: true,
-                          error:
-                            formik.touched.joinedDate &&
-                            Boolean(formik.errors.joinedDate),
-                          helperText:
-                            formik.touched.joinedDate &&
-                            formik.errors.joinedDate,
                         },
                       }}
                     />
@@ -266,27 +359,12 @@ const EducationForm: React.FC<EducationFormProps> = ({
                     adapterLocale={vi}
                   >
                     <DatePicker
-                      label="Ngày kết thúc"
-                      value={
-                        formik.values.graduateDate
-                          ? parseDateFromString(formik.values.graduateDate)
-                          : null
-                      }
-                      onChange={(date) => {
-                        if (date) {
-                          const formattedDate = formatDateToString(date);
-                          formik.setFieldValue("graduateDate", formattedDate);
-                        }
-                      }}
+                      label="Ngày tốt nghiệp"
+                      value={graduateDate}
+                      onChange={handleGraduateDateChange}
                       slotProps={{
                         textField: {
                           fullWidth: true,
-                          error:
-                            formik.touched.graduateDate &&
-                            Boolean(formik.errors.graduateDate),
-                          helperText:
-                            formik.touched.graduateDate &&
-                            formik.errors.graduateDate,
                         },
                       }}
                     />
@@ -296,21 +374,20 @@ const EducationForm: React.FC<EducationFormProps> = ({
             </DialogContent>
 
             <DialogActions>
-              <Button
-                onClick={onClose}
-                disabled={formik.isSubmitting || isSubmitting}
-              >
+              <Button onClick={onClose} disabled={isSubmitting}>
                 Hủy
               </Button>
               <Button
                 type="submit"
                 variant="contained"
                 color="primary"
-                disabled={
-                  formik.isSubmitting || isSubmitting || !formik.isValid
-                }
+                disabled={isSubmitting || !formik.isValid}
+                onClick={() => {
+                  // Validate dates when user clicks submit
+                  validateDates();
+                }}
               >
-                {formik.isSubmitting || isSubmitting ? (
+                {isSubmitting ? (
                   <>
                     <CircularProgress size={24} sx={{ mr: 1 }} />
                     {mode === "add" ? "Đang thêm..." : "Đang lưu..."}

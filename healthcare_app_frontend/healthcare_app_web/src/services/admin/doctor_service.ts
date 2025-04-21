@@ -28,10 +28,20 @@ export const updateAddCertificate = async (
   },
   certId?: string
 ) => {
+  const { certName, issueDate } = certificate;
+
+  console.log("Gọi API thêm/cập nhật chứng chỉ:", {
+    doctorId,
+    certId,
+    requestBody: { certName, issueDate },
+  });
+
   const response = await axiosConfig.put(
     `${prefix}/certification/update/${doctorId}/${certId}`,
-    certificate
+    { certName, issueDate }
   );
+
+  console.log("Kết quả API chứng chỉ:", response.data);
   return response.data;
 };
 
@@ -56,10 +66,38 @@ export const updateAddExperience = async (
   },
   experienceId?: string
 ) => {
+  const {
+    companyName,
+    specialization,
+    startDate,
+    endDate,
+    address,
+    description,
+  } = experience;
+
+  const { number, street, ward, district, city, country } = address;
+
+  const requestBody = {
+    companyName,
+    specialization,
+    startDate,
+    endDate,
+    address: { number, street, ward, district, city, country },
+    description,
+  };
+
+  console.log("Gọi API thêm/cập nhật kinh nghiệm:", {
+    doctorId,
+    experienceId,
+    requestBody,
+  });
+
   const response = await axiosConfig.put(
     `${prefix}/experience/update/${doctorId}/${experienceId}`,
-    experience
+    requestBody
   );
+
+  console.log("Kết quả API kinh nghiệm:", response.data);
   return response.data;
 };
 
@@ -75,9 +113,31 @@ export const updateAddEducation = async (
   },
   educationId?: string
 ) => {
+  const { schoolName, joinDate, graduateDate, diploma } = education;
+
+  const requestBody = { schoolName, joinDate, graduateDate, diploma };
+
+  console.log("Gọi API thêm/cập nhật học vấn:", {
+    doctorId,
+    educationId,
+    requestBody,
+  });
+
   const response = await axiosConfig.put(
     `${prefix}/education/update/${doctorId}/${educationId}`,
-    education
+    requestBody
   );
+
+  console.log("Kết quả API học vấn:", response.data);
+  return response.data;
+};
+
+// delete thật ra là thay đổi trạng thái của bác sĩ
+export const deleteDoctor = async (doctorId: string) => {
+  const response = await axiosConfig.delete(`${prefix}`, {
+    params: {
+      doctorId: doctorId,
+    },
+  });
   return response.data;
 };

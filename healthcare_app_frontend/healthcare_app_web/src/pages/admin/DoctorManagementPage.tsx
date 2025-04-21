@@ -25,6 +25,7 @@ import {
   getAllDoctors,
   addDoctor,
   importDoctor,
+  deleteDoctor,
 } from "../../services/admin/doctor_service";
 import { format } from "date-fns";
 import * as XLSX from "xlsx";
@@ -191,16 +192,44 @@ const DoctorManagementPage: React.FC = () => {
   };
 
   // Hàm xử lý xóa bác sĩ
-  const handleDeleteClick = (id: number) => {
-    showMessage("Chức năng xóa bác sĩ chưa được hỗ trợ", "info");
+  const handleDeleteClick = async (id: number) => {
+    try {
+      setLoading(true);
+      // Find the doctor by id to get the userId
+      const doctorToDelete = doctors.find((doctor) => doctor.id === id);
+
+      if (!doctorToDelete) {
+        showMessage("Không tìm thấy bác sĩ", "error");
+        return;
+      }
+
+      const response = await deleteDoctor(doctorToDelete.userId);
+
+      if (response.code === 200) {
+        // Update the doctor status in the local state
+        setDoctors(
+          doctors.map((doctor) =>
+            doctor.id === id ? { ...doctor, status: false } : doctor
+          )
+        );
+        showMessage("Xóa bác sĩ thành công", "success");
+      } else {
+        showMessage("Xóa bác sĩ thất bại", "error");
+      }
+    } catch (error) {
+      console.error("Error deleting doctor:", error);
+      showMessage("Lỗi khi xóa bác sĩ", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Hàm xử lý cập nhật thông tin chi tiết của bác sĩ (học vấn, chứng chỉ, kinh nghiệm)
   const handleUpdateDoctorDetail = (updatedDoctor: Doctor) => {
-    showMessage(
-      "Chức năng cập nhật thông tin chi tiết bác sĩ chưa được hỗ trợ",
-      "info"
-    );
+    // showMessage(
+    //   "Chức năng cập nhật thông tin chi tiết bác sĩ chưa được hỗ trợ",
+    //   "info"
+    // );
   };
 
   // Hàm xử lý import file
@@ -775,8 +804,8 @@ const DoctorManagementPage: React.FC = () => {
     {
       field: "actions",
       headerName: "Thao tác",
-      width: 150,
-      flex: 1,
+      width: 80,
+      flex: 0.7,
       sortable: false,
       disableExport: true,
       renderCell: (params: GridRenderCellParams) => (
@@ -788,14 +817,6 @@ const DoctorManagementPage: React.FC = () => {
             onClick={() => handleViewDetail(params.row)}
           >
             <Visibility fontSize="small" />
-          </IconButton>
-          <IconButton
-            size="small"
-            color="info"
-            title="Chỉnh sửa"
-            onClick={() => handleEditClick(params.row)}
-          >
-            <Edit fontSize="small" />
           </IconButton>
           <IconButton
             size="small"
