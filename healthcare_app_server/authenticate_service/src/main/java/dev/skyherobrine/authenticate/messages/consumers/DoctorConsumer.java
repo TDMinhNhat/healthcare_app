@@ -138,7 +138,7 @@ public class DoctorConsumer {
 
             JsonNode node = new ObjectMapper().readTree(message);
             String doctorId = node.get("doctorId").asText();
-            Long educationId = node.get("eduId").asLong();
+            Long educationId = node.get("educationId").asLong();
             JsonNode education = node.get("education");
 
             DoctorEducation doctorEducation = doctorEducationRepository.findById(educationId).orElse(null);
