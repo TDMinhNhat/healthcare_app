@@ -225,4 +225,25 @@ public class DoctorConsumer {
             log.error(e.getMessage());
         }
     }
+
+    @KafkaListener(topics = "delete_doctor", groupId = "authenticate_delete_doctor")
+    public void deleteDoctor(String message) {
+        try {
+            log.info("Doctor Consumer: listen delete doctor message");
+            log.info("Doctor Consumer: {}", message);
+
+            String doctorId = ObjectParser.convertJsonToObject(message, String.class);
+            Doctor doctor = doctorRepository.findDoctorByUserId(doctorId).orElse(null);
+            if(doctor != null) {
+                doctor.setStatus(false);
+                doctorRepository.save(doctor);
+                log.info("Doctor Consumer: delete doctor successfully");
+                return;
+            }
+            log.warn("Doctor Consumer: doctor not found!");
+        } catch (Exception e) {
+            log.error("Doctor Consumer: delete doctor failed!");
+            log.error(e.getMessage());
+        }
+    }
 }

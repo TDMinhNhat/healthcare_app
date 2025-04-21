@@ -335,6 +335,7 @@ public class DoctorController implements IManagement<DoctorDTO, Long> {
             log.info("Doctor: Call the api delete doctor");
             Doctor doctor = doctorRepository.findDoctorByUserId(doctorId).orElse(null);
             if(doctor != null) {
+                kafkaTemplate.send("delete_doctor", ObjectParser.convertObjectToJson(doctorId));
                 doctor.setStatus(false);
                 return ResponseEntity.ok(new Response(
                         HttpStatus.OK.value(),

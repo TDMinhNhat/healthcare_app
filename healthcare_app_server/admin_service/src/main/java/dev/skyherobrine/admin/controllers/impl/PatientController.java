@@ -5,10 +5,12 @@ import dev.skyherobrine.admin.dtos.PatientRegisterDTO;
 import dev.skyherobrine.admin.models.mariadb.Patient;
 import dev.skyherobrine.admin.models.mariadb.Response;
 import dev.skyherobrine.admin.repositories.mariadb.PatientRepository;
+import dev.skyherobrine.admin.utils.ObjectParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,11 +23,13 @@ public class PatientController implements IManagement<Patient,Long> {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final PatientRepository patientRepository;
+    private final KafkaTemplate<String,String> kafkaTemplate;
     @Value("${domain-host-name}")
     private String domainHostName;
 
-    public PatientController(PatientRepository patientRepository) {
+    public PatientController(PatientRepository patientRepository, KafkaTemplate<String,String> kafkaTemplate) {
         this.patientRepository = patientRepository;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @GetMapping
@@ -116,6 +120,7 @@ public class PatientController implements IManagement<Patient,Long> {
             log.info("Patient: Call the api delete patient");
             Patient patient = patientRepository.findPatientByUserId(patientId).orElse(null);
             if(patient != null) {
+                kafkaTemplate.send("delete_patient", ObjectParser.convertObjectToJson(patientId));
                 patient.setStatus(false);
                 return ResponseEntity.ok(new Response(
                         HttpStatus.OK.value(),
