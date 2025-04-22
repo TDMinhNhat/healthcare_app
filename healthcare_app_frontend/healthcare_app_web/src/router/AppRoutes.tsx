@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, ReactNode } from "react";
 import { Loading } from "../components/global/Loading/Loading";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router";
 import { ROUTING } from "../constants/routing";
@@ -37,6 +37,28 @@ import DiseasManagementPage from "../pages/admin/DiseasManagementPage";
 import CancelAppointmentPage from "../pages/admin/CancelAppointmentPage";
 import DoctorRevenueDetailsPage from "../pages/admin/DoctorRevenueDetailsPage";
 
+// Protected route component to check user role
+const ProtectedRoute = ({
+  children,
+  allowedRoles,
+}: {
+  children: ReactNode;
+  allowedRoles: string[];
+}) => {
+  const role = localStorage.getItem("role");
+  const isAuthenticated = localStorage.getItem("user");
+
+  if (!isAuthenticated) {
+    return <Navigate to={ROUTING.HOME} replace />;
+  }
+
+  if (!allowedRoles.includes(role || "")) {
+    return <Navigate to={ROUTING.HOME} replace />;
+  }
+
+  return <>{children}</>;
+};
+
 export const AppRoutes = () => {
   // const role = localStorage.getItem("role");
 
@@ -57,9 +79,20 @@ export const AppRoutes = () => {
             path={ROUTING.FORGET_PASSWORD}
             element={<ForgetPasswordPage />}
           />
+          <Route
+            path={ROUTING.EXAMINATION_ROOM}
+            element={<ExaminationRoomPage />}
+          />
 
-          {/* Admin routes - no conditional rendering */}
-          <Route path={ROUTING.ADMIN} element={<AdminLayout />}>
+          {/* Admin routes - with role protection */}
+          <Route
+            path={ROUTING.ADMIN}
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route path={ROUTING.DASHBOARD} element={<AdminDashboardPage />} />
             <Route index element={<AdminDashboardPage />} />
             <Route path={ROUTING.USERS} element={<PatientManagementPage />} />
@@ -77,12 +110,15 @@ export const AppRoutes = () => {
             />
           </Route>
 
-          {/* Doctor routes - no conditional rendering */}
+          {/* Doctor routes - with role protection */}
           <Route
-            path={ROUTING.EXAMINATION_ROOM}
-            element={<ExaminationRoomPage />}
-          />
-          <Route path={ROUTING.DOCTOR} element={<DoctorLayout />}>
+            path={ROUTING.DOCTOR}
+            element={
+              <ProtectedRoute allowedRoles={["doctor"]}>
+                <DoctorLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route path={ROUTING.DASHBOARD} element={<DoctorDashboard />} />
             <Route index element={<DoctorDashboard />} />
             <Route path={ROUTING.PROFILE} element={<DoctorProfilePage />} />
@@ -104,8 +140,15 @@ export const AppRoutes = () => {
             <Route path={ROUTING.CHAT} element={<div>Chat</div>} />
           </Route>
 
-          {/* Patient routes - no conditional rendering */}
-          <Route path={ROUTING.PATIENT} element={<PatientLayout />}>
+          {/* Patient routes - with role protection */}
+          <Route
+            path={ROUTING.PATIENT}
+            element={
+              <ProtectedRoute allowedRoles={["patient"]}>
+                <PatientLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route path={ROUTING.DASHBOARD} element={<PatientDashboard />} />
             <Route index element={<PatientDashboard />} />
             <Route path={ROUTING.PROFILE} element={<PatientProfilePage />} />
