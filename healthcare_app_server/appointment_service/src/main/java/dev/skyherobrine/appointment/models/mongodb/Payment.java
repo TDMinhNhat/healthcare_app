@@ -1,6 +1,7 @@
 package dev.skyherobrine.appointment.models.mongodb;
 
 import dev.skyherobrine.appointment.enums.PaymentStatus;
+import dev.skyherobrine.appointment.models.mariadb.Price;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,12 +16,12 @@ public abstract class Payment {
 
     @MongoId
     private Long id;
-    private Double price;
+    private Price price;
     private String content;
     private LocalDateTime createdAt;
     private PaymentStatus status;
 
-    public Payment(Long id, Double price, String content) {
+    public Payment(Long id, Price price, String content) {
         this.id = id;
         this.price = price;
         this.content = content;
@@ -28,7 +29,7 @@ public abstract class Payment {
         this.status = PaymentStatus.WAITING_PAY;
     }
 
-    public Payment(Long id, Double price, String content, PaymentStatus status) {
+    public Payment(Long id, Price price, String content, PaymentStatus status) {
         this.id = id;
         this.price = price;
         this.content = content;

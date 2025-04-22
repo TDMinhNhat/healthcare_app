@@ -5,10 +5,14 @@ import dev.skyherobrine.admin.dtos.PriceDTO;
 import dev.skyherobrine.admin.models.mariadb.Price;
 import dev.skyherobrine.admin.models.mariadb.Response;
 import dev.skyherobrine.admin.repositories.mariadb.PriceRepository;
+import dev.skyherobrine.admin.utils.ObjectParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/admin/api/v1/price")
@@ -16,9 +20,11 @@ import org.springframework.web.bind.annotation.*;
 public class PriceController implements IManagement<PriceDTO,Long> {
 
     private final PriceRepository priceRepository;
+    private final KafkaTemplate<String,String> kafkaTemplate;
 
-    public PriceController(PriceRepository priceRepository) {
+    public PriceController(PriceRepository priceRepository, KafkaTemplate<String, String> kafkaTemplate) {
         this.priceRepository = priceRepository;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @GetMapping
@@ -52,6 +58,7 @@ public class PriceController implements IManagement<PriceDTO,Long> {
     public ResponseEntity<Response> add(@RequestBody PriceDTO price) {
         try {
             log.info("Price: Call the api add the price");
+            kafkaTemplate.send("insert_price", ObjectParser.convertObjectToJson(price));
             Price result = priceRepository.save(price.toObject());
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
@@ -76,6 +83,11 @@ public class PriceController implements IManagement<PriceDTO,Long> {
             log.info("Price: Call the api update the price");
             Price target = priceRepository.findById(id).orElse(null);
             if(target != null) {
+                kafkaTemplate.send("update_price", ObjectParser.convertObjectToJson(new HashMap<>(){{
+                    put("id", id);
+                    put("price", price.getPrice());
+                    put("priceType", price.getPriceType());
+                }}));
                 target.setPrice(price.getPrice());
                 target.setPriceType(price.getPriceType());
                 return ResponseEntity.ok(new Response(
@@ -84,11 +96,11 @@ public class PriceController implements IManagement<PriceDTO,Long> {
                         priceRepository.save(target)
                 ));
             }
-            log.warn("Price: the price wasn't found!");
+            log.warn("Price: the price wasn't found! Create a new price");
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
-                    "Price not found",
-                    null
+                    "Price not found but create a new price",
+                    priceRepository.save(new Price(price.getPrice(), price.getPriceType()))
             ));
         } catch (Exception e) {
             log.error("Price: the api thrown an error");
@@ -108,6 +120,9 @@ public class PriceController implements IManagement<PriceDTO,Long> {
             log.info("Price: Call the api delete the price");
             Price price = priceRepository.findById(id).orElse(null);
             if(price != null) {
+                kafkaTemplate.send("delete_price", ObjectParser.convertObjectToJson(new HashMap<>(){{
+                    put("id", id);
+                }}));
                 price.setStatus(false);
                 return ResponseEntity.ok(new Response(
                         HttpStatus.OK.value(),

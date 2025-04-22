@@ -10,6 +10,7 @@ import dev.skyherobrine.appointment.feigns.WorkScheduleFeign;
 import dev.skyherobrine.appointment.messages.consumers.responses.WorkScheduleResponseConsumer;
 import dev.skyherobrine.appointment.models.mongodb.BookAppointment;
 import dev.skyherobrine.appointment.models.mongodb.BookAppointmentPayment;
+import dev.skyherobrine.appointment.repositories.mariadb.PriceRepository;
 import dev.skyherobrine.appointment.repositories.mongodb.BookAppointmentPaymentRepository;
 import dev.skyherobrine.appointment.repositories.mongodb.BookAppointmentRepository;
 import dev.skyherobrine.appointment.utils.ObjectParser;
@@ -36,8 +37,9 @@ public class BookingService {
     private final WorkScheduleFeign workScheduleFeign;
     private final BookAppointmentRepository bookAppointmentRepository;
     private final WorkScheduleResponseConsumer workScheduleResponseConsumer;
+    private final PriceRepository priceRepository;
 
-    public BookingService(KafkaTemplate<String, String> kafkaTemplate, BookAppointmentRepository bar, BookAppointmentPaymentRepository bapr, UserFeign userFeign, WorkScheduleFeign workScheduleFeign, BookAppointmentRepository bookAppointmentRepository, WorkScheduleResponseConsumer workScheduleResponseConsumer) {
+    public BookingService(KafkaTemplate<String, String> kafkaTemplate, BookAppointmentRepository bar, BookAppointmentPaymentRepository bapr, UserFeign userFeign, WorkScheduleFeign workScheduleFeign, BookAppointmentRepository bookAppointmentRepository, WorkScheduleResponseConsumer workScheduleResponseConsumer, PriceRepository priceRepository) {
         this.kafkaTemplate = kafkaTemplate;
         this.bar = bar;
         this.bapr = bapr;
@@ -45,6 +47,7 @@ public class BookingService {
         this.workScheduleFeign = workScheduleFeign;
         this.bookAppointmentRepository = bookAppointmentRepository;
         this.workScheduleResponseConsumer = workScheduleResponseConsumer;
+        this.priceRepository = priceRepository;
     }
 
     public synchronized Map<String,Object> booking(AppointmentDTO appointmentDTO) throws Exception {
@@ -65,11 +68,11 @@ public class BookingService {
         kafkaTemplate.send("insert_book_appointment", ObjectParser.convertObjectToJson(bookAppointment));
         BookAppointment target = bar.save(bookAppointment);
 
-        Thread.sleep(2000);
+        Thread.sleep(1000);
 
         BookAppointmentPayment bookAppointmentPayment = new BookAppointmentPayment(
                 getMaxIdBookAppointmentPayment(),
-                5000.0,
+                priceRepository.getCurrentPriceByPriceType("BOOK_APPOINTMENT").orElseThrow(() -> new EntityNotFoundException("The price wasn't found!")),
                 appointmentDTO.getPaymentContent(),
                 PaymentStatus.PAYED,
                 target
