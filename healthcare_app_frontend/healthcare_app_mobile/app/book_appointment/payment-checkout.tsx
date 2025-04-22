@@ -15,10 +15,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { Client } from "@stomp/stompjs";
 import { createAppointment } from "../../services/appointment/booking_service"; // Import the appointment creation service
-
-interface PaymentCheckoutProps {
-  workScheduleId: number;
-}
+import { getAppointmentPrice } from "../../services/appointment/price_service"; // Import the price service
 
 const PaymentCheckout = () => {
   const router = useRouter();
@@ -38,16 +35,44 @@ const PaymentCheckout = () => {
   const getIntervalNumber = useRef(null);
 
   // Các thông số cần thiết cho thanh toán
-  const appointmentFee = 5000; // Phí khám bệnh (VND)
+  const [appointmentFee, setAppointmentFee] = useState<number>(0);
+  const [fetchingPrice, setFetchingPrice] = useState<boolean>(true);
+  const [priceError, setPriceError] = useState<string | null>(null);
   const code = workScheduleId + userId?.replace(/-/g, ""); // Tạo mã giao dịch duy nhất từ ID lịch làm việc và ID người dùng
   const acc = process.env?.EXPO_PUBLIC_ACC || ""; // Số tài khoản từ biến môi trường
   const bank = process.env?.EXPO_PUBLIC_BANK || ""; // Mã ngân hàng từ biến môi trường
+
+  // Fetch giá phí khám bệnh từ API
+  useEffect(() => {
+    const fetchAppointmentPrice = async () => {
+      try {
+        setFetchingPrice(true);
+        setPriceError(null);
+
+        const response = await getAppointmentPrice();
+
+        if (response.code === 200 && response.data) {
+          setAppointmentFee(response.data.price);
+        } else {
+          setPriceError("Không thể lấy thông tin phí khám bệnh");
+          console.error("API error:", response);
+        }
+      } catch (error) {
+        setPriceError("Có lỗi xảy ra khi lấy thông tin phí khám bệnh");
+        console.error("Failed to fetch appointment price:", error);
+      } finally {
+        setFetchingPrice(false);
+      }
+    };
+
+    fetchAppointmentPrice();
+  }, []);
 
   // Hàm xử lý khi hoàn tất thanh toán
   const handlePaymentComplete = async () => {
     try {
       // Gọi API để tạo cuộc hẹn mới
-      await createAppointment(userId, note, workScheduleId);
+      await createAppointment(userId, note, workScheduleId, code);
       // Chuyển hướng đến trang xác nhận sau khi thanh toán thành công
       router.push({
         pathname: "/book_appointment/confirmation",
@@ -67,21 +92,20 @@ const PaymentCheckout = () => {
     Clipboard.setString(text);
   };
 
-
   const client = new Client({
     brokerURL: `ws://${process.env.EXPO_PUBLIC_HOST_ID}:8081/appointment/socket`,
     debug: (msg) => {
       console.log("STOMP: " + msg);
     },
     onConnect: () => {
-        client.subscribe("/patient/result_check_payment", () => {
-          handlePaymentComplete().catch((error) => {
-            console.log(error);
-            setPaymentError("Có lỗi xảy ra trong quá trình xác minh thanh toán.");
-          });
-        })
-    }
-  })
+      client.subscribe("/patient/result_check_payment", () => {
+        handlePaymentComplete().catch((error) => {
+          console.log(error);
+          setPaymentError("Có lỗi xảy ra trong quá trình xác minh thanh toán.");
+        });
+      });
+    },
+  });
   client.appendMissingNULLonIncoming = true;
   client.discardWebsocketOnCommFailure = true;
   client.forceBinaryWSFrames = true;
@@ -90,17 +114,22 @@ const PaymentCheckout = () => {
     client.activate();
 
     getIntervalNumber.current = setInterval(() => {
-      client.publish({ destination: "/app/check_payment", body: JSON.stringify({
-        "amount_in": 5000,
-        "transaction_content": code
-      })});
+      if (appointmentFee > 0) {
+        client.publish({
+          destination: "/app/check_payment",
+          body: JSON.stringify({
+            amount_in: appointmentFee,
+            transaction_content: code,
+          }),
+        });
+      }
     }, 3000);
 
     return () => {
       client.deactivate();
       clearInterval(getIntervalNumber.current);
-    }
-  }, []);
+    };
+  }, [appointmentFee]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -114,9 +143,23 @@ const PaymentCheckout = () => {
 
         <View style={styles.cardSection}>
           <Text style={styles.sectionTitle}>Thông tin thanh toán</Text>
-          <Text style={styles.feeText}>
-            Phí khám bệnh: {appointmentFee.toLocaleString("vi-VN")} VNĐ
-          </Text>
+
+          {fetchingPrice ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color="#26b9c8" />
+              <Text style={styles.loadingText}>
+                Đang tải thông tin phí khám bệnh...
+              </Text>
+            </View>
+          ) : priceError ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{priceError}</Text>
+            </View>
+          ) : (
+            <Text style={styles.feeText}>
+              Phí khám bệnh: {appointmentFee.toLocaleString("vi-VN")} VNĐ
+            </Text>
+          )}
 
           {paymentError && (
             <View style={styles.errorContainer}>
@@ -124,80 +167,84 @@ const PaymentCheckout = () => {
             </View>
           )}
 
-          <View style={styles.qrContainer}>
-            <Image
-              source={{
-                uri: `https://qr.sepay.vn/img?bank=${bank}&acc=${acc}&template=compact&amount=${appointmentFee}&des=${code}`,
-              }}
-              style={styles.qrImage}
-              resizeMode="contain"
-            />
-          </View>
-
-          <View style={styles.paymentDetailsContainer}>
-            <Text style={styles.detailsTitle}>Thông tin chuyển khoản:</Text>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Chủ tài khoản:</Text>
-              <View style={styles.detailValueContainer}>
-                <Text style={styles.detailValue}>NGUYEN HO DANG QUANG</Text>
-                <TouchableOpacity
-                  onPress={() => copyToClipboard("NGUYEN HO DANG QUANG")}
-                >
-                  <Ionicons name="copy-outline" size={18} color="#26b9c8" />
-                </TouchableOpacity>
+          {!fetchingPrice && !priceError && (
+            <>
+              <View style={styles.qrContainer}>
+                <Image
+                  source={{
+                    uri: `https://qr.sepay.vn/img?bank=${bank}&acc=${acc}&template=compact&amount=${appointmentFee}&des=${code}`,
+                  }}
+                  style={styles.qrImage}
+                  resizeMode="contain"
+                />
               </View>
-            </View>
 
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Ngân hàng:</Text>
-              <View style={styles.detailValueContainer}>
-                <Text style={styles.detailValue}>BIDV</Text>
-                <TouchableOpacity onPress={() => copyToClipboard("BIDV")}>
-                  <Ionicons name="copy-outline" size={18} color="#26b9c8" />
-                </TouchableOpacity>
+              <View style={styles.paymentDetailsContainer}>
+                <Text style={styles.detailsTitle}>Thông tin chuyển khoản:</Text>
+
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>Chủ tài khoản:</Text>
+                  <View style={styles.detailValueContainer}>
+                    <Text style={styles.detailValue}>NGUYEN HO DANG QUANG</Text>
+                    <TouchableOpacity
+                      onPress={() => copyToClipboard("NGUYEN HO DANG QUANG")}
+                    >
+                      <Ionicons name="copy-outline" size={18} color="#26b9c8" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>Ngân hàng:</Text>
+                  <View style={styles.detailValueContainer}>
+                    <Text style={styles.detailValue}>BIDV</Text>
+                    <TouchableOpacity onPress={() => copyToClipboard("BIDV")}>
+                      <Ionicons name="copy-outline" size={18} color="#26b9c8" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>Số TK:</Text>
+                  <View style={styles.detailValueContainer}>
+                    <Text style={styles.detailValue}>{acc}</Text>
+                    <TouchableOpacity onPress={() => copyToClipboard(acc)}>
+                      <Ionicons name="copy-outline" size={18} color="#26b9c8" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>Số tiền:</Text>
+                  <View style={styles.detailValueContainer}>
+                    <Text style={styles.detailValue}>
+                      {appointmentFee.toLocaleString("vi-VN")}đ
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => copyToClipboard(appointmentFee.toString())}
+                    >
+                      <Ionicons name="copy-outline" size={18} color="#26b9c8" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>Nội dung CK:</Text>
+                  <View style={styles.detailValueContainer}>
+                    <Text style={styles.detailValue}>{code}</Text>
+                    <TouchableOpacity onPress={() => copyToClipboard(code)}>
+                      <Ionicons name="copy-outline" size={18} color="#26b9c8" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
-            </View>
 
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Số TK:</Text>
-              <View style={styles.detailValueContainer}>
-                <Text style={styles.detailValue}>{acc}</Text>
-                <TouchableOpacity onPress={() => copyToClipboard(acc)}>
-                  <Ionicons name="copy-outline" size={18} color="#26b9c8" />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Số tiền:</Text>
-              <View style={styles.detailValueContainer}>
-                <Text style={styles.detailValue}>
-                  {appointmentFee.toLocaleString("vi-VN")}đ
-                </Text>
-                <TouchableOpacity
-                  onPress={() => copyToClipboard(appointmentFee.toString())}
-                >
-                  <Ionicons name="copy-outline" size={18} color="#26b9c8" />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Nội dung CK:</Text>
-              <View style={styles.detailValueContainer}>
-                <Text style={styles.detailValue}>{code}</Text>
-                <TouchableOpacity onPress={() => copyToClipboard(code)}>
-                  <Ionicons name="copy-outline" size={18} color="#26b9c8" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-
-          <Text style={styles.instructionText}>
-            Sử dụng app ngân hàng để quét mã QR hoặc chuyển khoản thủ công theo
-            thông tin trên.
-          </Text>
+              <Text style={styles.instructionText}>
+                Sử dụng app ngân hàng để quét mã QR hoặc chuyển khoản thủ công
+                theo thông tin trên.
+              </Text>
+            </>
+          )}
         </View>
 
         <View style={styles.noteContainer}>
@@ -371,6 +418,16 @@ const styles = StyleSheet.create({
     color: "#26b9c8",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  loadingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  loadingText: {
+    marginLeft: 10,
+    fontSize: 14,
+    color: "#666",
   },
 });
 
