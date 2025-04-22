@@ -2,20 +2,19 @@ package dev.skyherobrine.admin.models.mariadb;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity @Table(name = "prices")
-@Getter @Setter @RequiredArgsConstructor
+@Getter @Setter @RequiredArgsConstructor @NoArgsConstructor
 public class Price {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false) @NonNull
     private Double price;
+    @Column(name = "price_type", nullable = false) @NonNull
+    private String priceType;
     @Column(nullable = false)
     private Boolean status;
     @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
