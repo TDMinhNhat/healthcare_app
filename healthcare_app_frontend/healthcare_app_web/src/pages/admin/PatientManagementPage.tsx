@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   DataGrid,
   GridColDef,
@@ -17,19 +17,24 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import { Edit, Delete, Add } from "@mui/icons-material";
+import { Edit, Delete, Add, UploadFile } from "@mui/icons-material";
 import { User } from "../../types/user";
 import PatientForm from "../../components/admin/PatientForm";
 import {
   getPatients,
   deletePatient,
+  importPatients,
 } from "../../services/admin/patients_service";
 import { updateInfo } from "../../services/authenticate/user_service";
+import * as XLSX from "xlsx";
+import { format } from "date-fns";
+import { Address } from "../../types/address";
 
 const PatientManagementPage: React.FC = () => {
   // Khai báo state để quản lý dữ liệu và trạng thái UI
   const [patients, setPatients] = useState<User[]>([]); // Danh sách bệnh nhân - no longer using mock data
   const [loading, setLoading] = useState<boolean>(true); // Loading state
+  const [importing, setImporting] = useState<boolean>(false); // Trạng thái import dữ liệu
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false); // Trạng thái hiển thị form
   const [formMode, setFormMode] = useState<"add" | "edit">("add"); // Chế độ form: thêm mới/chỉnh sửa
   const [selectedPatient, setSelectedPatient] = useState<User | null>(null); // Bệnh nhân đang được chọn
@@ -43,39 +48,41 @@ const PatientManagementPage: React.FC = () => {
     severity: "info",
   });
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Fetch patients data when component mounts
   useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        setLoading(true);
-        const response = await getPatients();
-
-        // Transform the date format from DD-MM-YYYY to YYYY-MM-DD for UI compatibility
-        const transformedData = response.data.map((patient: any) => {
-          // Convert date from DD-MM-YYYY to YYYY-MM-DD
-          const dateParts = patient.dob
-            ? patient.dob.split("-")
-            : ["01", "01", "1970"];
-          const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-
-          return {
-            ...patient,
-            dob: formattedDate,
-          };
-        });
-
-        setPatients(transformedData);
-        showMessage("Dữ liệu bệnh nhân đã được tải thành công", "success");
-      } catch (error) {
-        console.error("Error fetching patients:", error);
-        showMessage("Lỗi khi tải dữ liệu bệnh nhân", "error");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchPatients();
   }, []);
+
+  const fetchPatients = async () => {
+    try {
+      setLoading(true);
+      const response = await getPatients();
+
+      // Transform the date format from DD-MM-YYYY to YYYY-MM-DD for UI compatibility
+      const transformedData = response.data.map((patient: any) => {
+        // Convert date from DD-MM-YYYY to YYYY-MM-DD
+        const dateParts = patient.dob
+          ? patient.dob.split("-")
+          : ["01", "01", "1970"];
+        const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+
+        return {
+          ...patient,
+          dob: formattedDate,
+        };
+      });
+
+      setPatients(transformedData);
+      showMessage("Dữ liệu bệnh nhân đã được tải thành công", "success");
+    } catch (error) {
+      console.error("Error fetching patients:", error);
+      showMessage("Lỗi khi tải dữ liệu bệnh nhân", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const csvOptions: GridCsvExportOptions = {
     fileName: "patients",
@@ -219,6 +226,204 @@ const PatientManagementPage: React.FC = () => {
     }
   };
 
+  // Hàm phân tích chuỗi thành đối tượng địa chỉ
+  const parseAddress = (addressStr: string): Partial<Address> | null => {
+    if (!addressStr || addressStr === "null") return null;
+
+    // Địa chỉ các phần ngăn cách bởi dấu phẩy
+    const parts = addressStr.split(",").map((part) => part.trim());
+
+    if (parts.length < 2) {
+      console.error("Định dạng địa chỉ không hợp lệ:", addressStr);
+      return null;
+    }
+
+    // Xử lý linh hoạt các trường hợp thiếu thành phần địa chỉ
+    const address: Partial<Address> = {};
+
+    if (parts.length >= 1) address.number = parts[0];
+    if (parts.length >= 2) address.street = parts[1];
+    if (parts.length >= 3) address.ward = parts[2];
+    if (parts.length >= 4) address.district = parts[3];
+    if (parts.length >= 5) address.city = parts[4];
+    if (parts.length >= 6) address.country = parts[5];
+
+    return address;
+  };
+
+  // Hàm xử lý định dạng ngày tháng để hỗ trợ nhiều định dạng khác nhau
+  const formatDateString = (dateValue: any): string => {
+    if (!dateValue) return "";
+
+    try {
+      // Trường hợp 1: Nếu là chuỗi có định dạng YYYY-MM-DD (với dấu gạch ngang)
+      if (typeof dateValue === "string" && dateValue.includes("-")) {
+        // Kiểm tra xem có đúng định dạng YYYY-MM-DD không
+        const match = dateValue.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+        if (match) {
+          const year = match[1];
+          let month = match[2];
+          let day = match[3];
+
+          // Thêm số 0 ở đầu nếu cần
+          day = day.padStart(2, "0");
+          month = month.padStart(2, "0");
+
+          // Trả về định dạng "dd-MM-yyyy"
+          return `${day}-${month}-${year}`;
+        }
+      }
+
+      // Trường hợp 2: Nếu là chuỗi có định dạng DD/MM/YYYY
+      if (typeof dateValue === "string" && dateValue.includes("/")) {
+        const parts = dateValue.split("/");
+        if (parts.length !== 3) return dateValue;
+
+        let day = parts[0];
+        let month = parts[1];
+        const year = parts[2];
+
+        // Thêm số 0 ở đầu nếu cần
+        day = day.padStart(2, "0");
+        month = month.padStart(2, "0");
+
+        return `${day}-${month}-${year}`;
+      }
+
+      // Trường hợp 3: Nếu là số (Excel date serial)
+      if (typeof dateValue === "number" || !isNaN(Number(dateValue))) {
+        // Tạo đối tượng Date sử dụng UTC để tránh vấn đề múi giờ
+        const excelEpoch = new Date(Date.UTC(1899, 11, 30)); // 30/12/1899 ở UTC
+        const daysSinceEpoch = Number(dateValue);
+        const millisecondsSinceEpoch = daysSinceEpoch * 24 * 60 * 60 * 1000;
+        const date = new Date(excelEpoch.getTime() + millisecondsSinceEpoch);
+
+        // Lấy các thành phần ngày tháng ở định dạng UTC để tránh dịch ngày
+        const day = String(date.getUTCDate()).padStart(2, "0");
+        const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+        const year = date.getUTCFullYear();
+
+        return `${day}-${month}-${year}`;
+      }
+    } catch (error) {
+      console.error("Lỗi định dạng ngày tháng:", error, dateValue);
+      return String(dateValue);
+    }
+
+    // Trả về giá trị gốc nếu không thể xử lý
+    return String(dateValue);
+  };
+
+  // Hàm xử lý click để import file
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Hàm xử lý khi người dùng chọn file để import
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    const fileName = file.name.toLowerCase();
+
+    // Kiểm tra loại file
+    if (
+      fileName.endsWith(".csv") ||
+      fileName.endsWith(".xlsx") ||
+      fileName.endsWith(".xls")
+    ) {
+      setImporting(true); // Đặt trạng thái đang import
+      reader.onload = async (evt) => {
+        try {
+          // Đọc dữ liệu file
+          const data = evt.target?.result;
+          const workbook = XLSX.read(data, { type: "binary" });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+          // Xử lý từng dòng dữ liệu và phân tích các trường phức tạp
+          const processedData = json.map((row: any) => {
+            let address = null;
+            if (row.address && row.address !== "null") {
+              address = parseAddress(row.address);
+            }
+
+            // Định dạng ngày sinh
+            const formattedDob = row.dob ? formatDateString(row.dob) : "";
+
+            // Sửa dữ liệu giới tính về giá trị đúng:
+            let correctedSex = row.sex;
+            if (typeof row.sex === "string") {
+              // Chuyển đổi biểu diễn chuỗi sang giá trị boolean đúng
+              if (
+                row.sex.toLowerCase() === "nữ" ||
+                row.sex.toLowerCase() === "nu" ||
+                row.sex === "1" ||
+                row.sex === "true"
+              ) {
+                correctedSex = true; // Nữ
+              } else if (
+                row.sex.toLowerCase() === "nam" ||
+                row.sex === "0" ||
+                row.sex === "false"
+              ) {
+                correctedSex = false; // Nam
+              }
+            }
+
+            return {
+              ...row,
+              dob: formattedDob, // Sử dụng ngày sinh đã định dạng
+              sex: correctedSex, // Sử dụng giới tính đã được sửa
+              password: "123456789", // Default password
+              address: address,
+            };
+          });
+
+          console.log("Dữ liệu bệnh nhân đã xử lý:", processedData);
+
+          // Gọi API import bệnh nhân
+          try {
+            const response = await importPatients(processedData);
+            if (response && response.data) {
+              showMessage("Import dữ liệu bệnh nhân thành công", "success");
+              // Làm mới danh sách bệnh nhân sau khi import thành công
+              fetchPatients();
+            } else {
+              showMessage(
+                "Đã xảy ra lỗi khi import dữ liệu bệnh nhân",
+                "error"
+              );
+            }
+          } catch (apiError) {
+            console.error("Lỗi khi import bệnh nhân:", apiError);
+            showMessage(
+              "Đã xảy ra lỗi khi gửi dữ liệu bệnh nhân đến server",
+              "error"
+            );
+          } finally {
+            setImporting(false);
+          }
+        } catch (parseError) {
+          console.error("Lỗi khi phân tích file:", parseError);
+          showMessage(
+            `Lỗi khi parse file ${fileName.endsWith(".csv") ? "CSV" : "Excel"}`,
+            "error"
+          );
+          setImporting(false);
+        }
+      };
+      reader.readAsBinaryString(file);
+    } else {
+      showMessage("Chỉ hỗ trợ file .csv, .xlsx, .xls", "warning");
+    }
+
+    // Reset input để có thể chọn lại cùng 1 file
+    e.target.value = "";
+  };
+
   // Định nghĩa cấu trúc các cột cho bảng dữ liệu
   const columns: GridColDef[] = [
     {
@@ -332,7 +537,7 @@ const PatientManagementPage: React.FC = () => {
 
   return (
     <Box sx={{ height: "100%", width: "100%", padding: 0 }}>
-      {/* Phần header với nút thêm bệnh nhân */}
+      {/* Phần header với nút thêm bệnh nhân và import */}
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, gap: 2 }}>
         <Button
           variant="contained"
@@ -342,6 +547,29 @@ const PatientManagementPage: React.FC = () => {
         >
           Thêm bệnh nhân
         </Button>
+        <Button
+          variant="contained"
+          color="success"
+          startIcon={
+            importing ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              <UploadFile />
+            )
+          }
+          onClick={handleImportClick}
+          disabled={importing}
+          sx={{ fontWeight: 600 }}
+        >
+          {importing ? "Đang import..." : "Import file"}
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,.xlsx,.xls"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
       </Box>
 
       {/* Bảng dữ liệu bệnh nhân */}

@@ -21,3 +21,8 @@ export const deletePatient = async (patientId: string) => {
   });
   return response.data;
 };
+
+export const importPatients = async (patients: any) => {
+  const response = await axiosConfig.post(`${prefix}/import`, patients);
+  return response.data;
+};
