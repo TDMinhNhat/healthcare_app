@@ -1,5 +1,7 @@
 import { Box, Container, Typography, Button, Grid2 } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { useNavigate } from "react-router";
+import { ROUTING } from "../../constants/routing";
 
 const HeroBox = styled(Box)(({ theme }) => ({
   background: `linear-gradient(to right, ${theme.palette.background.paper} 60%, ${theme.palette.primary.light} 40%)`,
@@ -15,6 +17,11 @@ const FeatureCard = styled(Box)(({ theme }) => ({
 }));
 
 export default function Hero() {
+  const navigate = useNavigate();
+  const handleBookAppointment = () => {
+    // Handle booking appointment logic here
+    navigate(ROUTING.LOGIN);
+  };
   return (
     <HeroBox>
       <Container>
@@ -27,7 +34,12 @@ export default function Hero() {
               Chúng tôi cung cấp các dịch vụ y tế toàn diện nhất, để mọi người
               đều có cơ hội nhận được sự chăm sóc y tế chất lượng.
             </Typography>
-            <Button variant="contained" size="large" sx={{ mt: 2 }}>
+            <Button
+              variant="contained"
+              size="large"
+              sx={{ mt: 2 }}
+              onClick={handleBookAppointment}
+            >
               Đặt Lịch Hẹn
             </Button>
           </Grid2>
