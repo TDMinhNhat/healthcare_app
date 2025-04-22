@@ -12,7 +12,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 public class BookAppointmentPayment extends Payment {
     private BookAppointment bookAppointment;
-    private Price price;
 
     public BookAppointmentPayment(Long id, Price price, String content, BookAppointment bookAppointment) {
         super(id, price, content);
