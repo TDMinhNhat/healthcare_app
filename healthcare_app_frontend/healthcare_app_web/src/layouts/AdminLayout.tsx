@@ -14,6 +14,8 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import EventBusyIcon from "@mui/icons-material/EventBusy";
+import MedicationIcon from "@mui/icons-material/Medication";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import { useNavigate } from "react-router";
 import { Outlet } from "react-router";
 
@@ -48,7 +50,7 @@ export const AdminLayout: React.FC = () => {
         {/* Medical drug */}
         <ListItemButton onClick={() => handleNavigation("/admin/drugs")}>
           <ListItemIcon>
-            <LocalHospitalIcon />
+            <MedicationIcon />
           </ListItemIcon>
           <ListItemText primary="Quản lí thuốc" />
         </ListItemButton>
@@ -74,6 +76,13 @@ export const AdminLayout: React.FC = () => {
             <EventBusyIcon />
           </ListItemIcon>
           <ListItemText primary="Quản lí Lịch hẹn" />
+        </ListItemButton>
+        {/* Quản lí giá */}
+        <ListItemButton onClick={() => handleNavigation("/admin/prices")}>
+          <ListItemIcon>
+            <AttachMoneyIcon />
+          </ListItemIcon>
+          <ListItemText primary="Quản lí giá" />
         </ListItemButton>
       </List>
 

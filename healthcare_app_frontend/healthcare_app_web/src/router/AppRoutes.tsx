@@ -36,6 +36,7 @@ import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
 import DiseasManagementPage from "../pages/admin/DiseasManagementPage";
 import CancelAppointmentPage from "../pages/admin/CancelAppointmentPage";
 import DoctorRevenueDetailsPage from "../pages/admin/DoctorRevenueDetailsPage";
+import PriceManagementPage from "../pages/admin/PriceManagementPage";
 
 // Protected route component to check user role
 const ProtectedRoute = ({
@@ -98,6 +99,7 @@ export const AppRoutes = () => {
             <Route path={ROUTING.USERS} element={<PatientManagementPage />} />
             <Route path={ROUTING.DOCTORS} element={<DoctorManagementPage />} />
             <Route path={ROUTING.DRUG} element={<DrugManagementPage />} />
+            <Route path={ROUTING.PRICES} element={<PriceManagementPage />} />
             <Route path={ROUTING.SHIFTS} element={<ShiftManagementPage />} />
             <Route path={ROUTING.DISEASES} element={<DiseasManagementPage />} />
             <Route

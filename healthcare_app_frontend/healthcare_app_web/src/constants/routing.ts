@@ -18,6 +18,7 @@ export const ROUTING = {
   USERS: "users",
   DOCTORS: "doctors",
   DRUG: "drugs",
+  PRICES: "prices", // Add new route for prices
   SHIFTS: "shifts",
   DISEASES: "diseases",
   CANCEL_APPOINTMENT: "cancel-appointment",
