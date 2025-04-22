@@ -9,63 +9,64 @@ export default function Footer() {
           <Grid2 size={{ xs: 12, md: 4 }}>
             <Logo />
             <Typography variant="body2" sx={{ mt: 2 }}>
-              Providing quality healthcare services for a better tomorrow.
+              Cung cấp dịch vụ chăm sóc sức khỏe chất lượng cho một tương lai
+              tốt đẹp hơn.
             </Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, md: 2 }}>
             <Typography variant="h6" gutterBottom>
-              Company
+              Công Ty
             </Typography>
             <Link href="#" color="inherit" display="block">
-              About
+              Giới Thiệu
             </Link>
             <Link href="#" color="inherit" display="block">
-              Careers
+              Tuyển Dụng
             </Link>
             <Link href="#" color="inherit" display="block">
-              Contact
+              Liên Hệ
             </Link>
           </Grid2>
           <Grid2 size={{ xs: 12, md: 2 }}>
             <Typography variant="h6" gutterBottom>
-              Services
+              Dịch Vụ
             </Typography>
             <Link href="#" color="inherit" display="block">
-              Appointments
+              Lịch Hẹn
             </Link>
             <Link href="#" color="inherit" display="block">
-              Treatments
+              Điều Trị
             </Link>
             <Link href="#" color="inherit" display="block">
-              Specialists
+              Chuyên Gia
             </Link>
           </Grid2>
           <Grid2 size={{ xs: 12, md: 2 }}>
             <Typography variant="h6" gutterBottom>
-              Resources
+              Tài Nguyên
             </Typography>
             <Link href="#" color="inherit" display="block">
               Blog
             </Link>
             <Link href="#" color="inherit" display="block">
-              News
+              Tin Tức
             </Link>
             <Link href="#" color="inherit" display="block">
-              FAQ
+              Câu Hỏi Thường Gặp
             </Link>
           </Grid2>
           <Grid2 size={{ xs: 12, md: 2 }}>
             <Typography variant="h6" gutterBottom>
-              Legal
+              Pháp Lý
             </Typography>
             <Link href="#" color="inherit" display="block">
-              Privacy
+              Quyền Riêng Tư
             </Link>
             <Link href="#" color="inherit" display="block">
-              Terms
+              Điều Khoản
             </Link>
             <Link href="#" color="inherit" display="block">
-              Cookie Policy
+              Chính Sách Cookie
             </Link>
           </Grid2>
         </Grid2>

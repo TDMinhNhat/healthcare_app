@@ -11,23 +11,23 @@ import { Support, HealthAndSafety, Public, Shield } from "@mui/icons-material";
 const services = [
   {
     icon: <Support />,
-    title: "Customer Support",
-    description: "24/7 support for all your healthcare needs",
+    title: "Hỗ Trợ Khách Hàng",
+    description: "Hỗ trợ 24/7 cho tất cả nhu cầu chăm sóc sức khỏe của bạn",
   },
   {
     icon: <HealthAndSafety />,
-    title: "Checkup Services",
-    description: "Comprehensive medical checkups",
+    title: "Dịch Vụ Khám Tổng Quát",
+    description: "Kiểm tra sức khỏe toàn diện",
   },
   {
     icon: <Public />,
-    title: "Online Specialist",
-    description: "Connect with specialists online",
+    title: "Chuyên Gia Trực Tuyến",
+    description: "Kết nối với chuyên gia trực tuyến",
   },
   {
     icon: <Shield />,
-    title: "Privacy and Security",
-    description: "Your data is safe with us",
+    title: "Bảo Mật và An Toàn",
+    description: "Dữ liệu của bạn được bảo vệ an toàn với chúng tôi",
   },
 ];
 
@@ -36,7 +36,7 @@ export default function Services() {
     <Box sx={{ py: 8, backgroundColor: "secondary.light" }}>
       <Container>
         <Typography variant="h2" align="center" gutterBottom>
-          Your health requirements are our first focus.
+          Sức khỏe tinh thần của bạn là ưu tiên hàng đầu của chúng tôi.
         </Typography>
         <Grid2 container spacing={4} sx={{ mt: 4 }}>
           {services.map((service) => (

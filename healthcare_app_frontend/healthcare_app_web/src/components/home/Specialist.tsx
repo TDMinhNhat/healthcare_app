@@ -11,23 +11,23 @@ import {
 
 const specialists = [
   {
-    name: "Dr. Sarah Green",
-    specialty: "Cardiologist",
+    name: "Bác sĩ Sarah Hoàng",
+    specialty: "Chuyên khoa Tim mạch",
     image: "https://picsum.photos/300/300",
   },
   {
-    name: "Dr. Amanda Ray",
-    specialty: "Neurologist",
+    name: "Bác sĩ Amanda Nguyễn",
+    specialty: "Chuyên khoa Thần kinh",
     image: "https://picsum.photos/300/300",
   },
   {
-    name: "Dr. Richard Brook",
-    specialty: "Surgeon",
+    name: "Bác sĩ Richard Trần",
+    specialty: "Phẫu thuật",
     image: "https://picsum.photos/300/300",
   },
   {
-    name: "Dr. Victor Stevens",
-    specialty: "Pediatrician",
+    name: "Bác sĩ Victor Lê",
+    specialty: "Nhi khoa",
     image: "https://picsum.photos/300/300",
   },
 ];
@@ -37,7 +37,7 @@ export default function Specialists() {
     <Box sx={{ py: 8 }}>
       <Container>
         <Typography variant="h2" align="center" gutterBottom>
-          Top Specialist
+          Chuyên Gia Hàng Đầu
         </Typography>
         <Grid2 container spacing={4} sx={{ mt: 4 }}>
           {specialists.map((specialist) => (
@@ -61,7 +61,7 @@ export default function Specialists() {
                     {specialist.specialty}
                   </Typography>
                   <Button variant="contained" color="primary">
-                    Book Now
+                    Đặt Lịch Ngay
                   </Button>
                 </CardContent>
               </Card>

@@ -4,18 +4,18 @@ import { LocalHospital, AttachMoney, Psychology } from "@mui/icons-material";
 const benefits = [
   {
     icon: <LocalHospital />,
-    title: "Modern Clinic",
-    description: "State-of-the-art facilities and equipment",
+    title: "Chăm Sóc Toàn Diện Tinh thần",
+    description: "Dịch vụ y tế đầy đủ từ khám bệnh đến điều trị",
   },
   {
     icon: <AttachMoney />,
-    title: "Low Consultation Fees",
-    description: "Affordable healthcare services for everyone",
+    title: "Chi Phí Tư Vấn Thấp",
+    description: "Dịch vụ chăm sóc sức khỏe giá cả phải chăng cho mọi người",
   },
   {
     icon: <Psychology />,
-    title: "Professional Treatment",
-    description: "Experienced and qualified medical professionals",
+    title: "Điều Trị Chuyên Nghiệp",
+    description: "Đội ngũ y bác sĩ giàu kinh nghiệm và trình độ chuyên môn cao",
   },
 ];
 
@@ -27,14 +27,14 @@ export default function Benefits() {
           <Grid2 size={{ xs: 12, md: 6 }}>
             <Box
               component="img"
-              src="https://picsum.photos/800/600?random=1"
-              alt="Medical Procedure"
+              src="/benefit.jpg"
+              alt="Quy trình y tế"
               sx={{ width: "100%", borderRadius: 2 }}
             />
           </Grid2>
           <Grid2 size={{ xs: 12, md: 6 }}>
             <Typography variant="h2" gutterBottom>
-              The Benefits of utilizing Medicare
+              Lợi Ích Khi Sử Dụng Dịch Vụ Của Chúng Tôi
             </Typography>
             {benefits.map((benefit) => (
               <Box

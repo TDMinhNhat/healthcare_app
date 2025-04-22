@@ -2,7 +2,7 @@ import { AppBar, Toolbar, Box, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import Logo from "./Logo";
 import { useNavigate } from "react-router";
-import { ROUTING } from "../../../constants/routing";
+import { ROUTING } from "../../constants/routing";
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   backgroundColor: "white",
@@ -49,18 +49,13 @@ export default function Navbar() {
       <Toolbar>
         <Logo />
         <Box sx={{ flexGrow: 1 }} />
-        <NavButton>Home</NavButton>
-        <NavButton>Our Services</NavButton>
-        <NavButton>Find Doctor</NavButton>
-        <NavButton>About</NavButton>
-        <NavButton>Contact</NavButton>
         <Button
           variant="outlined"
           color="primary"
           sx={{ ml: 2 }}
           onClick={() => handleNavigate(ROUTING.LOGIN)}
         >
-          Login
+          Đăng nhập
         </Button>
         <Button
           variant="contained"
@@ -68,7 +63,7 @@ export default function Navbar() {
           sx={{ ml: 2 }}
           onClick={() => handleNavigate(ROUTING.REGISTER)}
         >
-          Sign Up
+          Đăng kí
         </Button>
       </Toolbar>
     </StyledAppBar>

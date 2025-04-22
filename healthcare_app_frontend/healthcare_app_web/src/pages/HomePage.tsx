@@ -1,24 +1,25 @@
 import { Container } from "@mui/material";
-import Benefits from "../components/ui/Home/Benefits.tsx";
-import Footer from "../components/ui/Home/Footer.tsx";
-import Hero from "../components/ui/Home/Hero.tsx";
-import Navbar from "../components/ui/Home/Navbar.tsx";
-import Services from "../components/ui/Home/Services.tsx";
-import Specialists from "../components/ui/Home/Specialist.tsx";
+import Benefits from "../components/home/Benefits.tsx";
+import Footer from "../components/home/Footer.tsx";
+import Hero from "../components/home/Hero.tsx";
+import Navbar from "../components/home/Navbar.tsx";
+import Services from "../components/home/Services.tsx";
+import Specialists from "../components/home/Specialist.tsx";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { ROUTING } from "../constants/routing";
+import DiseaseList from "../components/home/Disease.tsx";
 
 function HomePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is already logged in
+    // Kiểm tra xem người dùng đã đăng nhập chưa
     const user = localStorage.getItem("user");
     const role = localStorage.getItem("role");
 
     if (user && role) {
-      // User is logged in, redirect based on role
+      // Người dùng đã đăng nhập, chuyển hướng dựa trên vai trò
       if (role === "doctor") {
         navigate(ROUTING.DOCTOR);
       } else if (role === "patient") {
@@ -27,7 +28,7 @@ function HomePage() {
         navigate(ROUTING.ADMIN);
       }
     }
-    // If no user or role, stay on the home page
+    // Nếu không có người dùng hoặc vai trò, ở lại trang chủ
   }, [navigate]);
 
   return (
@@ -35,7 +36,8 @@ function HomePage() {
       <Navbar />
       <Hero />
       <Services />
-      <Specialists />
+      <DiseaseList />
+      {/* <Specialists /> */}
       <Benefits />
       <Footer />
     </Container>

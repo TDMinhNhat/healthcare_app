@@ -32,17 +32,22 @@ const SelectService: React.FC<SelectSpecialtyProps> = ({ onSelect }) => {
         setError(null);
 
         // Simulate network delay
-        const result: object = await getAllTypeDiseases()
+        const result: any = await getAllTypeDiseases()
           .then((response) => response.data.data)
           .catch((error) => {
             console.log(error);
-            return null;
+            return [];
           });
+
+        // lọc các dịch vụ đang hoạt động
+        const activeServices = result.filter(
+          (service: any) => service.status === true
+        );
 
         // Use mock data instead of API call
         // const response = await getSpecialties();
         // setServices(response.data.data || []);
-        setServices(result);
+        setServices(activeServices);
       } catch (err) {
         console.error("Failed to fetch services:", err);
         setError("Failed to load services. Please try again.");

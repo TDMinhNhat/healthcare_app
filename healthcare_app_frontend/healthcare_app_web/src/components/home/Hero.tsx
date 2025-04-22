@@ -3,13 +3,13 @@ import { styled } from "@mui/material/styles";
 
 const HeroBox = styled(Box)(({ theme }) => ({
   background: `linear-gradient(to right, ${theme.palette.background.paper} 60%, ${theme.palette.primary.light} 40%)`,
-  padding: theme.spacing(8, 0),
+  padding: theme.spacing(4, 0),
 }));
 
 const FeatureCard = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
   color: "white",
-  padding: theme.spacing(2),
+  padding: theme.spacing(1),
   borderRadius: theme.shape.borderRadius,
   textAlign: "center",
 }));
@@ -21,30 +21,35 @@ export default function Hero() {
         <Grid2 container spacing={4} alignItems="center">
           <Grid2 size={{ xs: 12, md: 6 }}>
             <Typography variant="h1" gutterBottom>
-              Your Health Comes First.
+              Sức Khỏe Tinh Thần Của Bạn Là Ưu Tiên Hàng Đầu.
             </Typography>
             <Typography variant="body1" paragraph>
-              We provide the most full medical services, so every person could
-              have the opportunity to receive qualitative medical help.
+              Chúng tôi cung cấp các dịch vụ y tế toàn diện nhất, để mọi người
+              đều có cơ hội nhận được sự chăm sóc y tế chất lượng.
             </Typography>
             <Button variant="contained" size="large" sx={{ mt: 2 }}>
-              Book Appointment
+              Đặt Lịch Hẹn
             </Button>
           </Grid2>
           <Grid2 size={{ xs: 12, md: 6 }}>
             <Box
               component="img"
-              src="/doctor.png"
-              alt="Doctor"
-              sx={{ width: "100%", maxWidth: 500 }}
+              src="/doctor3.png"
+              alt="Bác sĩ"
+              sx={{
+                width: "100%",
+                maxWidth: 500,
+                height: 530,
+                objectFit: "contain",
+              }}
             />
           </Grid2>
         </Grid2>
         <Grid2 container spacing={2} sx={{ mt: 4 }}>
           {[
-            "24 Hours Services",
-            "25 Years of Experience",
-            "High Quality Care",
+            "Tư Vấn Trực Tuyến",
+            "Đội Ngũ Chuyên Gia",
+            "Chăm Sóc Chất Lượng Cao",
           ].map((feature) => (
             <Grid2 size={{ xs: 12, md: 4 }} key={feature}>
               <FeatureCard>

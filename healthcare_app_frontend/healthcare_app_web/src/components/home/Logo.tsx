@@ -1,7 +1,7 @@
 import { Typography, Box } from "@mui/material";
 import { LocalHospital } from "@mui/icons-material";
 import { useNavigate } from "react-router";
-import { ROUTING } from "../../../constants/routing";
+import { ROUTING } from "../../constants/routing";
 
 export default function Logo() {
   const navigate = useNavigate();

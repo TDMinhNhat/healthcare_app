@@ -91,7 +91,11 @@ export default function BookAppointmentScreen() {
     const fetchServices = async () => {
       try {
         const response = await getAllTypeDiseases();
-        setServices(response.data.data || []);
+        // lọc các dịch vụ đang hoạt động
+        const activeServices = response.data.data.filter(
+          (service) => service.status === true
+        );
+        setServices(activeServices || []);
       } catch (error) {
         console.error("Error fetching services:", error);
         Alert.alert("Lỗi", "Không thể lấy danh sách dịch vụ");
