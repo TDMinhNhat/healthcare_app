@@ -7,6 +7,7 @@ import dev.skyherobrine.admin.enums.PaymentStatus;
 import dev.skyherobrine.admin.models.mongodb.BookAppointment;
 import dev.skyherobrine.admin.models.mongodb.BookAppointmentPayment;
 import dev.skyherobrine.admin.repositories.mariadb.PatientRepository;
+import dev.skyherobrine.admin.repositories.mariadb.PriceRepository;
 import dev.skyherobrine.admin.repositories.mongodb.BookAppointmentPaymentRepository;
 import dev.skyherobrine.admin.repositories.mongodb.BookAppointmentRepository;
 import dev.skyherobrine.admin.repositories.mongodb.WorkScheduleRepository;
@@ -24,12 +25,14 @@ public class BookAppointmentConsumer {
     private final BookAppointmentRepository bookAppointmentRepository;
     private final BookAppointmentPaymentRepository bookAppointmentPaymentRepository;
     private final WorkScheduleRepository workScheduleRepository;
+    private final PriceRepository priceRepository;
 
-    public BookAppointmentConsumer(PatientRepository patientRepository, BookAppointmentRepository bookAppointmentRepository, BookAppointmentPaymentRepository bookAppointmentPaymentRepository, WorkScheduleRepository workScheduleRepository) {
+    public BookAppointmentConsumer(PatientRepository patientRepository, BookAppointmentRepository bookAppointmentRepository, BookAppointmentPaymentRepository bookAppointmentPaymentRepository, WorkScheduleRepository workScheduleRepository, PriceRepository priceRepository) {
         this.patientRepository = patientRepository;
         this.bookAppointmentRepository = bookAppointmentRepository;
         this.bookAppointmentPaymentRepository = bookAppointmentPaymentRepository;
         this.workScheduleRepository = workScheduleRepository;
+        this.priceRepository = priceRepository;
     }
 
     @KafkaListener(topics = "insert_book_appointment", groupId = "admin_insert_book_appointment")
@@ -68,14 +71,14 @@ public class BookAppointmentConsumer {
 
             JsonNode node = new ObjectMapper().readTree(message);
             Long getId = node.get("id").asLong();
-            Double getPrice = node.get("price").asDouble();
+            Long getPrice = node.get("price").asLong();
             String getContent = node.get("content").asText();
             Long getBookAppointmentId = node.get("bookAppointmentId").get("id").asLong();
 
             BookAppointment bookAppointment = bookAppointmentRepository.findById(getBookAppointmentId).orElseThrow(() -> new EntityNotFoundException("The book appointment was not found!"));
             BookAppointmentPayment bookAppointmentPayment = new BookAppointmentPayment(
                     getId,
-                    getPrice,
+                    priceRepository.findById(getPrice).orElseThrow(() -> new EntityNotFoundException("The price was not found!")),
                     getContent,
                     PaymentStatus.PAYED,
                     bookAppointment
