@@ -233,20 +233,21 @@ const PatientManagementPage: React.FC = () => {
     // Địa chỉ các phần ngăn cách bởi dấu phẩy
     const parts = addressStr.split(",").map((part) => part.trim());
 
-    if (parts.length < 2) {
-      console.error("Định dạng địa chỉ không hợp lệ:", addressStr);
+    // Kiểm tra nếu không đủ 6 trường thông tin thì trả về null
+    if (parts.length < 6) {
+      console.error("Địa chỉ không đủ thông tin:", addressStr);
       return null;
     }
 
-    // Xử lý linh hoạt các trường hợp thiếu thành phần địa chỉ
-    const address: Partial<Address> = {};
-
-    if (parts.length >= 1) address.number = parts[0];
-    if (parts.length >= 2) address.street = parts[1];
-    if (parts.length >= 3) address.ward = parts[2];
-    if (parts.length >= 4) address.district = parts[3];
-    if (parts.length >= 5) address.city = parts[4];
-    if (parts.length >= 6) address.country = parts[5];
+    // Chỉ tạo đối tượng địa chỉ khi có đầy đủ thông tin
+    const address: Partial<Address> = {
+      number: parts[0],
+      street: parts[1],
+      ward: parts[2],
+      district: parts[3],
+      city: parts[4],
+      country: parts[5],
+    };
 
     return address;
   };
