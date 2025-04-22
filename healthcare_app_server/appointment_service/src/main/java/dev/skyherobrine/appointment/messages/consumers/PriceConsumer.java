@@ -51,7 +51,6 @@ public class PriceConsumer {
 
             Price price = priceRepository.findById(getPriceId).orElse(null);
             if(price != null) {
-                log.error("Price Consumer: price not found");
                 price.setPrice(getPrice);
                 price.setPriceType(getPriceType);
                 priceRepository.save(price);

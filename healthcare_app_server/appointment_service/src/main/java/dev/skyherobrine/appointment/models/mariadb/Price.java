@@ -27,7 +27,7 @@ public class Price {
     @PrePersist
     public void prePersist() {
         status = true;
-        createdAt = LocalDateTime.now();
+        createdAt = updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate

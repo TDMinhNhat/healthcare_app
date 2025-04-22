@@ -120,9 +120,7 @@ public class PriceController implements IManagement<PriceDTO,Long> {
             log.info("Price: Call the api delete the price");
             Price price = priceRepository.findById(id).orElse(null);
             if(price != null) {
-                kafkaTemplate.send("delete_price", ObjectParser.convertObjectToJson(new HashMap<>(){{
-                    put("id", id);
-                }}));
+                kafkaTemplate.send("delete_price", ObjectParser.convertObjectToJson(id));
                 price.setStatus(false);
                 return ResponseEntity.ok(new Response(
                         HttpStatus.OK.value(),
