@@ -21,6 +21,14 @@ import { io, Socket } from "socket.io-client";
 import * as FileSystem from "expo-file-system";
 import { navigate } from "expo-router/build/global-state/routing";
 
+const socket = io(`ws://${process.env.EXPO_PUBLIC_HOST_ID}:8081`, {
+  path: "/image_detect/socket",
+  transports: ["websocket", "polling"],
+  reconnection: true,
+  reconnectionAttempts: 10,
+  autoConnect: false,
+});
+
 export default function Emergency() {
   const [permission, requestPermission] = useCameraPermissions(); // State quản lý quyền truy cập camera
   const [cameraType, setCameraType] = useState<CameraType>("back"); // State quản lý loại camera (trước/sau)
@@ -38,34 +46,15 @@ export default function Emergency() {
   const [locationErrorMsg, setLocationErrorMsg] = useState<string | null>(null);
 
   const cameraRef = useRef<CameraView>(null); // Tham chiếu đến component camera
-  const getIntervalNumber = useRef(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter(); // Hook điều hướng
-  const [socket, setSocket] = useState<Socket>(
-    io(`ws://${process.env.EXPO_PUBLIC_HOST_ID}:8081`, {
-      path: "/image_detect/socket",
-      transports: ["websocket", "polling"],
-      reconnection: true,
-      reconnectionAttempts: 10,
-      autoConnect: false,
-    })
-  );
 
-  // Lấy vị trí hiện tại
+  // Add useEffect to log component re-renders
   useEffect(() => {
-    async function getCurrentLocation() {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setLocationErrorMsg("Permission to access location was denied");
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-      console.log("Current location:", location);
-    }
-
-    getCurrentLocation();
-  }, []);
+    console.log(
+      `[Emergency] Component rendered at: ${new Date().toLocaleTimeString()}`
+    );
+  });
 
   // Yêu cầu quyền truy cập thư viện ảnh khi component được render
   useEffect(() => {
@@ -86,40 +75,69 @@ export default function Emergency() {
   }, []);
 
   useEffect(() => {
+    console.log("Attempting to connect socket...");
     socket.connect();
-    socket.on("connect", () => {
-      socket.on("emergency_detect_response", (data) => {
-        if(data.code === 200 || data === "New User") {
-          socket.emit("send_data_emergency", data === "New User" ? data : data.data);
 
-          // socket.disconnect();
-          // clearInterval(getIntervalNumber.current);
+    socket.on("connect", () => {
+      console.log("Socket connected successfully. Socket ID:", socket.id);
+      socket.on("emergency_detect_response", (data) => {
+        if (data.code === 200 || data === "New User") {
+          socket.emit(
+            "send_data_emergency",
+            data === "New User" ? data : data.data
+          );
         }
       });
     });
 
-    getIntervalNumber.current = setInterval(() => {
-      (async () => {
-        const photo = await cameraRef.current?.takePictureAsync({
-          quality: 0.8, // Chất lượng ảnh 80%
+    socket.on("disconnect", (reason) => {
+      console.log("Socket disconnected. Reason:", reason);
+    });
+
+    socket.on("connect_error", (error) => {
+      console.log("Socket connection error:", error.message);
+    });
+
+    intervalRef.current = setInterval(async () => {
+      if (cameraRef.current) {
+        const photo = await cameraRef.current.takePictureAsync({
+          base64: true,
+          quality: 0.3,
+          shutterSound: false,
+          skipProcessing: true,
         });
 
-        const fileURI = photo.uri;
-        const base64Image = await FileSystem.readAsStringAsync(fileURI, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
+        // Tính toán và ghi log kích thước của dữ liệu base64
+        // if (photo?.base64) {
+        //   const base64Length = photo.base64.length;
+        //   const base64SizeInKB = (base64Length * 3) / 4 / 1024; // Base64 sử dụng khoảng 4 ký tự để biểu diễn 3 byte
+        //   const base64SizeInMB = base64SizeInKB / 1024;
+
+        //   console.log(`📊 Base64 size: ${base64Length} chars`);
+        //   console.log(
+        //     `📊 Approximate size: ${base64SizeInKB.toFixed(
+        //       2
+        //     )} KB (${base64SizeInMB.toFixed(2)} MB)`
+        //   );
+        // }
+
         socket.emit("emergency_detect_request", {
-          image: base64Image,
+          // image: photo?.base64,
+          image: "hello",
           fileName: "face.jpg",
         });
-      })();
-    }, 2000);
+        console.log("📸 Ảnh đã gửi lúc:", new Date().toLocaleTimeString());
+      }
+    }, 3000); // chụp mỗi 3 giây
 
     return () => {
+      console.log("Cleaning up socket connection...");
       socket.disconnect();
-      clearInterval(getIntervalNumber.current);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     };
-  }, [])
+  }, []);
 
   // Hàm được gọi khi camera sẵn sàng sử dụng
   const onCameraReady = () => {
