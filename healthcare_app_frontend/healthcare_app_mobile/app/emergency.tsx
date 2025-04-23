@@ -20,6 +20,7 @@ import * as Location from "expo-location";
 import { io, Socket } from "socket.io-client";
 import * as FileSystem from "expo-file-system";
 import { navigate } from "expo-router/build/global-state/routing";
+import * as ImageManipulator from "expo-image-manipulator";
 
 const socket = io(`ws://${process.env.EXPO_PUBLIC_HOST_ID}:8081`, {
   path: "/image_detect/socket",
@@ -101,32 +102,42 @@ export default function Emergency() {
     intervalRef.current = setInterval(async () => {
       if (cameraRef.current) {
         const photo = await cameraRef.current.takePictureAsync({
-          base64: true,
-          quality: 0.3,
+          quality: 1,
           shutterSound: false,
           skipProcessing: true,
         });
 
-        // Tính toán và ghi log kích thước của dữ liệu base64
-        // if (photo?.base64) {
-        //   const base64Length = photo.base64.length;
-        //   const base64SizeInKB = (base64Length * 3) / 4 / 1024; // Base64 sử dụng khoảng 4 ký tự để biểu diễn 3 byte
-        //   const base64SizeInMB = base64SizeInKB / 1024;
+        // Sử dụng ImageManipulator để giảm kích thước ảnh
+        try {
+          const manipulatedImage = await ImageManipulator.manipulateAsync(
+            photo.uri, // Đường dẫn tới ảnh chụp từ camera
+            [{ resize: { width: 340 } }], // Thay đổi kích thước ảnh xuống còn 480px chiều rộng, giữ nguyên tỷ lệ
+            // [],
+            {
+              compress: 0.9, // Nén ảnh xuống (giá trị compress càng nhỏ, mức độ nén càng cao và chất lượng càng giảm)
+              format: ImageManipulator.SaveFormat.JPEG, // Chuyển đổi sang định dạng JPEG
+              base64: true, // Yêu cầu trả về chuỗi base64 từ ảnh
+            }
+          );
 
-        //   console.log(`📊 Base64 size: ${base64Length} chars`);
-        //   console.log(
-        //     `📊 Approximate size: ${base64SizeInKB.toFixed(
-        //       2
-        //     )} KB (${base64SizeInMB.toFixed(2)} MB)`
-        //   );
-        // }
+          // Ghi log kích thước ảnh để kiểm tra
+          if (manipulatedImage.base64) {
+            const base64Length = manipulatedImage.base64.length;
+            const base64SizeInKB = (base64Length * 3) / 4 / 1024;
+            console.log(
+              `📊 Kích thước ảnh sau khi nén: ${base64SizeInKB.toFixed(2)} KB`
+            );
+          }
 
-        socket.emit("emergency_detect_request", {
-          // image: photo?.base64,
-          image: "hello",
-          fileName: "face.jpg",
-        });
-        console.log("📸 Ảnh đã gửi lúc:", new Date().toLocaleTimeString());
+          // Gửi ảnh dưới dạng chuỗi base64 qua socket
+          socket.emit("emergency_detect_request", {
+            image: manipulatedImage.base64, // Gửi dữ liệu ảnh dưới dạng chuỗi base64
+            fileName: "face.jpg", // Tên file để server xử lý
+          });
+          console.log("📸 Ảnh đã gửi lúc:", new Date().toLocaleTimeString());
+        } catch (error) {
+          console.error("Error manipulating image:", error);
+        }
       }
     }, 3000); // chụp mỗi 3 giây
 
@@ -149,7 +160,7 @@ export default function Emergency() {
     if (cameraRef.current && isCameraReady) {
       try {
         const photo = await cameraRef.current.takePictureAsync({
-          quality: 0.8, // Chất lượng ảnh 80%
+          quality: 1, // Chất lượng ảnh 80%
         });
 
         setCapturedImage(photo.uri);
@@ -361,7 +372,8 @@ export default function Emergency() {
               <TouchableOpacity
                 style={styles.captureButton}
                 onPress={takePicture}
-                disabled={!isCameraReady}
+                // disabled={!isCameraReady}
+                disabled={true}
               >
                 <View style={styles.captureButtonInner} />
               </TouchableOpacity>
@@ -369,6 +381,7 @@ export default function Emergency() {
               <TouchableOpacity
                 style={styles.controlButton}
                 onPress={toggleMode}
+                disabled={true}
               >
                 <MaterialIcons name="photo-library" size={28} color="white" />
               </TouchableOpacity>
