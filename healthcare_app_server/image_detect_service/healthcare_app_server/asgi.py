@@ -21,7 +21,7 @@ import face_detect_package.services as face_detect_service
 import healthcare_app_server.eureka
 import base64
 
-sio = socketio.AsyncServer(async_mode = 'asgi', cors_allowed_origins = '*', always_connect=False)
+sio = socketio.AsyncServer(async_mode = 'asgi', cors_allowed_origins = '*', always_connect=False, max_http_buffer_size=100 * 1024 * 1024 * 1024)
 django_asgi_application = get_asgi_application()
 
 application = socketio.ASGIApp(sio, django_asgi_application, socketio_path="/image_detect/socket")
