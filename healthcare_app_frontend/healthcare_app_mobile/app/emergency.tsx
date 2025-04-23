@@ -111,10 +111,10 @@ export default function Emergency() {
         try {
           const manipulatedImage = await ImageManipulator.manipulateAsync(
             photo.uri, // Đường dẫn tới ảnh chụp từ camera
-            [{ resize: { width: 340 } }], // Thay đổi kích thước ảnh xuống còn 480px chiều rộng, giữ nguyên tỷ lệ
+            [{ resize: { width: 320 } }], // Thay đổi kích thước ảnh xuống còn 480px chiều rộng, giữ nguyên tỷ lệ
             // [],
             {
-              compress: 0.9, // Nén ảnh xuống (giá trị compress càng nhỏ, mức độ nén càng cao và chất lượng càng giảm)
+              compress: 0.8, // Nén ảnh xuống (giá trị compress càng nhỏ, mức độ nén càng cao và chất lượng càng giảm)
               format: ImageManipulator.SaveFormat.JPEG, // Chuyển đổi sang định dạng JPEG
               base64: true, // Yêu cầu trả về chuỗi base64 từ ảnh
             }
