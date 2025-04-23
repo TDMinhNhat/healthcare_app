@@ -6,11 +6,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "book_appointment_payments")
 @Getter @Setter
 @NoArgsConstructor
 public class BookAppointmentPayment extends Payment {
+    @Field(name = "book_appointment")
     private BookAppointment bookAppointment;
 
     public BookAppointmentPayment(Long id, Price price, String content, BookAppointment bookAppointment) {

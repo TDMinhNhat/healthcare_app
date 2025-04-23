@@ -3,6 +3,7 @@ package dev.skyherobrine.appointment.services;
 import com.fasterxml.jackson.databind.JsonNode;
 import dev.skyherobrine.appointment.enums.AppointmentStatus;
 import dev.skyherobrine.appointment.feigns.WorkScheduleFeign;
+import dev.skyherobrine.appointment.messages.consumers.responses.AdminDashboardResponseConsumer;
 import dev.skyherobrine.appointment.messages.consumers.responses.WorkScheduleResponseConsumer;
 import dev.skyherobrine.appointment.models.mongodb.BookAppointment;
 import dev.skyherobrine.appointment.repositories.mongodb.BookAppointmentRepository;
@@ -34,8 +35,9 @@ public class DashboardService {
     private final WorkScheduleFeign workScheduleFeign;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final WorkScheduleResponseConsumer workScheduleResponseConsumer;
+    private final AdminDashboardResponseConsumer adminDashboardResponseConsumer;
 
-    public DashboardService(BookAppointmentRepository bookAppointmentRepository, MedicalRecordRepository medicalRecordRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, BookingService bookingService, WorkScheduleFeign workScheduleFeign, KafkaTemplate<String, String> kafkaTemplate, WorkScheduleResponseConsumer workScheduleResponseConsumer) {
+    public DashboardService(BookAppointmentRepository bookAppointmentRepository, MedicalRecordRepository medicalRecordRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, BookingService bookingService, WorkScheduleFeign workScheduleFeign, KafkaTemplate<String, String> kafkaTemplate, WorkScheduleResponseConsumer workScheduleResponseConsumer, AdminDashboardResponseConsumer adminDashboardResponseConsumer) {
         this.bookAppointmentRepository = bookAppointmentRepository;
         this.medicalRecordRepository = medicalRecordRepository;
         this.medicalRecordDrugRepository = medicalRecordDrugRepository;
@@ -43,6 +45,7 @@ public class DashboardService {
         this.workScheduleFeign = workScheduleFeign;
         this.kafkaTemplate = kafkaTemplate;
         this.workScheduleResponseConsumer = workScheduleResponseConsumer;
+        this.adminDashboardResponseConsumer = adminDashboardResponseConsumer;
     }
 
     public Map<String,Object> getPatientDashboard(String patientId) throws Exception {
@@ -160,9 +163,8 @@ public class DashboardService {
         return result;
     }
 
-    public Map<String,Object> getAdminDashboard(String adminId) {
-        Map<String,Object> result = new HashMap<>();
-
-        return result;
+    public Object getAdminDashboard() {
+        kafkaTemplate.send("request_get_admin_dashboard", "");
+        return adminDashboardResponseConsumer.getStorageData();
     }
 }

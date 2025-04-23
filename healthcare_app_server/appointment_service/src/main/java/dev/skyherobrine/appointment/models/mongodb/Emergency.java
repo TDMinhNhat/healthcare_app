@@ -1,5 +1,6 @@
 package dev.skyherobrine.appointment.models.mongodb;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -15,6 +16,7 @@ public class Emergency {
     private Long id;
     private String patientId;
     private String doctorId;
+    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
     private LocalDateTime createdAt;
 
     public Emergency(Long id) {

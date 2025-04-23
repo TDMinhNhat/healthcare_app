@@ -1,5 +1,6 @@
 package dev.skyherobrine.appointment.models.mongodb;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import dev.skyherobrine.appointment.enums.PaymentStatus;
 import dev.skyherobrine.appointment.models.mariadb.Price;
 import lombok.Getter;
@@ -18,6 +19,7 @@ public abstract class Payment {
     private Long id;
     private Price price;
     private String content;
+    @JsonFormat(pattern = "dd-MM-yyyy-HH-mm-ss")
     private LocalDateTime createdAt;
     private PaymentStatus status;
 

@@ -62,13 +62,13 @@ public class DashboardController {
     }
 
     @GetMapping("/admin")
-    public ResponseEntity<Response> getAdminDashboard(@RequestParam String adminId) {
+    public ResponseEntity<Response> getAdminDashboard() {
         try {
             log.info("Dashboard Controller: Call the api get admin dashboard");
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "Get admin dashboard",
-                    dashboardService.getPatientDashboard(adminId)
+                    dashboardService.getAdminDashboard()
             ));
         } catch (Exception e) {
             log.error("Dashboard Controller: The api thrown an error");
