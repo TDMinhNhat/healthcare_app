@@ -10,3 +10,12 @@ export const getAppointmentPrice = async () => {
   });
   return response.data;
 };
+
+export const getAppointmentPriceByTypeDisease = async (price_type: string) => {
+  const response = await axiosConfig.get(`${prefix}`, {
+    params: {
+      price_type: price_type,
+    },
+  });
+  return response.data;
+};

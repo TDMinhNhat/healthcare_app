@@ -15,7 +15,10 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { Client } from "@stomp/stompjs";
 import { createAppointment } from "../../services/appointment/booking_service"; // Import the appointment creation service
-import { getAppointmentPrice } from "../../services/appointment/price_service"; // Import the price service
+import {
+  getAppointmentPrice,
+  getAppointmentPriceByTypeDisease,
+} from "../../services/appointment/price_service"; // Import the price service
 
 const PaymentCheckout = () => {
   const router = useRouter();
@@ -49,10 +52,34 @@ const PaymentCheckout = () => {
         setFetchingPrice(true);
         setPriceError(null);
 
-        const response = await getAppointmentPrice();
+        let response;
+        if (serviceName) {
+          response = await getAppointmentPriceByTypeDisease(serviceName);
+
+          // Nếu dữ liệu là null, dù code là 200, lấy giá mặc định
+          if (response.code === 200 && !response.data) {
+            response = await getAppointmentPrice();
+          }
+        } else {
+          // Nếu không có thông tin service, lấy giá mặc định
+          response = await getAppointmentPrice();
+        }
 
         if (response.code === 200 && response.data) {
-          setAppointmentFee(response.data.price);
+          // lọc status true
+          // Nếu dữ liệu là mảng, lọc ra các giá hợp lệ
+          if (Array.isArray(response.data)) {
+            const validPrices = response.data.filter(
+              (item) => item.status === true
+            );
+            if (validPrices.length > 0) {
+              setAppointmentFee(validPrices[0].price);
+            } else {
+              setPriceError("Không tìm thấy thông tin giá hợp lệ");
+            }
+          } else {
+            setAppointmentFee(response.data.price);
+          }
         } else {
           setPriceError("Không thể lấy thông tin phí khám bệnh");
           console.error("API error:", response);
