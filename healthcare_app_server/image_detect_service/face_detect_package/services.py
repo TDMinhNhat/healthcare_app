@@ -140,5 +140,5 @@ class FaceDetectService:
         return mean_embedding
 
     def __get_user_by_userid__(self, user_id):
-        response = requests.get(f"http://localhost:8081/authenticate/api/v1/user/patient?userId={user_id}").json()
-        return response.data
+        response = requests.get(f"http://localhost:8081/authenticate/api/v1/user/patient?userId={user_id}")
+        return response.json()
