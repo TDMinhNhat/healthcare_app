@@ -17,10 +17,9 @@ import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { detectFace } from "../services/image_detect/detect_service";
 import * as Location from "expo-location";
-import { io, Socket } from "socket.io-client";
 import * as FileSystem from "expo-file-system";
 import { navigate } from "expo-router/build/global-state/routing";
-import * as ImageManipulator from "expo-image-manipulator";
+import { io } from "socket.io-client";
 
 const socket = io(`ws://${process.env.EXPO_PUBLIC_HOST_ID}:8081`, {
   path: "/image_detect/socket",
@@ -46,16 +45,12 @@ export default function Emergency() {
   );
   const [locationErrorMsg, setLocationErrorMsg] = useState<string | null>(null);
 
-  const cameraRef = useRef<CameraView>(null); // Tham chiếu đến component camera
+  // Thêm state cho tự động chụp
+  const [isDetecting, setIsDetecting] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const router = useRouter(); // Hook điều hướng
 
-  // Add useEffect to log component re-renders
-  useEffect(() => {
-    console.log(
-      `[Emergency] Component rendered at: ${new Date().toLocaleTimeString()}`
-    );
-  });
+  const cameraRef = useRef<CameraView>(null); // Tham chiếu đến component camera
+  const router = useRouter(); // Hook điều hướng
 
   // Yêu cầu quyền truy cập thư viện ảnh khi component được render
   useEffect(() => {
@@ -76,21 +71,8 @@ export default function Emergency() {
   }, []);
 
   useEffect(() => {
-    console.log("Attempting to connect socket...");
+    console.log("Setting up socket connection...");
     socket.connect();
-
-    socket.on("connect", () => {
-      console.log("Socket connected successfully. Socket ID:", socket.id);
-      socket.on("emergency_detect_response", (data) => {
-        if (data.code === 200 || data === "New User") {
-          console.log("Emergency detected:", data);
-          socket.emit(
-            "send_data_emergency",
-            data === "New User" ? data : data.data
-          );
-        }
-      });
-    });
 
     socket.on("disconnect", (reason) => {
       console.log("Socket disconnected. Reason:", reason);
@@ -100,56 +82,82 @@ export default function Emergency() {
       console.log("Socket connection error:", error.message);
     });
 
-    intervalRef.current = setInterval(async () => {
-      if (cameraRef.current) {
-        const photo = await cameraRef.current.takePictureAsync({
-          quality: 1,
-          shutterSound: false,
-          skipProcessing: true,
-        });
-
-        // Sử dụng ImageManipulator để giảm kích thước ảnh
-        try {
-          const manipulatedImage = await ImageManipulator.manipulateAsync(
-            photo.uri, // Đường dẫn tới ảnh chụp từ camera
-            [{ resize: { width: 320 } }], // Thay đổi kích thước ảnh xuống còn 480px chiều rộng, giữ nguyên tỷ lệ
-            // [],
-            {
-              compress: 0.8, // Nén ảnh xuống (giá trị compress càng nhỏ, mức độ nén càng cao và chất lượng càng giảm)
-              format: ImageManipulator.SaveFormat.JPEG, // Chuyển đổi sang định dạng JPEG
-              base64: true, // Yêu cầu trả về chuỗi base64 từ ảnh
-            }
-          );
-
-          // Ghi log kích thước ảnh để kiểm tra
-          if (manipulatedImage.base64) {
-            const base64Length = manipulatedImage.base64.length;
-            const base64SizeInKB = (base64Length * 3) / 4 / 1024;
-            console.log(
-              `📊 Kích thước ảnh sau khi nén: ${base64SizeInKB.toFixed(2)} KB`
-            );
-          }
-
-          // Gửi ảnh dưới dạng chuỗi base64 qua socket
-          socket.emit("emergency_detect_request", {
-            image: manipulatedImage.base64, // Gửi dữ liệu ảnh dưới dạng chuỗi base64
-            fileName: "face.jpg", // Tên file để server xử lý
-          });
-          console.log("📸 Ảnh đã gửi lúc:", new Date().toLocaleTimeString());
-        } catch (error) {
-          console.error("Error manipulating image:", error);
-        }
-      }
-    }, 3000); // chụp mỗi 3 giây
-
+    // Return cleanup function
     return () => {
       console.log("Cleaning up socket connection...");
       socket.disconnect();
+    };
+  }, []); // Empty dependency array ensures this only runs once
+
+  // Thiết lập chụp ảnh tự động khi camera sẵn sàng
+  useEffect(() => {
+    if (isCameraReady && mode === "camera" && !isPreview && !isDetecting) {
+      // Xóa interval cũ nếu có
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+
+      // Thiết lập interval mới để chụp ảnh mỗi 1 giây
+      intervalRef.current = setInterval(async () => {
+        if (!cameraRef.current) return;
+
+        try {
+          setIsDetecting(true);
+
+          // Chụp ảnh với chất lượng cao và không bỏ qua xử lý
+          const photo = await cameraRef.current.takePictureAsync({
+            quality: 1,
+            skipProcessing: true,
+            shutterSound: false,
+          });
+
+          // Gửi ảnh đến API phát hiện
+          const response = await detectFace({
+            uri: photo.uri,
+            type: "image/jpeg",
+          });
+
+          console.log("Kết quả nhận diện:", response);
+
+          // Kiểm tra kết quả và xử lý
+          if (response && response.code === 200) {
+            // Nếu có dữ liệu
+            // if (response.data && response.data.length > 0) {
+            // Hiển thị ảnh đã chụp
+            // setCapturedImage(photo.uri);
+
+            // Dừng interval khi phát hiện thành công
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
+            }
+            socket.emit(
+              "send_data_emergency",
+              response.data === "New User" ? response.data : response.data.data
+            );
+
+            // setIsPreview(true);
+            Alert.alert("Đã phát hiện", "Hình ảnh đã được xử lý!");
+            router.replace("/");
+            // }
+          }
+        } catch (error) {
+          console.error("Lỗi khi xử lý ảnh:", error);
+        } finally {
+          setIsDetecting(false);
+        }
+      }, 1000); // Chụp mỗi 1 giây
+    }
+
+    return () => {
+      // Cleanup function only cleans up the interval now
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
-  }, []);
+  }, [isCameraReady, mode, isPreview, isDetecting]);
 
   // Hàm được gọi khi camera sẵn sàng sử dụng
   const onCameraReady = () => {
@@ -160,10 +168,13 @@ export default function Emergency() {
   const takePicture = async () => {
     if (cameraRef.current && isCameraReady) {
       try {
+        // Chụp ảnh với chất lượng cao nhất và không bỏ qua xử lý
         const photo = await cameraRef.current.takePictureAsync({
-          quality: 1, // Chất lượng ảnh 80%
+          quality: 1,
+          skipProcessing: false,
         });
 
+        // Không nén ảnh nữa, sử dụng trực tiếp URI của ảnh gốc
         setCapturedImage(photo.uri);
         setIsPreview(true); // Chuyển sang chế độ xem trước
       } catch (error) {
@@ -180,7 +191,7 @@ export default function Emergency() {
         mediaTypes: ImagePicker.MediaTypeOptions.Images, // Chỉ cho phép chọn ảnh
         allowsEditing: true, // Cho phép chỉnh sửa trước khi chọn
         aspect: [4, 3], // Tỷ lệ khung hình
-        quality: 0.8, // Chất lượng ảnh 80%
+        quality: 1, // Chất lượng ảnh 100% (thay vì 0.8)
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
@@ -194,7 +205,7 @@ export default function Emergency() {
   };
 
   // Utility function to convert URI to Blob
-  const uriToBlob = async (uri: string): Promise<Blob> => {
+  const uriToBlob = async (uri: string): Promise<any> => {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.onload = function () {
@@ -219,11 +230,11 @@ export default function Emergency() {
     setIsUploading(true);
 
     try {
-      // Chuyển đổi URI ảnh thành Blob
-      const imageBlob = await uriToBlob(capturedImage);
-
-      // Sử dụng dịch vụ detectFace để tải ảnh lên server
-      const response = await detectFace(imageBlob);
+      // Sử dụng dịch vụ detectFace để tải ảnh lên server với ảnh nguyên gốc
+      const response = await detectFace({
+        uri: capturedImage,
+        type: "image/jpeg",
+      });
 
       // Xử lý phản hồi từ server
       console.log("Phản hồi từ server:", response);
@@ -268,7 +279,14 @@ export default function Emergency() {
 
   // Chuyển đổi giữa chế độ camera và chọn ảnh từ thư viện
   const toggleMode = () => {
+    // Dừng interval nếu đang chuyển từ chế độ camera sang chế độ thư viện
+    if (mode === "camera" && intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
     setMode(mode === "camera" ? "gallery" : "camera");
+
     if (isPreview) {
       cancelPreview();
     }
@@ -362,6 +380,14 @@ export default function Emergency() {
               mode="picture"
             />
 
+            {/* Lớp phủ hiển thị trạng thái đang phát hiện */}
+            {isDetecting && (
+              <View style={styles.detectionOverlay}>
+                <ActivityIndicator size="large" color="#26b9c8" />
+                <Text style={styles.detectionText}>Đang phát hiện...</Text>
+              </View>
+            )}
+
             <View style={styles.controlsContainer}>
               <TouchableOpacity
                 style={styles.controlButton}
@@ -373,8 +399,7 @@ export default function Emergency() {
               <TouchableOpacity
                 style={styles.captureButton}
                 onPress={takePicture}
-                // disabled={!isCameraReady}
-                disabled={true}
+                disabled={!isCameraReady || isDetecting}
               >
                 <View style={styles.captureButtonInner} />
               </TouchableOpacity>
@@ -382,7 +407,6 @@ export default function Emergency() {
               <TouchableOpacity
                 style={styles.controlButton}
                 onPress={toggleMode}
-                disabled={true}
               >
                 <MaterialIcons name="photo-library" size={28} color="white" />
               </TouchableOpacity>
@@ -414,8 +438,9 @@ export default function Emergency() {
         <View style={styles.instructionContainer}>
           <Text style={styles.instructionTitle}>Hỗ trợ y tế khẩn cấp</Text>
           <Text style={styles.instructionText}>
-            Chụp ảnh vùng bị thương hoặc triệu chứng của bạn. Đội ngũ y tế sẽ
-            đánh giá và liên hệ với bạn trong thời gian sớm nhất.
+            {mode === "camera"
+              ? "Hệ thống đang tự động chụp và phân tích hình ảnh. Bạn có thể chuyển đổi camera hoặc chọn ảnh từ thư viện."
+              : "Chụp ảnh vùng bị thương hoặc triệu chứng của bạn. Đội ngũ y tế sẽ đánh giá và liên hệ với bạn trong thời gian sớm nhất."}
           </Text>
         </View>
       )}
@@ -597,5 +622,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     margin: 20,
+  },
+  // Thêm style cho overlay phát hiện
+  detectionOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  detectionText: {
+    color: "#fff",
+    fontSize: 16,
+    marginTop: 10,
+    fontWeight: "bold",
   },
 });

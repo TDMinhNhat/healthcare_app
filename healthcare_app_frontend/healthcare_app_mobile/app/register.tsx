@@ -58,6 +58,9 @@ export default function Register() {
   // Trạng thái phát hiện khuôn mặt
   const [isDetecting, setIsDetecting] = useState(false);
 
+  // Thêm ref để theo dõi interval
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
   // Các bước trong quy trình đăng ký
   const [registrationStep, setRegistrationStep] = useState<1 | 2>(1);
   const [detectedFaceImage, setDetectedFaceImage] = useState<string | null>(
@@ -74,7 +77,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
 
   // Add a comment to clarify gender handling
-  // Switch: true = female (Nam), false = male (Nữ)
+  // Switch: true = female (Nữ), false = male (Nam)
   const [gender, setGender] = useState<"male" | "female">("female");
   const [birthDate, setBirthDate] = useState<Date>(new Date());
   const [dateError, setDateError] = useState<string | null>(null);
@@ -87,52 +90,73 @@ export default function Register() {
   // Xử lý khi camera sẵn sàng
   const onCameraReady = () => {
     setIsCameraReady(true);
-    // Không còn bắt đầu tự động phát hiện nữa
   };
 
-  // Hàm chụp ảnh và xác minh khuôn mặt
-  const captureAndVerifyFace = async () => {
-    if (!cameraRef.current || !isCameraReady) return;
-
-    try {
-      setIsDetecting(true);
-
-      const photo = await cameraRef.current.takePictureAsync({
-        quality: 1, // Chất lượng thấp hơn để xử lý nhanh hơn
-        skipProcessing: true,
-        shutterSound: false,
-      });
-
-      // Gửi hình ảnh đến API phát hiện khuôn mặt với uri
-      const result = await registerFace({
-        uri: photo.uri,
-        type: "image/jpeg",
-      });
-
-      console.log("Kết quả nhận diện khuôn mặt:", result);
-
-      if (result.code === 200 && result.message === "New User") {
-        setDetectedFaceImage(result.data);
-        setRegistrationStep(2);
-        Alert.alert("Thành công", "Nhận diện khuôn mặt thành công!");
-      } else {
-        Alert.alert(
-          "Thất bại",
-          "Không thể nhận diện khuôn mặt. Vui lòng thử lại."
-        );
+  // Thiết lập chụp ảnh liên tục khi ở bước 1 và camera sẵn sàng
+  useEffect(() => {
+    // Chỉ bắt đầu chụp liên tục khi camera sẵn sàng và đang ở bước 1
+    if (isCameraReady && registrationStep === 1 && !isDetecting) {
+      // Xóa interval cũ nếu có
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
-    } catch (error) {
-      console.error("Lỗi khi nhận diện khuôn mặt:", error);
-      Alert.alert("Lỗi", "Đã xảy ra lỗi khi nhận diện khuôn mặt");
-    } finally {
-      setIsDetecting(false);
+
+      // Thiết lập interval mới để chụp ảnh mỗi 2 giây
+      intervalRef.current = setInterval(async () => {
+        if (!cameraRef.current || isDetecting) return;
+
+        try {
+          setIsDetecting(true);
+
+          const photo = await cameraRef.current.takePictureAsync({
+            quality: 1,
+            skipProcessing: true,
+            shutterSound: false,
+          });
+
+          // Gửi hình ảnh đến API phát hiện khuôn mặt
+          const result = await registerFace({
+            uri: photo.uri,
+            type: "image/jpeg",
+          });
+
+          console.log("Kết quả nhận diện khuôn mặt:", result);
+
+          if (result.code === 200 && result.message === "New User") {
+            // Dừng interval khi phát hiện thành công
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
+            }
+
+            setDetectedFaceImage(result.data);
+            setRegistrationStep(2);
+            Alert.alert("Thành công", "Nhận diện khuôn mặt thành công!");
+          }
+          // Không hiển thị alert khi thất bại, chỉ log ra console
+        } catch (error) {
+          console.error("Lỗi khi nhận diện khuôn mặt:", error);
+        } finally {
+          setIsDetecting(false);
+        }
+      }, 1000);
     }
-  };
+
+    // Cleanup function để dọn dẹp interval khi component unmount hoặc deps thay đổi
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [isCameraReady, registrationStep, isDetecting]);
 
   // Hàm quay lại bước phát hiện khuôn mặt
   const goBackToFaceDetection = () => {
     setDetectedFaceImage(null);
     setRegistrationStep(1);
+    // useEffect sẽ tự động bắt đầu chụp lại khi registrationStep thay đổi
   };
 
   // Xử lý thay đổi ngày tháng
@@ -198,8 +222,8 @@ export default function Register() {
       {registrationStep === 1 && (
         <View style={styles.cameraContainer}>
           <Text style={styles.instruction}>
-            Vui lòng nhìn thẳng vào camera và nhấn nút chụp để xác thực khuôn
-            mặt
+            Vui lòng nhìn thẳng vào camera để hệ thống xác thực khuôn mặt tự
+            động
           </Text>
 
           <View style={styles.cameraWrapper}>
@@ -212,25 +236,14 @@ export default function Register() {
             />
 
             {/* Lớp phủ với chỉ báo phát hiện */}
-            {isDetecting && (
-              <View style={styles.detectionOverlay}>
-                <ActivityIndicator size="large" color="#26b9c8" />
-                <Text style={styles.detectionText}>
-                  Đang nhận diện khuôn mặt...
-                </Text>
-              </View>
-            )}
-          </View>
-
-          <View style={styles.controlsContainer}>
-            {/* Nút chụp ảnh */}
-            <TouchableOpacity
-              style={styles.captureButton}
-              onPress={captureAndVerifyFace}
-              disabled={isDetecting || !isCameraReady}
-            >
-              <Ionicons name="camera" size={28} color="#fff" />
-            </TouchableOpacity>
+            <View style={styles.detectionOverlay}>
+              <ActivityIndicator size="large" color="#26b9c8" />
+              <Text style={styles.detectionText}>
+                {isDetecting
+                  ? "Đang nhận diện khuôn mặt..."
+                  : "Đang tìm kiếm khuôn mặt..."}
+              </Text>
+            </View>
           </View>
         </View>
       )}
@@ -261,7 +274,6 @@ export default function Register() {
                   .padStart(2, "0");
                 const year = birthDate.getFullYear();
                 const dob = `${day}-${month}-${year}`;
-
                 const isFemale = gender === "female";
                 const response = await signUp(
                   values.firstName,
@@ -478,7 +490,6 @@ export default function Register() {
                         setGender(gender === "female" ? "male" : "female")
                       }
                       value={gender === "female"}
-                      style={styles.switch}
                     />
                     <TouchableOpacity
                       style={[
@@ -545,6 +556,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
+    marginTop: 20,
   },
   backButton: {
     padding: 8,
@@ -597,9 +609,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+    marginTop: 15,
   },
   camera: {
     flex: 1,
+    borderBottomWidth: 1,
+    borderColor: "#eee",
   },
   controlsContainer: {
     flexDirection: "row",
@@ -610,6 +625,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   controlButton: {
+    marginTop: 10,
     padding: 15,
     borderRadius: 30,
     backgroundColor: "rgba(38, 185, 200, 0.8)",
@@ -627,11 +643,11 @@ const styles = StyleSheet.create({
   },
   detectionText: {
     color: "#fff",
-    fontSize: 16,
-    marginTop: 10,
-    fontWeight: "600",
   },
   statusContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     backgroundColor: "rgba(38, 185, 200, 0.2)",
     paddingVertical: 10,
     paddingHorizontal: 20,
@@ -766,18 +782,5 @@ const styles = StyleSheet.create({
     color: "#26b9c8",
     marginLeft: 5,
     fontWeight: "500",
-  },
-  captureButton: {
-    backgroundColor: "#26b9c8",
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
 });

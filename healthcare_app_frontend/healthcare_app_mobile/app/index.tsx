@@ -44,9 +44,8 @@ export default function HomeScreen() {
       });
 
     if (result === null) {
-      Alert.alert("Lỗi", "Server có lỗi");
+      console.error("Lỗi", "Server có lỗi");
     } else if (result.code === 200) {
-      Alert.alert("Thành công", "Đăng Nhập Thành Công");
       console.log("result", result.data.user);
       dispatch(setUser(result.data.user));
       router.navigate({
@@ -54,7 +53,7 @@ export default function HomeScreen() {
         params: result.data,
       });
     } else {
-      Alert.alert("Thất bại", "Đăng Nhập Thất Bại");
+      Alert.alert("Đăng Nhập Thất Bại", "Tài khoản hoặc mật khẩu không đúng");
     }
   };
 
@@ -147,33 +146,6 @@ export default function HomeScreen() {
               >
                 <Text style={style.buttonText}>Khẩn cấp</Text>
               </TouchableOpacity>
-            </View>
-            <View style={style.itemArea}>
-              <View style={{ width: "100%" }}>
-                <Text style={{ textAlign: "center" }}>Hoặc</Text>
-              </View>
-            </View>
-            <View style={[style.itemArea, style.socialButtonArea]}>
-              <Pressable style={[style.socialButton, { borderColor: "blue" }]}>
-                <FontAwesome5 name="facebook" size={24} color="blue" />
-                <Text style={[style.socialButtonText, { color: "blue" }]}>
-                  Facebook
-                </Text>
-              </Pressable>
-              <Pressable
-                style={[style.socialButton, { borderColor: "orange" }]}
-              >
-                <FontAwesome name="google" size={24} color="orange" />
-                <Text style={[style.socialButtonText, { color: "orange" }]}>
-                  Google
-                </Text>
-              </Pressable>
-              <Pressable style={[style.socialButton, { borderColor: "black" }]}>
-                <FontAwesome name="apple" size={24} color="black" />
-                <Text style={[style.socialButtonText, { color: "black" }]}>
-                  Apple
-                </Text>
-              </Pressable>
             </View>
           </View>
         </SafeAreaView>
