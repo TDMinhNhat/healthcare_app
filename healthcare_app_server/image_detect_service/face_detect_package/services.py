@@ -2,8 +2,6 @@ import os.path
 import numpy as np
 import cv2
 import requests
-import httpx
-from asgiref.sync import sync_to_async
 
 from healthcare_app_server.models import *
 from scipy.spatial.distance import cosine
