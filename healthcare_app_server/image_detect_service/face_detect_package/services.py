@@ -113,7 +113,7 @@ class FaceDetectService:
             vector_check = np.array(list(map(float, user.face_encode_value.split(","))))
             similarity = 1 - cosine(vector_check, vector)
 
-            if similarity >= 0.8:
+            if similarity >= 0.6:
                 return self.__get_user_by_userid__(user.user_id)
         return None
 
