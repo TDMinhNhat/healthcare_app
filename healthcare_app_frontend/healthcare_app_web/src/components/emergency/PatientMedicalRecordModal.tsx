@@ -213,7 +213,7 @@ const PatientMedicalRecordModal: React.FC<PatientMedicalRecordModalProps> = ({
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <Typography variant="body1">
-                        <strong>Giới tính:</strong> {patient.sex ? "Nam" : "Nữ"}
+                        <strong>Giới tính:</strong> {patient.sex ? "Nữ" : "Nam"}
                       </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>

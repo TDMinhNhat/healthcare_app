@@ -11,17 +11,9 @@ import {
   Link,
   IconButton,
   InputAdornment,
-  Divider,
   CircularProgress,
 } from "@mui/material";
-import {
-  Visibility,
-  VisibilityOff,
-  Google,
-  Facebook,
-  Apple,
-  Face,
-} from "@mui/icons-material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
 import { login } from "../services/authenticate/auth_service";
@@ -203,30 +195,6 @@ export default function LoginPage() {
             </Grid2> */}
           </Grid2>
         </form>
-
-        <Divider sx={{ mt: 3, mb: 2 }}>
-          <Typography variant="body2" color="text.secondary">
-            Hoặc tiếp tục với
-          </Typography>
-        </Divider>
-
-        <Grid2 container spacing={2}>
-          <Grid2 size={{ xs: 4 }}>
-            <Button fullWidth variant="outlined" startIcon={<Google />}>
-              Google
-            </Button>
-          </Grid2>
-          <Grid2 size={{ xs: 4 }}>
-            <Button fullWidth variant="outlined" startIcon={<Facebook />}>
-              Facebook
-            </Button>
-          </Grid2>
-          <Grid2 size={{ xs: 4 }}>
-            <Button fullWidth variant="outlined" startIcon={<Apple />}>
-              Apple
-            </Button>
-          </Grid2>
-        </Grid2>
       </Box>
     </Container>
   );

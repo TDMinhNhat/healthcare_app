@@ -36,6 +36,15 @@ import { Avatar } from "@mui/material";
 import GPSMapComponent from "../../components/find_doctor/GPSMapComponent";
 import { Socket, io } from "socket.io-client";
 
+// Initialize socket outside the component to avoid recreation on renders
+const socket: Socket = io(`ws://localhost:8081`, {
+  path: "/image_detect/socket",
+  transports: ["websocket", "polling"],
+  reconnection: true,
+  reconnectionAttempts: 10,
+  autoConnect: false,
+});
+
 // Dữ liệu giả lập cho bệnh nhân cấp cứu
 const mockEmergencyPatients: (User & { received?: boolean })[] = [
   {
@@ -118,15 +127,6 @@ const EmergencyPage: React.FC = () => {
     patientId: "",
     patientName: "",
   });
-  const [socket, setSocket] = useState<Socket>(
-    io(`ws://localhost:8081`, {
-      path: "/image_detect/socket",
-      transports: ["websocket", "polling"],
-      reconnection: true,
-      reconnectionAttempts: 10,
-      autoConnect: false,
-    })
-  );
 
   useEffect(() => {
     loadEmergencyPatients();
@@ -137,39 +137,41 @@ const EmergencyPage: React.FC = () => {
 
     socket.on("connect", () => {
       console.log("connected");
-      socket.emit("request_patient_in_emergency", "")
+      socket.emit("request_patient_in_emergency", "");
 
-      socket.on("receive_patient_in_emergency", (data) => { 
+      socket.on("receive_patient_in_emergency", (data) => {
         console.log(data);
-        if(data === "New User") {
+        if (data === "New User") {
           //Add new patient with empty object
-          setPatients((prevPatients) => [
-            ...prevPatients,
-            { } as User,
-          ]);
-        } else if(data !== undefined) {
-          if(patients.length === 0) {
-            setPatients([data]);
-          } else {
-            // Filter patients contain the userId already before
-            const result = patients.filter((patient) => patient.userId === data.userId);
-            // Check if newPatients is empty or not
-            if(result.length === 0) {
-              // Add new patients to the state
-              setPatients((prevPatients) => [
-                ...prevPatients,
-                data,
-              ]);
+          setPatients((prevPatients) => [...prevPatients, {} as User]);
+        } else if (data !== undefined) {
+          // Always use functional update to work with latest state
+          setPatients((prevPatients) => {
+            // Check if this patient ID already exists
+            const patientExists = prevPatients.some(
+              (patient) => patient.userId === data.userId
+            );
+
+            // Only add the patient if it doesn't already exist
+            if (!patientExists) {
+              return [...prevPatients, data];
             }
-          }
+            return prevPatients;
+          });
         }
-      })
+      });
 
-      socket.on("get_patient_in_emergency", (data) => { 
+      socket.on("get_patient_in_emergency", (data) => {});
+    });
 
-      })
-    })
-  }, [])
+    // Cleanup function to disconnect socket when component unmounts
+    return () => {
+      socket.off("connect");
+      socket.off("receive_patient_in_emergency");
+      socket.off("get_patient_in_emergency");
+      socket.disconnect();
+    };
+  }, []);
 
   const loadEmergencyPatients = async () => {
     try {
@@ -303,8 +305,8 @@ const EmergencyPage: React.FC = () => {
       renderCell: (params: GridRenderCellParams) =>
         params.value !== undefined ? (
           <Chip
-            label={params.value ? "Nam" : "Nữ"}
-            color={params.value ? "info" : "secondary"}
+            label={params.value ? "Nữ" : "Nam"}
+            color={params.value ? "secondary" : "info"}
             size="small"
           />
         ) : (
@@ -393,7 +395,7 @@ const EmergencyPage: React.FC = () => {
           </Typography>
 
           {/* Bộ chọn ngày */}
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
+          {/* <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
               label="Chọn ngày"
               value={selectedDate}
@@ -416,7 +418,7 @@ const EmergencyPage: React.FC = () => {
                 },
               }}
             />
-          </LocalizationProvider>
+          </LocalizationProvider> */}
         </Box>
 
         <Divider sx={{ mb: 3 }} />
@@ -432,7 +434,7 @@ const EmergencyPage: React.FC = () => {
         ) : (
           <>
             {/* Bản đồ vị trí */}
-            <Box sx={{ mb: 4 }}>
+            {/* <Box sx={{ mb: 4 }}>
               <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
                 Bản đồ vị trí
               </Typography>
@@ -441,7 +443,7 @@ const EmergencyPage: React.FC = () => {
               </Box>
             </Box>
 
-            <Divider sx={{ mb: 3 }} />
+            <Divider sx={{ mb: 3 }} /> */}
 
             <Box sx={{ height: 500, width: "100%" }}>
               <DataGrid

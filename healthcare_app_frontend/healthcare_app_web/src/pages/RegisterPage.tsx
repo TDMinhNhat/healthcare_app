@@ -438,32 +438,6 @@ export default function RegisterPage() {
                 </Grid2>
               </Grid2>
             </form>
-
-            {/* Phân cách giữa form và các lựa chọn đăng ký bằng mạng xã hội */}
-            <Divider sx={{ mt: 3, mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                Hoặc đăng ký với
-              </Typography>
-            </Divider>
-
-            {/* Các nút đăng ký bằng mạng xã hội */}
-            <Grid2 container spacing={2}>
-              <Grid2 size={{ xs: 4 }}>
-                <Button fullWidth variant="outlined" startIcon={<Google />}>
-                  Google
-                </Button>
-              </Grid2>
-              <Grid2 size={{ xs: 4 }}>
-                <Button fullWidth variant="outlined" startIcon={<Facebook />}>
-                  Facebook
-                </Button>
-              </Grid2>
-              <Grid2 size={{ xs: 4 }}>
-                <Button fullWidth variant="outlined" startIcon={<Apple />}>
-                  Apple
-                </Button>
-              </Grid2>
-            </Grid2>
           </>
         )}
       </Box>
