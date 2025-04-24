@@ -188,6 +188,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
           // onBack={handleBack}
           // onReset={handleReset}
           workSchedule={workSchedule}
+          service={selectedService}
           loading={loading}
         />
       )}

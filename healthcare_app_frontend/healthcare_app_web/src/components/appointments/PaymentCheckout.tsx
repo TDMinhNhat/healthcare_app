@@ -10,7 +10,10 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { checkPayment } from "../../services/appointment/payment_service";
-import { getAppointmentPrice } from "../../services/appointment/price_service";
+import {
+  getAppointmentPrice,
+  getAppointmentPriceByTypeDisease,
+} from "../../services/appointment/price_service";
 import { v4 as uuidv4 } from "uuid";
 import { format, subHours } from "date-fns"; // Import date-fns functions
 import { useSelector } from "react-redux";
@@ -19,12 +22,14 @@ import { Client } from "@stomp/stompjs";
 interface PaymentCheckoutProps {
   onPaymentComplete: (paymentContent: string) => Promise<void>; // Hàm gọi khi thanh toán hoàn tất
   workSchedule: any; // Thông tin lịch làm việc của bác sĩ
+  service: any; // Thông tin dịch vụ đã chọn
   loading: boolean; // Trạng thái đang xử lý
 }
 
 const PaymentCheckout: React.FC<PaymentCheckoutProps> = ({
   onPaymentComplete, // gọi nó khi check thành công để tạo lịch hẹn
   workSchedule,
+  service, // thông tin dịch vụ đã chọn
   loading,
 }) => {
   const user = useSelector((state: any) => state.user.user); // Lấy thông tin người dùng từ Redux store
@@ -57,10 +62,33 @@ const PaymentCheckout: React.FC<PaymentCheckoutProps> = ({
         setFetchingPrice(true);
         setPriceError(null);
 
-        const response = await getAppointmentPrice();
+        let response;
+        if (service && service.name) {
+          response = await getAppointmentPriceByTypeDisease(service.name);
 
+          // Nếu dữ liệu là null, dù code là 200, lấy giá mặc định
+          if (response.code === 200 && !response.data) {
+            response = await getAppointmentPrice();
+          }
+        } else {
+          // Nếu không có thông tin service, lấy giá mặc định
+          response = await getAppointmentPrice();
+        }
+        console.log("response", response);
         if (response.code === 200 && response.data) {
-          setAppointmentFee(response.data.price);
+          // Nếu dữ liệu là mảng, lọc ra các giá hợp lệ
+          if (Array.isArray(response.data)) {
+            const validPrices = response.data.filter(
+              (item) => item.status === true
+            );
+            if (validPrices.length > 0) {
+              setAppointmentFee(validPrices[0].price);
+            } else {
+              setPriceError("Không tìm thấy thông tin giá hợp lệ");
+            }
+          } else {
+            setAppointmentFee(response.data.price);
+          }
         } else {
           setPriceError("Không thể lấy thông tin phí khám bệnh");
           console.error("API error:", response);
@@ -74,7 +102,7 @@ const PaymentCheckout: React.FC<PaymentCheckoutProps> = ({
     };
 
     fetchAppointmentPrice();
-  }, []);
+  }, [service]);
 
   useEffect(() => {
     client.activate();
