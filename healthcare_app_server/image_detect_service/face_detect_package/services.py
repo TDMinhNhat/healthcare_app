@@ -2,6 +2,7 @@ import os.path
 import numpy as np
 import cv2
 import requests
+import httpx
 from asgiref.sync import sync_to_async
 
 from healthcare_app_server.models import *
@@ -61,7 +62,7 @@ class FaceDetectService:
         return "Can't detect"
 
 
-    async def detect_face(self) -> str:
+    def detect_face(self) -> str:
         image_array = np.asarray(bytearray(self.face_image), dtype=np.uint8)
         image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
 
@@ -93,9 +94,9 @@ class FaceDetectService:
 
             self.descriptor_model.setInput(faceBlob)
             vector = self.descriptor_model.forward().flatten()
-            vector_str = ",".join(map(str, vector.tolist()))
+            # vector_str = ",".join(map(str, vector.tolist()))
 
-            result = await self.__check_user__(vector)
+            result = self.__check_user__(vector)
             if result is not None:
                 return result
             else:
@@ -103,8 +104,9 @@ class FaceDetectService:
 
         return "Can't detect"
 
-    async def __check_user__(self, vector):
-        users = await sync_to_async(list)(User.objects.all())
+    def __check_user__(self, vector):
+        # users = await sync_to_async(list)(User.objects.all())
+        users = User.objects.all()
 
         for user in users:
             if user.face_encode_value == '':
@@ -113,7 +115,7 @@ class FaceDetectService:
             vector_check = np.array(list(map(float, user.face_encode_value.split(","))))
             similarity = 1 - cosine(vector_check, vector)
 
-            if similarity >= 0.7:
+            if similarity >= 0.8:
                 return self.__get_user_by_userid__(user.user_id)
         return None
 
@@ -140,5 +142,5 @@ class FaceDetectService:
         return mean_embedding
 
     def __get_user_by_userid__(self, user_id):
-        response = requests.get(f"http://localhost:8081/authenticate/api/v1/user/patient?userId={user_id}")
-        return response.json()
+        response = requests.get(f"http://localhost:8081/authenticate/api/v1/user/patient?userId={user_id}").json()
+        return response.data

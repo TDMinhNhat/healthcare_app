@@ -56,7 +56,9 @@ def authenticate_face(request: HttpRequest) -> JsonResponse:
             serializer = ResponseSerializer(response)
             return JsonResponse(serializer.data, safe = False)
         else:
-            return JsonResponse(result, safe = False)
+            response = Response(200, "User Found", result)
+            serializer = ResponseSerializer(response)
+            return JsonResponse(serializer.data, safe = False)
 
     except RuntimeError as e:
         response = Response(500, "Can't decoded the image", None)
