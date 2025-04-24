@@ -73,7 +73,8 @@ export default function Register() {
   // Hiển thị/ẩn mật khẩu
   const [showPassword, setShowPassword] = useState(false);
 
-  // Thêm trạng thái riêng cho giới tính và ngày sinh
+  // Add a comment to clarify gender handling
+  // Switch: true = female (Nam), false = male (Nữ)
   const [gender, setGender] = useState<"male" | "female">("female");
   const [birthDate, setBirthDate] = useState<Date>(new Date());
   const [dateError, setDateError] = useState<string | null>(null);
@@ -97,16 +98,16 @@ export default function Register() {
       setIsDetecting(true);
 
       const photo = await cameraRef.current.takePictureAsync({
-        quality: 0.5, // Chất lượng thấp hơn để xử lý nhanh hơn
+        quality: 1, // Chất lượng thấp hơn để xử lý nhanh hơn
         skipProcessing: true,
+        shutterSound: false,
       });
 
-      // Chuyển đổi hình ảnh thành blob cho yêu cầu API
-      const response = await fetch(photo.uri);
-      const blob = await response.blob();
-
-      // Gửi hình ảnh đến API phát hiện khuôn mặt
-      const result = await registerFace(blob);
+      // Gửi hình ảnh đến API phát hiện khuôn mặt với uri
+      const result = await registerFace({
+        uri: photo.uri,
+        type: "image/jpeg",
+      });
 
       console.log("Kết quả nhận diện khuôn mặt:", result);
 
@@ -261,14 +262,14 @@ export default function Register() {
                 const year = birthDate.getFullYear();
                 const dob = `${day}-${month}-${year}`;
 
-                const isMale = gender === "male";
+                const isFemale = gender === "female";
                 const response = await signUp(
                   values.firstName,
                   values.lastName,
                   values.email,
                   values.password,
                   values.username,
-                  isMale,
+                  isFemale,
                   dob,
                   values.phone,
                   detectedFaceImage || ""
@@ -474,9 +475,9 @@ export default function Register() {
                       thumbColor="#ffffff"
                       ios_backgroundColor="#767577"
                       onValueChange={() =>
-                        setGender(gender === "male" ? "female" : "male")
+                        setGender(gender === "female" ? "male" : "female")
                       }
-                      value={gender === "male"}
+                      value={gender === "female"}
                       style={styles.switch}
                     />
                     <TouchableOpacity

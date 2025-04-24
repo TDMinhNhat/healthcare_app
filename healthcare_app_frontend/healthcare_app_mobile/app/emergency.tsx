@@ -83,6 +83,7 @@ export default function Emergency() {
       console.log("Socket connected successfully. Socket ID:", socket.id);
       socket.on("emergency_detect_response", (data) => {
         if (data.code === 200 || data === "New User") {
+          console.log("Emergency detected:", data);
           socket.emit(
             "send_data_emergency",
             data === "New User" ? data : data.data
