@@ -91,8 +91,8 @@ export default function RegisterPage() {
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       try {
-        // Chuyển đổi giới tính thành boolean (nam = true, nữ = false)
-        const isMale = values.gender === "male";
+        // Chuyển đổi giới tính thành boolean (nữ = true, nam = false)
+        const isFemale = values.gender === "female";
         const birthDate = new Date(values.birthDate);
 
         // Gửi thông tin đăng ký kèm hình ảnh khuôn mặt đến API
@@ -102,7 +102,7 @@ export default function RegisterPage() {
           values.email,
           values.password,
           values.username,
-          isMale,
+          isFemale,
           formatDateToString(birthDate),
           values.phone,
           detectedFaceImage // Gửi hình ảnh khuôn mặt đã phát hiện
