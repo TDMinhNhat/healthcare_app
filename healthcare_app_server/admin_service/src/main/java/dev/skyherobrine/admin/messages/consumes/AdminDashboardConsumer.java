@@ -55,8 +55,8 @@ public class AdminDashboardConsumer {
             //// Salary
             result.put("salaries", new HashMap<>(){{
                 put("total", bookAppointmentPaymentRepository.findAll().stream().mapToDouble(bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice()).reduce(0.0, Double::sum));
-                put("total_this_year", bookAppointmentPaymentRepository.findByBookAppointment_WorkSchedule_DateAppointment_Year(LocalDate.now().getYear()).stream().mapToDouble(bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice()).reduce(0.0, Double::sum));
-                put("total_previous_year", bookAppointmentPaymentRepository.findByBookAppointment_WorkSchedule_DateAppointment_Year(LocalDate.now().minusYears(1L).getYear()).stream().mapToDouble(bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice()).reduce(0.0, Double::sum));
+                put("total_this_year", bookAppointmentPaymentRepository.findAll().stream().filter(item -> item.getBookAppointment().getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().getYear()).toList().stream().mapToDouble(bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice()).reduce(0.0, Double::sum));
+                put("total_previous_year", bookAppointmentPaymentRepository.findAll().stream().filter(item -> item.getBookAppointment().getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().minusYears(1L).getYear()).toList().stream().mapToDouble(bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice()).reduce(0.0, Double::sum));
             }});
 
             //// Patients
@@ -79,20 +79,20 @@ public class AdminDashboardConsumer {
             Map<String,Object> salaries = new HashMap<>();
             salaries.put("quarter", bookAppointmentPaymentRepository.findAll().stream().collect(
                     Collectors.groupingBy(
-                            bookAppointmentPayment -> bookAppointmentPayment.getBookAppointment().getCreatedAt().get(IsoFields.QUARTER_OF_YEAR),
-                            Collectors.summarizingDouble(bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice())
+                            bookAppointmentPayment -> bookAppointmentPayment.getBookAppointment().getWorkSchedule().getDateAppointment().get(IsoFields.QUARTER_OF_YEAR),
+                            Collectors.reducing(0.0, bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice(), Double::sum)
                     )
             ));
             salaries.put("month", bookAppointmentPaymentRepository.findAll().stream().collect(
                     Collectors.groupingBy(
-                            bookAppointmentPayment -> bookAppointmentPayment.getCreatedAt().getMonth(),
-                            Collectors.summarizingDouble(bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice()))));
+                            bookAppointmentPayment -> bookAppointmentPayment.getBookAppointment().getWorkSchedule().getDateAppointment().getMonth(),
+                            Collectors.reducing(0.0, bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice(), Double::sum)
+                    )));
             salaries.put("year", bookAppointmentPaymentRepository.findAll().stream().collect(
                     Collectors.groupingBy(
-                            bookAppointmentPayment -> bookAppointmentPayment.getCreatedAt().getYear(),
-                            Collectors.summarizingDouble(bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice())
-                    )
-            ));
+                            bookAppointmentPayment -> bookAppointmentPayment.getBookAppointment().getWorkSchedule().getDateAppointment().getYear(),
+                            Collectors.reducing(0.0, bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice(), Double::sum)
+                    )));
             visualize.put("salaries", salaries);
 
             //// Patient appointment:
