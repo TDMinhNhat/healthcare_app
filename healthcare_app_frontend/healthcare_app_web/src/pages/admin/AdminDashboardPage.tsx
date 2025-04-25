@@ -240,14 +240,12 @@ const AdminDashboardPage: React.FC = () => {
   };
 
   // Hàm xử lý khi người dùng nhấp vào điểm trên biểu đồ với kiểm tra dữ liệu đúng đắn
-  const handleChartItemClick = (dataIndex: number) => {
-    if (dataIndex !== undefined) {
-      const period =
-        timeView === "quarter" ? `Q${dataIndex + 1}` : `${dataIndex + 1}`;
-      console.log(
-        `Điều hướng đến: /admin/doctor-revenue/${timeView}/${period}`
-      );
-      navigate(`/admin/doctor-revenue/${timeView}/${period}`);
+  const handleChartItemClick = (value: string) => {
+    if (value !== undefined) {
+      // const period =
+      //   timeView === "quarter" ? `Q${dataIndex + 1}` : `${dataIndex + 1}`;
+      console.log(`Điều hướng đến: /admin/doctor-revenue/${timeView}/${value}`);
+      navigate(`/admin/doctor-revenue/${timeView}/${value}`);
     }
   };
 
@@ -522,7 +520,7 @@ const AdminDashboardPage: React.FC = () => {
                 onAxisClick={(event, d) => {
                   console.log("Nhấp vào trục:", d);
                   if (d && d.dataIndex !== undefined) {
-                    handleChartItemClick(d.dataIndex);
+                    handleChartItemClick(d.axisValue);
                   }
                 }}
                 // onLineClick={(event, d) => {
@@ -534,7 +532,7 @@ const AdminDashboardPage: React.FC = () => {
                 onMarkClick={(event, d) => {
                   console.log("Nhấp vào điểm đánh dấu:", d);
                   if (d && d.dataIndex !== undefined) {
-                    handleChartItemClick(d.dataIndex);
+                    handleChartItemClick(d.axisValue);
                   }
                 }}
                 // onAreaClick={(event, d) => {

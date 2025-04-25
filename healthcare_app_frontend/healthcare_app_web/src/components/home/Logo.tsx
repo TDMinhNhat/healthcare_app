@@ -16,7 +16,7 @@ export default function Logo() {
     >
       <Box
         component="img"
-        src={"../../../public/logo2.png"}
+        src={"/logo2.png"}
         alt="Medicare Logo"
         sx={{
           height: 40, // Increased from 24 to 40 for a larger logo

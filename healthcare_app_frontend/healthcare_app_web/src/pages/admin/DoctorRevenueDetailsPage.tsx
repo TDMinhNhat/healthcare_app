@@ -16,6 +16,11 @@ import {
 } from "@mui/x-data-grid";
 import { useParams, useNavigate } from "react-router";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import {
+  getListDoctorByQuarter,
+  getListDoctorByMonth,
+  getListDoctorByYear,
+} from "../../services/appointment/dashboard_service";
 
 // Giao diện cho dữ liệu doanh thu của bác sĩ
 interface DoctorRevenue {
@@ -41,37 +46,54 @@ const DoctorRevenueDetailsPage: React.FC = () => {
     const fetchDoctorRevenues = async () => {
       try {
         setLoading(true);
-        // giả lập
-        setTimeout(() => {
-          const mockData: DoctorRevenue[] = Array.from(
-            { length: 15 },
-            (_, i) => ({
-              id: `doc-${i + 1}`,
-              doctorId: `D${1000 + i}`,
-              doctorName: `Bác sĩ Nguyễn Văn ${String.fromCharCode(65 + i)}`,
-              specialty: [
-                "Nhi khoa",
-                "Tim mạch",
-                "Da liễu",
-                "Nội tổng hợp",
-                "Thần kinh",
-              ][i % 5],
-              patientsCount: Math.floor(Math.random() * 50) + 10,
-              // Đảm bảo giá trị là số nguyên hợp lệ
-              totalRevenue: Math.round(
-                (Math.floor(Math.random() * 50) + 10) * 1000000
-              ),
+
+        let response;
+        console.log("period", period);
+
+        // Gọi API phù hợp dựa trên loại thời gian
+        if (periodType === "quarter" && period) {
+          // Bỏ chữ "Q" khỏi chuỗi quý (ví dụ: "Q1" -> "1")
+          const quarterNumber = period.replace("Q", "");
+          response = await getListDoctorByQuarter(quarterNumber);
+        } else if (periodType === "month" && period) {
+          const monthNumber = period.replace("T", "");
+          response = await getListDoctorByMonth(monthNumber);
+        } else if (periodType === "year" && period) {
+          response = await getListDoctorByYear(period);
+        } else {
+          throw new Error("Loại thời gian không hợp lệ");
+        }
+        console.log("API response:", response);
+        if (response?.code === 200 && Array.isArray(response.data)) {
+          // Chuyển đổi dữ liệu từ API sang định dạng phù hợp với giao diện
+          const formattedData: DoctorRevenue[] = response.data.map(
+            (item: any) => ({
+              id: item.doctor.userId,
+              doctorId: item.doctor.userId.toString(),
+              doctorName: `${item.doctor.lastName} ${item.doctor.firstName}`,
+              specialty:
+                item.doctor.typeDisease?.name ||
+                item.doctor.specialization ||
+                "Không xác định",
+              patientsCount: item.total_patients || 0,
+              totalRevenue: item.total_salaries || 0,
             })
           );
 
-          // Kiểm tra dữ liệu trước khi cập nhật state
-          console.log("Mock data created:", mockData);
-          setDoctorRevenues(mockData);
-          setLoading(false);
-        }, 1000);
+          console.log("API data transformed:", formattedData);
+          setDoctorRevenues(formattedData);
+        } else {
+          console.error("Invalid API response format:", response);
+          throw new Error("Dữ liệu không hợp lệ");
+        }
       } catch (err) {
         console.error("Lỗi khi tải dữ liệu doanh thu bác sĩ:", err);
-        setError("Không thể tải dữ liệu doanh thu bác sĩ");
+        setError(
+          `Không thể tải dữ liệu doanh thu bác sĩ: ${
+            err instanceof Error ? err.message : "Lỗi không xác định"
+          }`
+        );
+      } finally {
         setLoading(false);
       }
     };
@@ -109,8 +131,8 @@ const DoctorRevenueDetailsPage: React.FC = () => {
     {
       field: "doctorId",
       headerName: "Mã bác sĩ",
-      flex: 1,
-      minWidth: 120,
+      flex: 1.5,
+      minWidth: 180,
       resizable: true,
     },
     {
@@ -131,8 +153,8 @@ const DoctorRevenueDetailsPage: React.FC = () => {
       field: "patientsCount",
       headerName: "Số lượng bệnh nhân",
       type: "number",
-      flex: 1.5,
-      minWidth: 150,
+      flex: 1,
+      minWidth: 120,
       resizable: true,
     },
     {
