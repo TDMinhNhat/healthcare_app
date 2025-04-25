@@ -29,23 +29,15 @@ import java.util.Map;
 public class DashboardService {
 
     private final BookAppointmentRepository bookAppointmentRepository;
-    private final MedicalRecordRepository medicalRecordRepository;
-    private final MedicalRecordDrugRepository medicalRecordDrugRepository;
     private final BookingService bookingService;
-    private final WorkScheduleFeign workScheduleFeign;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final WorkScheduleResponseConsumer workScheduleResponseConsumer;
-    private final AdminDashboardResponseConsumer adminDashboardResponseConsumer;
 
-    public DashboardService(BookAppointmentRepository bookAppointmentRepository, MedicalRecordRepository medicalRecordRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, BookingService bookingService, WorkScheduleFeign workScheduleFeign, KafkaTemplate<String, String> kafkaTemplate, WorkScheduleResponseConsumer workScheduleResponseConsumer, AdminDashboardResponseConsumer adminDashboardResponseConsumer) {
+    public DashboardService(BookAppointmentRepository bookAppointmentRepository, BookingService bookingService, KafkaTemplate<String, String> kafkaTemplate, WorkScheduleResponseConsumer workScheduleResponseConsumer) {
         this.bookAppointmentRepository = bookAppointmentRepository;
-        this.medicalRecordRepository = medicalRecordRepository;
-        this.medicalRecordDrugRepository = medicalRecordDrugRepository;
         this.bookingService = bookingService;
-        this.workScheduleFeign = workScheduleFeign;
         this.kafkaTemplate = kafkaTemplate;
         this.workScheduleResponseConsumer = workScheduleResponseConsumer;
-        this.adminDashboardResponseConsumer = adminDashboardResponseConsumer;
     }
 
     public Map<String,Object> getPatientDashboard(String patientId) throws Exception {
@@ -161,10 +153,5 @@ public class DashboardService {
         charts.put("yearly", yearly);
         result.put("charts", charts);
         return result;
-    }
-
-    public Object getAdminDashboard() {
-        kafkaTemplate.send("request_get_admin_dashboard", "");
-        return adminDashboardResponseConsumer.getStorageData();
     }
 }

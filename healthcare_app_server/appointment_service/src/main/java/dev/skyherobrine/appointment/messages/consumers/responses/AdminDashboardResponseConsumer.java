@@ -28,6 +28,45 @@ public class AdminDashboardResponseConsumer {
         latch.countDown();
     }
 
+    @KafkaListener(topics = "response_get_list_doctor_by_quarter", groupId = "appointment_response_get_list_doctor_by_quarter")
+    public void responseGetListDoctorByQuarter(String message) {
+        try {
+            log.info("Admin Dashboard Response Consumer: listening for getting list doctor by quarter");
+            log.info("Admin Dashboard Response Consumer: {}", message);
+            node = new ObjectMapper().readTree(message);
+        } catch (Exception e) {
+            log.error("Admin Dashboard Response Consumer: the consumer thrown an error");
+            log.error(e.getMessage());
+        }
+        latch.countDown();
+    }
+
+    @KafkaListener(topics = "request_get_list_doctor_by_month", groupId = "appointment_response_get_list_doctor_by_month")
+    public void responseGetListDoctorByMonth(String message) {
+        try {
+            log.info("Admin Dashboard Response Consumer: listening for getting list doctor by month");
+            log.info("Admin Dashboard Response Consumer: {}", message);
+            node = new ObjectMapper().readTree(message);
+        } catch (Exception e) {
+            log.error("Admin Dashboard Response Consumer: the consumer thrown an error");
+            log.error(e.getMessage());
+        }
+        latch.countDown();
+    }
+
+    @KafkaListener(topics = "response_get_list_doctor_by_year", groupId = "appointment_response_get_list_doctor_by_year")
+    public void responseGetListDoctorByYear(String message) {
+        try {
+            log.info("Admin Dashboard Response Consumer: listening for getting list doctor by year");
+            log.info("Admin Dashboard Response Consumer: {}", message);
+            node = new ObjectMapper().readTree(message);
+        } catch (Exception e) {
+            log.error("Admin Dashboard Response Consumer: the consumer thrown an error");
+            log.error(e.getMessage());
+        }
+        latch.countDown();
+    }
+
     public JsonNode getStorageData() {
         try {
             latch.await();

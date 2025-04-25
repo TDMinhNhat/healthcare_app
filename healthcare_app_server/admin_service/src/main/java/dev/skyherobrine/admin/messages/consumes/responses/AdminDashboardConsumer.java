@@ -1,5 +1,6 @@
 package dev.skyherobrine.admin.messages.consumes.responses;
 
+import dev.skyherobrine.admin.models.mariadb.Doctor;
 import dev.skyherobrine.admin.repositories.mariadb.DoctorRepository;
 import dev.skyherobrine.admin.repositories.mariadb.PatientRepository;
 import dev.skyherobrine.admin.repositories.mariadb.PriceRepository;
@@ -13,7 +14,9 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.IsoFields;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -81,7 +84,7 @@ public class AdminDashboardConsumer {
                             Collectors.reducing(0.0, bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice(), Double::sum)
                     )
             ));
-            salaries.put("month", bookAppointmentPaymentRepository.findAll().stream().collect(
+            salaries.put("month", bookAppointmentPaymentRepository.findAll().stream().filter(bookAppointmentPayment -> bookAppointmentPayment.getBookAppointment().getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().getYear()).collect(
                     Collectors.groupingBy(
                             bookAppointmentPayment -> bookAppointmentPayment.getBookAppointment().getWorkSchedule().getDateAppointment().getMonth(),
                             Collectors.reducing(0.0, bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice(), Double::sum)
@@ -122,6 +125,95 @@ public class AdminDashboardConsumer {
             log.error("Admin Dashboard Consumer: the consumer thrown an error");
             log.error("Admin Dashboard Consumer: {}", e.getMessage());
             kafkaTemplate.send("response_get_admin_dashboard", "Error: " + e.getMessage());
+            kafkaTemplate.flush();
+        }
+    }
+
+    @KafkaListener(topics = "request_get_list_doctor_by_quarter", groupId = "admin_get_list_doctor_by_quarter")
+    public void getListDoctorByQuarter(String message) {
+        try {
+            log.info("Admin Dashboard Consumer: Call the api get list doctor by quarter");
+            log.info("Admin Dashboard Consumer: {}", message);
+
+            String getQuarter = ObjectParser.convertJsonToObject(message, String.class);
+            List<Map<String,Object>> result = new ArrayList<>();
+            bookAppointmentRepository.findAll().stream().filter(item -> item.getWorkSchedule().getDateAppointment().get(IsoFields.QUARTER_OF_YEAR) == Integer.parseInt(getQuarter)).forEach(
+                    item -> {
+                        Map<String,Object> doctor = new HashMap<>();
+                        doctor.put("doctor", item.getWorkSchedule().getDoctor());
+                        doctor.put("total_patients", bookAppointmentPaymentRepository.findByBookAppointmentIn(bookAppointmentRepository.findAll().stream().filter(item1 -> item1.getWorkSchedule().getDoctor().equals(item.getWorkSchedule().getDoctor())).toList())
+                                .stream().filter(item1 -> item1.getBookAppointment().getWorkSchedule().getDateAppointment().get(IsoFields.QUARTER_OF_YEAR) == Integer.parseInt(getQuarter)).toList().size());
+                        doctor.put("total_salaries", bookAppointmentPaymentRepository.findByBookAppointmentIn(bookAppointmentRepository.findAll().stream().filter(item1 -> item1.getWorkSchedule().getDoctor().equals(item.getWorkSchedule().getDoctor())).toList())
+                                .stream().filter(item1 -> item1.getBookAppointment().getWorkSchedule().getDateAppointment().get(IsoFields.QUARTER_OF_YEAR) == Integer.parseInt(getQuarter)).mapToDouble(bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice()).reduce(0.0, Double::sum));
+
+                        result.add(doctor);
+                    }
+            );
+
+            kafkaTemplate.send("response_get_list_doctor_by_quarter", ObjectParser.convertObjectToJson(result)).get();
+            kafkaTemplate.flush();
+        } catch (Exception e) {
+            log.error("Admin Dashboard Consumer: the consumer thrown an error");
+            log.error("Admin Dashboard Consumer: {}", e.getMessage());
+            kafkaTemplate.send("response_get_list_doctor_by_quarter", "Error: " + e.getMessage());
+            kafkaTemplate.flush();
+        }
+    }
+
+    @KafkaListener(topics = "request_get_list_doctor_by_month", groupId = "admin_get_list_doctor_by_month")
+    public void getListDoctorByMonth(String message) {
+        try {
+            log.info("Admin Dashboard Consumer: Call the api get list doctor by month");
+            log.info("Admin Dashboard Consumer: {}", message);
+
+            int getMonth = Integer.parseInt(ObjectParser.convertJsonToObject(message, String.class));
+            List<Map<String,Object>> result = new ArrayList<>();
+            bookAppointmentRepository.findAll().stream().filter(item -> item.getWorkSchedule().getDateAppointment().getMonthValue() == getMonth && item.getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().getYear()).forEach(item -> {
+                Map<String,Object> doctor = new HashMap<>();
+                doctor.put("doctor", item.getWorkSchedule().getDoctor());
+                doctor.put("total_patients", bookAppointmentPaymentRepository.findByBookAppointmentIn(bookAppointmentRepository.findAll().stream().filter(item1 -> item1.getWorkSchedule().getDoctor().equals(item.getWorkSchedule().getDoctor())).toList())
+                        .stream().filter(item1 -> item1.getBookAppointment().getWorkSchedule().getDateAppointment().getMonthValue() == getMonth && item1.getBookAppointment().getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().getYear()).toList().size());
+                doctor.put("total_salaries", bookAppointmentPaymentRepository.findByBookAppointmentIn(bookAppointmentRepository.findAll().stream().filter(item1 -> item1.getWorkSchedule().getDoctor().equals(item.getWorkSchedule().getDoctor())).toList())
+                        .stream().filter(item1 -> item1.getBookAppointment().getWorkSchedule().getDateAppointment().getMonthValue() == getMonth && item1.getBookAppointment().getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().getYear()).mapToDouble(bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice()).reduce(0.0, Double::sum));
+
+                result.add(doctor);
+            });
+
+            kafkaTemplate.send("response_get_list_doctor_by_month", ObjectParser.convertObjectToJson(result)).get();
+            kafkaTemplate.flush();
+        } catch (Exception e) {
+            log.error("Admin Dashboard Consumer: the consumer thrown an error");
+            log.error("Admin Dashboard Consumer: {}", e.getMessage());
+            kafkaTemplate.send("response_get_list_doctor_by_month", "Error: " + e.getMessage());
+            kafkaTemplate.flush();
+        }
+    }
+
+    @KafkaListener(topics = "request_get_list_doctor_by_year", groupId = "admin_get_list_doctor_by_year")
+    public void getListDoctorByYear(String message) {
+        try {
+            log.info("Admin Dashboard Consumer: Call the api get list doctor by year");
+            log.info("Admin Dashboard Consumer: {}", message);
+
+            int getYear = Integer.parseInt(ObjectParser.convertJsonToObject(message, String.class));
+            List<Map<String,Object>> result = new ArrayList<>();
+            bookAppointmentRepository.findAll().stream().filter(item -> item.getWorkSchedule().getDateAppointment().getYear() == getYear).map(item -> item.getWorkSchedule().getDoctor()).forEach(item -> {
+                Map<String,Object> doctor = new HashMap<>();
+                doctor.put("doctor", item);
+                doctor.put("total_patients", bookAppointmentPaymentRepository.findByBookAppointmentIn(bookAppointmentRepository.findAll().stream().filter(item1 -> item1.getWorkSchedule().getDoctor().equals(item)).toList())
+                        .stream().filter(item1 -> item1.getBookAppointment().getWorkSchedule().getDateAppointment().getYear() == getYear).toList().size());
+                doctor.put("total_salaries", bookAppointmentPaymentRepository.findByBookAppointmentIn(bookAppointmentRepository.findAll().stream().filter(item1 -> item1.getWorkSchedule().getDoctor().equals(item)).toList())
+                        .stream().filter(item1 -> item1.getBookAppointment().getWorkSchedule().getDateAppointment().getYear() == getYear).mapToDouble(bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice()).reduce(0.0, Double::sum));
+
+                result.add(doctor);
+            });
+
+            kafkaTemplate.send("response_get_list_doctor_by_year", ObjectParser.convertObjectToJson(result)).get();
+            kafkaTemplate.flush();
+        } catch (Exception e) {
+            log.error("Admin Dashboard Consumer: the consumer thrown an error");
+            log.error("Admin Dashboard Consumer: {}", e.getMessage());
+            kafkaTemplate.send("response_get_list_doctor_by_year", "Error: " + e.getMessage());
             kafkaTemplate.flush();
         }
     }
