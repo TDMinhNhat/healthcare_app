@@ -73,6 +73,7 @@ public class DashboardController {
         try {
             log.info("Dashboard Controller: Call the api get admin dashboard");
             kafkaTemplate.send("request_get_admin_dashboard", "");
+            Thread.sleep(1000);
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "Get admin dashboard",
@@ -94,6 +95,7 @@ public class DashboardController {
         try {
             log.info("Dashboard Controller: Call the api get list doctor by quarter");
             kafkaTemplate.send("request_get_list_doctor_by_quarter", ObjectParser.convertObjectToJson(quarter));
+            Thread.sleep(1000);
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "Get list doctor by quarter",
@@ -115,6 +117,7 @@ public class DashboardController {
         try {
             log.info("Dashboard Controller: Call the api get list doctor by month");
             kafkaTemplate.send("request_get_list_doctor_by_month", ObjectParser.convertObjectToJson(month));
+            Thread.sleep(1000);
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "Get list doctor by month",
@@ -136,6 +139,7 @@ public class DashboardController {
         try {
             log.info("Dashboard Controller: Call the api get list doctor by year");
             kafkaTemplate.send("request_get_list_doctor_by_year", ObjectParser.convertObjectToJson(year));
+            Thread.sleep(1000);
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),
                     "Get list doctor by year",

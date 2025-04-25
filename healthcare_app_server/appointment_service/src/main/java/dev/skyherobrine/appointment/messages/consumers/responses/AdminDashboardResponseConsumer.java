@@ -41,7 +41,7 @@ public class AdminDashboardResponseConsumer {
         latch.countDown();
     }
 
-    @KafkaListener(topics = "request_get_list_doctor_by_month", groupId = "appointment_response_get_list_doctor_by_month")
+    @KafkaListener(topics = "response_get_list_doctor_by_month", groupId = "appointment_response_get_list_doctor_by_month")
     public void responseGetListDoctorByMonth(String message) {
         try {
             log.info("Admin Dashboard Response Consumer: listening for getting list doctor by month");
@@ -67,7 +67,7 @@ public class AdminDashboardResponseConsumer {
         latch.countDown();
     }
 
-    public JsonNode getStorageData() {
+    public synchronized JsonNode getStorageData() {
         try {
             latch.await();
             latch = new CountDownLatch(1);

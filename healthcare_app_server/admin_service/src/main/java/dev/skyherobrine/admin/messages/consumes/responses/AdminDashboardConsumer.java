@@ -1,11 +1,13 @@
 package dev.skyherobrine.admin.messages.consumes.responses;
 
 import dev.skyherobrine.admin.models.mariadb.Doctor;
+import dev.skyherobrine.admin.models.mongodb.BookAppointment;
 import dev.skyherobrine.admin.repositories.mariadb.DoctorRepository;
 import dev.skyherobrine.admin.repositories.mariadb.PatientRepository;
 import dev.skyherobrine.admin.repositories.mariadb.PriceRepository;
 import dev.skyherobrine.admin.repositories.mongodb.*;
 import dev.skyherobrine.admin.utils.ObjectParser;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -137,14 +139,12 @@ public class AdminDashboardConsumer {
 
             String getQuarter = ObjectParser.convertJsonToObject(message, String.class);
             List<Map<String,Object>> result = new ArrayList<>();
-            bookAppointmentRepository.findAll().stream().filter(item -> item.getWorkSchedule().getDateAppointment().get(IsoFields.QUARTER_OF_YEAR) == Integer.parseInt(getQuarter)).forEach(
+            bookAppointmentRepository.findAll().stream().filter(item -> item.getWorkSchedule().getDateAppointment().get(IsoFields.QUARTER_OF_YEAR) == Integer.parseInt(getQuarter) && item.getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().getYear()).map(item -> item.getWorkSchedule().getDoctor().getUserId()).distinct().forEach(
                     item -> {
                         Map<String,Object> doctor = new HashMap<>();
-                        doctor.put("doctor", item.getWorkSchedule().getDoctor());
-                        doctor.put("total_patients", bookAppointmentPaymentRepository.findByBookAppointmentIn(bookAppointmentRepository.findAll().stream().filter(item1 -> item1.getWorkSchedule().getDoctor().equals(item.getWorkSchedule().getDoctor())).toList())
-                                .stream().filter(item1 -> item1.getBookAppointment().getWorkSchedule().getDateAppointment().get(IsoFields.QUARTER_OF_YEAR) == Integer.parseInt(getQuarter)).toList().size());
-                        doctor.put("total_salaries", bookAppointmentPaymentRepository.findByBookAppointmentIn(bookAppointmentRepository.findAll().stream().filter(item1 -> item1.getWorkSchedule().getDoctor().equals(item.getWorkSchedule().getDoctor())).toList())
-                                .stream().filter(item1 -> item1.getBookAppointment().getWorkSchedule().getDateAppointment().get(IsoFields.QUARTER_OF_YEAR) == Integer.parseInt(getQuarter)).mapToDouble(bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice()).reduce(0.0, Double::sum));
+                        doctor.put("doctor", doctorRepository.findDoctorByUserId(item).orElseThrow(() -> new EntityNotFoundException("The doctor wasn't found!")));
+                        doctor.put("total_patients", bookAppointmentPaymentRepository.findByBookAppointment_IdIn(bookAppointmentRepository.findAll().stream().filter(item1 -> item1.getWorkSchedule().getDoctor().getUserId().equals(item) && item1.getWorkSchedule().getDateAppointment().get(IsoFields.QUARTER_OF_YEAR) == Integer.parseInt(getQuarter) && item1.getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().getYear()).map(BookAppointment::getId).toList()).size());
+                        doctor.put("total_salaries", bookAppointmentPaymentRepository.findByBookAppointment_IdIn(bookAppointmentRepository.findAll().stream().filter(item1 -> item1.getWorkSchedule().getDoctor().getUserId().equals(item) && item1.getWorkSchedule().getDateAppointment().get(IsoFields.QUARTER_OF_YEAR) == Integer.parseInt(getQuarter) && item1.getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().getYear()).map(BookAppointment::getId).toList()).stream().mapToDouble(bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice()).reduce(0.0, Double::sum));
 
                         result.add(doctor);
                     }
@@ -152,6 +152,7 @@ public class AdminDashboardConsumer {
 
             kafkaTemplate.send("response_get_list_doctor_by_quarter", ObjectParser.convertObjectToJson(result)).get();
             kafkaTemplate.flush();
+            log.info("Admin Dashboard Consumer: sent the result to appointment service");
         } catch (Exception e) {
             log.error("Admin Dashboard Consumer: the consumer thrown an error");
             log.error("Admin Dashboard Consumer: {}", e.getMessage());
@@ -168,19 +169,21 @@ public class AdminDashboardConsumer {
 
             int getMonth = Integer.parseInt(ObjectParser.convertJsonToObject(message, String.class));
             List<Map<String,Object>> result = new ArrayList<>();
-            bookAppointmentRepository.findAll().stream().filter(item -> item.getWorkSchedule().getDateAppointment().getMonthValue() == getMonth && item.getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().getYear()).forEach(item -> {
-                Map<String,Object> doctor = new HashMap<>();
-                doctor.put("doctor", item.getWorkSchedule().getDoctor());
-                doctor.put("total_patients", bookAppointmentPaymentRepository.findByBookAppointmentIn(bookAppointmentRepository.findAll().stream().filter(item1 -> item1.getWorkSchedule().getDoctor().equals(item.getWorkSchedule().getDoctor())).toList())
-                        .stream().filter(item1 -> item1.getBookAppointment().getWorkSchedule().getDateAppointment().getMonthValue() == getMonth && item1.getBookAppointment().getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().getYear()).toList().size());
-                doctor.put("total_salaries", bookAppointmentPaymentRepository.findByBookAppointmentIn(bookAppointmentRepository.findAll().stream().filter(item1 -> item1.getWorkSchedule().getDoctor().equals(item.getWorkSchedule().getDoctor())).toList())
-                        .stream().filter(item1 -> item1.getBookAppointment().getWorkSchedule().getDateAppointment().getMonthValue() == getMonth && item1.getBookAppointment().getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().getYear()).mapToDouble(bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice()).reduce(0.0, Double::sum));
+            bookAppointmentRepository.findAll().stream().filter(item -> item.getWorkSchedule().getDateAppointment().getMonthValue() == getMonth && item.getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().getYear()).map(item -> item.getWorkSchedule().getDoctor().getUserId()).distinct().forEach(
+                    item -> {
+                            Map<String,Object> doctor = new HashMap<>();
+                            doctor.put("doctor", doctorRepository.findDoctorByUserId(item).orElseThrow(() -> new EntityNotFoundException("The doctor wasn't found!")));
+                            doctor.put("total_patients", bookAppointmentPaymentRepository.findByBookAppointment_IdIn(bookAppointmentRepository.findAll().stream().filter(item1 -> item1.getWorkSchedule().getDoctor().getUserId().equals(item)).map(BookAppointment::getId).toList())
+                                    .stream().filter(item1 -> item1.getBookAppointment().getWorkSchedule().getDateAppointment().getMonthValue() == getMonth && item1.getBookAppointment().getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().getYear()).toList().size());
+                            doctor.put("total_salaries", bookAppointmentPaymentRepository.findByBookAppointment_IdIn(bookAppointmentRepository.findAll().stream().filter(item1 -> item1.getWorkSchedule().getDoctor().getUserId().equals(item)).map(BookAppointment::getId).toList())
+                                    .stream().filter(item1 -> item1.getBookAppointment().getWorkSchedule().getDateAppointment().getMonthValue() == getMonth && item1.getBookAppointment().getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().getYear()).mapToDouble(bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice()).reduce(0.0, Double::sum));
 
-                result.add(doctor);
-            });
+                            result.add(doctor);
+                    });
 
             kafkaTemplate.send("response_get_list_doctor_by_month", ObjectParser.convertObjectToJson(result)).get();
             kafkaTemplate.flush();
+            log.info("Admin Dashboard Consumer: sent the result to appointment service");
         } catch (Exception e) {
             log.error("Admin Dashboard Consumer: the consumer thrown an error");
             log.error("Admin Dashboard Consumer: {}", e.getMessage());
@@ -197,12 +200,12 @@ public class AdminDashboardConsumer {
 
             int getYear = Integer.parseInt(ObjectParser.convertJsonToObject(message, String.class));
             List<Map<String,Object>> result = new ArrayList<>();
-            bookAppointmentRepository.findAll().stream().filter(item -> item.getWorkSchedule().getDateAppointment().getYear() == getYear).map(item -> item.getWorkSchedule().getDoctor()).forEach(item -> {
+            bookAppointmentRepository.findAll().stream().filter(item -> item.getWorkSchedule().getDateAppointment().getYear() == getYear).map(item -> item.getWorkSchedule().getDoctor().getUserId()).distinct().forEach(item -> {
                 Map<String,Object> doctor = new HashMap<>();
-                doctor.put("doctor", item);
-                doctor.put("total_patients", bookAppointmentPaymentRepository.findByBookAppointmentIn(bookAppointmentRepository.findAll().stream().filter(item1 -> item1.getWorkSchedule().getDoctor().equals(item)).toList())
+                doctor.put("doctor", doctorRepository.findDoctorByUserId(item).orElseThrow(() -> new EntityNotFoundException("The doctor wasn't found!")));
+                doctor.put("total_patients", bookAppointmentPaymentRepository.findByBookAppointment_IdIn(bookAppointmentRepository.findAll().stream().filter(item1 -> item1.getWorkSchedule().getDoctor().getUserId().equals(item)).map(BookAppointment::getId).toList())
                         .stream().filter(item1 -> item1.getBookAppointment().getWorkSchedule().getDateAppointment().getYear() == getYear).toList().size());
-                doctor.put("total_salaries", bookAppointmentPaymentRepository.findByBookAppointmentIn(bookAppointmentRepository.findAll().stream().filter(item1 -> item1.getWorkSchedule().getDoctor().equals(item)).toList())
+                doctor.put("total_salaries", bookAppointmentPaymentRepository.findByBookAppointment_IdIn(bookAppointmentRepository.findAll().stream().filter(item1 -> item1.getWorkSchedule().getDoctor().getUserId().equals(item)).map(BookAppointment::getId).toList())
                         .stream().filter(item1 -> item1.getBookAppointment().getWorkSchedule().getDateAppointment().getYear() == getYear).mapToDouble(bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice()).reduce(0.0, Double::sum));
 
                 result.add(doctor);
@@ -210,6 +213,7 @@ public class AdminDashboardConsumer {
 
             kafkaTemplate.send("response_get_list_doctor_by_year", ObjectParser.convertObjectToJson(result)).get();
             kafkaTemplate.flush();
+            log.info("Admin Dashboard Consumer: sent the result to appointment service");
         } catch (Exception e) {
             log.error("Admin Dashboard Consumer: the consumer thrown an error");
             log.error("Admin Dashboard Consumer: {}", e.getMessage());

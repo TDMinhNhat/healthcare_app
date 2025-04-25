@@ -19,5 +19,7 @@ public interface BookAppointmentPaymentRepository extends MongoRepository<BookAp
 
     List<BookAppointmentPayment> findByBookAppointment_WorkSchedule_DateAppointment_Year(int year);
 
+    List<BookAppointmentPayment> findByBookAppointment_IdIn(Collection<Long> ids);
+
     List<BookAppointmentPayment> findByBookAppointmentIn(Collection<BookAppointment> bookAppointments);
 }
