@@ -46,7 +46,7 @@ const socket: Socket = io(`ws://localhost:8081`, {
 });
 
 // Dữ liệu giả lập cho bệnh nhân cấp cứu
-const mockEmergencyPatients: (User & { received?: boolean })[] = [
+const mockEmergencyPatients: User[] = [
   {
     userId: "1",
     firstName: "Văn A",
@@ -57,7 +57,7 @@ const mockEmergencyPatients: (User & { received?: boolean })[] = [
     sex: true,
     address: "Hà Nội",
     avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-    received: true, // Đã tiếp nhận
+    emergencyContact: "Nguyễn Văn B - 0987654321",
   },
   {
     userId: "2",
@@ -69,7 +69,7 @@ const mockEmergencyPatients: (User & { received?: boolean })[] = [
     sex: false,
     address: "Hồ Chí Minh",
     avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-    // Chưa tiếp nhận
+    emergencyContact: "Trần Văn C - 0976543210",
   },
   {
     userId: "3",
@@ -81,7 +81,7 @@ const mockEmergencyPatients: (User & { received?: boolean })[] = [
     sex: true,
     address: "Đà Nẵng",
     avatar: "https://randomuser.me/api/portraits/men/67.jpg",
-    received: true, // Đã tiếp nhận
+    emergencyContact: "Lê Thị D - 0965432109",
   },
   {
     userId: "4",
@@ -93,7 +93,7 @@ const mockEmergencyPatients: (User & { received?: boolean })[] = [
     sex: false,
     address: "Cần Thơ",
     avatar: "https://randomuser.me/api/portraits/women/22.jpg",
-    // Chưa tiếp nhận
+    emergencyContact: "Phạm Văn E - 0954321098",
   },
   {},
   {},
@@ -107,26 +107,13 @@ const fetchEmergencyPatients = async (date?: Date): Promise<User[]> => {
   });
 };
 
-interface EmergencyPatient extends User {
-  received?: boolean;
-}
-
 const EmergencyPage: React.FC = () => {
-  const [patients, setPatients] = useState<EmergencyPatient[]>([]);
+  const [patients, setPatients] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPatient, setSelectedPatient] = useState<User | null>(null);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // Mặc định là hôm nay
-  const [confirmDialog, setConfirmDialog] = useState<{
-    open: boolean;
-    patientId: string;
-    patientName: string;
-  }>({
-    open: false,
-    patientId: "",
-    patientName: "",
-  });
 
   useEffect(() => {
     loadEmergencyPatients();
@@ -141,18 +128,33 @@ const EmergencyPage: React.FC = () => {
 
       socket.on("receive_patient_in_emergency", (data) => {
         console.log(data);
-        if (data === "New User") {
-          //Add new patient with empty object
-          setPatients((prevPatients) => [...prevPatients, {} as User]);
+        if (data.data === "New User") {
+          // Thêm bệnh nhân mới với đối tượng trống - có thể có nhiều row bệnh nhân mới rỗng
+          // Đảm bảo trường emergencyContact được định nghĩa
+          setPatients((prevPatients) => [
+            ...prevPatients,
+            { emergencyContact: data.emergencyContact } as User,
+          ]);
+        } else if (
+          data.emergencyContact &&
+          !data.userId &&
+          !data.firstName &&
+          !data.lastName
+        ) {
+          // Trường hợp chỉ có duy nhất trường emergencyContact, xử lý như new user
+          setPatients((prevPatients) => [
+            ...prevPatients,
+            { emergencyContact: data.emergencyContact } as User,
+          ]);
         } else if (data !== undefined) {
-          // Always use functional update to work with latest state
+          // Luôn sử dụng cập nhật hàm để làm việc với trạng thái mới nhất
           setPatients((prevPatients) => {
-            // Check if this patient ID already exists
+            // Kiểm tra xem ID bệnh nhân này đã tồn tại chưa
             const patientExists = prevPatients.some(
               (patient) => patient.userId === data.userId
             );
 
-            // Only add the patient if it doesn't already exist
+            // Chỉ thêm bệnh nhân nếu họ chưa tồn tại trong danh sách
             if (!patientExists) {
               return [...prevPatients, data];
             }
@@ -202,41 +204,6 @@ const EmergencyPage: React.FC = () => {
 
   const handleCloseModal = () => {
     setModalOpen(false);
-  };
-
-  // Xử lý tiếp nhận bệnh nhân
-  const handleReceivePatient = (event: React.MouseEvent, patientId: string) => {
-    event.stopPropagation(); // Ngăn chặn sự kiện click trên thẻ
-
-    // Tìm thông tin bệnh nhân để hiển thị trong dialog
-    const patient = patients.find((p) => p.userId === patientId);
-    const patientName = patient
-      ? `${patient.lastName || ""} ${patient.firstName || ""}`.trim() ||
-        "bệnh nhân này"
-      : "bệnh nhân này";
-
-    setConfirmDialog({
-      open: true,
-      patientId,
-      patientName,
-    });
-  };
-
-  // Xử lý xác nhận tiếp nhận
-  const handleConfirmReceive = () => {
-    setPatients((prevPatients) =>
-      prevPatients.map((patient) =>
-        patient.userId === confirmDialog.patientId
-          ? { ...patient, received: true }
-          : patient
-      )
-    );
-    setConfirmDialog({ ...confirmDialog, open: false });
-  };
-
-  // Đóng dialog xác nhận
-  const handleCloseConfirm = () => {
-    setConfirmDialog({ ...confirmDialog, open: false });
   };
 
   // Tính tuổi từ ngày sinh
@@ -336,25 +303,12 @@ const EmergencyPage: React.FC = () => {
         params.value || "Không xác định",
     },
     {
-      field: "received",
-      headerName: "Trạng thái",
-      width: 150,
-      renderCell: (params: GridRenderCellParams) => (
-        <Chip
-          label={params.value ? "Đã tiếp nhận" : "Chưa tiếp nhận"}
-          color={params.value ? "success" : "warning"}
-          icon={params.value ? <CheckCircleIcon /> : <PersonAddAlt1Icon />}
-          size="small"
-          onClick={
-            !params.value && params.row.userId
-              ? (event) => handleReceivePatient(event, params.row.userId)
-              : undefined
-          }
-          sx={{
-            cursor: !params.value && params.row.userId ? "pointer" : "default",
-          }}
-        />
-      ),
+      field: "emergencyContact",
+      headerName: "Liên hệ khẩn cấp",
+      width: 220,
+      flex: 1,
+      renderCell: (params: GridRenderCellParams) =>
+        params.value || "Không xác định",
     },
   ];
 
@@ -487,36 +441,6 @@ const EmergencyPage: React.FC = () => {
         onClose={handleCloseModal}
         patient={selectedPatient}
       />
-
-      {/* Dialog xác nhận tiếp nhận */}
-      <Dialog
-        open={confirmDialog.open}
-        onClose={handleCloseConfirm}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          {"Xác nhận tiếp nhận bệnh nhân"}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Bạn có chắc chắn muốn tiếp nhận {confirmDialog.patientName}?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseConfirm} color="inherit">
-            Hủy
-          </Button>
-          <Button
-            onClick={handleConfirmReceive}
-            color="primary"
-            variant="contained"
-            autoFocus
-          >
-            Xác nhận tiếp nhận
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Container>
   );
 };

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Avatar, Box, IconButton, Tooltip } from "@mui/material";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
-import { useTranslation } from "react-i18next";
 
 interface EditableAvatarProps {
   src: string;
@@ -16,7 +15,6 @@ const EditableAvatar: React.FC<EditableAvatarProps> = ({
   size = 100,
   onEditAvatar,
 }) => {
-  const { t } = useTranslation();
   const [isHovering, setIsHovering] = useState(false);
 
   return (
@@ -56,7 +54,7 @@ const EditableAvatar: React.FC<EditableAvatarProps> = ({
             borderRadius: "50%",
           }}
         >
-          <Tooltip title={t("profile.changeAvatar")}>
+          <Tooltip title="Thay đổi ảnh đại diện">
             <IconButton
               onClick={onEditAvatar}
               size="small"

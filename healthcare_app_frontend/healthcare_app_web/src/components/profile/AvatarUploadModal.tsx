@@ -12,7 +12,6 @@ import {
   IconButton,
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { useTranslation } from "react-i18next";
 
 interface AvatarUploadModalProps {
   open: boolean;
@@ -39,7 +38,6 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({
   onClose,
   onSave,
 }) => {
-  const { t } = useTranslation();
   const [previewUrl, setPreviewUrl] = useState<string>(currentAvatar);
   const [file, setFile] = useState<File | null>(null);
 
@@ -72,7 +70,7 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{t("profile.changeAvatar")}</DialogTitle>
+      <DialogTitle>Thay đổi ảnh đại diện</DialogTitle>
       <DialogContent>
         <Box
           sx={{
@@ -93,7 +91,7 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({
             variant="contained"
             startIcon={<CloudUploadIcon />}
           >
-            {t("common.uploadImage")}
+            Tải ảnh lên
             <VisuallyHiddenInput
               type="file"
               accept="image/*"
@@ -110,10 +108,10 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="inherit">
-          {t("common.cancel")}
+          Hủy bỏ
         </Button>
         <Button onClick={handleSave} color="primary" variant="contained">
-          {t("common.save")}
+          Lưu
         </Button>
       </DialogActions>
     </Dialog>
