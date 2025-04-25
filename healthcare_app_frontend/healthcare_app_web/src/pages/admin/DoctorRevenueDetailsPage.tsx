@@ -106,20 +106,42 @@ const DoctorRevenueDetailsPage: React.FC = () => {
 
   // Cấu hình cột cho bảng dữ liệu
   const columns: GridColDef[] = [
-    { field: "doctorId", headerName: "Mã bác sĩ", width: 120 },
-    { field: "doctorName", headerName: "Tên bác sĩ", width: 250 },
-    { field: "specialty", headerName: "Chuyên khoa", width: 150 },
+    {
+      field: "doctorId",
+      headerName: "Mã bác sĩ",
+      flex: 1,
+      minWidth: 120,
+      resizable: true,
+    },
+    {
+      field: "doctorName",
+      headerName: "Tên bác sĩ",
+      flex: 2,
+      minWidth: 200,
+      resizable: true,
+    },
+    {
+      field: "specialty",
+      headerName: "Chuyên khoa",
+      flex: 1.5,
+      minWidth: 150,
+      resizable: true,
+    },
     {
       field: "patientsCount",
       headerName: "Số lượng bệnh nhân",
       type: "number",
-      width: 180,
+      flex: 1.5,
+      minWidth: 150,
+      resizable: true,
     },
     {
       field: "totalRevenue",
       headerName: "Tổng doanh thu",
       type: "number",
-      width: 200,
+      flex: 1.5,
+      minWidth: 150,
+      resizable: true,
       valueFormatter: (value) => {
         // Đảm bảo params.value là một số hợp lệ
         const total = typeof value === "number" ? value : 0;
@@ -178,11 +200,11 @@ const DoctorRevenueDetailsPage: React.FC = () => {
           {new Date().getFullYear()}
         </Typography>
       </Box>
-
       <Paper sx={{ width: "100%", overflow: "hidden" }}>
         <DataGrid
           rows={doctorRevenues}
           columns={columns}
+          autoHeight
           initialState={{
             pagination: {
               paginationModel: { page: 0, pageSize: 10 },

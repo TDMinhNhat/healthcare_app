@@ -24,18 +24,38 @@ import { useSelector } from "react-redux";
 import { format } from "date-fns";
 import { useNavigate } from "react-router";
 import { ROUTING } from "../../constants/routing";
+import { getDashboard } from "../../services/appointment/dashboard_service";
 
-interface AdminDashboardResponse {
-  revenue: {
-    total: number; // Tổng doanh thu
-    quarterly: Record<string, number>; // Doanh thu theo quý
-    monthly: Record<string, number>; // Doanh thu theo tháng
+interface DashboardVisualize {
+  salaries: {
+    month: Record<string, number>;
+    year: Record<string, number>;
+    quarter: Record<string, number>;
   };
   patients: {
-    total: number; // Tổng số bệnh nhân
-    quarterly: Record<string, number>; // Số bệnh nhân theo quý
-    monthly: Record<string, number>; // Số bệnh nhân theo tháng
+    month: Record<string, number>;
+    year: Record<string, number>;
+    quarter: Record<string, number>;
   };
+}
+
+interface AdminDashboardResponse {
+  salaries: {
+    total: number;
+    total_previous_year: number;
+    total_this_year: number;
+  };
+  doctors: {
+    total: number;
+    total_previous_year: number;
+    total_this_year: number;
+  };
+  patients: {
+    total: number;
+    total_previous_year: number;
+    total_this_year: number;
+  };
+  visualize: DashboardVisualize;
 }
 
 const AdminDashboardPage: React.FC = () => {
@@ -44,14 +64,18 @@ const AdminDashboardPage: React.FC = () => {
   // Lấy thông tin người dùng từ Redux store
   const user = useSelector((state: any) => state.user.user);
 
-  // State để theo dõi loại xem thời gian đã chọn (quý hoặc tháng)
-  const [timeView, setTimeView] = useState<"quarter" | "month">("quarter");
+  // State để theo dõi loại xem thời gian đã chọn (quý, tháng hoặc năm)
+  const [timeView, setTimeView] = useState<"quarter" | "month" | "year">(
+    "quarter"
+  );
 
   // Các state cho dữ liệu bảng điều khiển
   // State cho tổng doanh thu
   const [totalRevenue, setTotalRevenue] = useState(0);
   // State cho tổng số bệnh nhân
   const [totalPatients, setTotalPatients] = useState(0);
+  // State cho tổng số bác sĩ
+  const [totalDoctors, setTotalDoctors] = useState(0);
   // State cho doanh thu theo tháng
   const [monthlyRevenue, setMonthlyRevenue] = useState<Record<string, number>>(
     {}
@@ -68,10 +92,23 @@ const AdminDashboardPage: React.FC = () => {
   const [quarterlyPatients, setQuarterlyPatients] = useState<
     Record<string, number>
   >({});
+  // State cho doanh thu theo năm
+  const [yearlyRevenue, setYearlyRevenue] = useState<Record<string, number>>(
+    {}
+  );
+  // State cho số bệnh nhân theo năm
+  const [yearlyPatients, setYearlyPatients] = useState<Record<string, number>>(
+    {}
+  );
   // State cho trạng thái tải
   const [isLoading, setIsLoading] = useState(true);
   // State cho lỗi
   const [error, setError] = useState<string | null>(null);
+  // State cho thông tin so sánh năm trước
+  const [yearComparison, setYearComparison] = useState({
+    revenue: { current: 0, previous: 0 },
+    patients: { current: 0, previous: 0 },
+  });
 
   // Lấy dữ liệu bảng điều khiển từ API
   useEffect(() => {
@@ -85,67 +122,87 @@ const AdminDashboardPage: React.FC = () => {
 
       try {
         setIsLoading(true);
-        // Thông thường sẽ gọi API ở đây:
-        // const response = await getAdminDashboard();
-        // const dashboardData: AdminDashboardResponse = response.data;
-
-        // Dữ liệu mẫu cho demo
-        const dashboardData: AdminDashboardResponse = {
-          revenue: {
-            total: 1250000000,
-            quarterly: {
-              Q1: 280000000,
-              Q2: 320000000,
-              Q3: 350000000,
-              Q4: 300000000,
-            },
-            monthly: {
-              "1": 90000000,
-              "2": 85000000,
-              "3": 105000000,
-              "4": 98000000,
-              "5": 110000000,
-              "6": 112000000,
-              "7": 125000000,
-              "8": 115000000,
-              "9": 110000000,
-              "10": 95000000,
-              "11": 105000000,
-              "12": 100000000,
-            },
-          },
-          patients: {
-            total: 4800,
-            quarterly: {
-              Q1: 1200,
-              Q2: 1350,
-              Q3: 1280,
-              Q4: 970,
-            },
-            monthly: {
-              "1": 400,
-              "2": 380,
-              "3": 420,
-              "4": 430,
-              "5": 450,
-              "6": 470,
-              "7": 490,
-              "8": 420,
-              "9": 370,
-              "10": 320,
-              "11": 340,
-              "12": 310,
-            },
-          },
-        };
+        // Gọi API để lấy dữ liệu dashboard
+        const response = await getDashboard();
+        const dashboardData: AdminDashboardResponse = response.data;
 
         // Cập nhật state với dữ liệu từ API
-        setTotalRevenue(dashboardData.revenue.total);
+        setTotalRevenue(dashboardData.salaries.total);
         setTotalPatients(dashboardData.patients.total);
-        setMonthlyRevenue(dashboardData.revenue.monthly);
-        setQuarterlyRevenue(dashboardData.revenue.quarterly);
-        setMonthlyPatients(dashboardData.patients.monthly);
-        setQuarterlyPatients(dashboardData.patients.quarterly);
+        setTotalDoctors(dashboardData.doctors.total);
+
+        // Cập nhật dữ liệu so sánh năm
+        setYearComparison({
+          revenue: {
+            current: dashboardData.salaries.total_this_year,
+            previous: dashboardData.salaries.total_previous_year,
+          },
+          patients: {
+            current: dashboardData.patients.total_this_year,
+            previous: dashboardData.patients.total_previous_year,
+          },
+        });
+
+        // Xử lý dữ liệu tháng (chuyển tên tháng sang số tháng)
+        const monthlyRevenueData: Record<string, number> = {};
+        const monthlyPatientsData: Record<string, number> = {};
+
+        // Danh sách tháng theo thứ tự
+        const monthOrder = [
+          "JANUARY",
+          "FEBRUARY",
+          "MARCH",
+          "APRIL",
+          "MAY",
+          "JUNE",
+          "JULY",
+          "AUGUST",
+          "SEPTEMBER",
+          "OCTOBER",
+          "NOVEMBER",
+          "DECEMBER",
+        ];
+
+        // Xử lý dữ liệu theo tháng
+        monthOrder.forEach((month, index) => {
+          const monthNum = String(index + 1);
+          if (dashboardData.visualize.salaries.month[month] !== undefined) {
+            monthlyRevenueData[monthNum] =
+              dashboardData.visualize.salaries.month[month];
+          }
+          if (dashboardData.visualize.patients.month[month] !== undefined) {
+            monthlyPatientsData[monthNum] =
+              dashboardData.visualize.patients.month[month];
+          }
+        });
+
+        setMonthlyRevenue(monthlyRevenueData);
+        setMonthlyPatients(monthlyPatientsData);
+
+        // Xử lý dữ liệu theo quý
+        const quarterlyRevenueData: Record<string, number> = {};
+        const quarterlyPatientsData: Record<string, number> = {};
+
+        // Lấy key - value dưới dạng mảng
+        Object.entries(dashboardData.visualize.salaries.quarter).forEach(
+          ([quarter, value]) => {
+            quarterlyRevenueData[`Q${quarter}`] = value;
+          }
+        );
+
+        Object.entries(dashboardData.visualize.patients.quarter).forEach(
+          ([quarter, value]) => {
+            quarterlyPatientsData[`Q${quarter}`] = value;
+          }
+        );
+
+        setQuarterlyRevenue(quarterlyRevenueData);
+        setQuarterlyPatients(quarterlyPatientsData);
+
+        // Xử lý dữ liệu theo năm
+        setYearlyRevenue(dashboardData.visualize.salaries.year);
+        setYearlyPatients(dashboardData.visualize.patients.year);
+
         setError(null);
       } catch (err) {
         console.error("Error fetching admin dashboard data:", err);
@@ -175,7 +232,7 @@ const AdminDashboardPage: React.FC = () => {
   // Xử lý khi thay đổi chế độ xem thời gian
   const handleTimeViewChange = (
     event: React.MouseEvent<HTMLElement>,
-    newTimeView: "quarter" | "month" | null
+    newTimeView: "quarter" | "month" | "year" | null
   ) => {
     if (newTimeView !== null) {
       setTimeView(newTimeView);
@@ -231,6 +288,18 @@ const AdminDashboardPage: React.FC = () => {
           title: "Doanh thu theo quý trong năm",
         };
       }
+      case "year": {
+        // Lấy 5 năm gần đây nhất theo thứ tự tăng dần (từ cũ đến mới)
+        const years = Object.keys(yearlyRevenue)
+          .sort((a, b) => parseInt(a) - parseInt(b))
+          .slice(0, 5);
+
+        return {
+          xAxisData: years,
+          seriesData: years.map((year) => yearlyRevenue[year] || 0),
+          title: "Doanh thu theo năm (5 năm gần đây)",
+        };
+      }
       default:
         return { xAxisData: [], seriesData: [], title: "" };
     }
@@ -275,6 +344,18 @@ const AdminDashboardPage: React.FC = () => {
           title: "Số bệnh nhân theo quý trong năm",
         };
       }
+      case "year": {
+        // Lấy 5 năm gần đây nhất theo thứ tự tăng dần (từ cũ đến mới)
+        const years = Object.keys(yearlyPatients)
+          .sort((a, b) => parseInt(a) - parseInt(b))
+          .slice(0, 5);
+
+        return {
+          xAxisData: years,
+          seriesData: years.map((year) => yearlyPatients[year] || 0),
+          title: "Số bệnh nhân theo năm (5 năm gần đây)",
+        };
+      }
       default:
         return { xAxisData: [], seriesData: [], title: "" };
     }
@@ -314,7 +395,7 @@ const AdminDashboardPage: React.FC = () => {
       {/* Thẻ tổng kết */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {/* Thẻ Tổng Doanh Thu */}
-        <Grid item xs={12} sm={6} md={6}>
+        <Grid item xs={12} sm={6} md={4}>
           <Card
             sx={{ height: "100%", bgcolor: "primary.light", color: "white" }}
           >
@@ -322,11 +403,11 @@ const AdminDashboardPage: React.FC = () => {
               <Box display="flex" alignItems="center" mb={1}>
                 <AttachMoneyIcon sx={{ fontSize: 40, mr: 1 }} />
                 <Typography variant="h5" component="div">
-                  Tổng Doanh Thu
+                  Doanh Thu Năm Nay
                 </Typography>
               </Box>
               <Typography variant="h3" fontWeight="bold">
-                {formatCurrency(totalRevenue)}
+                {formatCurrency(yearComparison.revenue.current)}
               </Typography>
               <Typography variant="body2" sx={{ mt: 1, opacity: 0.8 }}>
                 Năm {new Date().getFullYear()}
@@ -336,7 +417,7 @@ const AdminDashboardPage: React.FC = () => {
         </Grid>
 
         {/* Thẻ Tổng Số Bệnh Nhân */}
-        <Grid item xs={12} sm={6} md={6}>
+        <Grid item xs={12} sm={6} md={4}>
           <Card
             sx={{ height: "100%", bgcolor: "success.light", color: "white" }}
           >
@@ -344,11 +425,31 @@ const AdminDashboardPage: React.FC = () => {
               <Box display="flex" alignItems="center" mb={1}>
                 <PeopleIcon sx={{ fontSize: 40, mr: 1 }} />
                 <Typography variant="h5" component="div">
-                  Tổng Số Bệnh Nhân
+                  Bệnh Nhân Năm Nay
                 </Typography>
               </Box>
               <Typography variant="h3" fontWeight="bold">
-                {formatPatientCount(totalPatients)}
+                {formatPatientCount(yearComparison.patients.current)}
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 1, opacity: 0.8 }}>
+                Năm {new Date().getFullYear()}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Thẻ Tổng Số Bác Sĩ */}
+        <Grid item xs={12} sm={6} md={4}>
+          <Card sx={{ height: "100%", bgcolor: "info.light", color: "white" }}>
+            <CardContent>
+              <Box display="flex" alignItems="center" mb={1}>
+                <LocalHospitalIcon sx={{ fontSize: 40, mr: 1 }} />
+                <Typography variant="h5" component="div">
+                  Bác Sĩ
+                </Typography>
+              </Box>
+              <Typography variant="h3" fontWeight="bold">
+                {formatPatientCount(totalDoctors)}
               </Typography>
               <Typography variant="body2" sx={{ mt: 1, opacity: 0.8 }}>
                 Năm {new Date().getFullYear()}
@@ -372,6 +473,9 @@ const AdminDashboardPage: React.FC = () => {
           </ToggleButton>
           <ToggleButton value="month" aria-label="month view">
             Tháng
+          </ToggleButton>
+          <ToggleButton value="year" aria-label="year view">
+            Năm
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>

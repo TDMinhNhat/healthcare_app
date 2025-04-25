@@ -19,3 +19,8 @@ export const getDoctorDashboard = async (doctorId: string) => {
   });
   return response.data;
 };
+
+export const getDashboard = async () => {
+  const response = await axiosConfig.get(`${prefix}/admin`);
+  return response.data;
+};
