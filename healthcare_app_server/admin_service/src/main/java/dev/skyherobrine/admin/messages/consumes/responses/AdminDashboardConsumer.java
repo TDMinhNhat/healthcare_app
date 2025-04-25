@@ -1,7 +1,5 @@
-package dev.skyherobrine.admin.messages.consumes;
+package dev.skyherobrine.admin.messages.consumes.responses;
 
-import dev.skyherobrine.admin.models.mariadb.Price;
-import dev.skyherobrine.admin.models.mongodb.BookAppointmentPayment;
 import dev.skyherobrine.admin.repositories.mariadb.DoctorRepository;
 import dev.skyherobrine.admin.repositories.mariadb.PatientRepository;
 import dev.skyherobrine.admin.repositories.mariadb.PriceRepository;
@@ -77,7 +75,7 @@ public class AdminDashboardConsumer {
             Map<String,Object> visualize = new HashMap<>();
             //// Salaries:
             Map<String,Object> salaries = new HashMap<>();
-            salaries.put("quarter", bookAppointmentPaymentRepository.findAll().stream().collect(
+            salaries.put("quarter", bookAppointmentPaymentRepository.findAll().stream().filter(bookAppointmentPayment -> bookAppointmentPayment.getBookAppointment().getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().getYear()).collect(
                     Collectors.groupingBy(
                             bookAppointmentPayment -> bookAppointmentPayment.getBookAppointment().getWorkSchedule().getDateAppointment().get(IsoFields.QUARTER_OF_YEAR),
                             Collectors.reducing(0.0, bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice(), Double::sum)
