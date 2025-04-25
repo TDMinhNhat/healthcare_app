@@ -10,6 +10,9 @@ import {
   SafeAreaView,
   StatusBar,
   Platform,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
 } from "react-native";
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
@@ -20,6 +23,9 @@ import * as Location from "expo-location";
 import * as FileSystem from "expo-file-system";
 import { navigate } from "expo-router/build/global-state/routing";
 import { io } from "socket.io-client";
+import { useSelector } from "react-redux";
+import { Formik } from "formik";
+import * as Yup from "yup";
 
 const socket = io(`ws://${process.env.EXPO_PUBLIC_HOST_ID}:8081`, {
   path: "/image_detect/socket",
@@ -30,6 +36,7 @@ const socket = io(`ws://${process.env.EXPO_PUBLIC_HOST_ID}:8081`, {
 });
 
 export default function Emergency() {
+  const user = useSelector((state: any) => state.user.user);
   const [permission, requestPermission] = useCameraPermissions(); // State quản lý quyền truy cập camera
   const [cameraType, setCameraType] = useState<CameraType>("back"); // State quản lý loại camera (trước/sau)
   const [isCameraReady, setIsCameraReady] = useState(false); // State kiểm tra camera đã sẵn sàng chưa
@@ -44,9 +51,13 @@ export default function Emergency() {
     null
   );
   const [locationErrorMsg, setLocationErrorMsg] = useState<string | null>(null);
+  // Add missing state
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [detectionResponse, setDetectionResponse] = useState<any>(null);
+  // Add new state for success modal
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Thêm state cho tự động chụp
-  const [isDetecting, setIsDetecting] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const cameraRef = useRef<CameraView>(null); // Tham chiếu đến component camera
@@ -89,9 +100,57 @@ export default function Emergency() {
     };
   }, []); // Empty dependency array ensures this only runs once
 
+  // Thêm hàm gửi dữ liệu khẩn cấp
+  const sendEmergencyData = (phone: string) => {
+    if (!detectionResponse) {
+      console.log("No detection response data available");
+      return;
+    }
+
+    // console.log("Sending emergency data with phone:", phone);
+
+    let dataToSend =
+      detectionResponse.data === "New User"
+        ? detectionResponse.data
+        : detectionResponse.data.data;
+
+    // Thêm số điện thoại vào dữ liệu
+    if (typeof dataToSend === "object") {
+      dataToSend = { ...dataToSend, emergencyContact: phone };
+    } else {
+      dataToSend = { data: dataToSend, emergencyContact: phone };
+    }
+
+    // console.log("Final data being sent:", dataToSend);
+
+    socket.emit("send_data_emergency", dataToSend);
+
+    // Alert.alert("Đã phát hiện", "Hình ảnh đã được xử lý!");
+    if (user) {
+      router.replace("/(tabs)/profile");
+    } else {
+      router.replace("/");
+    }
+  };
+
   // Thiết lập chụp ảnh tự động khi camera sẵn sàng
   useEffect(() => {
-    if (isCameraReady && mode === "camera" && !isPreview && !isDetecting) {
+    // Always clear interval if modal is showing
+    if ((showPhoneModal || showSuccessModal) && intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+      return;
+    }
+
+    // Don't start interval if modal is showing
+    if (
+      isCameraReady &&
+      mode === "camera" &&
+      !isPreview &&
+      !showPhoneModal &&
+      !showSuccessModal
+    ) {
+      console.log("Setting up auto-capture interval");
       // Xóa interval cũ nếu có
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -103,8 +162,6 @@ export default function Emergency() {
         if (!cameraRef.current) return;
 
         try {
-          setIsDetecting(true);
-
           // Chụp ảnh với chất lượng cao và không bỏ qua xử lý
           const photo = await cameraRef.current.takePictureAsync({
             quality: 1,
@@ -122,32 +179,27 @@ export default function Emergency() {
 
           // Kiểm tra kết quả và xử lý
           if (response && response.code === 200) {
-            // Nếu có dữ liệu
-            // if (response.data && response.data.length > 0) {
-            // Hiển thị ảnh đã chụp
-            // setCapturedImage(photo.uri);
-
             // Dừng interval khi phát hiện thành công
             if (intervalRef.current) {
               clearInterval(intervalRef.current);
               intervalRef.current = null;
             }
-            socket.emit(
-              "send_data_emergency",
-              response.data === "New User" ? response.data : response.data.data
-            );
 
-            // setIsPreview(true);
-            Alert.alert("Đã phát hiện", "Hình ảnh đã được xử lý!");
-            router.replace("/");
-            // }
+            // Lưu trữ phản hồi để sử dụng sau
+            setDetectionResponse(response);
+
+            // Only show success modal if a user is logged in
+            if (user) {
+              setShowSuccessModal(true);
+            } else {
+              // If no user, show phone modal directly
+              setShowPhoneModal(true);
+            }
           }
         } catch (error) {
           console.error("Lỗi khi xử lý ảnh:", error);
-        } finally {
-          setIsDetecting(false);
         }
-      }, 1000); // Chụp mỗi 1 giây
+      }, 2000); // Chụp mỗi 1 giây
     }
 
     return () => {
@@ -157,7 +209,7 @@ export default function Emergency() {
         intervalRef.current = null;
       }
     };
-  }, [isCameraReady, mode, isPreview, isDetecting]);
+  }, [isCameraReady, isPreview, showPhoneModal, showSuccessModal, mode]); // Added showSuccessModal to dependencies
 
   // Hàm được gọi khi camera sẵn sàng sử dụng
   const onCameraReady = () => {
@@ -320,6 +372,154 @@ export default function Emergency() {
     );
   }
 
+  // Phone validation schema using Yup
+  const PhoneSchema = Yup.object().shape({
+    phone: Yup.string()
+      .matches(/^[0-9]{10}$/, "Số điện thoại phải có 10 chữ số")
+      .required("Số điện thoại không được để trống"),
+  });
+
+  // Fix modal implementation to handle interval clearing
+  const PhoneNumberModal = () => (
+    <Modal
+      visible={showPhoneModal}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={() => {
+        // Ensure interval is not restarted accidentally
+        setShowPhoneModal(false);
+      }}
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.modalOverlay}
+      >
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Số điện thoại liên hệ</Text>
+          <Text style={styles.modalText}>
+            Vui lòng nhập số điện thoại để chúng tôi có thể liên hệ trong trường
+            hợp khẩn cấp
+          </Text>
+
+          <Formik
+            initialValues={{ phone: "" }}
+            validationSchema={PhoneSchema}
+            onSubmit={(values) => {
+              // Clear interval before closing modal to prevent immediate restart
+              if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+              }
+              setShowPhoneModal(false);
+              sendEmergencyData(values.phone);
+            }}
+          >
+            {({
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              values,
+              errors,
+              touched,
+              isValid,
+              dirty,
+            }) => (
+              <>
+                <TextInput
+                  style={[
+                    styles.phoneInput,
+                    errors.phone && touched.phone ? styles.inputError : null,
+                  ]}
+                  value={values.phone}
+                  onChangeText={handleChange("phone")}
+                  onBlur={handleBlur("phone")}
+                  placeholder="Nhập số điện thoại"
+                  keyboardType="phone-pad"
+                  autoFocus
+                  maxLength={10}
+                />
+
+                {errors.phone && touched.phone && (
+                  <Text style={styles.errorText}>{errors.phone}</Text>
+                )}
+
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.cancelButton]}
+                    onPress={() => {
+                      // Ensure interval is not restarted accidentally
+                      if (intervalRef.current) {
+                        clearInterval(intervalRef.current);
+                        intervalRef.current = null;
+                      }
+                      setShowPhoneModal(false);
+                    }}
+                  >
+                    <Text style={styles.buttonText}>Hủy</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.modalButton,
+                      styles.confirmButton,
+                      !isValid || !dirty ? styles.disabledButton : null,
+                    ]}
+                    onPress={handleSubmit}
+                    disabled={!isValid || !dirty}
+                  >
+                    <Text style={styles.buttonText}>Xác nhận</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </Formik>
+        </View>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+
+  // Add success modal component
+  const SuccessModal = () => (
+    <Modal
+      visible={showSuccessModal}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={() => {
+        setShowSuccessModal(false);
+      }}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Thành công</Text>
+          <Text style={styles.modalText}>
+            Đã phát hiện, hình ảnh đã được xử lý!
+          </Text>
+
+          <TouchableOpacity
+            style={[
+              styles.modalButton,
+              styles.confirmButton,
+              { alignSelf: "center" },
+            ]}
+            onPress={() => {
+              setShowSuccessModal(false);
+
+              // Check if user has phone
+              if (user && user.phone) {
+                sendEmergencyData(user.phone);
+              } else {
+                // Show phone modal if no phone number
+                setShowPhoneModal(true);
+              }
+            }}
+          >
+            <Text style={styles.buttonText}>OK</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+
   // Giao diện chính của màn hình khẩn cấp
   return (
     <SafeAreaView style={styles.container}>
@@ -353,11 +553,7 @@ export default function Emergency() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[
-                  styles.actionButton,
-                  styles.uploadButton,
-                  isUploading && styles.disabledButton,
-                ]}
+                style={[styles.actionButton, styles.uploadButton]}
                 onPress={uploadImage}
                 disabled={isUploading}
               >
@@ -380,14 +576,6 @@ export default function Emergency() {
               mode="picture"
             />
 
-            {/* Lớp phủ hiển thị trạng thái đang phát hiện */}
-            {isDetecting && (
-              <View style={styles.detectionOverlay}>
-                <ActivityIndicator size="large" color="#26b9c8" />
-                <Text style={styles.detectionText}>Đang phát hiện...</Text>
-              </View>
-            )}
-
             <View style={styles.controlsContainer}>
               <TouchableOpacity
                 style={styles.controlButton}
@@ -399,7 +587,7 @@ export default function Emergency() {
               <TouchableOpacity
                 style={styles.captureButton}
                 onPress={takePicture}
-                disabled={!isCameraReady || isDetecting}
+                disabled={true}
               >
                 <View style={styles.captureButtonInner} />
               </TouchableOpacity>
@@ -407,6 +595,7 @@ export default function Emergency() {
               <TouchableOpacity
                 style={styles.controlButton}
                 onPress={toggleMode}
+                disabled={true}
               >
                 <MaterialIcons name="photo-library" size={28} color="white" />
               </TouchableOpacity>
@@ -444,6 +633,12 @@ export default function Emergency() {
           </Text>
         </View>
       )}
+
+      {/* Modal nhập số điện thoại */}
+      <PhoneNumberModal />
+
+      {/* Add Success Modal */}
+      <SuccessModal />
     </SafeAreaView>
   );
 }
@@ -639,5 +834,68 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 10,
     fontWeight: "bold",
+  },
+  // Thêm style cho modal số điện thoại
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalContainer: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    width: "100%",
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  modalText: {
+    fontSize: 14,
+    marginBottom: 20,
+    textAlign: "center",
+    color: "#555",
+  },
+  phoneInput: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  inputError: {
+    borderColor: "#ff6b6b",
+  },
+  errorText: {
+    color: "#ff6b6b",
+    fontSize: 12,
+    marginBottom: 15,
+    marginLeft: 5,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 10,
+  },
+  modalButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    minWidth: 120,
+    alignItems: "center",
+  },
+  confirmButton: {
+    backgroundColor: "#26b9c8",
+  },
+  disabledButton: {
+    backgroundColor: "#aaa",
+    opacity: 0.7,
   },
 });
