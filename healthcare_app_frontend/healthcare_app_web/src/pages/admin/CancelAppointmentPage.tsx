@@ -48,11 +48,6 @@ export default function CancelAppointmentPage() {
   const [bankInfoError, setBankInfoError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
 
-  // Lấy dữ liệu khi component được tạo
-  useEffect(() => {
-    fetchAppointments();
-  }, []);
-
   // Thêm effect để xử lý khi thay đổi trạng thái
   useEffect(() => {
     fetchAppointments(selectedStatus);
@@ -124,11 +119,16 @@ export default function CancelAppointmentPage() {
   const fetchAppointments = async (status?: string) => {
     try {
       setLoading(true);
+      setError(null);
+
+      console.log(`📌 Bắt đầu lọc theo trạng thái:`, status || "ALL");
 
       let response;
       if (status && status !== "ALL") {
+        // console.log(`📌 Gọi API getBookingsByStatus với trạng thái:`, status);
         response = await getBookingsByStatus(status);
       } else {
+        // console.log(`📌 Gọi API getAllBookings`);
         response = await getAllBookings();
       }
 
@@ -138,21 +138,34 @@ export default function CancelAppointmentPage() {
 
         if (response.data.data && Array.isArray(response.data.data)) {
           appointmentsArray = response.data.data;
+          // console.log(
+          //   `📌 Nhận được ${appointmentsArray.length} bản ghi từ API cho trạng thái:`,
+          //   status || "ALL"
+          // );
         } else {
           console.error("Cấu trúc dữ liệu không mong đợi:", response.data);
         }
 
         const transformedData = transformAppointmentData(appointmentsArray);
-        console.log("Dữ liệu đã chuyển đổi:", transformedData);
+        console.log(
+          `📌 Dữ liệu đã chuyển đổi cho trạng thái [${status || "ALL"}]:`,
+          transformedData.length,
+          "bản ghi"
+        );
+
         setCanceledAppointments(transformedData);
       } else {
         throw new Error("Định dạng phản hồi không hợp lệ");
       }
     } catch (err) {
       setError("Không thể lấy danh sách cuộc hẹn");
-      console.error(err);
+      console.error(
+        `📌 Lỗi khi lấy dữ liệu cho trạng thái [${status || "ALL"}]:`,
+        err
+      );
     } finally {
       setLoading(false);
+      console.log(`📌 Hoàn thành lọc theo trạng thái:`, status || "ALL");
     }
   };
 
@@ -374,7 +387,7 @@ export default function CancelAppointmentPage() {
         </Alert>
       )}
 
-      {/* Dropdown lọc theo trạng thái */}
+      {/* Dropdown lọc theo trạng thái - Đã cập nhật để vô hiệu hóa khi đang tải */}
       <FormControl sx={{ mb: 2, minWidth: 200 }}>
         <InputLabel id="status-select-label">Lọc theo trạng thái</InputLabel>
         <Select
@@ -383,6 +396,7 @@ export default function CancelAppointmentPage() {
           value={selectedStatus}
           label="Lọc theo trạng thái"
           onChange={handleStatusChange}
+          disabled={loading} // Vô hiệu hóa dropdown khi đang tải dữ liệu
         >
           <MenuItem value="ALL">Tất cả</MenuItem>
           <MenuItem value="DONE">Hoàn thành</MenuItem>
