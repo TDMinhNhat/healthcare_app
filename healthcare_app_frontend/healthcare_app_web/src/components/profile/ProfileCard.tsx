@@ -10,7 +10,7 @@ import {
   IconButton,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import { useTranslation } from "react-i18next";
+
 interface ProfileCardProps {
   title: string;
   children: React.ReactNode;
@@ -30,7 +30,6 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
   avatar,
   name,
 }) => {
-  const { t } = useTranslation();
   return (
     <StyledCard>
       <CardContent>
@@ -44,10 +43,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
               />
             )}
             {name && <Typography variant="h5">{name}</Typography>}
-            <IconButton
-              aria-label={t("common.edit")}
-              sx={{ marginLeft: "auto" }}
-            >
+            <IconButton aria-label="Chỉnh sửa" sx={{ marginLeft: "auto" }}>
               <EditIcon />
             </IconButton>
           </Box>

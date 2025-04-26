@@ -8,7 +8,11 @@ interface EditableAvatarProps {
   size?: number;
   onEditAvatar: () => void;
 }
-
+/*
+Chỉ hiển thị avatar hiện tại cùng với hiệu ứng hover để hiển thị nút chỉnh sửa (icon camera)
+Khi người dùng nhấn vào nút chỉnh sửa, nó gọi hàm onEditAvatar để mở modal upload
+Không thực hiện việc tải lên ảnh mới
+*/
 const EditableAvatar: React.FC<EditableAvatarProps> = ({
   src,
   alt,

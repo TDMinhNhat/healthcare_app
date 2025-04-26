@@ -10,6 +10,8 @@ import {
   Avatar,
   styled,
   IconButton,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
@@ -18,6 +20,8 @@ interface AvatarUploadModalProps {
   currentAvatar: string;
   onClose: () => void;
   onSave: (newAvatar: string) => void;
+  isLoading?: boolean;
+  error?: string | null;
 }
 
 const VisuallyHiddenInput = styled("input")({
@@ -31,12 +35,19 @@ const VisuallyHiddenInput = styled("input")({
   whiteSpace: "nowrap",
   width: 1,
 });
-
+/**
+ * Là modal xuất hiện sau khi người dùng nhấn vào nút chỉnh sửa từ EditableAvatar
+Cho phép người dùng chọn file ảnh mới từ máy tính để upload
+Hiển thị preview ảnh mới trước khi lưu
+Xử lý việc tương tác với API để tải ảnh lên server
+ */
 const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({
   open,
   currentAvatar,
   onClose,
   onSave,
+  isLoading = false,
+  error = null,
 }) => {
   const [previewUrl, setPreviewUrl] = useState<string>(currentAvatar);
   const [file, setFile] = useState<File | null>(null);
@@ -56,22 +67,27 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({
   };
 
   const handleSave = () => {
-    // In a real application, you would upload the file to a server here
-    // For now, we'll just pass the preview URL
     onSave(previewUrl);
-    onClose();
   };
 
   const handleClose = () => {
-    setPreviewUrl(currentAvatar);
-    setFile(null);
-    onClose();
+    if (!isLoading) {
+      setPreviewUrl(currentAvatar);
+      setFile(null);
+      onClose();
+    }
   };
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
       <DialogTitle>Thay đổi ảnh đại diện</DialogTitle>
       <DialogContent>
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
         <Box
           sx={{
             display: "flex",
@@ -90,12 +106,14 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({
             component="label"
             variant="contained"
             startIcon={<CloudUploadIcon />}
+            disabled={isLoading}
           >
             Tải ảnh lên
             <VisuallyHiddenInput
               type="file"
               accept="image/*"
               onChange={handleFileChange}
+              disabled={isLoading}
             />
           </Button>
 
@@ -107,11 +125,17 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} color="inherit">
+        <Button onClick={handleClose} color="inherit" disabled={isLoading}>
           Hủy bỏ
         </Button>
-        <Button onClick={handleSave} color="primary" variant="contained">
-          Lưu
+        <Button
+          onClick={handleSave}
+          color="primary"
+          variant="contained"
+          disabled={isLoading || !file}
+          startIcon={isLoading ? <CircularProgress size={20} /> : null}
+        >
+          {isLoading ? "Đang lưu..." : "Lưu"}
         </Button>
       </DialogActions>
     </Dialog>

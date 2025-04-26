@@ -1,11 +1,10 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Paper, Box, Typography, Grid, Divider } from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
 import CakeIcon from "@mui/icons-material/Cake";
 import WcIcon from "@mui/icons-material/Wc";
-import { useTranslation } from "react-i18next";
 import EditableAvatar from "./EditableAvatar";
 import { Address } from "../../types";
 
@@ -34,23 +33,12 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   onEditAvatar,
   hideEditButton = false,
 }) => {
-  const { t } = useTranslation();
-  // useEffect(() => {
-  //   console.log("firstName:", firstName || "undefined");
-  //   console.log("lastName:", lastName || "undefined");
-  //   console.log("email:", email || "undefined");
-  //   console.log("phone:", phone || "undefined");
-  //   console.log("dob:", dob || "undefined");
-  //   console.log("avatar:", avatar || "undefined");
-  //   console.log("sex: ", sex || "undefined");
-  // }, [firstName, lastName, email, phone, dob, avatar]);
-  // console.log("sex:", sex || "undefined");
-
   // Format the address into a readable string
   const addressString =
     address != null
       ? `${address.number} ${address.street}, ${address.ward}, ${address.district}, ${address.city}, ${address.country}`
-      : t("common.noData");
+      : "Không có dữ liệu";
+
   return (
     <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
       <Box sx={{ textAlign: "center", mb: 3 }}>

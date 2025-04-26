@@ -311,7 +311,7 @@ const DoctorList: React.FC<DoctorListProps> = ({
                         <Avatar
                           sx={{ width: 80, height: 80 }}
                           src={
-                            doctor.image ||
+                            doctor.avatar ||
                             "https://picsum.photos/120/120?random=1"
                           }
                           alt={

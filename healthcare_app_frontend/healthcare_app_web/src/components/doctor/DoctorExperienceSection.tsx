@@ -65,9 +65,9 @@ export const DoctorExperienceSection: React.FC<DoctorExperienceProps> = ({
           <Typography variant="body2" color="text.secondary">
             Không có thông tin kinh nghiệm
           </Typography>
-          <Typography variant="caption" color="error">
+          {/* <Typography variant="caption" color="error">
             Thông tin gỡ lỗi: {JSON.stringify(experiences)}
-          </Typography>
+          </Typography> */}
         </Box>
       )}
     </ProfileCard>

@@ -11,22 +11,25 @@ import CreditCardIcon from "@mui/icons-material/CreditCard"; // Import icon cho 
 import { PersonalInfoSection } from "../../components/profile/PersonalInfoSection";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
 import AvatarUploadModal from "../../components/profile/AvatarUploadModal";
-import { useTranslation } from "react-i18next";
 // Import services và Redux hooks
-import { getPatientInfo } from "../../services/authenticate/user_service";
+import {
+  getPatientInfo,
+  updatePatientAvatar,
+} from "../../services/authenticate/user_service";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "../../stores/slices/user.slice";
 import { ROUTING } from "../../constants/routing";
 
 // Component trang hồ sơ bệnh nhân
 const PatientProfilePage: React.FC = () => {
-  const { t } = useTranslation(); // Hook đa ngôn ngữ
   // Khai báo các state cần thiết
   const [patientData, setPatientData] = useState<any>(null); // Lưu thông tin bệnh nhân
   const [loading, setLoading] = useState(true); // Trạng thái đang tải
   const [error, setError] = useState<string | null>(null); // Lưu thông báo lỗi nếu có
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Trạng thái hiển thị modal chỉnh sửa
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false); // Trạng thái hiển thị modal tải lên avatar
+  const [avatarLoading, setAvatarLoading] = useState(false); // Trạng thái đang tải khi cập nhật avatar
+  const [avatarError, setAvatarError] = useState<string | null>(null); // Lỗi khi cập nhật avatar
   const user = useSelector((state: any) => state.user.user); // Lấy thông tin người dùng từ Redux
   const dispatch = useDispatch(); // Hook để gửi action đến Redux
   const navigate = useNavigate(); // Hook chuyển trang
@@ -98,16 +101,39 @@ const PatientProfilePage: React.FC = () => {
     // localStorage.setItem("user", JSON.stringify(updatedUser));
   };
 
-  // Chỉ cập nhật state local để xem trước UI
-  // Trong ứng dụng thực tế, hàm này sẽ gọi API để cập nhật avatar
-  const handleSaveAvatar = (newAvatar: string) => {
-    setPatientData({ ...patientData, avatar: newAvatar });
-    console.log("Avatar updated locally (no API call):", newAvatar);
+  // Cập nhật avatar sử dụng API
+  const handleSaveAvatar = async (newAvatar: string) => {
+    try {
+      setAvatarLoading(true);
+      setAvatarError(null);
+      // Gọi API để cập nhật avatar
+      const response = await updatePatientAvatar(user.userId, {
+        uri: newAvatar,
+      });
+      if (response?.data?.code === 200) {
+        // Cập nhật state local với dữ liệu trả về từ API
+        setPatientData(response.data.data);
+        // Cập nhật Redux state
+        const updatedUser = {
+          ...user,
+          avatar: response.data.data.avatar,
+        };
+        dispatch(setUser(updatedUser));
+        console.log("Avatar updated successfully:", response.data.data.avatar);
+      } else {
+        throw new Error("Failed to update avatar");
+      }
+    } catch (error) {
+      console.error("Error updating avatar:", error);
+      setAvatarError("Failed to update avatar. Please try again.");
+    } finally {
+      setAvatarLoading(false);
+    }
   };
 
   // Hiển thị trạng thái đang tải
   if (loading) {
-    return <div>{t("common.loading")}</div>;
+    return <div>Đang tải...</div>;
   }
 
   // Hiển thị thông báo lỗi nếu có
@@ -117,7 +143,7 @@ const PatientProfilePage: React.FC = () => {
 
   // Hiển thị thông báo khi không có dữ liệu
   if (!patientData) {
-    return <Alert severity="info">{t("common.noData")}</Alert>;
+    return <Alert severity="info">Không có dữ liệu</Alert>;
   }
 
   // Render giao diện chính khi đã có dữ liệu
@@ -128,11 +154,11 @@ const PatientProfilePage: React.FC = () => {
         <Grid item xs={12}>
           <Box sx={{ position: "relative" }}>
             <PersonalInfoSection
-              firstName={patientData.firstName || t("common.notAvailable")}
-              lastName={patientData.lastName || t("common.notAvailable")}
-              email={patientData.email || t("common.notAvailable")}
-              phone={patientData.phone || t("common.notAvailable")}
-              dob={patientData.dob || t("common.notAvailable")}
+              firstName={patientData.firstName || "Không có thông tin"}
+              lastName={patientData.lastName || "Không có thông tin"}
+              email={patientData.email || "Không có thông tin"}
+              phone={patientData.phone || "Không có thông tin"}
+              dob={patientData.dob || "Không có thông tin"}
               sex={patientData.sex !== undefined ? patientData.sex : null}
               address={patientData.address || null}
               avatar={patientData.avatar || "/default-avatar.png"}
@@ -153,7 +179,7 @@ const PatientProfilePage: React.FC = () => {
                 boxShadow: 1,
                 zIndex: 1,
               }}
-              aria-label={t("common.edit")}
+              aria-label="Chỉnh sửa"
               size="small"
             >
               <EditIcon />
@@ -209,6 +235,8 @@ const PatientProfilePage: React.FC = () => {
         currentAvatar={patientData.avatar || "/default-avatar.png"}
         onClose={handleCloseAvatarModal}
         onSave={handleSaveAvatar}
+        isLoading={avatarLoading}
+        error={avatarError}
       />
     </Container>
   );

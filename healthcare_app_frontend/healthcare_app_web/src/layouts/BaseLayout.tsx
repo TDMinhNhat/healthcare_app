@@ -117,9 +117,17 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
               onClick={handleMenu}
               color="inherit"
             >
-              <Avatar sx={{ bgcolor: "secondary.main" }}>
-                <AccountCircle />
-              </Avatar>
+              {user?.avatar ? (
+                <Avatar
+                  sx={{ bgcolor: "secondary.main" }}
+                  src={user.avatar}
+                  alt={`${user.firstName} ${user.lastName}`}
+                />
+              ) : (
+                <Avatar sx={{ bgcolor: "secondary.main" }}>
+                  <AccountCircle />
+                </Avatar>
+              )}
             </IconButton>
             <Menu
               id="menu-appbar"

@@ -14,11 +14,13 @@ import { EditProfileModal } from "../../components/profile/EditProfileModal";
 import AvatarUploadModal from "../../components/profile/AvatarUploadModal";
 // Import types và services
 import { Doctor } from "../../types/doctor";
-import { useTranslation } from "react-i18next";
 import { Diploma } from "../../types";
-import { useSelector } from "react-redux";
-import { getDoctorInfo } from "../../services/authenticate/user_service";
-import { log } from "console";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  getDoctorInfo,
+  updateDoctorAvatar,
+} from "../../services/authenticate/user_service";
+import { setUser } from "../../stores/slices/user.slice";
 import { ROUTING } from "../../constants/routing";
 
 // Dữ liệu mẫu - thông thường sẽ lấy từ API
@@ -114,14 +116,16 @@ const mockDoctorData: any = {
 
 // Component trang hồ sơ bác sĩ
 const DoctorProfilePage: React.FC = () => {
-  const { t } = useTranslation(); // Hook đa ngôn ngữ
   // Khai báo các state cần thiết
   const [doctorData, setDoctorData] = useState<any | null>(null); // Lưu thông tin bác sĩ
   const [loading, setLoading] = useState(true); // Trạng thái đang tải
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Trạng thái hiển thị modal chỉnh sửa
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false); // Trạng thái hiển thị modal tải lên avatar
+  const [avatarLoading, setAvatarLoading] = useState(false); // Trạng thái đang tải khi cập nhật avatar
+  const [avatarError, setAvatarError] = useState<string | null>(null); // Lỗi khi cập nhật avatar
   const [error, setError] = useState<string | null>(null); // Lưu thông báo lỗi nếu có
   const user = useSelector((state: any) => state.user.user); // Lấy thông tin người dùng từ Redux
+  const dispatch = useDispatch(); // Hook để gửi action đến Redux
   const navigate = useNavigate(); // Hook chuyển trang
 
   useEffect(() => {
@@ -177,15 +181,48 @@ const DoctorProfilePage: React.FC = () => {
   };
 
   // Hàm xử lý khi lưu avatar mới
-  const handleSaveAvatar = (newAvatar: string) => {
-    // Ở đây sẽ gọi API để cập nhật avatar
-    setDoctorData({ ...doctorData, avatar: newAvatar });
-    console.log("Saving updated avatar:", newAvatar);
+  const handleSaveAvatar = async (newAvatar: string) => {
+    try {
+      setAvatarLoading(true);
+      setAvatarError(null);
+
+      // Gọi API để cập nhật avatar bác sĩ
+      const response = await updateDoctorAvatar(user.userId, {
+        uri: newAvatar,
+      });
+
+      if (response?.data?.code === 200) {
+        // Cập nhật state local với dữ liệu trả về từ API
+        setDoctorData({
+          ...doctorData,
+          doctor: response.data.data, // Cập nhật thông tin doctor với dữ liệu mới
+        });
+
+        // Cập nhật Redux state với avatar mới
+        const updatedUser = {
+          ...user,
+          avatar: response.data.data.avatar, // Avatar là trực tiếp trong data object, không phải trong doctor.avatar
+        };
+        dispatch(setUser(updatedUser));
+
+        console.log(
+          "Doctor avatar updated successfully:",
+          response.data.data.avatar
+        );
+      } else {
+        throw new Error("Failed to update doctor avatar");
+      }
+    } catch (error) {
+      console.error("Error updating doctor avatar:", error);
+      setAvatarError("Failed to update avatar. Please try again.");
+    } finally {
+      setAvatarLoading(false);
+    }
   };
 
   // Hiển thị trạng thái đang tải
   if (loading) {
-    return <div>{t("common.loading")}</div>;
+    return <div>Đang tải...</div>;
   }
 
   // Hiển thị thông báo lỗi nếu có
@@ -195,7 +232,7 @@ const DoctorProfilePage: React.FC = () => {
 
   // Hiển thị thông báo khi không có dữ liệu
   if (!doctorData) {
-    return <Alert severity="info">{t("common.noData")}</Alert>;
+    return <Alert severity="info">Không có dữ liệu</Alert>;
   }
 
   // Render giao diện chính khi đã có dữ liệu
@@ -206,14 +243,12 @@ const DoctorProfilePage: React.FC = () => {
         <Grid item xs={12}>
           <Box sx={{ position: "relative" }}>
             <PersonalInfoSection
-              firstName={
-                doctorData.doctor?.firstName || t("common.notAvailable")
-              }
-              lastName={doctorData.doctor?.lastName || t("common.notAvailable")}
-              email={doctorData.doctor?.email || t("common.notAvailable")}
-              phone={doctorData.doctor?.phone || t("common.notAvailable")}
-              dob={doctorData.doctor?.dob || t("common.notAvailable")}
-              sex={doctorData.doctor?.sex ?? t("common.notAvailable")}
+              firstName={doctorData.doctor?.firstName || "Không có thông tin"}
+              lastName={doctorData.doctor?.lastName || "Không có thông tin"}
+              email={doctorData.doctor?.email || "Không có thông tin"}
+              phone={doctorData.doctor?.phone || "Không có thông tin"}
+              dob={doctorData.doctor?.dob || "Không có thông tin"}
+              sex={doctorData.doctor?.sex ?? "Không có thông tin"}
               address={doctorData.doctor?.address || null}
               avatar={doctorData.doctor?.avatar || "/default-avatar.png"}
               onEditAvatar={handleOpenAvatarModal}
@@ -234,7 +269,7 @@ const DoctorProfilePage: React.FC = () => {
                 boxShadow: 1,
                 zIndex: 1,
               }}
-              aria-label={t("common.edit")}
+              aria-label="Chỉnh sửa"
               size="small"
             >
               <EditIcon />
@@ -265,7 +300,7 @@ const DoctorProfilePage: React.FC = () => {
           <DoctorExperienceSection
             experiences={doctorData.experiences || []}
             specialization={
-              doctorData.doctor?.typeDisease?.name || t("common.notAvailable")
+              doctorData.doctor?.typeDisease?.name || "Không có thông tin"
             }
           />
         </Grid>
@@ -302,6 +337,8 @@ const DoctorProfilePage: React.FC = () => {
         currentAvatar={doctorData.doctor?.avatar || "/default-avatar.png"}
         onClose={handleCloseAvatarModal}
         onSave={handleSaveAvatar}
+        isLoading={avatarLoading}
+        error={avatarError}
       />
     </Container>
   );
