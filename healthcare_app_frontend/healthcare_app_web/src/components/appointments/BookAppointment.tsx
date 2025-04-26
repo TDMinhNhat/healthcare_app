@@ -81,7 +81,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
       setError(null);
       setPaymentCompleted(true);
 
-      await createAppointment(patientId, note, workSchedule.id, "123");
+      await createAppointment(patientId, note, workSchedule.id, paymentContent);
 
       handleNext();
     } catch (err) {

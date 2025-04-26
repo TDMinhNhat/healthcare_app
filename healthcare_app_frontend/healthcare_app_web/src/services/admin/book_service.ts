@@ -2,12 +2,17 @@ import axiosConfig from "../axiosConfig";
 
 const prefix = "admin/api/v1/appointments";
 
-export const getCancelBookings = async () => {
+export const getBookingsByStatus = async (status: string) => {
   const response = await axiosConfig.get(`${prefix}/status`, {
     params: {
-      status: "CANCELLED",
+      status: status,
     },
   });
+  return response;
+};
+
+export const getAllBookings = async () => {
+  const response = await axiosConfig.get(`${prefix}`);
   return response;
 };
 
