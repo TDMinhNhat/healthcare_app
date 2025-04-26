@@ -283,14 +283,14 @@ const PaymentCheckout = () => {
         </View>
       </ScrollView>
 
-      <View>
+      {/* <View>
         <TouchableOpacity
           style={styles.cancelButton}
           onPress={handlePaymentComplete}
         >
           <Text style={styles.cancelButtonText}>Hoàn tất thanh toán</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
       <View style={styles.footer}>
         <TouchableOpacity
           style={styles.cancelButton}
