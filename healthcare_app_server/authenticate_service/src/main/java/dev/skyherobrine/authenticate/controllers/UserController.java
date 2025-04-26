@@ -181,6 +181,47 @@ public class UserController {
         }
     }
 
+    @PutMapping("/doctor/avatar")
+    public synchronized ResponseEntity<Response> updateDoctorAvatar(
+            @RequestParam("doctorId") String doctorId,
+            @RequestParam("image") MultipartFile file
+    ) {
+        try {
+            log.info("User: Call api update the patient avatar");
+            Doctor doctor = dr.findDoctorByUserId(doctorId).orElse(null);
+            if(doctor != null) {
+                String getKeyFileName = avatarService.uploadFile(doctorId, file);
+                String getURL = avatarService.getURLFile(getKeyFileName).toExternalForm();
+
+                kafkaTemplate.send("update_doctor_avatar", ObjectParser.convertObjectToJson(new HashMap<>(){{
+                    put("doctorId", doctorId);
+                    put("image", getURL);
+                }}));
+
+                doctor.setAvatar(getURL);
+                Doctor result = dr.save(doctor);
+                return ResponseEntity.ok(new Response(
+                        HttpStatus.OK.value(),
+                        "Update avatar doctor successfully!",
+                        result
+                ));
+            }
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.NOT_FOUND.value(),
+                    "Can't find the doctor",
+                    null
+            ));
+        } catch (Exception e) {
+            log.error("User: Can't update the doctor avatar");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The server can't update the doctor avatar",
+                    e.getMessage()
+            ));
+        }
+    }
+
     @PostMapping("/patient/account_bank")
     public ResponseEntity<Response> addPatientAccountBank(
             @RequestBody PatientAccountBankDTO dto
