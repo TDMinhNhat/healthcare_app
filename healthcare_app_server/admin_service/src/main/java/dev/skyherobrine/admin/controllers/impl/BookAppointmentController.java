@@ -37,10 +37,17 @@ public class BookAppointmentController {
     @GetMapping
     public ResponseEntity<Response> getAllBookAppointment() {
         log.info("Book Appointment: Call the api get all book appointments");
+        List<Map<String,Object>> result = new ArrayList<>();
+        bookAppointmentRepository.findAll().forEach(item -> {
+            Map<String,Object> data = new HashMap<>();
+            data.put("bookAppointment", item);
+            data.put("bookAppointmentPayment", bookAppointmentPaymentRepository.findByBookAppointment_Id(item.getId()).orElse(null));
+            result.add(data);
+        });
         return ResponseEntity.ok(new Response(
                 HttpStatus.OK.value(),
                 "Get all book appointments successfully",
-                bookAppointmentRepository.findAll()
+                result
         ));
     }
 
@@ -50,7 +57,7 @@ public class BookAppointmentController {
     ) {
         log.info("Book Appointment: Call the api get all book appointments by status");
         List<Map<String,Object>> result = new ArrayList<>();
-        bookAppointmentRepository.findByStatus(AppointmentStatus.CANCELLED).forEach(item -> {
+        bookAppointmentRepository.findByStatus(AppointmentStatus.valueOf(status)).forEach(item -> {
             Map<String,Object> data = new HashMap<>();
             data.put("bookAppointment", item);
             data.put("bookAppointmentPayment", bookAppointmentPaymentRepository.findByBookAppointment_Id(item.getId()).orElse(null));
