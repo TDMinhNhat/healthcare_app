@@ -149,7 +149,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
         />
       )}
 
-      {activeStep === 3 && (
+      {/* {activeStep === 3 && (
         <Box>
           <DoctorDetails doctor={selectedDoctor} />
           <Box sx={{ mt: 3 }}>
@@ -180,7 +180,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
             </Button>
           </Box>
         </Box>
-      )}
+      )} */}
 
       {activeStep === 3 && (
         <PaymentCheckout
