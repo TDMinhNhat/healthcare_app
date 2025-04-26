@@ -1,4 +1,5 @@
 import axiosConfig from "../axiosConfig";
+import mime from "mime";
 const prefix = "/authenticate/api/v1/user";
 
 export const getPatientInfo = async (userId: string) => {
@@ -56,6 +57,30 @@ export const getPatientBankAccount = async (patientId: string) => {
   const response = await axiosConfig.get(`${prefix}/patient/account_bank`, {
     params: {
       patientId: patientId,
+    },
+  });
+  return response;
+};
+
+export const updatePatientAvatar = async (
+  patientId: string,
+  image: { uri: string; type?: string }
+) => {
+  const formData = new FormData();
+
+  formData.append("image", {
+    uri: image.uri,
+    name: image.uri.split("/").pop(), // lấy phần tử cuối cùng trong đường dẫn, là file name
+    type: image.type || mime.getType(image.uri) || "image/jpeg",
+  });
+  formData.append("patientId", patientId);
+
+  const response = await axiosConfig.put(`${prefix}/patient/avatar`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+    transformRequest: (data, headers) => {
+      return formData; // ensures formData is passed as-is
     },
   });
   return response;

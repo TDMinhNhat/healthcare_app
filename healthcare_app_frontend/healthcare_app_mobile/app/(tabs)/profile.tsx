@@ -12,12 +12,18 @@ import {
 import { router } from "expo-router";
 import { useSelector, useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
-import { logOut } from "../../redux/slices/userSlice";
+import { logOut, updateUser } from "../../redux/slices/userSlice";
+import * as ImagePicker from "expo-image-picker";
+import { updatePatientAvatar } from "../../services/authenticate/user_service";
 
+// Component chính cho tab hồ sơ người dùng
 export default function ProfileTab() {
+  // Lấy thông tin người dùng từ Redux store
   const user = useSelector((state: any) => state.user.user);
+  // Khởi tạo dispatch để gửi actions
   const dispatch = useDispatch();
 
+  // Hàm xử lý khi người dùng muốn chỉnh sửa hồ sơ
   const handleEditProfile = () => {
     if (user?.userId) {
       router.push({
@@ -27,11 +33,67 @@ export default function ProfileTab() {
     }
   };
 
+  // Hàm xử lý khi người dùng muốn cập nhật ảnh đại diện
+  const handleUpdateAvatar = async () => {
+    try {
+      // Yêu cầu quyền truy cập vào thư viện ảnh
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (status !== "granted") {
+        Alert.alert(
+          "Quyền truy cập",
+          "Cần quyền truy cập vào thư viện ảnh để thay đổi ảnh đại diện."
+        );
+        return;
+      }
+
+      // Mở trình chọn ảnh
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const selectedImage = result.assets[0];
+        console.log("Selected image:", selectedImage);
+        // Gọi API cập nhật ảnh đại diện
+        const response = await updatePatientAvatar(user.userId, {
+          uri: selectedImage.uri,
+        });
+
+        if (response.data && response.data.code === 200) {
+          // Lấy URL ảnh đại diện mới từ response
+          const newAvatarUrl = response.data.data.avatar;
+
+          // Cập nhật Redux store với ảnh đại diện mới
+          dispatch(
+            updateUser({
+              ...user,
+              avatar: newAvatarUrl,
+            })
+          );
+
+          Alert.alert("Thành công", "Ảnh đại diện đã được cập nhật");
+        } else {
+          Alert.alert("Lỗi", "Không thể cập nhật ảnh đại diện");
+        }
+      }
+    } catch (error) {
+      console.error("Error updating avatar:", error);
+      Alert.alert("Lỗi", "Đã xảy ra lỗi khi cập nhật ảnh đại diện");
+    }
+  };
+
+  // Hàm xử lý khi người dùng bấm vào nút khẩn cấp
   const handleEmergency = () => {
     // Chuyển hướng trực tiếp đến trang khẩn cấp thay vì hiển thị thông báo
     router.push("/emergency");
   };
 
+  // Hàm xử lý khi người dùng đăng xuất
   const handleLogout = () => {
     Alert.alert("Đăng xuất", "Bạn có chắc chắn muốn đăng xuất không?", [
       { text: "Hủy", style: "cancel" },
@@ -46,6 +108,7 @@ export default function ProfileTab() {
     ]);
   };
 
+  // Render giao diện người dùng
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -64,14 +127,17 @@ export default function ProfileTab() {
           <View style={styles.infoCard}>
             {/* Ảnh đại diện bên trong thẻ thông tin */}
             <View style={styles.avatarContainer}>
-              <Image
-                source={{
-                  uri: user?.avatar || "https://via.placeholder.com/150",
-                }}
-                style={styles.avatar}
-              />
+              <TouchableOpacity onPress={handleUpdateAvatar}>
+                <Image
+                  source={{
+                    uri: user?.avatar || "https://via.placeholder.com/150",
+                  }}
+                  style={styles.avatar}
+                />
+              </TouchableOpacity>
             </View>
 
+            {/* Hiển thị thông tin họ tên */}
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Họ và tên:</Text>
               <Text style={styles.infoValue}>
@@ -79,6 +145,7 @@ export default function ProfileTab() {
               </Text>
             </View>
 
+            {/* Hiển thị thông tin email */}
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Email:</Text>
               <Text style={styles.infoValue} numberOfLines={2}>
@@ -86,6 +153,7 @@ export default function ProfileTab() {
               </Text>
             </View>
 
+            {/* Hiển thị thông tin số điện thoại */}
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Số điện thoại:</Text>
               <Text style={styles.infoValue}>
@@ -93,6 +161,7 @@ export default function ProfileTab() {
               </Text>
             </View>
 
+            {/* Hiển thị thông tin ngày sinh */}
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Ngày sinh:</Text>
               <Text style={styles.infoValue}>
@@ -100,6 +169,7 @@ export default function ProfileTab() {
               </Text>
             </View>
 
+            {/* Hiển thị thông tin giới tính */}
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Giới tính:</Text>
               <Text style={styles.infoValue}>
@@ -111,6 +181,7 @@ export default function ProfileTab() {
               </Text>
             </View>
 
+            {/* Hiển thị thông tin địa chỉ */}
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Địa chỉ:</Text>
               <Text style={styles.infoValue} numberOfLines={2}>
@@ -124,7 +195,7 @@ export default function ProfileTab() {
 
         {/* Tùy chọn menu */}
         <View style={styles.menuContainer}>
-          {/* Đã xóa mục chỉnh sửa hồ sơ */}
+          {/* Nút khẩn cấp */}
           <TouchableOpacity style={styles.menuItem} onPress={handleEmergency}>
             <View style={[styles.menuIconContainer, styles.emergencyIcon]}>
               <Ionicons name="warning-outline" size={20} color="#dc3545" />
@@ -187,6 +258,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 10,
     marginTop: 5,
+    position: "relative",
   },
   avatar: {
     width: 100,
@@ -287,14 +359,14 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     padding: 15,
-    alignItems: "center", // Center the avatar
+    alignItems: "center", // Căn giữa ảnh đại diện
   },
   infoRow: {
     flexDirection: "row",
     paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
-    width: "100%", // Ensure full width
+    width: "100%",
   },
   infoLabel: {
     width: "35%",

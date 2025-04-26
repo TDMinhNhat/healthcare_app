@@ -161,18 +161,15 @@ export default function EditProfileScreen() {
             touched,
           }) => (
             <View style={styles.content}>
-              {/* Ảnh hồ sơ */}
-              <View style={styles.avatarContainer}>
+              {/* Ảnh hồ sơ (chỉ hiển thị không cập nhật) */}
+              {/* <View style={styles.avatarContainer}>
                 <Image
                   source={{
                     uri: user?.avatar || "https://via.placeholder.com/150",
                   }}
                   style={styles.avatar}
                 />
-                <TouchableOpacity style={styles.editAvatarButton}>
-                  <Ionicons name="camera" size={20} color="#fff" />
-                </TouchableOpacity>
-              </View>
+              </View> */}
 
               {/* Các trường biểu mẫu - Sử dụng Formik */}
               <View style={styles.formGroup}>
@@ -422,17 +419,6 @@ const styles = StyleSheet.create({
     borderRadius: 60,
     borderWidth: 3,
     borderColor: "#0056b3",
-  },
-  editAvatarButton: {
-    position: "absolute",
-    bottom: 0,
-    right: "35%",
-    backgroundColor: "#0056b3",
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
   },
   formGroup: {
     marginBottom: 16,
