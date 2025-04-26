@@ -38,7 +38,11 @@ public class BookAppointmentConsumer {
 
             BookAppointment target = bookAppointmentRepository.findByPatientIdAndWorkSchedule(getUserId, Long.parseLong(getAppointmentId)).orElseThrow(() -> new EntityNotFoundException("The book appointment was not found!"));
             target.setStatus(AppointmentStatus.valueOf(getStatus));
-            bookAppointmentRepository.save(target);
+            BookAppointment result = bookAppointmentRepository.save(target);
+
+            BookAppointmentPayment bookAppointmentPayment = bookAppointmentPaymentRepository.findByBookAppointmentId_Id(target.getId()).orElseThrow(() -> new EntityNotFoundException("The book appointment payment was not found!"));
+            bookAppointmentPayment.setBookAppointmentId(result);
+            bookAppointmentPaymentRepository.save(bookAppointmentPayment);
 
             log.info("Book Appointment Consumer: update the status successfully!");
         } catch (Exception e) {
