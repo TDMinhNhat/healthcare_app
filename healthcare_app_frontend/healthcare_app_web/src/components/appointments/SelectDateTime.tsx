@@ -9,6 +9,7 @@ import {
   Card,
   CardContent,
   Stack,
+  Alert,
 } from "@mui/material";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -22,6 +23,7 @@ import {
   formatTimeFromTimeString,
 } from "../../utils/dateUtils";
 import { getWorkScheduleByDoctorAndExactDate } from "../../services/authenticate/workSchedule_service";
+import { getAppointmentPatientDetail } from "../../services/appointment/booking_service";
 import DoctorDetails from "./DoctorDetails"; // Import DoctorDetails component
 
 /**
@@ -33,6 +35,7 @@ import DoctorDetails from "./DoctorDetails"; // Import DoctorDetails component
 interface SelectDateTimeProps {
   doctor: any;
   onSelect: (date: Date, shift: any, workScheduleTarget: object) => void;
+  patientId?: string; // Add patientId prop
   // onBack: () => void;
 }
 
@@ -45,6 +48,7 @@ interface SelectDateTimeProps {
 const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   doctor,
   onSelect,
+  patientId,
   // onBack,
 }) => {
   const { t } = useTranslation();
@@ -73,11 +77,16 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   // State lưu thông báo lỗi nếu có
   const [error, setError] = useState<string | null>(null);
 
+  // State để kiểm soát trạng thái đã đặt lịch
+  const [hasExistingAppointment, setHasExistingAppointment] =
+    useState<boolean>(false);
+
   // State để kiểm tra xem có lịch làm việc nào trong ngày đã chọn không
   const [hasWorkSchedules, setHasWorkSchedules] = useState<boolean>(true);
 
   // State lưu trữ thông tin lịch làm việc
   const [workSchedules, setWorkSchedules] = useState<any>(null);
+  // lịch được chọn
   const [workScheduleTarget, setWorkScheduleTarget] = useState<any>(null);
 
   /**
@@ -171,13 +180,35 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
    * @param shift - Ca khám được chọn
    * @param shiftInfo - Thông tin chi tiết của ca khám
    */
-  const handleShiftSelect = (shift: string, shiftInfo: any) => {
+  const handleShiftSelect = async (shift: string, shiftInfo: any) => {
     // Tìm và lưu thông tin lịch làm việc tương ứng với ca được chọn
     const shiftId = shiftInfo.id;
-    setWorkScheduleTarget(
-      workSchedules.find((item: any) => item.shift.id === shiftId)
+    const selectedWorkSchedule = workSchedules.find(
+      (item: any) => item.shift.id === shiftId
     );
 
+    // Kiểm tra xem bệnh nhân đã có lịch khám trong ca này chưa
+    try {
+      const response = await getAppointmentPatientDetail(
+        patientId,
+        selectedWorkSchedule.id
+      );
+
+      // Nếu API trả về mã 200, nghĩa là đã có lịch khám
+      if (response.data.code === 200) {
+        setHasExistingAppointment(true);
+        setError(
+          "Bạn đã có lịch khám trong khung giờ này. Vui lòng chọn khung giờ khác."
+        );
+        return;
+      }
+    } catch (error) {
+      // Nếu API trả về lỗi, nghĩa là chưa có lịch khám
+      setHasExistingAppointment(false);
+      setError(null);
+    }
+
+    setWorkScheduleTarget(selectedWorkSchedule);
     setSelectedShift(shift);
     setSelectedShiftInfo(shiftInfo);
   };
@@ -242,6 +273,13 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
       <Box sx={{ mb: 3 }}>
         <DoctorDetails doctor={doctor} />
       </Box>
+
+      {/* Hiển thị thông báo lỗi nếu có */}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       {/* Bố cục lưới: bên trái là lịch, bên phải là danh sách ca khám */}
       <Grid container spacing={3}>
@@ -356,11 +394,11 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
       <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
         {/* Nút quay lại */}
         {/* <Button onClick={onBack}>{t("common.back")}</Button> */}
-        {/* Nút tiếp tục - vô hiệu hóa nếu chưa chọn đủ thông tin */}
+        {/* Nút tiếp tục - vô hiệu hóa nếu chưa chọn đủ thông tin hoặc đã có lịch */}
         <Button
           variant="contained"
           color="primary"
-          disabled={!selectedDate || !selectedShift}
+          disabled={!selectedDate || !selectedShift || hasExistingAppointment}
           onClick={handleContinue}
         >
           {t("common.continue")}

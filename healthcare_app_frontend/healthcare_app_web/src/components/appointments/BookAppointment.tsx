@@ -145,11 +145,12 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
         <SelectDateTime
           doctor={selectedDoctor}
           onSelect={handleDateTimeSelect}
+          patientId={patientId}
           // onBack={handleBack}
         />
       )}
 
-      {/* {activeStep === 3 && (
+      {activeStep === 3 && (
         <Box>
           <DoctorDetails doctor={selectedDoctor} />
           <Box sx={{ mt: 3 }}>
@@ -180,7 +181,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
             </Button>
           </Box>
         </Box>
-      )} */}
+      )}
 
       {activeStep === 3 && (
         <PaymentCheckout
