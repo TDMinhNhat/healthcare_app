@@ -22,6 +22,7 @@ import {
   formatTimeFromTimeString,
 } from "../../utils/dateUtils";
 import { getDoctorInfo } from "../../services/authenticate/user_service";
+import { getAppointmentPatientDetail } from "../../services/appointment/booking_service"; // Import the correct API function
 
 interface TimeSlot {
   id: number;
@@ -50,6 +51,8 @@ export default function DateTimeSelectionScreen() {
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [loadingTimeSlots, setLoadingTimeSlots] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasExistingAppointment, setHasExistingAppointment] = useState(false); // Add state for tracking existing appointments
+  const [appointmentError, setAppointmentError] = useState<string | null>(null); // Add state for error messages
 
   // States for doctor information
   const [doctorDetails, setDoctorDetails] = useState<any>(null);
@@ -149,10 +152,43 @@ export default function DateTimeSelectionScreen() {
   };
 
   // Handle time slot selection
-  const handleTimeSlotSelection = (slotId: number, workScheduleId?: number) => {
-    setSelectedTimeSlot(slotId);
-    if (workScheduleId) {
+  const handleTimeSlotSelection = async (
+    slotId: number,
+    workScheduleId?: number
+  ) => {
+    if (!workScheduleId) return;
+
+    try {
+      setIsLoading(true);
+      setAppointmentError(null);
+
+      // Check if patient already has an appointment for this time slot
+      const response = await getAppointmentPatientDetail(
+        user.userId, // Use patient ID from Redux state
+        workScheduleId
+      );
+
+      // If API returns status 200, it means there's already an appointment
+      if (response.data.code === 200) {
+        setHasExistingAppointment(true);
+        setAppointmentError(
+          "Bạn đã có lịch khám vào khung giờ này. Vui lòng chọn khung giờ khác."
+        );
+        Alert.alert(
+          "Thông báo",
+          "Bạn đã có lịch khám vào khung giờ này. Vui lòng chọn khung giờ khác."
+        );
+        return;
+      }
+      // Update selected time slot and work schedule ID
+      setSelectedTimeSlot(slotId);
       setSelectedWorkScheduleId(workScheduleId);
+    } catch (error) {
+      // If API returns an error, it means there's no appointment yet
+      setHasExistingAppointment(false);
+      setAppointmentError(null);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -190,6 +226,14 @@ export default function DateTimeSelectionScreen() {
   const handleContinueToPayment = () => {
     if (!selectedTimeSlot || !selectedWorkScheduleId) {
       Alert.alert("Thông báo", "Vui lòng chọn giờ khám");
+      return;
+    }
+
+    if (hasExistingAppointment) {
+      Alert.alert(
+        "Thông báo",
+        "Lịch khám vào khung giờ này đã được đặt. Vui lòng chọn khung giờ khác."
+      );
       return;
     }
 
