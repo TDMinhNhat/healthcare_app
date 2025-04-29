@@ -56,6 +56,7 @@ import {
 } from "../../services/appointment/medical_record_service";
 import { getPatientInfo } from "../../services/authenticate/user_service";
 import { getAllDrugs } from "../../services/appointment/drug_service";
+import { ca } from "date-fns/locale";
 
 // Dữ liệu mẫu bệnh nhân
 const MOCK_PATIENT: User = {
@@ -144,6 +145,7 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
 
   // Trạng thái chỉnh sửa
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [canEdit, setCanEdit] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
 
@@ -224,6 +226,11 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
         console.log("API response:", response);
         const apiData = response.data || {};
 
+        // Check if apiData is empty object or null
+        if (!apiData || Object.keys(apiData).length === 0) {
+          setCanEdit(true);
+        }
+
         console.log("infoAppointment", infoAppointment);
         console.log("patient id", patientId);
 
@@ -261,7 +268,7 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
           fetchPatientInfo(patientId);
         } else {
           // Sử dụng dữ liệu mẫu nếu không có patientId
-          setPatient(MOCK_PATIENT);
+          // setPatient(MOCK_PATIENT);
         }
 
         // Khởi tạo các trường dữ liệu form
@@ -276,7 +283,6 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
         setLoading(false);
       }
     };
-
     // Hàm lấy thông tin bệnh nhân
     const fetchPatientInfo = async (userId: string) => {
       setPatientLoading(true);
@@ -398,6 +404,11 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
 
   // Hàm bắt đầu chỉnh sửa hồ sơ
   const handleStartEditing = () => {
+    if (!canEdit) {
+      window.alert("Không thể chỉnh sửa hồ sơ bệnh án đã lưu");
+      return;
+    }
+
     setIsEditing(true);
   };
 
@@ -419,6 +430,35 @@ const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
   // Hàm lưu thông tin hồ sơ bệnh án
   const handleSave = async () => {
     if (!medicalRecord || !appointmentId) return;
+
+    if (!diagnosisDisease.trim()) {
+      window.alert("Vui lòng nhập chẩn đoán bệnh");
+      return;
+    }
+
+    if (!reExaminationDate) {
+      window.alert("Vui lòng chọn ngày tái khám");
+      return;
+    }
+
+    // Ensure re-examination date is in the future
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time component to compare dates only
+    const reExamDate = new Date(reExaminationDate);
+
+    if (reExamDate <= today) {
+      window.alert("Ngày tái khám phải là ngày trong tương lai");
+      return;
+    }
+
+    // Add confirmation dialog before saving
+    const confirmSave = window.confirm(
+      "Lưu ý: Sau khi lưu hồ sơ bệnh án, bạn sẽ không thể chỉnh sửa lại. Bạn có chắc chắn muốn lưu không?"
+    );
+
+    if (!confirmSave) {
+      return;
+    }
 
     setSaving(true);
     setError(null);
