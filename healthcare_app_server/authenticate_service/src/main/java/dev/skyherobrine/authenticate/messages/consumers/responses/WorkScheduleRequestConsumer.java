@@ -184,7 +184,7 @@ public class WorkScheduleRequestConsumer {
             log.info("Work Schedule Request Consumer: {}", message);
 
             String doctorId = ObjectParser.convertJsonToObject(message, String.class);
-            List<WorkSchedule> result = workScheduleRepository.findAllByDoctor_UserId(doctorId).stream().filter(workSchedule -> workSchedule.getDateAppointment().getYear() == LocalDate.now().getYear()).toList();
+            List<WorkSchedule> result = workScheduleRepository.findAllByDoctor_UserId(doctorId).stream().filter(workSchedule -> workSchedule.getDateAppointment().getYear() >= LocalDate.now().minusYears(5L).getYear() && workSchedule.getDateAppointment().getYear() <= LocalDate.now().getYear()).toList();
 
             Map<String,Object> visualizeYearly = new HashMap<>();
             for(AtomicInteger i = new AtomicInteger(LocalDate.now().getYear()); i.get() >= LocalDate.now().minusYears(5L).getYear(); i.set(i.get() - 1)) {
