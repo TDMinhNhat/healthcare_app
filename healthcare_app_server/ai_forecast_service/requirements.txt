@@ -10,3 +10,7 @@ scipy
 requests
 numpy
 confluent-kafka
+statsmodels
+joblib
+pandas
+pmdarima
