@@ -4,7 +4,6 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router";
 import { ROUTING } from "../constants/routing";
 import PatientProfilePage from "../pages/patient/PatientProfilePage";
 import DoctorProfilePage from "../pages/doctor/DoctorProfilePage";
-import MedicalRecordPage from "../pages/doctor/MedicalRecordPage";
 import DoctorAppointmentDetailsPage from "../pages/doctor/DoctorAppointmentDetailsPage";
 import PatientAppointmentDetailsPage from "../pages/patient/PatientAppointmentDetailsPage";
 import EmergencyPage from "../pages/doctor/EmergencyPage";

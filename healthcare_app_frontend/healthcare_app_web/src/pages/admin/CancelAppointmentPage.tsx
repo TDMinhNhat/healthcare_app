@@ -98,6 +98,7 @@ export default function CancelAppointmentPage() {
               appointment.bookAppointmentPayment.status ===
               PaymentStatus.PAY_BACK,
             paymentStatus: appointment.bookAppointmentPayment.status,
+            price: appointment.bookAppointmentPayment.price.price,
             rawData: appointment.bookAppointment,
           };
         } catch (error) {
@@ -479,10 +480,27 @@ export default function CancelAppointmentPage() {
               </Grid>
               <Grid item xs={12}>
                 <Typography variant="subtitle1">
+                  <strong>Mã bác sĩ:</strong>{" "}
+                  {selectedAppointment.rawData?.workSchedule?.doctor?.userId ||
+                    "Không có thông tin"}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="subtitle1">
                   <strong>Bác sĩ phụ trách:</strong>{" "}
                   {selectedAppointment.rawData?.workSchedule?.doctor
                     ? `${selectedAppointment.rawData.workSchedule.doctor.lastName} ${selectedAppointment.rawData.workSchedule.doctor.firstName}`
                     : "Không có thông tin"}
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Typography variant="subtitle1">
+                  <strong>Số tiền:</strong>{" "}
+                  {new Intl.NumberFormat("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  }).format(selectedAppointment.price || 0)}
                 </Typography>
               </Grid>
 

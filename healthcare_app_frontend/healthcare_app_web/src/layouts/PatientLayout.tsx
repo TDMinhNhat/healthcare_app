@@ -9,9 +9,7 @@ import {
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import EventNoteIcon from "@mui/icons-material/EventNote";
-import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import DescriptionIcon from "@mui/icons-material/Description";
-import ChatIcon from "@mui/icons-material/Chat";
 import { Outlet, useNavigate } from "react-router";
 import { ROUTING } from "../constants/routing";
 

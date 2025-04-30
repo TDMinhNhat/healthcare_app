@@ -57,7 +57,7 @@ const DoctorDashboard: React.FC = () => {
 
         const response = await getDoctorDashboard(user.userId);
         const dashboardData: DoctorDashboardResponse = response;
-
+        console.log("Doctor dashboard data:", dashboardData.data);
         // Update states with API data
         setTotalPatients(dashboardData.data.total_patient_done);
         setTodayAppointments(dashboardData.data.total_patient_today);

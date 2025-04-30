@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { io, Socket } from "socket.io-client";
 import {
   Box,
   Typography,
@@ -28,7 +27,6 @@ import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import CloseIcon from "@mui/icons-material/Close";
-import HomeIcon from "@mui/icons-material/Home";
 import { ROUTING } from "../../constants/routing"; // Import hằng số ROUTING
 import {
   format,
@@ -38,12 +36,7 @@ import {
   subWeeks,
 } from "date-fns";
 import { vi } from "date-fns/locale";
-import {
-  formatDateToString,
-  parseDateFromString,
-  parseDateTimeFromString,
-  formatTime,
-} from "../../utils/dateUtils";
+import { formatDateToString, parseDateFromString } from "../../utils/dateUtils";
 import { getWorkScheduleBetweenDate } from "../../services/authenticate/workSchedule_service.ts";
 
 /**

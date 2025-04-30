@@ -1,16 +1,14 @@
-import React, { ReactNode } from "react";
+import React from "react";
 import { BaseLayout } from "./BaseLayout";
 import {
   List,
   ListItemIcon,
   ListItemText,
-  Divider,
   ListItemButton,
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
-import SettingsIcon from "@mui/icons-material/Settings";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import EventBusyIcon from "@mui/icons-material/EventBusy";
@@ -59,7 +57,7 @@ export const AdminLayout: React.FC = () => {
           <ListItemIcon>
             <AccessTimeIcon />
           </ListItemIcon>
-          <ListItemText primary="Ca làm việc" />
+          <ListItemText primary="Quản lí ca làm việc" />
         </ListItemButton>
         {/* Quản lí dịch vụ */}
         <ListItemButton onClick={() => handleNavigation("/admin/diseases")}>
@@ -86,7 +84,7 @@ export const AdminLayout: React.FC = () => {
         </ListItemButton>
       </List>
 
-      <Divider />
+      {/* <Divider /> */}
       {/* <List>
         <ListItemButton onClick={() => handleNavigation("/admin/settings")}>
           <ListItemIcon>

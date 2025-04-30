@@ -17,7 +17,7 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import { Edit, Delete, Add, UploadFile } from "@mui/icons-material";
+import { Delete, Add, UploadFile } from "@mui/icons-material";
 import { User } from "../../types/user";
 import PatientForm from "../../components/admin/PatientForm";
 import {
@@ -27,7 +27,6 @@ import {
 } from "../../services/admin/patients_service";
 import { updateInfo } from "../../services/authenticate/user_service";
 import * as XLSX from "xlsx";
-import { format } from "date-fns";
 import { Address } from "../../types/address";
 
 const PatientManagementPage: React.FC = () => {

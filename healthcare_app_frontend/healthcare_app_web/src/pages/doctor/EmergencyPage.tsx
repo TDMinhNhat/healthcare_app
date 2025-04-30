@@ -23,17 +23,10 @@ import {
   GridRenderCellParams,
   GridToolbar,
 } from "@mui/x-data-grid";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import EmergencyIcon from "@mui/icons-material/MedicalServices";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import PatientMedicalRecordModal from "../../components/emergency/PatientMedicalRecordModal";
 import { User } from "../../types/user";
 import { Avatar } from "@mui/material";
-import GPSMapComponent from "../../components/find_doctor/GPSMapComponent";
 import { Socket, io } from "socket.io-client";
 
 // Initialize socket outside the component to avoid recreation on renders
@@ -98,14 +91,6 @@ const mockEmergencyPatients: User[] = [
   {},
   {},
 ];
-
-// Hàm API giả lập - sẽ được thay thế bằng dịch vụ thực tế
-const fetchEmergencyPatients = async (date?: Date): Promise<User[]> => {
-  return new Promise((resolve) => {
-    console.log(`Fetching patients for date: ${date?.toLocaleDateString()}`);
-    setTimeout(() => resolve(mockEmergencyPatients), 800);
-  });
-};
 
 const EmergencyPage: React.FC = () => {
   const [patients, setPatients] = useState<User[]>([]);
@@ -347,32 +332,6 @@ const EmergencyPage: React.FC = () => {
           >
             Danh sách bệnh nhân cấp cứu
           </Typography>
-
-          {/* Bộ chọn ngày */}
-          {/* <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DatePicker
-              label="Chọn ngày"
-              value={selectedDate}
-              onChange={handleDateChange}
-              slotProps={{
-                textField: {
-                  size: "small",
-                  InputProps: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <CalendarTodayIcon fontSize="small" />
-                      </InputAdornment>
-                    ),
-                  },
-                  sx: {
-                    minWidth: "180px",
-                    ml: { xs: 0, sm: 2 },
-                    mt: { xs: 2, sm: 0 },
-                  },
-                },
-              }}
-            />
-          </LocalizationProvider> */}
         </Box>
 
         <Divider sx={{ mb: 3 }} />
@@ -387,18 +346,6 @@ const EmergencyPage: React.FC = () => {
           </Alert>
         ) : (
           <>
-            {/* Bản đồ vị trí */}
-            {/* <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-                Bản đồ vị trí
-              </Typography>
-              <Box sx={{ height: "400px", width: "100%" }}>
-                <GPSMapComponent />
-              </Box>
-            </Box>
-
-            <Divider sx={{ mb: 3 }} /> */}
-
             <Box sx={{ height: 500, width: "100%" }}>
               <DataGrid
                 rows={patients.map((p, index) => ({

@@ -1,4 +1,4 @@
-import React, { ReactNode, use, useState } from "react";
+import React, { ReactNode, useState } from "react";
 import {
   Box,
   CssBaseline,
@@ -42,13 +42,13 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
 
 interface BaseLayoutProps {
   children: ReactNode;
-  title: string;
+  title?: string;
   sidebarContent: ReactNode;
 }
 
 export const BaseLayout: React.FC<BaseLayoutProps> = ({
   children,
-  title,
+  // title,
   sidebarContent,
 }) => {
   const [open, setOpen] = useState(true);

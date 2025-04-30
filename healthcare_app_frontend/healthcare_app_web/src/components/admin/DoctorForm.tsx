@@ -346,7 +346,10 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
                         ) : (
                           <Select
                             labelId="disease-select-label"
-                            value={values.typeDisease?.id || ""}
+                            value={
+                              values.typeDisease?.id ||
+                              (diseases.length > 0 ? diseases[0].id : "")
+                            }
                             onChange={(e: SelectChangeEvent<any>) => {
                               const selectedId = e.target.value;
                               const selectedDisease = diseases.find(

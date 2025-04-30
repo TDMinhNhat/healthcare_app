@@ -358,7 +358,7 @@ const DoctorRevenueDetailsPage: React.FC = () => {
           onClick={handleExcelExport}
           sx={{ ml: 2 }}
         >
-          Xuất Excel theo mẫu
+          Xuất Excel
         </Button>
       </Box>
       <Paper sx={{ width: "100%", overflow: "hidden" }}>
