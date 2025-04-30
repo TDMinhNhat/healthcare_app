@@ -19,7 +19,6 @@ import { setUser } from "@/redux/slices/userSlice";
 import { useDispatch } from "react-redux";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import * as encoding from "text-encoding";
 
 // Define validation schema using Yup
 const LoginSchema = Yup.object().shape({
