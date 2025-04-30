@@ -8,9 +8,12 @@ https://docs.djangoproject.com/en/5.2/howto/deployment/wsgi/
 """
 
 import os
-
+import healthcare_app_server.eureka
+from healthcare_app_server.kafka_consumer import KafkaConsumer
 from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'healthcare_app_server.settings')
 
 application = get_wsgi_application()
+
+KafkaConsumer().start()

@@ -1,7 +1,10 @@
 import threading
-from confluent_kafka import Consumer, KafkaException
 import json
+import pandas as pd
 import logging as log
+from statsmodels.tsa.stattools import adfuller, acf, pacf
+from confluent_kafka import Consumer, Producer, KafkaException
+from statsmodels.tsa.arima.model import ARIMA
 
 topics = ["predict_salary_year", "predict_salary_month", "predict_salary_quarter"]
 
@@ -16,6 +19,13 @@ class KafkaConsumer(threading.Thread):
                 'enable.auto.commit': True
             }
         )
+
+        self.producer = Producer(
+            {
+                'bootstrap.servers': 'localhost:9092'
+            }
+        )
+
         threading.Thread.__init__(self, daemon = True)
 
     def run(self):
@@ -56,10 +66,48 @@ class KafkaConsumer(threading.Thread):
                 print("There're no matched topic")
 
     def __predict_salary_year__(self, data) -> None:
+        data_json = json.loads(data)
+        data = pd.DataFrame(list(data_json.items()), columns = ["Year", "Salary"])
+
+        series = data["Salary"]
+        d = self.__get_diff_order__(series)
+        p, q = self.__estimate_p_q__(series)
+
+        model = ARIMA(series, order=(p, d, q))
+        model_fit = model.fit()
+        forecast = model_fit.forecast(steps = 3)
+
+        self.producer.produce('predict_salary_year_result', forecast.tolist())
         pass
 
     def __predict_salary_month__(self, data) -> None:
+        data_json = json.loads(data)
+        print(data_json)
         pass
 
     def __predict_salary_quarter__(self, data) -> None:
+        data_json = json.loads(data)
+        print(data_json)
         pass
+
+    def __get_diff_order__(self, series):
+        for d in range(20):
+            test_series = series.diff(d).dropna() if d > 0 else series
+            p_value = adfuller(test_series)[1]
+            if p_value < 0.05:
+                return d
+        return 20  # fallback
+
+    def __estimate_p_q__(self, series):
+        acf_vals = acf(series, nlags=50)
+        pacf_vals = pacf(series, nlags=50)
+
+        def find_cutoff(corr, threshold=0.2):
+            for i in range(1, len(corr)):
+                if abs(corr[i]) < threshold:
+                    return i - 1  # Previous lag was the last significant
+            return 0
+
+        estimated_p = find_cutoff(pacf_vals)
+        estimated_q = find_cutoff(acf_vals)
+        return estimated_p, estimated_q
