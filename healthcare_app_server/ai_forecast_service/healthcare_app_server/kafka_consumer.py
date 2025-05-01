@@ -5,7 +5,7 @@ import logging as log
 from statsmodels.tsa.stattools import adfuller, acf, pacf
 from confluent_kafka import Consumer, Producer, KafkaException
 from statsmodels.tsa.arima.model import ARIMA
-from statsmodels.tsa.holtwinters import SimpleExpSmoothing
+from statsmodels.tsa.holtwinters import SimpleExpSmoothing, Holt
 
 topics = ["predict_salary_year", "predict_salary_month", "predict_salary_quarter"]
 
@@ -59,45 +59,35 @@ class KafkaConsumer(threading.Thread):
         match topic:
             case "predict_salary_year":
                 self.__predict_salary_year__(data)
-            case "predict_salary_month":
-                self.__predict_salary_month__(data)
-            case "predict_salary_quarter":
-                self.__predict_salary_quarter__(data)
             case _:
                 print("There're no matched topic")
 
     def __predict_salary_year__(self, data) -> None:
-        data_json = json.loads(data)
-        data = pd.DataFrame(list(data_json.items()), columns = ["Year", "Salary"])
-        print(data)
-        if data.size >= 10:
-            print("ARIMA Model is used")
-            series = data["Salary"]
-            d = self.__get_diff_order__(series)
-            p, q = self.__estimate_p_q__(series)
+        try:
+            data_json = json.loads(data)
+            data = pd.DataFrame(list(data_json.items()), columns = ["Year", "Salary"])
+            if data.size >= 10:
+                print("ARIMA Model is used")
+                series = data["Salary"]
+                d = self.__get_diff_order__(series)
+                p, q = self.__estimate_p_q__(series)
 
-            model = ARIMA(series, order=(p, d, q))
-            model_fit = model.fit()
-            forecast = model_fit.forecast(steps = 3)
-            print(forecast)
-            self.producer.produce('predict_salary_year_result', json.dumps(forecast.tolist()).encode('utf-8'))
-        else:
-            print("Simple Exponential Smoothing is used")
-            model = SimpleExpSmoothing(data["Salary"])
-            model_fit = model.fit(optimized=False)
-            forecast = model_fit.forecast(steps = 3)
-            print(forecast)
-            self.producer.produce('predict_salary_year_result', json.dumps(forecast.tolist()).encode('utf-8'))
-        pass
-
-    def __predict_salary_month__(self, data) -> None:
-        data_json = json.loads(data)
-        print(data_json)
-        pass
-
-    def __predict_salary_quarter__(self, data) -> None:
-        data_json = json.loads(data)
-        print(data_json)
+                model = ARIMA(series, order=(p, d, q))
+                model_fit = model.fit()
+                forecast = model_fit.forecast(steps = 3)
+                print(forecast)
+                self.producer.produce('predict_salary_year_result', json.dumps(forecast.tolist()).encode('utf-8'))
+            else:
+                print("Simple Exponential Smoothing is used")
+                model = Holt(data["Salary"])
+                model_fit = model.fit(smoothing_level=0.5, smoothing_trend=0.5, optimized=False)
+                forecast = model_fit.forecast(steps = 3)
+                print(forecast)
+                self.producer.produce('predict_salary_year_result', json.dumps(forecast.tolist()).encode('utf-8'))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            print(error_message)
+            self.producer.produce('predict_salary_year_result', error_message.encode('utf-8'))
         pass
 
     def __get_diff_order__(self, series):

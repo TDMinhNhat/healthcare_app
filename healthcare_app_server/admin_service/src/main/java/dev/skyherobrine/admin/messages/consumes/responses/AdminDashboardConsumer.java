@@ -101,22 +101,6 @@ public class AdminDashboardConsumer {
             visualize.put("salaries", salaries);
 
             //// Salaries Prediction:
-            kafkaTemplate.send("predict_salary_quarter", ObjectParser.convertObjectToJson(bookAppointmentPaymentRepository.findAll().stream().filter(bookAppointmentPayment -> bookAppointmentPayment.getBookAppointment().getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().getYear()).collect(
-                    Collectors.groupingBy(
-                            bookAppointmentPayment -> bookAppointmentPayment.getBookAppointment().getWorkSchedule().getDateAppointment().get(IsoFields.QUARTER_OF_YEAR),
-                            Collectors.reducing(0.0, bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice(), Double::sum)
-                    )
-            )));
-
-
-            kafkaTemplate.send("predict_salary_month", ObjectParser.convertObjectToJson(
-                    bookAppointmentPaymentRepository.findAll().stream().filter(bookAppointmentPayment -> bookAppointmentPayment.getBookAppointment().getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().getYear()).collect(
-                            Collectors.groupingBy(
-                                    bookAppointmentPayment -> bookAppointmentPayment.getBookAppointment().getWorkSchedule().getDateAppointment().getMonth(),
-                                    Collectors.reducing(0.0, bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice(), Double::sum)
-                            ))
-            ));
-
             kafkaTemplate.send("predict_salary_year", ObjectParser.convertObjectToJson(
                     bookAppointmentPaymentRepository.findAll().stream().collect(
                             Collectors.groupingBy(
