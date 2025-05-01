@@ -41,7 +41,6 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
     "Chọn dịch vụ",
     "Chọn bác sĩ",
     "Chọn ngày giờ",
-    "Xem lại thông tin",
     "Thanh toán",
     "Xác nhận",
   ];

@@ -259,6 +259,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
       console.error("Lỗi khi kiểm tra thời gian cho cuộc hẹn:", error);
       return false;
     }
+    // return true;
   };
 
   /**
@@ -309,6 +310,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
       console.error("Lỗi khi xử lý ngày tháng:", error);
       return false;
     }
+    // return true;
   };
 
   /**
@@ -548,7 +550,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
       </Card>
 
       {/* Các lưu ý và hướng dẫn cho bệnh nhân */}
-      <Paper elevation={1} sx={{ p: 3, bgcolor: "info.50" }}>
+      {/* <Paper elevation={1} sx={{ p: 3, bgcolor: "info.50" }}>
         <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
           Lưu ý quan trọng:
         </Typography>
@@ -563,7 +565,7 @@ const PatientAppointmentDetailsPage: React.FC = () => {
           • Nếu cần hủy hoặc thay đổi lịch hẹn, vui lòng thông báo trước ít nhất
           24 giờ qua hotline của bệnh viện.
         </Typography>
-      </Paper>
+      </Paper> */}
 
       {/* Modal hồ sơ bệnh án */}
       <MedicalRecordModal

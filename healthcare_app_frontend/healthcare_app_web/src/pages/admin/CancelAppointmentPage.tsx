@@ -231,7 +231,11 @@ export default function CancelAppointmentPage() {
       setCanceledAppointments((prevAppointments) =>
         prevAppointments.map((appointment) =>
           appointment.appointmentId === appointmentId
-            ? { ...appointment, isRefunded: true }
+            ? {
+                ...appointment,
+                isRefunded: true,
+                paymentStatus: PaymentStatus.PAY_BACK,
+              }
             : appointment
         )
       );

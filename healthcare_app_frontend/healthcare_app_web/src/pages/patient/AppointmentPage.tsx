@@ -353,6 +353,7 @@ const AppointmentPage = () => {
       currentTimeInMinutes >= startTimeInMinutes &&
       currentTimeInMinutes <= endTimeInMinutes
     );
+    // return true;
   };
 
   // Điều hướng đến trang chi tiết cuộc hẹn khi người dùng nhấp vào một cuộc hẹn cụ thể
@@ -887,7 +888,7 @@ const AppointmentPage = () => {
                   />
                   <Typography variant="caption">Chờ khám</Typography>
                 </Box>
-                <Box sx={{ display: "flex", alignItems: "center" }}>
+                {/* <Box sx={{ display: "flex", alignItems: "center" }}>
                   <Box
                     sx={{
                       width: 12,
@@ -898,7 +899,7 @@ const AppointmentPage = () => {
                     }}
                   />
                   <Typography variant="caption">Đang khám</Typography>
-                </Box>
+                </Box> */}
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <Box
                     sx={{
