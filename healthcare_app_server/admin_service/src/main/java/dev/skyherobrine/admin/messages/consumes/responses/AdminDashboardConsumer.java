@@ -35,8 +35,9 @@ public class AdminDashboardConsumer {
     private final WorkScheduleRepository workScheduleRepository;
     private final DoctorRepository doctorRepository;
     private final PatientRepository patientRepository;
+    private final AdminForecastSalaryConsumer adminForecastSalaryConsumer;
 
-    public AdminDashboardConsumer(KafkaTemplate<String, String> kafkaTemplate, BookAppointmentRepository bookAppointmentRepository, BookAppointmentPaymentRepository bookAppointmentPaymentRepository, MedicalRecordRepository medicalRecordRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, PriceRepository priceRepository, WorkScheduleRepository workScheduleRepository, DoctorRepository doctorRepository, PatientRepository patientRepository) {
+    public AdminDashboardConsumer(KafkaTemplate<String, String> kafkaTemplate, BookAppointmentRepository bookAppointmentRepository, BookAppointmentPaymentRepository bookAppointmentPaymentRepository, MedicalRecordRepository medicalRecordRepository, MedicalRecordDrugRepository medicalRecordDrugRepository, PriceRepository priceRepository, WorkScheduleRepository workScheduleRepository, DoctorRepository doctorRepository, PatientRepository patientRepository, AdminForecastSalaryConsumer adminForecastSalaryConsumer) {
         this.kafkaTemplate = kafkaTemplate;
         this.bookAppointmentRepository = bookAppointmentRepository;
         this.bookAppointmentPaymentRepository = bookAppointmentPaymentRepository;
@@ -46,6 +47,7 @@ public class AdminDashboardConsumer {
         this.workScheduleRepository = workScheduleRepository;
         this.doctorRepository = doctorRepository;
         this.patientRepository = patientRepository;
+        this.adminForecastSalaryConsumer = adminForecastSalaryConsumer;
     }
 
     @KafkaListener(topics = "request_get_admin_dashboard", groupId = "admin_get_admin_dashboard")
@@ -106,6 +108,7 @@ public class AdminDashboardConsumer {
                     )
             )));
 
+
             kafkaTemplate.send("predict_salary_month", ObjectParser.convertObjectToJson(
                     bookAppointmentPaymentRepository.findAll().stream().filter(bookAppointmentPayment -> bookAppointmentPayment.getBookAppointment().getWorkSchedule().getDateAppointment().getYear() == LocalDate.now().getYear()).collect(
                             Collectors.groupingBy(
@@ -121,6 +124,8 @@ public class AdminDashboardConsumer {
                                     Collectors.reducing(0.0, bookAppointmentPayment -> bookAppointmentPayment.getPrice().getPrice(), Double::sum)
                             ))
             ));
+            Thread.sleep(1000);
+            visualize.put("salaries_prediction", adminForecastSalaryConsumer.getStorageData());
 
             //// Patient appointment:
             Map<String,Object> patients = new HashMap<>();

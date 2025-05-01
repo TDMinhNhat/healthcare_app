@@ -72,7 +72,8 @@ public class DashboardController {
     public ResponseEntity<Response> getAdminDashboard() {
         try {
             log.info("Dashboard Controller: Call the api get admin dashboard");
-            kafkaTemplate.send("request_get_admin_dashboard", "");
+            kafkaTemplate.send("request_get_admin_dashboard", "").get();
+            kafkaTemplate.flush();
             Thread.sleep(1000);
             return ResponseEntity.ok(new Response(
                     HttpStatus.OK.value(),

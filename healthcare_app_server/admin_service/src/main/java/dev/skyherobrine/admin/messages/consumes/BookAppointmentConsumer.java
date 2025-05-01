@@ -71,7 +71,7 @@ public class BookAppointmentConsumer {
 
             JsonNode node = new ObjectMapper().readTree(message);
             Long getId = node.get("id").asLong();
-            Long getPrice = node.get("price").asLong();
+            Long getPrice = node.get("price").get("id").asLong();
             String getContent = node.get("content").asText();
             Long getBookAppointmentId = node.get("bookAppointmentId").get("id").asLong();
 
