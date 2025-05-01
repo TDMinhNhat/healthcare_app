@@ -5,6 +5,7 @@ import logging as log
 from statsmodels.tsa.stattools import adfuller, acf, pacf
 from confluent_kafka import Consumer, Producer, KafkaException
 from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 
 topics = ["predict_salary_year", "predict_salary_month", "predict_salary_quarter"]
 
@@ -68,16 +69,25 @@ class KafkaConsumer(threading.Thread):
     def __predict_salary_year__(self, data) -> None:
         data_json = json.loads(data)
         data = pd.DataFrame(list(data_json.items()), columns = ["Year", "Salary"])
+        print(data)
+        if data.size >= 10:
+            print("ARIMA Model is used")
+            series = data["Salary"]
+            d = self.__get_diff_order__(series)
+            p, q = self.__estimate_p_q__(series)
 
-        series = data["Salary"]
-        d = self.__get_diff_order__(series)
-        p, q = self.__estimate_p_q__(series)
-
-        model = ARIMA(series, order=(p, d, q))
-        model_fit = model.fit()
-        forecast = model_fit.forecast(steps = 3)
-
-        self.producer.produce('predict_salary_year_result', forecast.tolist())
+            model = ARIMA(series, order=(p, d, q))
+            model_fit = model.fit()
+            forecast = model_fit.forecast(steps = 3)
+            print(forecast)
+            self.producer.produce('predict_salary_year_result', json.dumps(forecast.tolist()).encode('utf-8'))
+        else:
+            print("Simple Exponential Smoothing is used")
+            model = SimpleExpSmoothing(data["Salary"])
+            model_fit = model.fit(optimized=False)
+            forecast = model_fit.forecast(steps = 3)
+            print(forecast)
+            self.producer.produce('predict_salary_year_result', json.dumps(forecast.tolist()).encode('utf-8'))
         pass
 
     def __predict_salary_month__(self, data) -> None:
