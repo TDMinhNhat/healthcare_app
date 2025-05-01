@@ -20,6 +20,7 @@ public class RoutesConfig {
                 .route("image_detect_service", r -> r.path("/image_detect/**").uri("http://localhost:8000"))
                 .route("gps_service", r -> r.path("/gps/**").uri("ws://localhost:3000"))
                 .route("chat_service", r -> r.path("/chat/**").uri("ws://localhost:4000"))
+                .route("chatbot_service", r -> r.path("/chatbot/**").uri("http://localhost:14000"))
                 .build();
     }
 }
