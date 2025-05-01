@@ -150,6 +150,7 @@ export default function AppointmentDetailsScreen() {
 
     // Cho phép tham gia nếu thời gian hiện tại nằm trong khoảng thời gian của ca làm việc
     return currentTime >= shiftStartTime && currentTime <= shiftEndTime;
+    // return true;
   };
 
   // Xử lý tham gia cuộc gọi video
@@ -241,6 +242,7 @@ export default function AppointmentDetailsScreen() {
       console.error("Lỗi khi xử lý ngày tháng:", error);
       return false;
     }
+    // return true;
   };
 
   /**
@@ -542,7 +544,7 @@ export default function AppointmentDetailsScreen() {
         </View>
 
         {/* Lưu ý quan trọng */}
-        <View style={styles.notesCard}>
+        {/* <View style={styles.notesCard}>
           <Text style={styles.notesTitle}>Lưu ý quan trọng:</Text>
 
           <View style={styles.noteItem}>
@@ -564,7 +566,7 @@ export default function AppointmentDetailsScreen() {
               nhất 24 giờ qua hotline của bệnh viện.
             </Text>
           </View>
-        </View>
+        </View> */}
       </ScrollView>
 
       {/* Modal xác nhận huỷ lịch hẹn */}

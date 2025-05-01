@@ -292,6 +292,7 @@ export default function AppointmentsComponent() {
 
     // Cho phép tham gia nếu thời gian hiện tại nằm trong khoảng thời gian của ca làm việc
     return currentTime >= shiftStartTime && currentTime <= shiftEndTime;
+    // return true;
   };
 
   // Xử lý khi nhấp vào một cuộc hẹn để xem chi tiết
@@ -619,10 +620,10 @@ export default function AppointmentsComponent() {
           <View style={[styles.legendColor, { backgroundColor: "#2196f3" }]} />
           <Text style={styles.legendText}>Chờ khám</Text>
         </View>
-        <View style={styles.legendItem}>
+        {/* <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: "#673ab7" }]} />
           <Text style={styles.legendText}>Đang khám</Text>
-        </View>
+        </View> */}
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: "#4caf50" }]} />
           <Text style={styles.legendText}>Đã khám</Text>
