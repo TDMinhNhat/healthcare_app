@@ -4,11 +4,11 @@ import Footer from "../components/home/Footer.tsx";
 import Hero from "../components/home/Hero.tsx";
 import Navbar from "../components/home/Navbar.tsx";
 import Services from "../components/home/Services.tsx";
-import Specialists from "../components/home/Specialist.tsx";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { ROUTING } from "../constants/routing";
 import DiseaseList from "../components/home/Disease.tsx";
+import ChatBot from "../components/chatbot/ChatBot.tsx";
 
 function HomePage() {
   const navigate = useNavigate();
@@ -40,6 +40,7 @@ function HomePage() {
       {/* <Specialists /> */}
       <Benefits />
       <Footer />
+      <ChatBot />
     </Container>
   );
 }
