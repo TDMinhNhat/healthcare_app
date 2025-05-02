@@ -5,7 +5,35 @@ from face_detect_package.serializers import ResponseSerializer
 from face_detect_package.services import *
 
 @api_view(['POST'])
-def send_image(request: HttpRequest) -> JsonResponse:
+def register_face(request: HttpRequest) -> JsonResponse:
+    try:
+        get_image = request.FILES["file"]
+        image = get_image.read()
+        result = FaceDetectService(image).detect_face_register()
+
+        if result == "No Detect":
+            response = Response(400, "Can't detect the face", None)
+            serializer = ResponseSerializer(response)
+            return JsonResponse(serializer.data, safe = False)
+        elif result == "Multiple Face":
+            response = Response(400, "Must be 1 face in image", None)
+            serializer = ResponseSerializer(response)
+            return JsonResponse(serializer.data, safe = False)
+        elif result == "Can't detect":
+            response = Response(400, "Can't detect who is this", None)
+            serializer = ResponseSerializer(response)
+            return JsonResponse(serializer.data, safe = False)
+        else:
+            response = Response(200, "New User", result)
+            serializer = ResponseSerializer(response)
+            return JsonResponse(serializer.data, safe = False)
+    except RuntimeError as e:
+        response = Response(500, "Can't decoded the image", None)
+        serializer = ResponseSerializer(response)
+        return JsonResponse(serializer.data, safe = False)
+
+@api_view(['POST'])
+def authenticate_face(request: HttpRequest) -> JsonResponse:
     try:
         get_image = request.FILES["file"]
         image = get_image.read()
@@ -28,7 +56,9 @@ def send_image(request: HttpRequest) -> JsonResponse:
             serializer = ResponseSerializer(response)
             return JsonResponse(serializer.data, safe = False)
         else:
-            return JsonResponse(result, safe = False)
+            response = Response(200, "User Found", result)
+            serializer = ResponseSerializer(response)
+            return JsonResponse(serializer.data, safe = False)
 
     except RuntimeError as e:
         response = Response(500, "Can't decoded the image", None)

@@ -17,6 +17,10 @@ spring:
     redis:
       host: localhost
       port: 6379
+    mongodb:
+      database: authenticate_service
+      host: localhost
+      port: 27017
   kafka:
     consumer:
       auto-offset-reset: earliest
@@ -51,3 +55,11 @@ eureka:
     instance:
         hostname: localhost
         preferIpAddress: true
+springdoc:
+  api-docs:
+    enabled: true
+    path: /authenticate/v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+aws_access_key: AKIATWBJ2KFZKJUMQ33C
+aws_secret_key: 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

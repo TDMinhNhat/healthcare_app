@@ -9,5 +9,7 @@ boto3
 opencv-python
 scipy
 requests
-numpy==1.26.4
+numpy
 confluent-kafka
+python-socketio
+daphne

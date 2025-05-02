@@ -4,7 +4,7 @@ from healthcare_app_server.models import *
 import json
 import logging as log
 
-topics = ["insert_user", "insert_type_detect"]
+topics = ["insert_patient"]
 
 class KafkaConsumer(threading.Thread):
 
@@ -47,10 +47,8 @@ class KafkaConsumer(threading.Thread):
 
     def __filter_topic__(self, topic, data) -> None:
         match topic:
-            case "insert_user":
+            case "insert_patient":
                 self.__insert_user__(data)
-            case "insert_type_detect":
-                self.__insert_type_detect__(data)
             case _:
                 print("There're no matched topic")
 
@@ -60,22 +58,9 @@ class KafkaConsumer(threading.Thread):
 
             user = User(
                 user_id = data_json['userId'],
-                face_detect_data = data_json['faceImageEncode']
+                face_encode_value = data_json['faceEncodeValue']
             )
 
             user.save()
-        except Exception as e:
-            print(f"Exception: {e}")
-
-    def __insert_type_detect__(self, data) -> None:
-        try:
-            data_json = json.loads(data)
-
-            type_detect = TypeDetect(
-                type_name = data_json["typeName"]
-            )
-
-            type_detect.save()
-
         except Exception as e:
             print(f"Exception: {e}")

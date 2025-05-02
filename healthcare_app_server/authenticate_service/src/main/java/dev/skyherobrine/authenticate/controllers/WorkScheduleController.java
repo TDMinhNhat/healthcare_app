@@ -1,0 +1,223 @@
+package dev.skyherobrine.authenticate.controllers;
+
+import dev.skyherobrine.authenticate.dtos.WorkScheduleDTO;
+import dev.skyherobrine.authenticate.feigns.BookAppointmentFeign;
+import dev.skyherobrine.authenticate.models.mariadb.Response;
+import dev.skyherobrine.authenticate.models.mongodb.WorkSchedule;
+import dev.skyherobrine.authenticate.repositories.mongodb.WorkScheduleRepository;
+import dev.skyherobrine.authenticate.services.WorkScheduleService;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/authenticate/api/v1/work_schedule")
+@Slf4j
+public class WorkScheduleController {
+
+    private final WorkScheduleService workScheduleService;
+    private final WorkScheduleRepository workScheduleRepository;
+    private final BookAppointmentFeign bookAppointmentFeign;
+
+    public WorkScheduleController(WorkScheduleService workScheduleService, WorkScheduleRepository workScheduleRepository, BookAppointmentFeign bookAppointmentFeign) {
+        this.workScheduleService = workScheduleService;
+        this.workScheduleRepository = workScheduleRepository;
+        this.bookAppointmentFeign = bookAppointmentFeign;
+    }
+
+    @PostMapping
+    public synchronized ResponseEntity<Response> addWorkSchedule(@RequestBody WorkScheduleDTO workScheduleDTO) {
+        try {
+            log.info("Work Schedule: Call the api add work schedule of the doctor");
+
+            WorkSchedule result = workScheduleService.addWorkSchedule(workScheduleDTO);
+
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Add the work schedule successfully",
+                    result
+            ));
+
+        } catch (Exception e) {
+            log.error("Work Schedule: The api thrown an exception");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @PostMapping("/add_multi")
+    public synchronized ResponseEntity<Response> addMultiWorkSchedule(@RequestBody List<WorkScheduleDTO> workScheduleDTOList) {
+        try {
+            log.info("Work Schedule: Call the api add work schedule of the doctor");
+
+            workScheduleDTOList.forEach(workSchedule -> {
+                try {
+                    workScheduleService.addWorkSchedule(workSchedule);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Add the work schedule successfully",
+                    true
+            ));
+
+        } catch (Exception e) {
+            log.error("Work Schedule: The api thrown an exception");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/between")
+    public ResponseEntity<Response> getWorkScheduleByBetween(
+            @RequestParam("start") String start,
+            @RequestParam("end") String end
+    ) {
+        try {
+            log.info("Work Schedule: Call the api get work schedule by between day");
+            var result = workScheduleRepository.findByDateAppointmentBetween(
+                    LocalDate.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy")).minusDays(1L),
+                    LocalDate.parse(end, DateTimeFormatter.ofPattern("dd-MM-yyyy")).plusDays(1L)
+            );
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Get the work schedule by between day successfully",
+                    result.stream().map(WorkSchedule::getId).toList()
+            ));
+        } catch (Exception e) {
+            log.error("Work Schedule: The api thrown an exception");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/between/{doctorId}")
+    public ResponseEntity<Response> getWorkScheduleByBetweenAndDoctor(
+            @PathVariable("doctorId") String doctorId,
+            @RequestParam String start,
+            @RequestParam String end
+    ) {
+        try {
+            log.info("Work Schedule: Call the api get work schedule by between day");
+            List<Map<String,Object>> result = new ArrayList<>();
+            workScheduleRepository.findByDoctor_UserIdAndDateAppointmentBetween(
+                    doctorId,
+                    LocalDate.parse(start, DateTimeFormatter.ofPattern("dd-MM-yyyy")).minusDays(1L),
+                    LocalDate.parse(end, DateTimeFormatter.ofPattern("dd-MM-yyyy")).plusDays(1L)
+            ).forEach(workSchedule -> {
+                Map<String,Object> data = new HashMap<>();
+                data.put("workSchedule", workSchedule);
+                data.put("detail", bookAppointmentFeign.getAppointmentDetailByWorkSchedule(workSchedule.getId().toString()).getBody().getData());
+
+                result.add(data);
+            });
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Get the work schedule by between day successfully",
+                    result
+            ));
+        } catch (Exception e) {
+            log.error("Work Schedule: The api thrown an exception");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/doctor/date")
+    public ResponseEntity<Response> getWorkScheduleDoctorByDate(@RequestParam String doctorId, @RequestParam String date) {
+        log.info("Work Schedule: Call the api get work schedule by doctor and date");
+        return ResponseEntity.ok(new Response(
+                HttpStatus.OK.value(),
+                "Get the work schedule by doctor and date successfully",
+                workScheduleRepository.findByDoctor_UserIdAndDateAppointment(doctorId, LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyyy")))
+        ));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Response> getById(@PathVariable("id") String id) {
+        try {
+            log.info("Work Schedule: Call the api get work schedule by id");
+            WorkSchedule result = workScheduleRepository.findById(Long.parseLong(id)).orElseThrow(() -> new EntityNotFoundException("Work schedule not found"));
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Get the work schedule by id successfully",
+                    result
+            ));
+        } catch (Exception e) {
+            log.error("Work Schedule: The api thrown an exception");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/doctor")
+    public ResponseEntity<Response> getWorkScheduleByDoctor(@RequestParam String doctorId) {
+        try {
+            log.info("Work Schedule: Call the api get work schedule by doctor");
+            List<Map<String,Object>> result = new ArrayList<>();
+            workScheduleRepository.findAllByDoctor_UserId(doctorId).forEach(workSchedule -> {
+                Map<String,Object> data = new HashMap<>();
+                data.put("workSchedule", workSchedule);
+//                data.put("isAvailable", bookAppointmentFeign.getAppointmentByWorkSchedule(workSchedule.getId().toString()).getBody().getData() == null);
+                result.add(data);
+            });
+
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.OK.value(),
+                    "Get the work schedule by doctor successfully",
+                    result
+            ));
+        } catch (Exception e) {
+            log.error("Work Schedule: The api thrown an exception");
+            log.error(e.getMessage());
+            return ResponseEntity.ok(new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "The api thrown an error",
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/id/doctor")
+    public ResponseEntity<Response> getWorkScheduleIdByDoctorId(@RequestParam String doctorId) {
+        log.info("Work Schedule: Call the api get work schedule id by doctor id");
+        var result = workScheduleRepository.findAllByDoctor_UserId(doctorId).stream().map(WorkSchedule::getId).toList();
+        return ResponseEntity.ok(new Response(
+                HttpStatus.OK.value(),
+                "Get the work schedule id by doctor id successfully",
+                result
+        ));
+    }
+}

@@ -1,0 +1,16 @@
+django
+djangorestframework
+django-cors-headers
+py-eureka-client
+asyncio
+pillow
+boto3
+opencv-python
+scipy
+requests
+numpy
+confluent-kafka
+statsmodels
+joblib
+pandas
+pmdarima

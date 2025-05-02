@@ -5,6 +5,10 @@ spring:
     jpa:
       repositories:
         enabled: true
+    mongodb:
+      host: localhost
+      port: 27017
+      database: appointment_service
   datasource:
     url: jdbc:mariadb://localhost:3306/appointment_service
     username: root
@@ -16,11 +20,12 @@ spring:
     show-sql: true
   kafka:
     consumer:
-      auto-offset-reset: earliest
+      auto-offset-reset: latest
       bootstrap-servers: localhost:9092
       group-id: authenticate_service
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      enable-auto-commit: false
     producer:
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -35,3 +40,11 @@ eureka:
   instance:
     hostname: localhost
     preferIpAddress: true
+springdoc:
+  api-docs:
+    enabled: true
+    path: /appointment/v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+bearer-sepay: XVEYDNH2M7OASF6LGIMAT13REWQOCAK9VYWBBGX90HRNS5N8TUQOXKGC15JJYOFC
+domain-host-name: localhost
