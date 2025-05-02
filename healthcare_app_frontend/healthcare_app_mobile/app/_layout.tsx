@@ -98,6 +98,14 @@ export default function Layout() {
             presentation: "card",
           }}
         />
+        <Stack.Screen
+          name={"chatbot"}
+          options={{
+            title: "Trợ lý ảo",
+            headerShown: true,
+            presentation: "card",
+          }}
+        />
       </Stack>
     </Provider>
   );

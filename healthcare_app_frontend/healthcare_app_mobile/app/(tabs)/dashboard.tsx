@@ -16,6 +16,7 @@ import { format } from "date-fns";
 import { Ionicons } from "@expo/vector-icons";
 import { getPatientDashboard } from "../../services/appointment/dashboard_service";
 import { useRouter } from "expo-router";
+import FloatingChatButton from "@/components/common/FloatingChatButton";
 
 // Interface for appointments
 interface Appointment {
@@ -508,6 +509,8 @@ export default function DashboardTab() {
           )}
         </View>
       </ScrollView>
+
+      <FloatingChatButton />
     </SafeAreaView>
   );
 }
