@@ -7,10 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.mistralai.MistralAiChatModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/chatbot/api/v1/chat")
@@ -23,7 +20,7 @@ public class ChatbotController {
         this.model = model;
     }
 
-    @GetMapping("/send")
+    @PostMapping("/send")
     public ResponseEntity<Response> generateChat(@RequestBody String message) {
         try {
             log.info("Chatbot: Call the api for generating message chat");
