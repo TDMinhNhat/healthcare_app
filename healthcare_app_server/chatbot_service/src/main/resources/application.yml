@@ -13,10 +13,10 @@ server:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://server:8761/eureka/
     fetch-registry: true
   instance:
-    hostname: localhost
+    hostname: server
     preferIpAddress: true
 springdoc:
   api-docs:

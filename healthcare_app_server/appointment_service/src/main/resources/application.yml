@@ -6,11 +6,11 @@ spring:
       repositories:
         enabled: true
     mongodb:
-      host: localhost
+      host: appointment_mongodb
       port: 27017
       database: appointment_service
   datasource:
-    url: jdbc:mariadb://localhost:3306/appointment_service
+    url: jdbc:mariadb://appointment_mariadb:3306/appointment_service?createDatabaseIfNotExist=true
     username: root
     password: 123456789
     driver-class-name: org.mariadb.jdbc.Driver
@@ -21,24 +21,23 @@ spring:
   kafka:
     consumer:
       auto-offset-reset: latest
-      bootstrap-servers: localhost:9092
-      group-id: authenticate_service
+      group-id: appointment_service
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       enable-auto-commit: false
     producer:
-      bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    bootstrap-servers: kafka:29092
 server:
   port: 11000
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://server:8761/eureka/
     fetch-registry: true
   instance:
-    hostname: localhost
+    hostname: server
     preferIpAddress: true
 springdoc:
   api-docs:
@@ -47,4 +46,3 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 bearer-sepay: XVEYDNH2M7OASF6LGIMAT13REWQOCAK9VYWBBGX90HRNS5N8TUQOXKGC15JJYOFC
-domain-host-name: localhost

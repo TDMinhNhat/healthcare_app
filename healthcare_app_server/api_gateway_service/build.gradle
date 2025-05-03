@@ -5,12 +5,16 @@ plugins {
 }
 
 group = 'dev.skyherobrine'
-version = '0.0.1-SNAPSHOT'
+version = '1.0'
 
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+}
+
+springBoot {
+    mainClass = 'dev.skyherobrine.api_gateway.ApiGatewayServiceApplication'
 }
 
 repositories {
@@ -41,4 +45,8 @@ dependencyManagement {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+tasks.named('bootJar') {
+    archiveFileName = 'api_gateway_service.jar'
 }

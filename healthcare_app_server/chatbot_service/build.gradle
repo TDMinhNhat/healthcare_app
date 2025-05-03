@@ -5,7 +5,11 @@ plugins {
 }
 
 group = 'dev.skyherobrine.backend'
-version = '0.0.1-SNAPSHOT'
+version = '1.0'
+
+springBoot {
+    mainClass = "dev.skyherobrine.chatbot.ChatbotServiceApplication"
+}
 
 java {
     toolchain {
@@ -41,4 +45,8 @@ dependencyManagement {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+tasks.named("bootJar") {
+    archiveFileName = "chatbot_service.jar"
 }

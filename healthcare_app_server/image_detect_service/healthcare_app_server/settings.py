@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-u)!!ad@#d%12nhona&uyda-he5__smk5xew73mnvkji_u*(+=q
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -83,7 +83,7 @@ WSGI_APPLICATION = 'healthcare_app_server.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': 'localhost',
+        'HOST': 'image_detect_mariadb',
         'PORT': '3306',
         'NAME': 'image_detect_service',
         'USER': 'root',

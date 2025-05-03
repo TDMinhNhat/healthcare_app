@@ -15,6 +15,6 @@ public class OpenAPIConfig {
 
     @Bean
     public OpenAPI userOpenAPI() {
-        return new OpenAPI().servers(List.of(new Server().url("http://localhost:9000"))).info(new Info().title("Authenticate API Service").version("1.0.0"));
+        return new OpenAPI().servers(List.of(new Server().url("http://authenticate_service:9000"))).info(new Info().title("Authenticate API Service").version("1.0.0"));
     }
 }

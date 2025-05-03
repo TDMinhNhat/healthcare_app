@@ -5,7 +5,11 @@ plugins {
 }
 
 group = 'dev.skyherobrine'
-version = '0.0.1-SNAPSHOT'
+version = '1.0'
+
+springBoot {
+    mainClass = "dev.skyherobrine.authenticate.AuthenticateServiceApplication"
+}
 
 java {
     toolchain {
@@ -55,4 +59,8 @@ dependencyManagement {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+tasks.named('bootJar') {
+    archiveFileName = "authenticate_service.jar"
 }

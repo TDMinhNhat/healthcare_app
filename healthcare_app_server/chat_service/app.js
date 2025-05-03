@@ -5,7 +5,6 @@ var logger = require('morgan');
 var app = express();
 var { Eureka } = require("eureka-js-client");
 var server = require("http").createServer(app);
-// var mongodb = require("./configs/mongodb.config");
 var kafka = require("./configs/kafka.config");
 var socketRun = require("./configs/socket.config.js");
 
@@ -18,7 +17,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const client = new Eureka({
     instance: {
         app: "CHAT_SERVICE",
-        hostName: "localhost",
+        hostName: "chat_service",
         ipAddr: "127.0.0.1",
         port: {
             "$": 4000,
@@ -35,7 +34,7 @@ const client = new Eureka({
         },
     },
     eureka: {
-        host: "localhost",
+        host: "server",
         port: 8761,
         servicePath: "/eureka/apps/",
     }

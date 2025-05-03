@@ -15,6 +15,7 @@ node_modules/
 .settings
 .springBeans
 .sts4-cache
+.jar
 bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/

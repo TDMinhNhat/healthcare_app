@@ -11,7 +11,7 @@ class KafkaConsumer(threading.Thread):
     def __init__(self):
         self.consumer = Consumer(
             {
-                'bootstrap.servers': 'localhost:9092',
+                'bootstrap.servers': 'kafka:29092',
                 'group.id': 'image_detect_consumer',
                 'auto.offset.reset': 'earliest',
                 'enable.auto.commit': True

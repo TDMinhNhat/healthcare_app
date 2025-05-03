@@ -3,30 +3,30 @@ spring:
     name: admin_service
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3306/admin_service
+    url: jdbc:mariadb://admin_mariadb:3306/admin_service?createDatabaseIfNotExist=true
     username: root
     password: 123456789
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+    database-platform: org.hibernate.dialect.MariaDBDialect
   data:
     mongodb:
-      host: localhost
+      host: admin_mongodb
       port: 27017
       database: admin_service
     jpa:
       repositories:
         enabled: true
   kafka:
+    bootstrap-servers: kafka:29092
     consumer:
       auto-offset-reset: earliest
-      bootstrap-servers: localhost:9092
       group-id: admin_service
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     producer:
-      bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
   main:
@@ -36,10 +36,10 @@ server:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://server:8761/eureka/
     fetch-registry: true
   instance:
-    hostname: localhost
+    hostname: server
     preferIpAddress: true
 springdoc:
   api-docs:
@@ -47,4 +47,4 @@ springdoc:
     path: /admin/v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
-domain-host-name: localhost
+domain-host-name: server

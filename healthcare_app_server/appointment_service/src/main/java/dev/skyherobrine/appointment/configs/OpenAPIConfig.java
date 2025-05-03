@@ -15,6 +15,6 @@ public class OpenAPIConfig {
 
     @Bean
     public OpenAPI userOpenAPI() {
-        return new OpenAPI().servers(List.of(new Server().url("http://localhost:11000"))).info(new Info().title("Appointment API Service").version("1.0.0"));
+        return new OpenAPI().servers(List.of(new Server().url("http://appointment_service:11000"))).info(new Info().title("Appointment API Service").version("1.0.0"));
     }
 }

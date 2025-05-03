@@ -4,8 +4,12 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.7'
 }
 
+springBoot {
+    mainClass = 'dev.skyherobrine.server.HealthcareAppServerApplication'
+}
+
 group = 'dev.skyherobrine'
-version = '0.0.1-SNAPSHOT'
+version = '1.0'
 
 java {
     toolchain {
@@ -35,4 +39,8 @@ dependencyManagement {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+tasks.named('bootJar') {
+    archiveFileName = 'healthcare_app_server.jar'
 }

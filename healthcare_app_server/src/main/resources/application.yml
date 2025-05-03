@@ -1,6 +1,6 @@
 spring:
   application:
-    name: healthcare_app_server
+    name: server
 server:
   port: 8761
 eureka:

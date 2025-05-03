@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "workschedulefeign", url = "localhost:9000/authenticate/api/v1/work_schedule")
+@FeignClient(name = "workschedulefeign", url = "api_gateway_service:8081/authenticate/api/v1/work_schedule")
 public interface WorkScheduleFeign {
 
     @GetMapping("/{id}")

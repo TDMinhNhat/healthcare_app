@@ -3,7 +3,7 @@ spring:
     name: authenticate_service
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3306/authenticate_service
+    url: jdbc:mariadb://authenticate_mariadb:3306/authenticate_service?createDatabaseIfNotExist=true
     username: root
     password: 123456789
   jpa:
@@ -15,21 +15,20 @@ spring:
       repositories:
         enabled: true
     redis:
-      host: localhost
+      host: authenticate_redis
       port: 6379
     mongodb:
       database: authenticate_service
-      host: localhost
+      host: authenticate_mongodb
       port: 27017
   kafka:
+    bootstrap-servers: kafka:29092
     consumer:
       auto-offset-reset: earliest
-      bootstrap-servers: localhost:9092
       group-id: authenticate_service
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     producer:
-      bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
   cache:
@@ -50,10 +49,10 @@ server:
 eureka:
     client:
       serviceUrl:
-          defaultZone: http://localhost:8761/eureka/
+          defaultZone: http://server:8761/eureka/
       fetch-registry: true
     instance:
-        hostname: localhost
+        hostname: server
         preferIpAddress: true
 springdoc:
   api-docs:
