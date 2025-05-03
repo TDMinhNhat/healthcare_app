@@ -47,7 +47,7 @@ const PaymentCheckout: React.FC<PaymentCheckoutProps> = ({
   const getIntervalNumber = useRef<Timeout | null>(null);
 
   const client = new Client({
-    brokerURL: "ws://localhost:8081/appointment/socket",
+    brokerURL: `wss://${import.meta.env.VITE_HOST}/appointment/socket`,
     onConnect: () => {
       client.subscribe("/patient/result_check_payment", () => {
         setVerifyingPayment(true);

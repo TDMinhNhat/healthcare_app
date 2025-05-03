@@ -30,7 +30,7 @@ import { Avatar } from "@mui/material";
 import { Socket, io } from "socket.io-client";
 
 // Initialize socket outside the component to avoid recreation on renders
-const socket: Socket = io(`ws://localhost:8081`, {
+const socket: Socket = io(`wss://${import.meta.env.VITE_HOST}`, {
   path: "/image_detect/socket",
   transports: ["websocket", "polling"],
   reconnection: true,
