@@ -14,13 +14,13 @@ public class RoutesConfig {
     @Bean
     public RouteLocator configRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
-                .route("authenticate_service", r -> r.path("/authenticate/**").uri("http://localhost:9000"))
-                .route("admin_service", r -> r.path("/admin/**").uri("http://localhost:10000"))
-                .route("appointment_service", r -> r.path("/appointment/**").uri("http://localhost:11000"))
-                .route("image_detect_service", r -> r.path("/image_detect/**").uri("http://localhost:8000"))
-                .route("gps_service", r -> r.path("/gps/**").uri("ws://localhost:3000"))
-                .route("chat_service", r -> r.path("/chat/**").uri("ws://localhost:4000"))
-                .route("chatbot_service", r -> r.path("/chatbot/**").uri("http://localhost:14000"))
+                .route("authenticate_service", r -> r.path("/authenticate/**").uri("http://authenticate_service:9000"))
+                .route("admin_service", r -> r.path("/admin/**").uri("http://admin_service:10000"))
+                .route("appointment_service", r -> r.path("/appointment/**").uri("http://appointment_service:11000"))
+                .route("image_detect_service", r -> r.path("/image_detect/**").uri("http://image_detect_service:8000"))
+                .route("gps_service", r -> r.path("/gps/**").uri("ws://gps_service:3000"))
+                .route("chat_service", r -> r.path("/chat/**").uri("ws://chat_service:4000"))
+                .route("chatbot_service", r -> r.path("/chatbot/**").uri("http://chatbot_service:14000"))
                 .build();
     }
 }
