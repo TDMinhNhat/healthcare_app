@@ -120,7 +120,7 @@ const PaymentCheckout = () => {
   };
 
   const client = new Client({
-    brokerURL: `ws://${process.env.EXPO_PUBLIC_HOST_ID}:8081/appointment/socket`,
+    brokerURL: `wss://${process.env.EXPO_PUBLIC_HOST_ID}/appointment/socket`,
     debug: (msg) => {
       console.log("STOMP: " + msg);
     },

@@ -27,7 +27,7 @@ import { useSelector } from "react-redux";
 import { Formik } from "formik";
 import * as Yup from "yup";
 
-const socket = io(`ws://${process.env.EXPO_PUBLIC_HOST_ID}:8081`, {
+const socket = io(`wss://${process.env.EXPO_PUBLIC_HOST_ID}`, {
   path: "/image_detect/socket",
   transports: ["websocket", "polling"],
   reconnection: true,
