@@ -126,31 +126,10 @@ services:
     restart: always
     ports:
       - '8761:8761'
-    depends_on:
-      - kafka
-      - admin_mariadb
-      - admin_mongodb
-      - authenticate_mariadb
-      - authenticate_mongodb
-      - authenticate_redis
-      - appointment_mariadb
-      - appointment_mongodb
-      - image_detect_mariadb
-    networks:
-      - eureka_server
-  api_gateway_service:
-    container_name: api_gateway_service
-    build: ./api_gateway_service/
-    restart: always
-    ports:
-      - '8081:8081'
-    depends_on:
-      - kafka
-      - server
     networks:
       - eureka_server
   chatbot_service:
-    container_name: chatbot_service
+    container_name: chatbot
     build: ./chatbot_service/
     restart: always
     ports:
@@ -161,7 +140,7 @@ services:
     networks:
       - eureka_server
   admin_service:
-    container_name: admin_service
+    container_name: admin
     build: ./admin_service/
     restart: always
     ports:
@@ -176,7 +155,7 @@ services:
       - admin_database
       - kafka-network
   authenticate_service:
-    container_name: authenticate_service
+    container_name: authenticate
     build: ./authenticate_service/
     restart: always
     ports:
@@ -192,7 +171,7 @@ services:
       - authenticate_database
       - kafka-network
   appointment_service:
-    container_name: appointment_service
+    container_name: appointment
     build: ./appointment_service/
     restart: always
     ports:
@@ -207,7 +186,7 @@ services:
       - appointment_database
       - kafka-network
   chat_service:
-    container_name: chat_service
+    container_name: chat
     build: ./chat_service/
     restart: always
     ports:
@@ -219,14 +198,13 @@ services:
       - appointment_service
       - chatbot_service
       - authenticate_service
-      - api_gateway_service
       - ai_forecast_service
       - image_detect_service
     networks:
       - eureka_server
       - kafka-network
   image_detect_service:
-    container_name: image_detect_service
+    container_name: imagedetect
     build: ./image_detect_service/
     restart: always
     ports:
@@ -256,3 +234,20 @@ services:
     networks:
       - eureka_server
       - kafka-network
+  api_gateway_service:
+    container_name: api_gateway_service
+    build: ./api_gateway_service/
+    restart: always
+    ports:
+      - '8081:8081'
+    depends_on:
+      - server
+      - image_detect_service
+      - ai_forecast_service
+      - authenticate_service
+      - chatbot_service
+      - appointment_service
+      - admin_service
+      - chat_service
+    networks:
+      - eureka_server

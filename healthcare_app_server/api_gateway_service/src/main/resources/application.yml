@@ -3,6 +3,42 @@ spring:
     name: api_gateway_service
   main:
     web-application-type: reactive
+  cloud:
+    discovery:
+      enabled: true
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+#      routes:
+#        - id: authenticate_service
+#          uri: http://authenticate_service:9000
+#          predicates:
+#            - Path=/authenticate/**
+#        - id: admin_service
+#          uri: http://admin_service:10000
+#          predicates:
+#            - Path=/admin/**
+#        - id: appointment_service
+#          uri: http://appointment_service:11000
+#          predicates:
+#            - Path=/appointment/**
+#        - id: image_detect_service
+#          uri: http://image_detect_service:8000
+#          predicates:
+#            - Path=/image_detect/**
+#        - id: gps_service
+#          uri: ws://gps_service:3000
+#          predicates:
+#            - Path=/gps/**
+#        - id: chat_service
+#          uri: ws://chat_service:4000
+#          predicates:
+#            - Path=/chat/**
+#        - id: chatbot_service
+#          uri: http://chatbot_service:14000
+#          predicates:
+#            - Path=/chatbot/**
 server:
   port: 8081
   address: 0.0.0.0
