@@ -41,7 +41,7 @@ export default function WaitingRoomScreen() {
   // Kết nối Socket khi component được mount
   useEffect(() => {
     // Khởi tạo kết nối socket mới
-    const newSocket = io(`ws://${host}:8081`, {
+    const newSocket = io(`wss://${host}`, {
       path: "/chat",
       transports: ["websocket", "polling"],
       reconnection: true,
