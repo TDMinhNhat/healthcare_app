@@ -40,10 +40,11 @@ public class BookingSocketController {
             headers.set("Authorization", "Bearer " + getBearerSepayToken);
 
             JsonNode node = new ObjectMapper().readTree(restTemplate.exchange(
-                    "https://my.sepay.vn/userapi/transactions/list?transaction_date_min=" + LocalDateTime.now().minusMinutes(30L).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                     + "&transaction_date_max=" + LocalDateTime.now().plusMinutes(30L).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                    "https://my.sepay.vn/userapi/transactions/list?transaction_date_min=" + LocalDateTime.now().minusDays(1L).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                     + "&transaction_date_max=" + LocalDateTime.now().plusDays(1L).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                             + "&amount_in=" + getDataNode.get("amount_in"), HttpMethod.GET, new HttpEntity<>(headers), String.class).getBody())
                     .get("transactions");
+            System.out.println(node);
             for (JsonNode transaction : node) {
                 if (transaction.get("transaction_content").asText().equals(getDataNode.get("transaction_content").asText())) {
                     log.info("Booking Socket: payment found");

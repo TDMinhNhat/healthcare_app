@@ -113,7 +113,7 @@ services:
     image: mariadb
     restart: always
     ports:
-      - '12006:3306'
+      - '8006:3306'
     environment:
       MYSQL_ROOT_USER: root
       MYSQL_ROOT_PASSWORD: 123456789
@@ -213,7 +213,7 @@ services:
       sh -c "
         python manage.py makemigrations --noinput &&
         python manage.py migrate --noinput &&
-        daphne -p 8000 healthcare_app_server.asgi:application"
+        daphne -b 0.0.0.0 -p 8000 healthcare_app_server.asgi:application"
     depends_on:
       - kafka
       - server
