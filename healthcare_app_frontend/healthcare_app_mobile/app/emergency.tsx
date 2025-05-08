@@ -38,7 +38,7 @@ const socket = io(`wss://${process.env.EXPO_PUBLIC_HOST_ID}`, {
 export default function Emergency() {
   const user = useSelector((state: any) => state.user.user);
   const [permission, requestPermission] = useCameraPermissions(); // State quản lý quyền truy cập camera
-  const [cameraType, setCameraType] = useState<CameraType>("back"); // State quản lý loại camera (trước/sau)
+  const [cameraType, setCameraType] = useState<CameraType>("front"); // State quản lý loại camera (trước/sau)
   const [isCameraReady, setIsCameraReady] = useState(false); // State kiểm tra camera đã sẵn sàng chưa
   const [isPreview, setIsPreview] = useState(false); // State kiểm tra đang ở chế độ xem trước ảnh
   const [capturedImage, setCapturedImage] = useState<string | null>(null); // State lưu trữ đường dẫn ảnh đã chụp
