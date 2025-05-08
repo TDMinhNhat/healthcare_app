@@ -69,7 +69,7 @@ export default function WaitingRoomPage() {
   // Dùng socket như state để tránh việc mất kết nối khi component re-render
   // Hoặc tránh tạo kết nối mới mỗi khi component re-render
   const [socket, setSocket] = useState<Socket>(
-    io("ws://localhost:8081", {
+    io(`wss://${import.meta.env.VITE_HOST}`, {
       path: "/chat",
       transports: ["websocket", "polling"],
       reconnection: true,
