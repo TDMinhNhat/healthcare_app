@@ -56,6 +56,12 @@ export default function Emergency() {
   const [detectionResponse, setDetectionResponse] = useState<any>(null);
   // Add new state for success modal
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  // modal xác nhận gọi cấp cứu cho ai (bản thân hay người khác)
+  const [showEmergencyTypeModal, setShowEmergencyTypeModal] = useState(false);
+  // nếu gửi cho bản thân thì không detect
+  const [skipDetection, setSkipDetection] = useState(false);
+  // State to control if auto detection is running
+  const [isDetectionRunning, setIsDetectionRunning] = useState(false);
 
   // Thêm state cho tự động chụp
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -135,22 +141,73 @@ export default function Emergency() {
     }
   };
 
-  // Thiết lập chụp ảnh tự động khi camera sẵn sàng
+  // gửi dữ liệu khẩn cấp cho bản thân
+  const sendSelfEmergencyData = () => {
+    if (!user) {
+      console.log("No user data available");
+      return;
+    }
+
+    const dataToSend = {
+      ...user,
+      emergencyContact: user.phone || "",
+    };
+
+    console.log("Sending self emergency data:", dataToSend);
+    socket.emit("send_data_emergency", dataToSend);
+
+    if (user) {
+      router.replace("/(tabs)/profile");
+    } else {
+      router.replace("/");
+    }
+  };
+
+  // Show selection modal immediately when component mounts
   useEffect(() => {
-    // Always clear interval if modal is showing
-    if ((showPhoneModal || showSuccessModal) && intervalRef.current) {
+    // Small delay to ensure the component is fully mounted
+    const timer = setTimeout(() => {
+      if (user) {
+        // For logged in users, show the emergency type selection immediately
+        setShowEmergencyTypeModal(true);
+      } else {
+        // For non-logged in users, start detection directly
+        startAutoDetection();
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Function to start automatic detection
+  const startAutoDetection = () => {
+    setIsDetectionRunning(true);
+  };
+
+  // Updated automatic detection effect
+  useEffect(() => {
+    // Always clear interval if modal is showing or detection is not running
+    if (
+      (showPhoneModal ||
+        showSuccessModal ||
+        showEmergencyTypeModal ||
+        !isDetectionRunning) &&
+      intervalRef.current
+    ) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
       return;
     }
 
-    // Don't start interval if modal is showing
+    // Only start interval if detection is running, camera is ready, and no modals are showing
     if (
+      isDetectionRunning &&
       isCameraReady &&
       mode === "camera" &&
       !isPreview &&
       !showPhoneModal &&
-      !showSuccessModal
+      !showSuccessModal &&
+      !showEmergencyTypeModal
     ) {
       console.log("Setting up auto-capture interval");
       // Xóa interval cũ nếu có
@@ -159,7 +216,7 @@ export default function Emergency() {
         intervalRef.current = null;
       }
 
-      // Thiết lập interval mới để chụp ảnh mỗi 1 giây
+      // Thiết lập interval mới để chụp ảnh mỗi 2 giây
       intervalRef.current = setInterval(async () => {
         if (!cameraRef.current) return;
 
@@ -186,33 +243,41 @@ export default function Emergency() {
               clearInterval(intervalRef.current);
               intervalRef.current = null;
             }
+            setIsDetectionRunning(false);
 
             // Lưu trữ phản hồi để sử dụng sau
             setDetectionResponse(response);
 
             // Show appropriate modal based on user status
-            if (user && user.phone) {
-              // If logged in user with phone, show success modal first
+            if (user) {
+              // No longer needed to show selection here, as it was shown first
               setShowSuccessModal(true);
             } else {
-              // If no user or no phone, show phone modal first
+              // If no user, show phone modal first
               setShowPhoneModal(true);
             }
           }
         } catch (error) {
           console.error("Lỗi khi xử lý ảnh:", error);
         }
-      }, 2000); // Chụp mỗi 1 giây
+      }, 2000);
     }
 
     return () => {
-      // Cleanup function only cleans up the interval now
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
     };
-  }, [isCameraReady, isPreview, showPhoneModal, showSuccessModal, mode]); // Added showSuccessModal to dependencies
+  }, [
+    isCameraReady,
+    isPreview,
+    showPhoneModal,
+    showSuccessModal,
+    showEmergencyTypeModal,
+    mode,
+    isDetectionRunning,
+  ]);
 
   // Hàm được gọi khi camera sẵn sàng sử dụng
   const onCameraReady = () => {
@@ -490,7 +555,61 @@ export default function Emergency() {
     </Modal>
   );
 
-  // Add success modal component
+  // Modified EmergencyTypeModal component
+  const EmergencyTypeModal = () => (
+    <Modal
+      visible={showEmergencyTypeModal}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={() => {
+        setShowEmergencyTypeModal(false);
+      }}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Gọi cấp cứu</Text>
+          <Text style={styles.modalText}>Bạn đang gọi cấp cứu cho ai?</Text>
+
+          <View style={styles.emergencyTypeButtons}>
+            <TouchableOpacity
+              style={[styles.emergencyTypeButton, styles.selfButton]}
+              onPress={() => {
+                setShowEmergencyTypeModal(false);
+                // For self: skip detection and use user info directly
+                if (user) {
+                  if (user.phone) {
+                    // If user has phone, send data directly
+                    setShowSuccessModal(true);
+                    setSkipDetection(true);
+                  } else {
+                    // If user has no phone, ask for it
+                    setShowPhoneModal(true);
+                    setSkipDetection(true);
+                  }
+                }
+              }}
+            >
+              <Text style={styles.buttonText}>Cho bản thân</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.emergencyTypeButton, styles.otherButton]}
+              onPress={() => {
+                setShowEmergencyTypeModal(false);
+                // For someone else: start detection
+                setSkipDetection(false);
+                startAutoDetection();
+              }}
+            >
+              <Text style={styles.buttonText}>Cho người khác</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  // Update SuccessModal component to handle skipped detection
   const SuccessModal = () => (
     <Modal
       visible={showSuccessModal}
@@ -504,7 +623,9 @@ export default function Emergency() {
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>Thành công</Text>
           <Text style={styles.modalText}>
-            Đã phát hiện, hình ảnh đã được xử lý!
+            {skipDetection
+              ? "Yêu cầu cấp cứu đã được ghi nhận!"
+              : "Đã phát hiện, hình ảnh đã được xử lý!"}
           </Text>
 
           <TouchableOpacity
@@ -516,18 +637,22 @@ export default function Emergency() {
             onPress={() => {
               setShowSuccessModal(false);
 
-              // nếu người dùng đã đăng nhập và có số điện thoại
-              if (user && user.phone) {
-                sendEmergencyData(user.phone);
-              }
-              // trường hợp logout ko có số điện thoại
-              else if (sessionPhone.current) {
-                sendEmergencyData(sessionPhone.current);
-                sessionPhone.current = ""; // Clear after use
-              }
-              // Fallback
-              else {
-                setShowPhoneModal(true);
+              // nếu skipDetection là true, là gửi cho bản thân không cần detect
+              if (skipDetection) {
+                // For self-emergency, send data directly
+                sendSelfEmergencyData();
+              } else {
+                // For others, use normal flow
+                if (user && user.phone) {
+                  // trường hợp login
+                  sendEmergencyData(user.phone);
+                } else if (sessionPhone.current) {
+                  // trường hợp logout không có user
+                  sendEmergencyData(sessionPhone.current);
+                  sessionPhone.current = "";
+                } else {
+                  setShowPhoneModal(true);
+                }
               }
             }}
           >
@@ -594,6 +719,14 @@ export default function Emergency() {
               mode="picture"
             />
 
+            {/* Show the detection overlay when detection is running */}
+            {isDetectionRunning && (
+              <View style={styles.detectionOverlay}>
+                <ActivityIndicator size="large" color="#26b9c8" />
+                <Text style={styles.detectionText}>Đang phân tích...</Text>
+              </View>
+            )}
+
             <View style={styles.controlsContainer}>
               <TouchableOpacity
                 style={styles.controlButton}
@@ -654,6 +787,9 @@ export default function Emergency() {
 
       {/* Modal nhập số điện thoại */}
       <PhoneNumberModal />
+
+      {/* Add Emergency Type Modal */}
+      <EmergencyTypeModal />
 
       {/* Add Success Modal */}
       <SuccessModal />
@@ -916,4 +1052,46 @@ const styles = StyleSheet.create({
   //   backgroundColor: "#aaa",
   //   opacity: 0.7,
   // },
+  emergencyTypeButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 10,
+  },
+  emergencyTypeButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    flex: 1,
+    alignItems: "center",
+    marginHorizontal: 5,
+  },
+  selfButton: {
+    backgroundColor: "#26b9c8",
+  },
+  otherButton: {
+    backgroundColor: "#757575",
+  },
+  startEmergencyContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  startEmergencyButton: {
+    backgroundColor: "#ff6b6b", // Emergency red color
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: "white",
+  },
+  startEmergencyText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
 });
