@@ -59,7 +59,7 @@ export default function HomeScreen() {
   return (
     <Formik
       initialValues={{
-        email: "donaldtrump@gmail.com",
+        email: "quangproforever@gmail.com",
         password: "123456789",
       }}
       validationSchema={LoginSchema}

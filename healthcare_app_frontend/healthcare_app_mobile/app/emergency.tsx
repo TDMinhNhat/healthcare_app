@@ -59,6 +59,8 @@ export default function Emergency() {
 
   // Thêm state cho tự động chụp
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  // Add ref to store phone number temporarily
+  const sessionPhone = useRef<string>("");
 
   const cameraRef = useRef<CameraView>(null); // Tham chiếu đến component camera
   const router = useRouter(); // Hook điều hướng
@@ -188,11 +190,12 @@ export default function Emergency() {
             // Lưu trữ phản hồi để sử dụng sau
             setDetectionResponse(response);
 
-            // Only show success modal if a user is logged in
-            if (user) {
+            // Show appropriate modal based on user status
+            if (user && user.phone) {
+              // If logged in user with phone, show success modal first
               setShowSuccessModal(true);
             } else {
-              // If no user, show phone modal directly
+              // If no user or no phone, show phone modal first
               setShowPhoneModal(true);
             }
           }
@@ -411,7 +414,16 @@ export default function Emergency() {
                 intervalRef.current = null;
               }
               setShowPhoneModal(false);
-              sendEmergencyData(values.phone);
+
+              // For non-logged in users, show success modal after phone
+              if (!user) {
+                setShowSuccessModal(true);
+                // Store the phone to use later when success modal is closed
+                sessionPhone.current = values.phone;
+              } else {
+                // For logged-in users without phone in profile, send immediately
+                sendEmergencyData(values.phone);
+              }
             }}
           >
             {({
@@ -504,11 +516,17 @@ export default function Emergency() {
             onPress={() => {
               setShowSuccessModal(false);
 
-              // Check if user has phone
+              // nếu người dùng đã đăng nhập và có số điện thoại
               if (user && user.phone) {
                 sendEmergencyData(user.phone);
-              } else {
-                // Show phone modal if no phone number
+              }
+              // trường hợp logout ko có số điện thoại
+              else if (sessionPhone.current) {
+                sendEmergencyData(sessionPhone.current);
+                sessionPhone.current = ""; // Clear after use
+              }
+              // Fallback
+              else {
                 setShowPhoneModal(true);
               }
             }}
@@ -894,8 +912,8 @@ const styles = StyleSheet.create({
   confirmButton: {
     backgroundColor: "#26b9c8",
   },
-  disabledButton: {
-    backgroundColor: "#aaa",
-    opacity: 0.7,
-  },
+  // disabledButton: {
+  //   backgroundColor: "#aaa",
+  //   opacity: 0.7,
+  // },
 });
