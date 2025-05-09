@@ -368,7 +368,7 @@ const DoctorSchedulePage = () => {
       }
 
       // Kiểm tra giá trị maxSlots trước khi lưu
-      if (currentMaxSlots < 20 || currentMaxSlots > 40) {
+      if (currentMaxSlots < 1 || currentMaxSlots > 100) {
         window.alert("Số lượng bệnh nhân tối đa phải từ 20 đến 40");
         return;
       }

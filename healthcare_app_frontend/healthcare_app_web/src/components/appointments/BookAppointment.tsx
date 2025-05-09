@@ -82,7 +82,7 @@ const BookAppointment: React.FC<BookAppointmentProps> = ({
 
       await createAppointment(patientId, note, workSchedule.id, paymentContent);
 
-      handleNext();
+      setActiveStep(4);
     } catch (err) {
       console.error("Failed to process payment:", err);
       setError("Thanh toán thất bại. Vui lòng thử lại.");
