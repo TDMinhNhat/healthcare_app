@@ -72,8 +72,8 @@ interface ScheduleItem {
 const MaxSlotsSchema = Yup.object().shape({
   maxSlots: Yup.number()
     .required("Số lượng bệnh nhân là bắt buộc")
-    .min(20, "Số lượng tối thiểu là 20 bệnh nhân")
-    .max(40, "Số lượng tối đa là 40 bệnh nhân")
+    .min(1, "Số lượng tối thiểu là 1 bệnh nhân")
+    .max(100, "Số lượng tối đa là 100 bệnh nhân")
     .integer("Vui lòng nhập số nguyên"),
 });
 
@@ -366,6 +366,13 @@ const DoctorSchedulePage = () => {
         setErrorMessage("Không tìm thấy thông tin người dùng");
         return;
       }
+
+      // Kiểm tra giá trị maxSlots trước khi lưu
+      if (currentMaxSlots < 20 || currentMaxSlots > 40) {
+        window.alert("Số lượng bệnh nhân tối đa phải từ 20 đến 40");
+        return;
+      }
+
       // Tạo danh sách các ca làm việc cần lưu
       const schedulesToSave = [];
       // Duyệt qua từng ngày trong lịch tuần hiện tại
@@ -587,7 +594,7 @@ const DoctorSchedulePage = () => {
                       helperText={
                         touched.maxSlots && errors.maxSlots
                           ? errors.maxSlots
-                          : "Giới hạn từ 20 đến 40 bệnh nhân mỗi ca"
+                          : "Giới hạn từ 1 đến 100 bệnh nhân mỗi ca"
                       }
                       InputProps={{
                         endAdornment: (
