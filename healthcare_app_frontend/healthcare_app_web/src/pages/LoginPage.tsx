@@ -25,7 +25,10 @@ const validationSchema = Yup.object({
   email: Yup.string()
     .email("Địa chỉ email không hợp lệ")
     .required("Email là bắt buộc"),
-  password: Yup.string().required("Mật khẩu là bắt buộc"),
+  password: Yup.string()
+    .min(8, "Mật khẩu phải có ít nhất 8 ký tự")
+    .max(50, "Mật khẩu không được vượt quá 50 ký tự")
+    .required("Mật khẩu là bắt buộc"),
 });
 
 export default function LoginPage() {

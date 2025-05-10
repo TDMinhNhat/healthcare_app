@@ -22,7 +22,8 @@ import { useNavigate } from "react-router";
 const ChangePasswordSchema = Yup.object().shape({
   oldPassword: Yup.string().required("Vui lòng nhập mật khẩu cũ"),
   newPassword: Yup.string()
-    .min(6, "Mật khẩu mới phải có ít nhất 6 ký tự")
+    .min(8, "Mật khẩu phải có ít nhất 8 ký tự")
+    .max(50, "Mật khẩu không được vượt quá 50 ký tự")
     .required("Vui lòng nhập mật khẩu mới"),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("newPassword"), null], "Mật khẩu xác nhận không khớp")
