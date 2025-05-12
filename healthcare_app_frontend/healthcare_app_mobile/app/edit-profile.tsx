@@ -58,8 +58,12 @@ export default function EditProfileScreen() {
 
   // Validation schema với Yup - loại bỏ sex và dob
   const validationSchema = Yup.object().shape({
-    firstName: Yup.string().required("Họ là bắt buộc"),
-    lastName: Yup.string().required("Tên là bắt buộc"),
+    firstName: Yup.string()
+      .required("Tên là bắt buộc")
+      .min(2, "Tên phải có ít nhất 2 ký tự"),
+    lastName: Yup.string()
+      .required("Họ là bắt buộc")
+      .min(2, "Họ phải có ít nhất 2 ký tự"),
     email: Yup.string()
       .email("Email không hợp lệ")
       .required("Email là bắt buộc"),
