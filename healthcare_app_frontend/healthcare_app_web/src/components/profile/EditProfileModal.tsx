@@ -110,8 +110,12 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
   // Xác thực form sử dụng Yup
   const validationSchema = Yup.object({
-    firstName: Yup.string().required("Trường này là bắt buộc"),
-    lastName: Yup.string().required("Trường này là bắt buộc"),
+    firstName: Yup.string()
+      .required("Tên là bắt buộc")
+      .min(2, "Tên phải có ít nhất 2 ký tự"),
+    lastName: Yup.string()
+      .required("Họ là bắt buộc")
+      .min(2, "Họ phải có ít nhất 2 ký tự"),
     email: Yup.string()
       .email("Email không hợp lệ")
       .required("Trường này là bắt buộc"),

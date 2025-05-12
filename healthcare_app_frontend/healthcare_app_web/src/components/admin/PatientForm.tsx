@@ -35,13 +35,11 @@ interface PatientFormProps {
 // Định nghĩa các quy tắc kiểm tra dữ liệu nhập vào
 const validationSchema = Yup.object({
   firstName: Yup.string()
-    .required("Họ là bắt buộc")
-    .min(2, "Họ phải có ít nhất 2 ký tự")
-    .matches(/^[^\d]+$/, "Họ không được chứa số"),
-  lastName: Yup.string()
     .required("Tên là bắt buộc")
-    .min(2, "Tên phải có ít nhất 2 ký tự")
-    .matches(/^[^\d]+$/, "Tên không được chứa số"),
+    .min(2, "Tên phải có ít nhất 2 ký tự"),
+  lastName: Yup.string()
+    .required("Họ là bắt buộc")
+    .min(2, "Họ phải có ít nhất 2 ký tự"),
   sex: Yup.boolean().required("Giới tính là bắt buộc"),
   dob: Yup.date()
     .required("Ngày sinh là bắt buộc")

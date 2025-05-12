@@ -14,7 +14,6 @@ import {
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { format } from "date-fns";
 import { Shift } from "../../types/shift";
 import { useFormik } from "formik";
 import * as Yup from "yup";

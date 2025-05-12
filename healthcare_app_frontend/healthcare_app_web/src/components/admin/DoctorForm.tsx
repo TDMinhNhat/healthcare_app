@@ -54,8 +54,12 @@ const DoctorForm: React.FC<DoctorFormProps> = ({
 
   // Create validation schema with Yup for text fields only
   const validationSchema = Yup.object({
-    firstName: Yup.string().required("Họ không được để trống"),
-    lastName: Yup.string().required("Tên không được để trống"),
+    firstName: Yup.string()
+      .required("Tên là bắt buộc")
+      .min(2, "Tên phải có ít nhất 2 ký tự"),
+    lastName: Yup.string()
+      .required("Họ là bắt buộc")
+      .min(2, "Họ phải có ít nhất 2 ký tự"),
     specialization: Yup.string().required("Chuyên khoa không được để trống"),
     phone: Yup.string()
       .required("Số điện thoại không được để trống")

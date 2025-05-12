@@ -225,20 +225,28 @@ const ShiftManagementPage: React.FC = () => {
     {
       field: "actions",
       headerName: "Thao tác",
-      width: 120,
-      flex: 0.7,
+      width: 70,
+      flex: 0.5,
       sortable: false,
       disableExport: true,
       renderCell: (params: GridRenderCellParams) => (
-        <Box sx={{ display: "flex", gap: 1, height: "100%" }}>
-          <IconButton
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1,
+            height: "100%",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {/* <IconButton
             size="small"
             color="info"
             title="Chỉnh sửa"
             onClick={() => handleEditClick(params.row)}
           >
             <Edit fontSize="small" />
-          </IconButton>
+          </IconButton> */}
           <IconButton
             size="small"
             color="error"
