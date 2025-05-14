@@ -260,7 +260,7 @@ export default function Emergency() {
         } catch (error) {
           console.error("Lỗi khi xử lý ảnh:", error);
         }
-      }, 2000);
+      }, 3000);
     }
 
     return () => {
