@@ -21,7 +21,7 @@ const ChangePasswordSchema = Yup.object().shape({
   oldPassword: Yup.string().required("Vui lòng nhập mật khẩu cũ"),
   newPassword: Yup.string()
     .min(8, "Mật khẩu mới phải có ít nhất 68 ký tự")
-    .max(50, "Mật khẩu không được vượt quá 50 ký tự")
+    .max(20, "Mật khẩu không được vượt quá 20 ký tự")
     .required("Vui lòng nhập mật khẩu mới"),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("newPassword"), null], "Mật khẩu xác nhận không khớp")
