@@ -54,7 +54,7 @@ const validationSchema = Yup.object({
     .required("Số điện thoại là bắt buộc"),
   password: Yup.string()
     .min(8, "Mật khẩu phải có ít nhất 8 ký tự")
-    .max(50, "Mật khẩu không được vượt quá 50 ký tự")
+    .max(20, "Mật khẩu không được vượt quá 20 ký tự")
     .required("Mật khẩu là bắt buộc"),
   birthDate: Yup.date()
     .max(new Date(), "Ngày sinh không thể là ngày trong tương lai")
