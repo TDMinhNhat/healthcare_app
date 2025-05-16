@@ -1,27 +1,19 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-const API_URL = "https://reqres.in/api";
+
+// const hostIp = "192.168.100.8"
+const API_URL = `https://${process.env.EXPO_PUBLIC_HOST_ID}`;
 const axiosConfig = axios.create({
   baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000,
 });
-const getAccessToken = async () => {
-  try {
-    const accessToken = await AsyncStorage.getItem("accessToken");
-    return accessToken;
-  } catch (error) {
-    console.error("Error getting access token:", error);
-    return null;
-  }
-};
+
 axiosConfig.interceptors.request.use(
   async (config) => {
-    Promise.resolve(getAccessToken()).then((accessToken) => {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    });
+    // Promise.resolve(getAccessToken()).then((accessToken) => {
+    //   config.headers.Authorization = `Bearer ${accessToken}`;
+    // });
     return config;
   },
   (error) => {
@@ -30,7 +22,7 @@ axiosConfig.interceptors.request.use(
 );
 
 axiosConfig.interceptors.response.use(
-  (response: any) => {
+  (response) => {
     return response;
   },
   async (error) => {
@@ -55,4 +47,5 @@ axiosConfig.interceptors.response.use(
     return Promise.reject(error?.response?.data);
   }
 );
+
 export default axiosConfig;

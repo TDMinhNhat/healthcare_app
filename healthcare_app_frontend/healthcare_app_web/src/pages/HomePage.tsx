@@ -1,30 +1,48 @@
-import {Container} from "@mui/material";
-import {useState} from "react";
-import HeaderComponent from "../components/HeaderComponent.tsx";
-import HomeComponent from "../components/HomeComponent.tsx";
-import OurServiceComponent from "../components/OurServiceComponent.tsx";
-import FindDoctorComponent from "../components/FindDoctorComponent.tsx";
-import ReviewsComponent from "../components/ReviewsComponent.tsx";
-import FooterComponent from "../components/FooterComponent.tsx";
-import UserSettingComponent from "../components/UserSettingComponent.tsx"
+import { Container } from "@mui/material";
+import Benefits from "../components/home/Benefits.tsx";
+import Footer from "../components/home/Footer.tsx";
+import Hero from "../components/home/Hero.tsx";
+import Navbar from "../components/home/Navbar.tsx";
+import Services from "../components/home/Services.tsx";
+import { useEffect } from "react";
+import { useNavigate } from "react-router";
+import { ROUTING } from "../constants/routing";
+import DiseaseList from "../components/home/Disease.tsx";
+import ChatBot from "../components/chatbot/ChatBot.tsx";
 
-function HomePage({ language, setLanguage, languageType } : { language: object, setLanguage: void, languageType: string }) {
+function HomePage() {
+  const navigate = useNavigate();
 
-    const [tab, setTab] = useState("home");
+  useEffect(() => {
+    // Kiểm tra xem người dùng đã đăng nhập chưa
+    const user = localStorage.getItem("user");
+    const role = localStorage.getItem("role");
 
-    return (
-        <Container maxWidth={false} disableGutters={true}>
-            <HeaderComponent language={language.header} tab={tab} setTab={setTab} />
+    if (user && role) {
+      // Người dùng đã đăng nhập, chuyển hướng dựa trên vai trò
+      if (role === "doctor") {
+        navigate(ROUTING.DOCTOR);
+      } else if (role === "patient") {
+        navigate(ROUTING.PATIENT);
+      } else {
+        navigate(ROUTING.ADMIN);
+      }
+    }
+    // Nếu không có người dùng hoặc vai trò, ở lại trang chủ
+  }, [navigate]);
 
-            { tab === "home" && <HomeComponent language={language.body.home} />}
-            { tab === "our_services" && <OurServiceComponent language={language.body.our_services} />}
-            { tab === "find_doctors" && <FindDoctorComponent language={language.body.find_doctors} />}
-            { tab === "reviews" && <ReviewsComponent language={language.body.reviews} />}
-            { tab === "users" && <UserSettingComponent language={language.body.users} />}
-
-            <FooterComponent footer={language.footer} setLanguage={setLanguage} languageType={languageType} />
-        </Container>
-    )
+  return (
+    <Container maxWidth={false} disableGutters={true}>
+      <Navbar />
+      <Hero />
+      <Services />
+      <DiseaseList />
+      {/* <Specialists /> */}
+      <Benefits />
+      <Footer />
+      <ChatBot />
+    </Container>
+  );
 }
 
 export default HomePage;

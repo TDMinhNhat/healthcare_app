@@ -1,0 +1,251 @@
+import {
+  StyleSheet,
+  SafeAreaView,
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  Image,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
+import { useState } from "react";
+import { Link, useRouter } from "expo-router";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import AuthenticateService from "../services/authenticate/authenticateService";
+import { setUser } from "@/redux/slices/userSlice";
+import { useDispatch } from "react-redux";
+import { Formik } from "formik";
+import * as Yup from "yup";
+
+// Define validation schema using Yup
+const LoginSchema = Yup.object().shape({
+  email: Yup.string().email("Email không hợp lệ").required("Email là bắt buộc"),
+  password: Yup.string()
+    .min(8, "Mật khẩu phải có ít nhất 8 ký tự")
+    .max(20, "Mật khẩu không được vượt quá 20 ký tự")
+    .required("Mật khẩu là bắt buộc"),
+});
+
+export default function HomeScreen() {
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const router = useRouter();
+  const dispatch = useDispatch();
+
+  const handleLogin = async (values: { email: string; password: string }) => {
+    const result = await new AuthenticateService()
+      .checkLogin(values.email, values.password)
+      .then((response) => response.data)
+      .catch((error) => {
+        console.log(error);
+        return null;
+      });
+
+    if (result === null) {
+      console.error("Lỗi", "Server có lỗi");
+    } else if (result.code === 200) {
+      console.log("result", result.data.user);
+      dispatch(setUser(result.data.user));
+      router.navigate({
+        pathname: "/(tabs)/dashboard",
+        params: result.data,
+      });
+    } else {
+      Alert.alert("Đăng Nhập Thất Bại", "Tài khoản hoặc mật khẩu không đúng");
+    }
+  };
+
+  return (
+    <Formik
+      initialValues={{
+        email: "quangproforever@gmail.com",
+        password: "123456789",
+      }}
+      validationSchema={LoginSchema}
+      onSubmit={handleLogin}
+    >
+      {({
+        handleChange,
+        handleBlur,
+        handleSubmit,
+        values,
+        errors,
+        touched,
+      }) => (
+        <SafeAreaView style={style.main}>
+          <View style={style.container}>
+            <View>
+              <Text style={style.title}>ĐĂNG NHẬP</Text>
+            </View>
+            <View style={style.itemArea}>
+              <TextInput
+                inputMode={"email"}
+                value={values.email}
+                placeholder={"Nhập tài khoản email"}
+                onChangeText={handleChange("email")}
+                onBlur={handleBlur("email")}
+                style={[
+                  style.input,
+                  touched.email && errors.email ? style.inputError : null,
+                ]}
+              />
+            </View>
+            {touched.email && errors.email && (
+              <Text style={style.errorText}>{errors.email}</Text>
+            )}
+            <View style={style.itemAreaPassword}>
+              <TextInput
+                secureTextEntry={!showPassword}
+                value={values.password}
+                placeholder={"Nhập mật khẩu"}
+                onChangeText={handleChange("password")}
+                onBlur={handleBlur("password")}
+                style={[
+                  style.inputPassword,
+                  touched.password && errors.password ? style.inputError : null,
+                ]}
+              />
+              <MaterialCommunityIcons
+                name={showPassword ? "eye-off" : "eye"}
+                size={24}
+                color="#aaa"
+                style={style.togglePassword}
+                onPress={() => setShowPassword(!showPassword)}
+              />
+            </View>
+            {touched.password && errors.password && (
+              <Text style={style.errorText}>{errors.password}</Text>
+            )}
+            <View style={style.itemArea}>
+              <Link href={"/register"}>
+                <View>
+                  <Text style={style.buttonDirectLink}>Tạo Tài Khoản</Text>
+                </View>
+              </Link>
+              <Link href={"/forgot_password"}>
+                <View>
+                  <Text style={style.buttonDirectLink}>Quên Mật Khẩu</Text>
+                </View>
+              </Link>
+            </View>
+            <View style={style.itemArea}>
+              <TouchableOpacity
+                style={style.button}
+                onPress={() => handleSubmit()}
+              >
+                <Text style={style.buttonText}>Đăng Nhập</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={style.itemArea}>
+              <TouchableOpacity
+                style={style.button}
+                onPress={() => router.push("/emergency")}
+              >
+                <Text style={style.buttonText}>Khẩn cấp</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </SafeAreaView>
+      )}
+    </Formik>
+  );
+}
+
+const style = StyleSheet.create({
+  main: {
+    width: "100%",
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  container: {
+    width: "85%",
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 30,
+    fontWeight: "bold",
+  },
+  itemArea: {
+    width: "100%",
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  itemAreaPassword: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 20,
+    width: "100%",
+    borderStyle: "solid",
+    borderColor: "black",
+    borderWidth: 1,
+  },
+  input: {
+    width: "100%",
+    borderStyle: "solid",
+    borderColor: "black",
+    borderWidth: 1,
+    padding: 8,
+  },
+  inputPassword: {
+    width: "90%",
+    padding: 8,
+  },
+  togglePassword: {
+    marginRight: 10,
+  },
+  buttonDirectLink: {
+    color: "#26b9c8",
+    textDecorationLine: "underline",
+  },
+  button: {
+    backgroundColor: "#26b9c8",
+    padding: 10,
+    width: "100%",
+    borderRadius: 10,
+  },
+  buttonText: {
+    color: "white",
+    textAlign: "center",
+  },
+  socialButtonArea: {
+    width: "100%",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  socialButton: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderStyle: "solid",
+    borderWidth: 1,
+    padding: 10,
+  },
+  socialButtonText: {
+    marginLeft: 5,
+  },
+  inputError: {
+    borderColor: "red",
+  },
+  errorText: {
+    color: "red",
+    marginTop: 5,
+    alignSelf: "flex-start",
+    fontSize: 12,
+  },
+});

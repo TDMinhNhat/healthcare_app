@@ -1,47 +1,36 @@
 {
   "expo": {
     "name": "healthcare_app_mobile",
-    "slug": "healthcare_app_mobile",
+    "slug": "healthcareappmobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/images/logo2.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
-      "supportsTablet": true,
-      "infoPlist": {
-        "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera.",
-        "NSMicrophoneUsageDescription": "$(PRODUCT_NAME) needs access to your Microphone."
-      }
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/images/logo2.png",
         "backgroundColor": "#ffffff"
-      },
-      "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
-      ],
-      "package": "com.dangquang.healthcare_app_mobile"
+      }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/logo2.png"
     },
     "plugins": [
+      "expo-router",
       [
-        "react-native-vision-camera",
+        "expo-splash-screen",
         {
-          "cameraPermissionText": "$(PRODUCT_NAME) needs access to your Camera.",
-          "enableMicrophonePermission": true,
-          "microphonePermissionText": "$(PRODUCT_NAME) needs access to your Microphone."
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
         }
       ],
       [
@@ -51,7 +40,31 @@
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
           "recordAudioAndroid": true
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
       ]
-    ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "943ad564-9ebc-4d59-9cdc-db103e1105c0"
+      }
+    },
+    "owner": "tdminhnhat"
   }
 }
