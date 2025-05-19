@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: appointment_service
+  data:
+    jpa:
+      repositories:
+        enabled: true
+    mongodb:
+      host: appointment_mongodb
+      port: 27017
+      database: appointment_service
+  datasource:
+    url: jdbc:mariadb://appointment_mariadb:3306/appointment_service?createDatabaseIfNotExist=true
+    username: root
+    password: 123456789
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  kafka:
+    consumer:
+      auto-offset-reset: latest
+      group-id: appointment_service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      enable-auto-commit: false
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    bootstrap-servers: kafka:29092
+server:
+  port: 11000
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://server:8761/eureka/
+    fetch-registry: true
+  instance:
+    hostname: server
+    preferIpAddress: true
+springdoc:
+  api-docs:
+    enabled: true
+    path: /appointment/v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+bearer-sepay: XVEYDNH2M7OASF6LGIMAT13REWQOCAK9VYWBBGX90HRNS5N8TUQOXKGC15JJYOFC

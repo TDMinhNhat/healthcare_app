@@ -1,0 +1,253 @@
+networks:
+  authenticate_database:
+    driver: bridge
+  appointment_database:
+    driver: bridge
+  image_detect_database:
+    driver: bridge
+  admin_database:
+    driver: bridge
+  eureka_server:
+    driver: bridge
+  kafka-network:
+    driver: bridge
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    restart: always
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - kafka-network
+  kafka:
+    image: confluentinc/cp-kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    restart: always
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - kafka-network
+    depends_on:
+      - zookeeper
+
+  admin_mariadb:
+    container_name: admin_mariadb
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: 123456789
+    ports:
+        - '10006:3306'
+    networks:
+      - admin_database
+  admin_mongodb:
+    container_name: admin_mongodb
+    image: mongo
+    restart: always
+    ports:
+      - '10007:27017'
+    networks:
+      - admin_database
+  authenticate_mariadb:
+    container_name: authenticate_mariadb
+    image: mariadb
+    restart: always
+    ports:
+      - '9006:3306'
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: 123456789
+    networks:
+      - authenticate_database
+  authenticate_mongodb:
+    container_name: authenticate_mongodb
+    image: mongo
+    restart: always
+    ports:
+      - '9007:27017'
+    networks:
+      - authenticate_database
+  authenticate_redis:
+    container_name: authenticate_redis
+    image: redis
+    restart: always
+    ports:
+      - '9009:6379'
+    networks:
+      - authenticate_database
+  appointment_mariadb:
+    container_name: appointment_mariadb
+    image: mariadb
+    restart: always
+    ports:
+      - '11006:3306'
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: 123456789
+    networks:
+      - appointment_database
+  appointment_mongodb:
+    container_name: appointment_mongodb
+    image: mongo
+    restart: always
+    ports:
+      - '11007:27017'
+    networks:
+      - appointment_database
+  image_detect_mariadb:
+    container_name: image_detect_mariadb
+    image: mariadb
+    restart: always
+    ports:
+      - '8006:3306'
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: 123456789
+    networks:
+      - image_detect_database
+
+  server:
+    container_name: server
+    build: .
+    restart: always
+    ports:
+      - '8761:8761'
+    networks:
+      - eureka_server
+  chatbot_service:
+    container_name: chatbot
+    build: ./chatbot_service/
+    restart: always
+    ports:
+      - '14000:14000'
+    depends_on:
+      - kafka
+      - server
+    networks:
+      - eureka_server
+  admin_service:
+    container_name: admin
+    build: ./admin_service/
+    restart: always
+    ports:
+      - '10000:10000'
+    depends_on:
+      - kafka
+      - server
+      - admin_mariadb
+      - admin_mongodb
+    networks:
+      - eureka_server
+      - admin_database
+      - kafka-network
+  authenticate_service:
+    container_name: authenticate
+    build: ./authenticate_service/
+    restart: always
+    ports:
+      - '9000:9000'
+    depends_on:
+      - kafka
+      - server
+      - authenticate_mariadb
+      - authenticate_mongodb
+      - authenticate_redis
+    networks:
+      - eureka_server
+      - authenticate_database
+      - kafka-network
+  appointment_service:
+    container_name: appointment
+    build: ./appointment_service/
+    restart: always
+    ports:
+      - '11000:11000'
+    depends_on:
+      - kafka
+      - server
+      - appointment_mariadb
+      - appointment_mongodb
+    networks:
+      - eureka_server
+      - appointment_database
+      - kafka-network
+  chat_service:
+    container_name: chat
+    build: ./chat_service/
+    restart: always
+    ports:
+      - '4000:4000'
+    depends_on:
+      - kafka
+      - server
+      - admin_service
+      - appointment_service
+      - chatbot_service
+      - authenticate_service
+      - ai_forecast_service
+      - image_detect_service
+    networks:
+      - eureka_server
+      - kafka-network
+  image_detect_service:
+    container_name: imagedetect
+    build: ./image_detect_service/
+    restart: always
+    ports:
+      - '8000:8000'
+    command: >
+      sh -c "
+        python manage.py makemigrations --noinput &&
+        python manage.py migrate --noinput &&
+        daphne -b 0.0.0.0 -p 8000 healthcare_app_server.asgi:application"
+    depends_on:
+      - kafka
+      - server
+      - image_detect_mariadb
+    networks:
+      - eureka_server
+      - kafka-network
+      - image_detect_database
+  ai_forecast_service:
+    container_name: ai_forecast_service
+    build: ./ai_forecast_service/
+    restart: always
+    ports:
+      - '13000:13000'
+    depends_on:
+      - kafka
+      - server
+    networks:
+      - eureka_server
+      - kafka-network
+  api_gateway_service:
+    container_name: api_gateway_service
+    build: ./api_gateway_service/
+    restart: always
+    ports:
+      - '8081:8081'
+    depends_on:
+      - server
+      - image_detect_service
+      - ai_forecast_service
+      - authenticate_service
+      - chatbot_service
+      - appointment_service
+      - admin_service
+      - chat_service
+    networks:
+      - eureka_server

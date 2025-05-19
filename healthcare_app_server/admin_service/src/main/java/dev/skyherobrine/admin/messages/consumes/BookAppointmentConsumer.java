@@ -1,0 +1,141 @@
+package dev.skyherobrine.admin.messages.consumes;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.skyherobrine.admin.enums.AppointmentStatus;
+import dev.skyherobrine.admin.enums.PaymentStatus;
+import dev.skyherobrine.admin.models.mongodb.BookAppointment;
+import dev.skyherobrine.admin.models.mongodb.BookAppointmentPayment;
+import dev.skyherobrine.admin.repositories.mariadb.PatientRepository;
+import dev.skyherobrine.admin.repositories.mariadb.PriceRepository;
+import dev.skyherobrine.admin.repositories.mongodb.BookAppointmentPaymentRepository;
+import dev.skyherobrine.admin.repositories.mongodb.BookAppointmentRepository;
+import dev.skyherobrine.admin.repositories.mongodb.WorkScheduleRepository;
+import dev.skyherobrine.admin.utils.ObjectParser;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+public class BookAppointmentConsumer {
+
+    private final PatientRepository patientRepository;
+    private final BookAppointmentRepository bookAppointmentRepository;
+    private final BookAppointmentPaymentRepository bookAppointmentPaymentRepository;
+    private final WorkScheduleRepository workScheduleRepository;
+    private final PriceRepository priceRepository;
+
+    public BookAppointmentConsumer(PatientRepository patientRepository, BookAppointmentRepository bookAppointmentRepository, BookAppointmentPaymentRepository bookAppointmentPaymentRepository, WorkScheduleRepository workScheduleRepository, PriceRepository priceRepository) {
+        this.patientRepository = patientRepository;
+        this.bookAppointmentRepository = bookAppointmentRepository;
+        this.bookAppointmentPaymentRepository = bookAppointmentPaymentRepository;
+        this.workScheduleRepository = workScheduleRepository;
+        this.priceRepository = priceRepository;
+    }
+
+    @KafkaListener(topics = "insert_book_appointment", groupId = "admin_insert_book_appointment")
+    public void insertBookAppointment(String message) {
+        try {
+            log.info("Book Appointment Consumer: listen the message for inserting the book appointment");
+            log.info("Book Appointment Consumer: {}", message);
+
+            JsonNode node = new ObjectMapper().readTree(message);
+            Long getId = node.get("id").asLong();
+            String getPatientId = node.get("patientId").asText();
+            Long getWorkSchedule = node.get("workSchedule").asLong();
+            int getNumericOrders = node.get("numericalOrder").asInt();
+            String getNote = node.get("note").asText();
+
+            BookAppointment bookAppointment = new BookAppointment(
+                    getId,
+                    patientRepository.findPatientByUserId(getPatientId).orElseThrow(() -> new EntityNotFoundException("Patient was not found")),
+                    workScheduleRepository.findById(getWorkSchedule).orElseThrow(() -> new EntityNotFoundException("Work Schedule was not found")),
+                    getNumericOrders,
+                    getNote
+            );
+            bookAppointmentRepository.save(bookAppointment);
+            log.info("Book Appointment Consumer: The book appointment has been inserted");
+        } catch (Exception e) {
+            log.error("Book Appointment Consumer: The consumer thrown an exception");
+            log.error(e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "insert_book_appointment_payment", groupId = "admin_insert_book_appointment_payment")
+    public void insertBookAppointmentPayment(String message) {
+        try {
+            log.info("Book Appointment Consumer: listen the message for inserting the book appointment payment");
+            log.info("Book Appointment Consumer: {}", message);
+
+            JsonNode node = new ObjectMapper().readTree(message);
+            Long getId = node.get("id").asLong();
+            Long getPrice = node.get("price").get("id").asLong();
+            String getContent = node.get("content").asText();
+            Long getBookAppointmentId = node.get("bookAppointmentId").get("id").asLong();
+
+            BookAppointment bookAppointment = bookAppointmentRepository.findById(getBookAppointmentId).orElseThrow(() -> new EntityNotFoundException("The book appointment was not found!"));
+            BookAppointmentPayment bookAppointmentPayment = new BookAppointmentPayment(
+                    getId,
+                    priceRepository.findById(getPrice).orElseThrow(() -> new EntityNotFoundException("The price was not found!")),
+                    getContent,
+                    PaymentStatus.PAYED,
+                    bookAppointment
+            );
+            bookAppointmentPaymentRepository.save(bookAppointmentPayment);
+            log.info("Book Appointment Consumer: The book appointment payment has been inserted");
+        } catch (Exception e) {
+            log.error("Book Appointment Consumer: The consumer thrown an exception");
+            log.error(e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "cancel_appointment", groupId = "admin_cancel_bookAppointment")
+    public void cancelBookAppointment(String message) {
+        try {
+            log.info("Book Appointment Consumer: listen the message for canceling the book appointment");
+            log.info("Book Appointment Consumer: {}", message);
+
+            String getBookAppointmentId = ObjectParser.convertJsonToObject(message, String.class);
+            BookAppointment target = bookAppointmentRepository.findById(Long.parseLong(getBookAppointmentId)).orElseThrow(() -> new EntityNotFoundException("The book appointment was not found!"));
+            target.setStatus(AppointmentStatus.CANCELLED);
+            BookAppointment result = bookAppointmentRepository.save(target);
+            BookAppointmentPayment bookAppointmentPayment = bookAppointmentPaymentRepository.findByBookAppointment_Id(result.getId()).orElseThrow(() -> new EntityNotFoundException("The book appointment payment was not found!"));
+            bookAppointmentPayment.setBookAppointment(result);
+            bookAppointmentPaymentRepository.save(bookAppointmentPayment);
+
+            log.info("Book Appointment Consumer: set cancel the book appointment successfully!");
+        } catch (Exception e) {
+            log.error("Book Appointment Consumer: The consumer thrown an exception");
+            log.error(e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "update_status_bookAppointment", groupId = "admin_update_status_bookAppointment")
+    public void updateStatusBookAppointment(String message) {
+        try {
+            log.info("Book Appointment Consumer: listen the message for updating status of the book appointment");
+            log.info("Book Appointment Consumer: {}", message);
+
+            JsonNode node = new ObjectMapper().readTree(message);
+            String getAppointmentId = node.get("data").get("currentPatient").get("scheduleId").asText();
+            String getUserId = node.get("data").get("currentPatient").get("userId").asText();
+            String getStatus = node.get("status").asText();
+
+            BookAppointment target = bookAppointmentRepository.findByPatient_UserIdAndWorkSchedule_Id(getUserId, Long.parseLong(getAppointmentId)).orElseThrow(() -> new EntityNotFoundException("The book appointment was not found!"));
+            target.setStatus(AppointmentStatus.valueOf(getStatus));
+            BookAppointment result = bookAppointmentRepository.save(target);
+
+            BookAppointmentPayment bookAppointmentPayment = bookAppointmentPaymentRepository.findByBookAppointment_Id(target.getId()).orElseThrow(() -> new EntityNotFoundException("The book appointment payment was not found!"));
+            bookAppointmentPayment.setBookAppointment(result);
+            bookAppointmentPaymentRepository.save(bookAppointmentPayment);
+
+            log.info("Book Appointment Consumer: update the status successfully!");
+        } catch (Exception e) {
+            log.error("Book Appointment Consumer: the consumer thrown an error");
+            log.error(e.getMessage());
+        }
+    }
+}
+

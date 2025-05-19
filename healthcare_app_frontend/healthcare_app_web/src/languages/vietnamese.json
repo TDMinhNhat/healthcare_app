@@ -1,0 +1,474 @@
+{
+  "header": {
+    "home": "Trang Chủ",
+    "our_services": "Dịch Vụ",
+    "find_doctors": "Tìm Bác Sĩ",
+    "reviews": "Đánh Giá",
+    "login": "Đăng Nhập"
+  },
+  "body": {
+    "home": {},
+    "our_services": {},
+    "find_doctors": {
+      "face_detect": {
+        "title": "Nhận Diện Khuôn Mặt",
+        "description": "Nhận diện khuôn mặt để xác định danh tính của bạn trong hệ thống, từ đó chúng tôi có thể tìm bác sĩ gần nhất để hỗ trợ bạn",
+        "notice": "Vui lòng đảm bảo thiết bị của bạn cho phép ứng dụng truy cập camera để nhận diện khuôn mặt"
+      },
+      "input_info": {
+        "title": "Thông Tin Cá Nhân",
+        "subtitle": "Vui lòng cung cấp thông tin cá nhân để sử dụng dịch vụ của chúng tôi. Một số thông tin sẽ được chia sẻ với bác sĩ để hỗ trợ điều trị.",
+        "first_name": "Tên",
+        "last_name": "Họ",
+        "sex": {
+          "title": "Giới Tính",
+          "male": "Nam",
+          "female": "Nữ"
+        },
+        "dob": "Ngày Sinh",
+        "phone": "Số Điện Thoại",
+        "username": "Tên Đăng Nhập",
+        "email": "Địa Chỉ Email",
+        "password": "Mật Khẩu",
+        "repeat_password": "Nhập Lại Mật Khẩu",
+        "address": {
+          "title": "Địa Chỉ",
+          "number": "Số Nhà",
+          "street": "Đường",
+          "ward": "Phường",
+          "district": "Quận",
+          "city": "Thành Phố",
+          "country": "Quốc Gia"
+        },
+        "btn_clear": "Xóa Trắng",
+        "btn_submit": "Đăng Ký"
+      }
+    },
+    "reviews": {}
+  },
+  "footer": {
+    "select_language": "Chọn Ngôn Ngữ",
+    "description": "Sản phẩm bản quyền thuộc về KLTN_IUH. Nghiêm cấm sao chép hoặc kinh doanh sản phẩm khi chưa được sự đồng ý của tác giả.",
+    "copyright": "© 2025 SolarHealth"
+  },
+  "login": {
+    "title": "Đăng Nhập",
+    "login_standard": "Đăng nhập bằng tài khoản",
+    "login_face": "Đăng nhập bằng khuôn mặt",
+    "login_others_app": "Đăng nhập qua ứng dụng khác",
+    "email": "Email",
+    "password": "Mật Khẩu",
+    "button_login": "Đăng Nhập",
+    "other_login": "Hoặc đăng nhập với",
+    "link_register": "Đăng ký tài khoản",
+    "link_forgot_pass": "Quên mật khẩu"
+  },
+  "register": {
+    "tabs": [
+      {
+        "name": "Thông tin cá nhân"
+      },
+      {
+        "name": "Nhận diện khuôn mặt"
+      },
+      {
+        "name": "Xác nhận Email"
+      }
+    ],
+    "button_next": "Tiếp Theo",
+    "button_skip": "Bỏ Qua",
+    "button_back": "Quay Lại",
+    "input_info": {
+      "first_name": "Tên",
+      "last_name": "Họ",
+      "sex": "Giới tính",
+      "sex_male": "Nam",
+      "sex_female": "Nữ",
+      "date_of_birth": "Ngày sinh",
+      "phone": "Số điện thoại",
+      "username": "Tên đăng nhập",
+      "email": "Địa chỉ email",
+      "password": "Mật khẩu",
+      "repeat_password": "Nhập lại mật khẩu",
+      "address": {
+        "number": "Số nhà",
+        "street": "Đường",
+        "ward": "Phường",
+        "district": "Quận",
+        "city": "Thành phố",
+        "country": "Quốc gia"
+      },
+      "eula": "Tôi đồng ý với các điều khoản và điều kiện",
+      "error": {
+        "null": "Không được để trống",
+        "contains_number": "Không được chứa số",
+        "contains_text": "Không được chứa chữ",
+        "contains_special_character": "Không được chứa ký tự đặc biệt",
+        "start_number": "Không được bắt đầu bằng số",
+        "invalid_email": "Email không hợp lệ",
+        "not_match_password": "Mật khẩu không khớp"
+      }
+    },
+    "face_detect": {},
+    "verify_email": {
+      "message_info": "Chúng tôi đã gửi một mã xác nhận đến email đã đăng ký. Nếu chưa nhận được, vui lòng nhấn vào đây: ",
+      "label_input_otp": "Nhập mã xác nhận để kích hoạt tài khoản",
+      "button_resend_otp": "Gửi lại mã OTP"
+    },
+    "complete_register": {}
+  },
+  "chat": {
+    "tab": {
+      "search": {
+        "placeholder": "Tìm kiếm bạn bè"
+      },
+      "add_friend_modal": {
+        "title": "Thêm Bạn",
+        "btn_add": "Thêm Bạn",
+        "btn_cancel": "Hủy",
+        "input_search_placeholder": "Nhập mã, tên, số điện thoại hoặc email để tìm kiếm",
+        "role": {
+          "title": "Vai Trò",
+          "user": "Bệnh Nhân",
+          "doctor": "Bác Sĩ",
+          "admin": "Quản Trị Viên"
+        }
+      },
+      "create_group_modal": {},
+      "tabs": {
+        "private_chat": "CÁ NHÂN",
+        "group_chat": "NHÓM",
+        "list_friend": "BẠN BÈ"
+      },
+      "tab_friend": {
+        "status": {
+          "wait": "Chờ Phản Hồi",
+          "friend": "Đã Kết Bạn"
+        }
+      }
+    },
+    "area_chat": {}
+  },
+  "admin": {
+    "tabs": {
+      "list": [
+        {
+          "name": "Thống Kê",
+          "image": "",
+          "value": "dashboard"
+        },
+        {
+          "name": "Quản Lý Người Dùng",
+          "image": "",
+          "value": "users"
+        },
+        {
+          "name": "Quản Lý Vai Trò",
+          "image": "",
+          "value": "roles"
+        },
+        {
+          "name": "Quản Lý Đăng Nhập",
+          "image": "",
+          "value": "authenticate_providers"
+        },
+        {
+          "name": "Quản Lý Lịch Hẹn",
+          "image": "",
+          "value": "appointments"
+        }
+      ],
+      "tab_dashboard_content": {},
+      "tab_users_content": {
+        "total_users_system": "Tổng Người Dùng",
+        "total_users_patient": "Tổng Bệnh Nhân",
+        "total_users_doctor": "Tổng Bác Sĩ",
+        "total_users_manager": "Tổng Quản Lý",
+        "table": {
+          "id": "ID",
+          "userId": "ID Người Dùng",
+          "first_name": "Tên",
+          "last_name": "Họ",
+          "user_name": "Tên Đăng Nhập",
+          "email": "Địa Chỉ Email",
+          "phone": "Số Điện Thoại",
+          "role": "Vai Trò",
+          "status": "Trạng Thái",
+          "action": "Thao Tác",
+          "btn_delete": "Xóa",
+          "btn_view_detail": "Xem Chi Tiết"
+        }
+      },
+      "tab_appointments_content": {}
+    }
+  },
+  "patient": {
+    "profile": {
+      "title": "Hồ Sơ Bệnh Nhân",
+      "edit_profile": "Chỉnh Sửa Hồ Sơ",
+      "personal_info": "Thông Tin Cá Nhân",
+      "medical_records": "Hồ Sơ Y Tế",
+      "appointments": "Lịch Hẹn"
+    },
+    "dashboard": {
+      "welcome": "Xin chào,",
+      "next_appointment": "Lịch Hẹn Tới",
+      "view_details": "Xem Chi Tiết",
+      "appointment_statistics": "Thống Kê Lịch Hẹn",
+      "total_appointments": "Tổng Số Lịch Hẹn",
+      "completed": "Đã Hoàn Thành",
+      "upcoming": "Sắp Tới",
+      "cancelled": "Đã Hủy",
+      "no_upcoming_appointments": "Không có lịch hẹn nào sắp tới"
+    },
+    "appointments": {
+      "title": "Lịch Hẹn Khám Bệnh",
+      "book_new": "Đặt Lịch Hẹn Mới",
+      "upcoming": "Sắp Tới",
+      "past": "Đã Qua",
+      "completed": "Đã Hoàn Thành",
+      "cancelled": "Đã Hủy",
+      "no_appointments": "Không có lịch hẹn nào",
+      "cancel_appointment": "Hủy Lịch Hẹn",
+      "reschedule": "Đổi Lịch Hẹn",
+      "select_specialty": "Chọn Chuyên Khoa",
+      "select_date_time": "Chọn Ngày Giờ",
+      "select_date": "Chọn Ngày",
+      "select_time": "Chọn Giờ",
+      "morning": "Buổi Sáng",
+      "afternoon": "Buổi Chiều",
+      "evening": "Buổi Tối",
+      "available_doctors": "Bác Sĩ Khả Dụng",
+      "no_doctors_available": "Không có bác sĩ nào khả dụng trong thời gian này",
+      "try_different_time": "Vui lòng thử chọn một thời gian khác",
+      "select_different_time": "Chọn thời gian khác",
+      "select": "Chọn",
+      "doctor": "Bác Sĩ",
+      "date": "Ngày",
+      "time": "Giờ",
+      "booking_successful": "Đặt Lịch Hẹn Thành Công",
+      "booking_confirmation_message": "Lịch hẹn của bạn đã được đặt thành công. Chúng tôi đã gửi thông tin chi tiết vào email của bạn.",
+      "appointment_details": "Thông Tin Lịch Hẹn",
+      "no_available_slots": "Không có lịch hẹn khả dụng",
+      "back_to_appointments": "Quay Lại Danh Sách Lịch Hẹn",
+      "doctor_details": "Thông Tin Bác Sĩ",
+      "appointment_status": "Trạng Thái Lịch Hẹn",
+      "confirm": "Xác Nhận",
+      "steps": {
+        "select_service": "Chọn Dịch Vụ",
+        "select_date_time": "Chọn Ngày Giờ",
+        "select_doctor": "Chọn Bác Sĩ",
+        "review": "Xem Lại",
+        "confirm": "Xác Nhận"
+      },
+      "status": {
+        "confirmed": "Đã Xác Nhận",
+        "pending": "Đang Chờ Xác Nhận",
+        "cancelled": "Đã Hủy",
+        "completed": "Đã Hoàn Thành"
+      },
+      "select_service": "Chọn Dịch Vụ",
+      "no_services": "Không có dịch vụ nào khả dụng",
+      "try_different_service": "Vui lòng thử chọn một dịch vụ khác",
+      "select_different_service": "Chọn dịch vụ khác",
+      "service": "Dịch Vụ"
+    },
+    "medical_records": {
+      "title": "Hồ Sơ Bệnh Án",
+      "no_records": "Bạn chưa có hồ sơ bệnh án nào",
+      "appointment_details": "Chi Tiết Cuộc Hẹn",
+      "doctor": "Bác Sĩ",
+      "date": "Ngày Khám",
+      "room": "Phòng Khám",
+      "status": "Trạng Thái",
+      "diagnosis": "Chẩn Đoán",
+      "diagnosis_disease": "Bệnh Được Chẩn Đoán",
+      "follow_up": "Tái Khám",
+      "notes": "Ghi Chú Bổ Sung",
+      "medications": "Thuốc Điều Trị",
+      "medications_list": "Danh Sách Thuốc",
+      "medication_name": "Tên Thuốc",
+      "how_to_use": "Cách Dùng",
+      "quantity": "Số Lượng",
+      "unit": "Đơn Vị",
+      "no_diagnosis": "Không có chẩn đoán",
+      "no_notes": "Không có ghi chú bổ sung",
+      "no_medications": "Không có thuốc nào được kê đơn",
+      "record_not_found": "Không tìm thấy hồ sơ bệnh án",
+      "patient_information": "Thông Tin Bệnh Nhân"
+    }
+  },
+  "doctor": {
+    "profile": {
+      "title": "Hồ Sơ Bác Sĩ",
+      "edit_profile": "Chỉnh Sửa Hồ Sơ",
+      "personal_info": "Thông Tin Cá Nhân",
+      "experience": "Kinh Nghiệm",
+      "education": "Học Vấn",
+      "certificates": "Chứng Chỉ",
+      "years": "năm",
+      "reviews": "đánh giá",
+      "no_education_data": "Không có thông tin học vấn",
+      "no_experience_data": "Không có thông tin kinh nghiệm",
+      "no_certificates_data": "Không có thông tin chứng chỉ"
+    },
+    "dashboard": {
+      "title": "Bảng Điều Khiển Bác Sĩ",
+      "todays_appointments": "Lịch Hẹn Hôm Nay",
+      "total_patients": "Tổng Số Bệnh Nhân",
+      "upcoming_appointments": "Lịch Hẹn Sắp Tới",
+      "recent_patient_updates": "Cập Nhật Bệnh Nhân Gần Đây"
+    },
+    "schedule": {
+      "title": "Lịch Làm Việc",
+      "current_schedule": "Lịch Làm Việc Hiện Tại",
+      "view_only_info": "Đây là lịch làm việc hiện tại của bạn. Bạn có thể xem nhưng không thể chỉnh sửa trực tiếp tại đây.",
+      "select_date": "Chọn Ngày",
+      "add_time_slot": "Thêm Khung Giờ",
+      "start_time": "Giờ Bắt Đầu",
+      "end_time": "Giờ Kết Thúc",
+      "mark_unavailable": "Đánh Dấu Không Khả Dụng",
+      "mark_available": "Đánh Dấu Khả Dụng",
+      "no_time_slots": "Không có khung giờ nào cho ngày này",
+      "no_schedule_for_date": "Không có lịch làm việc cho ngày này",
+      "click_add": "Nhấn vào nút 'Thêm Khung Giờ' để thêm thời gian làm việc",
+      "add": "Thêm",
+      "save": "Lưu",
+      "time_slots": "Khung Giờ",
+      "save_schedule": "Lưu Lịch Làm Việc",
+      "success_added": "Thêm khung giờ làm việc thành công",
+      "success_saved": "Lưu lịch làm việc thành công",
+      "error_select_times": "Vui lòng chọn giờ bắt đầu và giờ kết thúc",
+      "error_invalid_time_range": "Giờ kết thúc phải sau giờ bắt đầu",
+      "error_time_slot_overlap": "Khung giờ này bị trùng lặp với khung giờ hiện có",
+      "error_select_start_time": "Vui lòng chọn giờ bắt đầu",
+      "error_select_end_time": "Vui lòng chọn giờ kết thúc",
+      "no_edits_allowed": "Chỉ có thể đánh dấu khả dụng hoặc xóa",
+      "slot_info": "Mỗi khung giờ kéo dài 30 phút. Giờ kết thúc sẽ được tính tự động.",
+      "auto_calculated": "tự động tính",
+      "select_all": "Chọn Tất Cả",
+      "clear_all": "Xóa Tất Cả",
+      "selection_info": "Chọn các khung giờ làm việc bằng cách nhấp vào từng ô. Mỗi khung giờ kéo dài 30 phút. Sau khi chọn xong, nhấn 'Lưu' để lưu lịch làm việc của bạn.",
+      "matrix_info": "Chọn khung giờ làm việc của bạn cho từng ngày bằng cách nhấp vào các ô tương ứng. Mỗi khung giờ kéo dài 30 phút. Sau khi chọn xong, nhấn 'Lưu Lịch Làm Việc' để lưu lịch làm việc của bạn.",
+      "time": "Giờ",
+      "select_all_for_time": "Chọn tất cả các ngày cho khung giờ này",
+      "clear_all_for_time": "Xóa tất cả các ngày cho khung giờ này",
+      "select_all_for_day": "Chọn tất cả các khung giờ cho ngày này",
+      "clear_all_for_day": "Xóa tất cả các khung giờ cho ngày này",
+      "available": "Khả Dụng",
+      "booked": "Đã Đặt"
+    },
+    "appointments": {
+      "title": "Lịch Hẹn Khám Bệnh",
+      "subtitle": "Xem và quản lý lịch hẹn khám bệnh với bệnh nhân",
+      "tabs": {
+        "upcoming": "Sắp Tới",
+        "completed": "Đã Hoàn Thành",
+        "cancelled": "Đã Hủy"
+      },
+      "no_appointments": "Không có lịch hẹn nào",
+      "patient_id": "Mã BN",
+      "status": {
+        "WAITING": "Đang Chờ",
+        "IN_PROGRESS": "Đang Khám",
+        "DONE": "Đã Hoàn Thành",
+        "CANCELLED": "Đã Hủy"
+      },
+      "start_appointment": "Bắt Đầu Khám",
+      "complete_appointment": "Hoàn Thành Khám",
+      "cancel": "Hủy Lịch Hẹn",
+      "add_notes": "Thêm Ghi Chú",
+      "view_edit_notes": "Xem/Sửa Ghi Chú",
+      "view_patient_details": "Xem Thông Tin Bệnh Nhân",
+      "appointment_notes": "Ghi Chú Lịch Hẹn",
+      "notes_placeholder": "Nhập ghi chú về tình trạng, chẩn đoán hoặc kế hoạch điều trị của bệnh nhân..."
+    },
+    "medical_records": {
+      "title": "Hồ Sơ Bệnh Án",
+      "edit_record": "Cập Nhật Hồ Sơ Bệnh Án",
+      "save_success": "Lưu hồ sơ bệnh án thành công",
+      "record_not_found": "Không tìm thấy hồ sơ bệnh án",
+      "tabs": {
+        "patient_info": "Thông Tin Bệnh Nhân",
+        "diagnosis": "Chẩn Đoán",
+        "medications": "Thuốc Điều Trị"
+      },
+      "patient_details": "Chi Tiết Bệnh Nhân",
+      "patient_name": "Tên Bệnh Nhân",
+      "patient_id": "Mã Bệnh Nhân",
+      "date_of_birth": "Ngày Sinh",
+      "gender": "Giới Tính",
+      "appointment_details": "Chi Tiết Cuộc Hẹn",
+      "appointment_date": "Ngày Khám",
+      "doctor_name": "Bác Sĩ Khám",
+      "room": "Phòng Khám",
+      "status": "Trạng Thái",
+      "diagnosis": "Chẩn Đoán",
+      "diagnosis_disease": "Bệnh Được Chẩn Đoán",
+      "diagnosis_placeholder": "Nhập chẩn đoán của bác sĩ về tình trạng bệnh nhân...",
+      "follow_up": "Tái Khám",
+      "reexamination_date": "Ngày Tái Khám",
+      "notes": "Ghi Chú",
+      "notes_placeholder": "Nhập ghi chú bổ sung về tình trạng bệnh nhân, chế độ ăn uống, sinh hoạt...",
+      "add_medication": "Thêm Thuốc",
+      "medication_name": "Tên Thuốc",
+      "search_medication": "Tìm kiếm thuốc...",
+      "unit": "Đơn Vị",
+      "quantity": "Số Lượng",
+      "add": "Thêm",
+      "medications_list": "Danh Sách Thuốc",
+      "no_medications": "Không có thuốc nào được kê toa",
+      "common": {
+        "saving": "Đang lưu..."
+      },
+      "medical_history": "Lịch Sử Bệnh",
+      "condition": "Tình Trạng",
+      "diagnosed_year": "Năm Chẩn Đoán",
+      "currently_treated": "Đang Điều Trị",
+      "allergies": "Dị Ứng",
+      "no_medical_history": "Không có dữ liệu về lịch sử bệnh",
+      "no_allergies": "Không có dị ứng đã biết",
+      "no_patient_data": "Không có dữ liệu bệnh nhân"
+    }
+  },
+  "common": {
+    "loading": "Đang tải...",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "view": "Xem",
+    "view_details": "Xem Chi Tiết",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "no_data": "Không có dữ liệu",
+    "back": "Quay Lại",
+    "continue": "Tiếp Tục",
+    "saving": "Đang lưu...",
+    "yes": "Có",
+    "no": "Không",
+    "actions": "Thao Tác",
+    "notAvailable": "Không Khả Dụng",
+    "noData": "Không Có Dữ Liệu"
+  },
+  "profile": {
+    "editPersonalInfo": "Chỉnh Sửa Thông Tin Cá Nhân",
+    "firstName": "Tên",
+    "lastName": "Họ",
+    "email": "Địa Chỉ Email",
+    "phone": "Số Điện Thoại",
+    "dob": "Ngày Sinh",
+    "sex": "Giới Tính",
+    "male": "Nam",
+    "female": "Nữ",
+    "address": "Địa Chỉ",
+    "address.number": "Số Nhà",
+    "address.street": "Đường",
+    "address.ward": "Phường/Xã",
+    "address.district": "Quận/Huyện",
+    "address.city": "Thành Phố",
+    "address.country": "Quốc Gia",
+    "saveSuccess": "Lưu thông tin cá nhân thành công!",
+    "saveError": "Có lỗi xảy ra khi lưu thông tin. Vui lòng thử lại sau."
+  }
+}

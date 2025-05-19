@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: chatbot_service
+  ai:
+    mistralai:
+      api-key: Uz9z733WjZxBmaikk0jOYRgKa5GQ3uo5
+      chat:
+        options:
+          model: mistral-large-latest
+          temperature: 0.5
+server:
+  port: 14000
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://server:8761/eureka/
+    fetch-registry: true
+  instance:
+    hostname: server
+    preferIpAddress: true
+springdoc:
+  api-docs:
+    enabled: true
+    path: /chatbot/v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

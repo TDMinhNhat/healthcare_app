@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: authenticate_service
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://authenticate_mariadb:3306/authenticate_service?createDatabaseIfNotExist=true
+    username: root
+    password: 123456789
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  data:
+    jpa:
+      repositories:
+        enabled: true
+    redis:
+      host: authenticate_redis
+      port: 6379
+    mongodb:
+      database: authenticate_service
+      host: authenticate_mongodb
+      port: 27017
+  kafka:
+    bootstrap-servers: kafka:29092
+    consumer:
+      auto-offset-reset: earliest
+      group-id: authenticate_service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  cache:
+    type: redis
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: skyherobrine13092003@gmail.com
+    password: tzkb bxhq yhlf hnnw
+    properties:
+      mail.smtp:
+        auth: true
+        starttls:
+          enable: true
+    protocol: smtp
+server:
+  port: 9000
+eureka:
+    client:
+      serviceUrl:
+          defaultZone: http://server:8761/eureka/
+      fetch-registry: true
+    instance:
+        hostname: server
+        preferIpAddress: true
+springdoc:
+  api-docs:
+    enabled: true
+    path: /authenticate/v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+aws_access_key: AKIATWBJ2KFZKJUMQ33C
+aws_secret_key: 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

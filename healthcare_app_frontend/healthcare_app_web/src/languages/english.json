@@ -1,0 +1,299 @@
+{
+  "header": {
+    "home": "Home",
+    "our_services": "Services",
+    "find_doctors": "Find Doctors",
+    "reviews": "Reviews",
+    "login": "Login"
+  },
+  "body": {
+    "home": {},
+    "our_services": {},
+    "find_doctors": {
+      "face_detect": {
+        "title": "Face Detection",
+        "description": "Detect your face to identify you in the system, so we can find the nearest doctor to assist you",
+        "notice": "Please make sure your device allows the application to access the camera for face detection"
+      },
+      "input_info": {
+        "title": "Personal Information",
+        "subtitle": "Please provide personal information to use our services. Some information will be shared with doctors to assist with treatment.",
+        "first_name": "First Name",
+        "last_name": "Last Name",
+        "sex": {
+          "title": "Gender",
+          "male": "Male",
+          "female": "Female"
+        },
+        "dob": "Date of Birth",
+        "phone": "Phone Number",
+        "username": "Username",
+        "email": "Email Address",
+        "password": "Password",
+        "repeat_password": "Repeat Password",
+        "address": {
+          "title": "Address",
+          "number": "House Number",
+          "street": "Street",
+          "ward": "Ward",
+          "district": "District",
+          "city": "City",
+          "country": "Country"
+        },
+        "btn_clear": "Clear",
+        "btn_submit": "Register"
+      }
+    },
+    "reviews": {}
+  },
+  "footer": {
+    "select_language": "Select Language",
+    "description": "Product copyright belongs to KLTN_IUH. Copying or commercializing the product without the author's consent is strictly prohibited.",
+    "copyright": "© 2025 SolarHealth"
+  },
+  "login": {
+    "title": "Login",
+    "login_standard": "Login with account",
+    "login_face": "Login with face",
+    "login_others_app": "Login via other applications",
+    "email": "Email",
+    "password": "Password",
+    "button_login": "Login",
+    "other_login": "Or login with",
+    "link_register": "Register an account",
+    "link_forgot_pass": "Forgot password"
+  },
+  "register": {
+    "tabs": [
+      {
+        "name": "Personal Information"
+      },
+      {
+        "name": "Face Detection"
+      },
+      {
+        "name": "Email Verification"
+      }
+    ],
+    "button_next": "Next",
+    "button_skip": "Skip",
+    "button_back": "Back",
+    "input_info": {
+      "first_name": "First Name",
+      "last_name": "Last Name",
+      "sex": "Gender",
+      "sex_male": "Male",
+      "sex_female": "Female",
+      "date_of_birth": "Date of Birth",
+      "phone": "Phone Number",
+      "username": "Username",
+      "email": "Email Address",
+      "password": "Password",
+      "repeat_password": "Repeat Password",
+      "address": {
+        "number": "House Number",
+        "street": "Street",
+        "ward": "Ward",
+        "district": "District",
+        "city": "City",
+        "country": "Country"
+      },
+      "eula": "I agree to the terms and conditions",
+      "error": {
+        "null": "Cannot be empty",
+        "contains_number": "Cannot contain numbers",
+        "contains_text": "Cannot contain text",
+        "contains_special_character": "Cannot contain special characters",
+        "start_number": "Cannot start with a number",
+        "invalid_email": "Invalid email",
+        "not_match_password": "Passwords do not match"
+      }
+    },
+    "face_detect": {},
+    "verify_email": {
+      "message_info": "We have sent a verification code to the registered email. If you haven't received it yet, please click here: ",
+      "label_input_otp": "Enter verification code to activate your account",
+      "button_resend_otp": "Resend OTP code"
+    },
+    "complete_register": {}
+  },
+  "chat": {
+    "tab": {
+      "search": {
+        "placeholder": "Search friends"
+      },
+      "add_friend_modal": {
+        "title": "Add Friend",
+        "btn_add": "Add Friend",
+        "btn_cancel": "Cancel",
+        "input_search_placeholder": "Enter code, name, phone number or email to search",
+        "role": {
+          "title": "Role",
+          "user": "Patient",
+          "doctor": "Doctor",
+          "admin": "Administrator"
+        }
+      },
+      "create_group_modal": {},
+      "tabs": {
+        "private_chat": "PRIVATE",
+        "group_chat": "GROUP",
+        "list_friend": "FRIENDS"
+      },
+      "tab_friend": {
+        "status": {
+          "wait": "Pending",
+          "friend": "Friends"
+        }
+      }
+    },
+    "area_chat": {}
+  },
+  "admin": {
+    "tabs": {
+      "list": [
+        {
+          "name": "Dashboard",
+          "image": "",
+          "value": "dashboard"
+        },
+        {
+          "name": "User Management",
+          "image": "",
+          "value": "users"
+        },
+        {
+          "name": "Role Management",
+          "image": "",
+          "value": "roles"
+        },
+        {
+          "name": "Login Management",
+          "image": "",
+          "value": "authenticate_providers"
+        },
+        {
+          "name": "Appointment Management",
+          "image": "",
+          "value": "appointments"
+        }
+      ],
+      "tab_dashboard_content": {},
+      "tab_users_content": {
+        "total_users_system": "Total Users",
+        "total_users_patient": "Total Patients",
+        "total_users_doctor": "Total Doctors",
+        "total_users_manager": "Total Managers",
+        "table": {
+          "id": "ID",
+          "userId": "User ID",
+          "first_name": "First Name",
+          "last_name": "Last Name",
+          "user_name": "Username",
+          "email": "Email Address",
+          "phone": "Phone Number",
+          "role": "Role",
+          "status": "Status",
+          "action": "Action",
+          "btn_delete": "Delete",
+          "btn_view_detail": "View Details"
+        }
+      },
+      "tab_appointments_content": {}
+    }
+  },
+  "patient": {
+    "profile": {
+      "title": "Patient Profile",
+      "edit_profile": "Edit Profile",
+      "personal_info": "Personal Information",
+      "medical_records": "Medical Records",
+      "appointments": "Appointments"
+    },
+    "dashboard": {
+      "welcome": "Welcome,",
+      "next_appointment": "Next Appointment",
+      "view_details": "View Details",
+      "recent_appointments": "Recent Appointments",
+      "medications": "Medications",
+      "recent_medical_records": "Recent Medical Records",
+      "no_upcoming_appointments": "No upcoming appointments",
+      "no_recent_appointments": "No recent appointments",
+      "no_medications": "No medications prescribed",
+      "no_medical_records": "No medical records available",
+      "refills_remaining": "Refills remaining"
+    },
+    "appointments": {
+      "title": "My Appointments",
+      "book_new": "Book New Appointment",
+      "upcoming": "Upcoming Appointments",
+      "past": "Past Appointments",
+      "cancelled": "Cancelled Appointments",
+      "select_date_time": "Select Date and Time",
+      "select_date": "Select Date",
+      "select_time": "Select Time",
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "evening": "Evening",
+      "available_doctors": "Available Doctors",
+      "no_doctors_available": "No doctors available for the selected time",
+      "select": "Select",
+      "doctor_details": "Doctor Details",
+      "booking_successful": "Booking Successful!",
+      "booking_confirmation_message": "Your appointment has been successfully booked. You will receive a confirmation email shortly.",
+      "appointment_details": "Appointment Details",
+      "date": "Date",
+      "time": "Time",
+      "doctor": "Doctor",
+      "back_to_appointments": "Back to Appointments",
+      "confirm": "Confirm Appointment",
+      "steps": {
+        "select_time": "Select Time",
+        "select_doctor": "Select Doctor",
+        "review": "Review",
+        "confirm": "Confirm"
+      },
+      "no_appointments": "You have no appointments",
+      "status": {
+        "confirmed": "Confirmed",
+        "pending": "Pending",
+        "cancelled": "Cancelled",
+        "completed": "Completed"
+      },
+      "cancel_appointment": "Cancel Appointment",
+      "reschedule": "Reschedule"
+    }
+  },
+  "doctor": {
+    "profile": {
+      "title": "Doctor Profile",
+      "edit_profile": "Edit Profile",
+      "personal_info": "Personal Information",
+      "experience": "Experience",
+      "education": "Education",
+      "certificates": "Certificates",
+      "years": "years",
+      "reviews": "reviews"
+    },
+    "dashboard": {
+      "title": "Doctor Dashboard",
+      "todays_appointments": "Today's Appointments",
+      "total_patients": "Total Patients",
+      "upcoming_appointments": "Upcoming Appointments",
+      "recent_patient_updates": "Recent Patient Updates"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "continue": "Continue",
+    "back": "Back",
+    "no_data": "No data available"
+  }
+}

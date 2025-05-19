@@ -1,0 +1,15 @@
+django
+djangorestframework
+django-cors-headers
+py-eureka-client
+asyncio
+mysqlclient
+pillow
+boto3
+opencv-python
+scipy
+requests
+numpy
+confluent-kafka
+python-socketio
+daphne

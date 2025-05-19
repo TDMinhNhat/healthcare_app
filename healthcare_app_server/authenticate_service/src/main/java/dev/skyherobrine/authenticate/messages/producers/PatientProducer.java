@@ -1,0 +1,40 @@
+package dev.skyherobrine.authenticate.messages.producers;
+
+import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.context.annotation.Bean;
+import org.springframework.kafka.config.TopicBuilder;
+import org.springframework.stereotype.Component;
+
+@Component
+public class PatientProducer {
+
+    @Bean
+    public NewTopic insertPatient() {
+        return TopicBuilder.name("insert_patient").build();
+    }
+
+    @Bean
+    public NewTopic updateVerifyEmail() {
+        return TopicBuilder.name("update_verify_email").build();
+    }
+
+    @Bean
+    public NewTopic updatePatientInfo() {
+        return TopicBuilder.name("update_patient_info").build();
+    }
+
+    @Bean
+    public NewTopic updatePatientAvatar() {
+        return TopicBuilder.name("update_patient_avatar").build();
+    }
+
+    @Bean
+    public NewTopic insertPatientAccountBank() {
+        return TopicBuilder.name("insert_patient_account_bank").build();
+    }
+
+    @Bean
+    public NewTopic updatePatientAccountBank() {
+        return TopicBuilder.name("update_patient_account_bank").build();
+    }
+}

@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: admin_service
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://admin_mariadb:3306/admin_service?createDatabaseIfNotExist=true
+    username: root
+    password: 123456789
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.MariaDBDialect
+  data:
+    mongodb:
+      host: admin_mongodb
+      port: 27017
+      database: admin_service
+    jpa:
+      repositories:
+        enabled: true
+  kafka:
+    bootstrap-servers: kafka:29092
+    consumer:
+      auto-offset-reset: earliest
+      group-id: admin_service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  main:
+    web-application-type: servlet
+server:
+  port: 10000
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://server:8761/eureka/
+    fetch-registry: true
+  instance:
+    hostname: server
+    preferIpAddress: true
+springdoc:
+  api-docs:
+    enabled: true
+    path: /admin/v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+domain-host-name: server
