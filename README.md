@@ -49,8 +49,14 @@ Một số tính năng đặc trưng của ứng dụng:
 <img src="./healthcare_app_diagram/class_diagram.png" align="center"/>
 
 ## SƠ ĐỒ DATABASE
+### SQL (MariaDB)
+<img src="./healthcare_app_diagram/sql_database_diagram.png" align="center"/>
+
+### NoSQL (MongoDB)
+<img src="./healthcare_app_diagram/nosql_database_diagram.png" align="center"/>
 
 ## KIẾN TRÚC PHẦN MỀM
+<img src="./healthcare_app_diagram/software_architecture.png" align="center"/>
 
 ## HIỆN THỰC
 
