@@ -1,7 +1,7 @@
 <div align="center">
     <img src="./image/logo.png" width=400>
     <h1>SolarHealth</h1>
-    <h3>💏 Ứng dụng phần mềm chăm sóc sức khoẻ SolarHealth 💑</h3>
+    <h3>💏 SolarHealth - Ứng dụng hỗ trợ chăm sóc sức khoẻ dành cho bệnh tâm lý 💑</h3>
 	<p align="center">
 		<a href="#giới-thiệu">📘 Giới Thiệu</a> -
 		<a href="#công-nghệ-sử-dụng">📚 Công nghệ sử dụng</a> -
@@ -25,22 +25,20 @@ từ xa với nhiều phương thức giao tiếp khác nhau (tin nhắn, cuộc
 
 Một số tính năng đặc trưng của ứng dụng:
 1. Cho phép bệnh nhân có thể tư vấn khám sức khoẻ từ xa
-2. Bác sĩ có thể biết được vị trí bệnh nhân để tới khám
-3. Phần mềm có thể chuẩn đoán bệnh cơ bản cho bệnh nhân dựa vào các thông tin cung cấp
-4. Phần mềm có thể xác thực các triệu chứng thông qua các hình ảnh chụp x-quang, siêu âm,... 
+2. Bác sĩ có thể biết được vị trí bệnh nhân để tới khám dựa vào thông tin cung cấp của bệnh nhân khi gọi cấp cứu
+3. Bệnh nhân có thể gọi cấp cứu khi có trường hợp khẩn cấp </br>
+...
 
 ## CÔNG NGHỆ SỬ DỤNG
 <div>
 	<ul>
-		<li>Frontend: Website (ReactJS), Mobile (React-native), Desktop App (C# Winform)</li>
-		<li>Backend: Java (Spring boot), Javascript/Typescript (NodeJS), Python (Django)</li>
-		<li>Database: MariaDB, SQLite, MongoDB, Redis</li>
-		<li>Security: JWT (Json Web Token), Spring OAuth2 (đăng nhập bằng: Github, Discord, Microsoft,...)</li>
-		<li>CI/CD: Docker, Jenkins</li>
-		<li>Deployment: Vercel (cho Frontend) - có thể deploy lên: Google Play (Android) & App Store (iOS), EC2 (AWS - cho Backend)</li>
+		<li>Frontend: Website (ReactJS), Mobile (React-native)</li>
+		<li>Backend: Java (Spring boot), Javascript (NodeJS), Python (Django)</li>
+		<li>Database: MariaDB, MongoDB và Redis</li>
+		<li>Security: Đăng nhập bằng form</li>
+		<li>Deployment: Vercel (cho Web), Droplets (Digital Ocean - cho Backend)</li>
 		<li>Kiến trúc: Microservices, Event-driven và Multi-layered</li>
-		<li>Công nghệ khác: Spring OpenFeign, AI (dự báo, xử lý ảnh,...), Apache Kafka, Socket I/O</li>
-		<li>Công cụ khác: S3 (AWS - Lưu trữ dữ liệu), Jira (lập kế hoạch)</li>
+		<li>Công nghệ khác: Spring OpenFeign, OpenCV (dùng CNN model), ARIMA Model, SES Model, Apache Kafka, Socket I/O, StompJS, S3 (lưu trữ ảnh)</li>
 	</ul>
 </div> 
 
