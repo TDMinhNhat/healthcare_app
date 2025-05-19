@@ -44,6 +44,18 @@ Một số tính năng đặc trưng của ứng dụng:
 	</ul>
 </div> 
 
+## SƠ ĐỒ USE CASE
+
+## SƠ ĐỒ CLASS
+
+## SƠ ĐỒ DATABASE
+
+## KIẾN TRÚC PHẦN MỀM
+
+## HIỆN THỰC
+
+## CÁCH CÀI ĐẶT
+
 ## THÀNH VIÊN THỰC HIỆN
 <table align="center">
 	<tbody> 
