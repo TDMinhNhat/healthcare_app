@@ -91,6 +91,10 @@ Một số tính năng đặc trưng của ứng dụng:
 <img src="./image/screens/doctor_managing_emergency.png" align="center"/>
 <p align="center">Bác sĩ quản lý các bệnh nhân gọi cấp cứu (Web)</p>
 
+## LIÊN KẾT
+### Website
+<a href="https://healthcare-web-tau.vercel.app/">Truy cập website của ứng dụng. Click vào đây</a>
+
 ## THÀNH VIÊN THỰC HIỆN
 <table align="center">
 	<tbody> 
