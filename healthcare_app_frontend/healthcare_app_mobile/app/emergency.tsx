@@ -62,6 +62,8 @@ export default function Emergency() {
   const [skipDetection, setSkipDetection] = useState(false);
   // State to control if auto detection is running
   const [isDetectionRunning, setIsDetectionRunning] = useState(false);
+  // Add state to track when waiting for server response
+  const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
 
   // Thêm state cho tự động chụp
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -115,8 +117,6 @@ export default function Emergency() {
       return;
     }
 
-    // console.log("Sending emergency data with phone:", phone);
-
     let dataToSend =
       detectionResponse.data === "New User"
         ? detectionResponse.data
@@ -129,15 +129,65 @@ export default function Emergency() {
       dataToSend = { data: dataToSend, emergencyContact: phone };
     }
 
-    // console.log("Final data being sent:", dataToSend);
+    console.log("Final data being sent:", dataToSend);
 
     socket.emit("send_data_emergency", dataToSend);
 
-    // Alert.alert("Đã phát hiện", "Hình ảnh đã được xử lý!");
     if (user) {
       router.replace("/(tabs)/profile");
     } else {
       router.replace("/");
+    }
+  };
+
+  // Hàm xử lý phản hồi nhận diện
+  const handleDetectionResponse = (response: any) => {
+    setDetectionResponse(response);
+    // Always set waiting to false when response is received
+    setIsWaitingForResponse(false);
+
+    if (response && response.code === 200) {
+      // Dừng việc tự động chụp nếu đang chạy
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      setIsDetectionRunning(false);
+
+      // Kiểm tra xem có phải người mới không
+      const isNewUser = response.data === "New User";
+
+      if (isNewUser) {
+        // Người lạ - chưa có trên hệ thống
+        if (user) {
+          // Đã login - sử dụng số điện thoại của user
+          if (user.phone) {
+            setShowSuccessModal(true);
+          } else {
+            // User không có số điện thoại, yêu cầu nhập
+            setShowPhoneModal(true);
+          }
+        } else {
+          // Chưa login - yêu cầu nhập số điện thoại
+          setShowPhoneModal(true);
+        }
+      } else {
+        // Đã nhận diện được người và có thông tin trên hệ thống
+        // Kiểm tra và lấy số điện thoại từ hồ sơ y tế
+        const userData = response.data.data;
+        const hasPhone = userData && userData.phone;
+
+        if (hasPhone) {
+          // Có số điện thoại trong hồ sơ, sử dụng luôn
+          setShowSuccessModal(true);
+        } else if (user && user.phone) {
+          // Không có số trong hồ sơ nhưng user đã login có số
+          setShowSuccessModal(true);
+        } else {
+          // Không có số trong cả hồ sơ và user (hoặc chưa login)
+          setShowPhoneModal(true);
+        }
+      }
     }
   };
 
@@ -186,12 +236,13 @@ export default function Emergency() {
 
   // Updated automatic detection effect
   useEffect(() => {
-    // Always clear interval if modal is showing or detection is not running
+    // Always clear interval if modal is showing, detection is not running, or waiting for response
     if (
       (showPhoneModal ||
         showSuccessModal ||
         showEmergencyTypeModal ||
-        !isDetectionRunning) &&
+        !isDetectionRunning ||
+        isWaitingForResponse) &&
       intervalRef.current
     ) {
       clearInterval(intervalRef.current);
@@ -199,7 +250,7 @@ export default function Emergency() {
       return;
     }
 
-    // Only start interval if detection is running, camera is ready, and no modals are showing
+    // Only start interval if detection is running, camera is ready, not waiting for response, and no modals are showing
     if (
       isDetectionRunning &&
       isCameraReady &&
@@ -207,7 +258,8 @@ export default function Emergency() {
       !isPreview &&
       !showPhoneModal &&
       !showSuccessModal &&
-      !showEmergencyTypeModal
+      !showEmergencyTypeModal &&
+      !isWaitingForResponse
     ) {
       console.log("Setting up auto-capture interval");
       // Xóa interval cũ nếu có
@@ -221,6 +273,9 @@ export default function Emergency() {
         if (!cameraRef.current) return;
 
         try {
+          // Set waiting for response before sending image
+          setIsWaitingForResponse(true);
+
           // Chụp ảnh với chất lượng cao và không bỏ qua xử lý
           const photo = await cameraRef.current.takePictureAsync({
             quality: 1,
@@ -238,27 +293,16 @@ export default function Emergency() {
 
           // Kiểm tra kết quả và xử lý
           if (response && response.code === 200) {
-            // Dừng interval khi phát hiện thành công
-            if (intervalRef.current) {
-              clearInterval(intervalRef.current);
-              intervalRef.current = null;
-            }
-            setIsDetectionRunning(false);
-
             // Lưu trữ phản hồi để sử dụng sau
-            setDetectionResponse(response);
-
-            // Show appropriate modal based on user status
-            if (user) {
-              // No longer needed to show selection here, as it was shown first
-              setShowSuccessModal(true);
-            } else {
-              // If no user, show phone modal first
-              setShowPhoneModal(true);
-            }
+            handleDetectionResponse(response);
+          } else {
+            // If response is not successful, we can resume detection
+            setIsWaitingForResponse(false);
           }
         } catch (error) {
           console.error("Lỗi khi xử lý ảnh:", error);
+          // In case of error, resume detection
+          setIsWaitingForResponse(false);
         }
       }, 3000);
     }
@@ -277,6 +321,7 @@ export default function Emergency() {
     showEmergencyTypeModal,
     mode,
     isDetectionRunning,
+    isWaitingForResponse, // Add this to dependency array
   ]);
 
   // Hàm được gọi khi camera sẵn sàng sử dụng
@@ -642,12 +687,17 @@ export default function Emergency() {
                 // For self-emergency, send data directly
                 sendSelfEmergencyData();
               } else {
-                // For others, use normal flow
-                if (user && user.phone) {
-                  // trường hợp login
+                const detectedPhone =
+                  extractPhoneFromResponse(detectionResponse);
+
+                if (detectedPhone) {
+                  // Sử dụng số điện thoại từ hồ sơ y tế đã nhận diện
+                  sendEmergencyData(detectedPhone);
+                } else if (user && user.phone) {
+                  // Sử dụng số điện thoại từ tài khoản đã đăng nhập
                   sendEmergencyData(user.phone);
                 } else if (sessionPhone.current) {
-                  // trường hợp logout không có user
+                  // Sử dụng số điện thoại đã nhập
                   sendEmergencyData(sessionPhone.current);
                   sessionPhone.current = "";
                 } else {
@@ -719,11 +769,13 @@ export default function Emergency() {
               mode="picture"
             />
 
-            {/* Show the detection overlay when detection is running */}
-            {isDetectionRunning && (
+            {/* Show the detection overlay when detection is running or waiting for response */}
+            {(isDetectionRunning || isWaitingForResponse) && (
               <View style={styles.detectionOverlay}>
                 <ActivityIndicator size="large" color="#26b9c8" />
-                <Text style={styles.detectionText}>Đang phân tích...</Text>
+                <Text style={styles.detectionText}>
+                  {isWaitingForResponse ? "Đang xử lý..." : "Đang phân tích..."}
+                </Text>
               </View>
             )}
 
@@ -796,6 +848,19 @@ export default function Emergency() {
     </SafeAreaView>
   );
 }
+
+// Hàm trích xuất số điện thoại từ kết quả nhận diện
+const extractPhoneFromResponse = (response: any): string | null => {
+  if (!response) return null;
+
+  if (response.data !== "New User") {
+    const userData = response.data.data;
+    if (userData && userData.phone) {
+      return userData.phone;
+    }
+  }
+  return null;
+};
 
 // Định nghĩa styles cho component
 const styles = StyleSheet.create({
