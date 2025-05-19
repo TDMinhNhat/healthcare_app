@@ -58,8 +58,38 @@ Một số tính năng đặc trưng của ứng dụng:
 <img src="./healthcare_app_diagram/software_architecture.png" align="center"/>
 
 ## HIỆN THỰC
+<img src="./image/screens/homepage.png" align="center"/>
+<p align="center">Màn hình trang chủ ứng dụng</p>
 
+</br>
 
+<img src="./image/screens/patient_view_appointment.png" align="center"/>
+<p align="center">Bệnh nhân xem lịch khám của bản thân (Web - Mobile)</p>
+
+</br>
+
+<img src="./image/screens/doctor_view_appointment.png" align="center"/>
+<p align="center">Bác sĩ xem lịch khám của bản thân (Web)</p>
+
+</br>
+
+<img src="./image/screens/paitent_join_room_online.png" align="center">
+<p align="center">Bệnh nhân tham gia phòng khám online (Web - Mobile)</p>
+
+</br>
+
+<img src="./image/screens/doctor_join_room_online.png" align="center">
+<p align="center">Bác sĩ tham gia phòng khám online (Web)</p>
+
+</br>
+
+<img src="./image/screens/patient_call_emergency.png" align="center">
+<p align="center">Bệnh nhân gọi chức năng cấp cứu (Mobile)</p>
+
+</br>
+
+<img src="./image/screens/doctor_managing_emergency.png" align="center"/>
+<p align="center">Bác sĩ quản lý các bệnh nhân gọi cấp cứu (Web)</p>
 
 ## THÀNH VIÊN THỰC HIỆN
 <table align="center">
