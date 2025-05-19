@@ -43,8 +43,10 @@ Một số tính năng đặc trưng của ứng dụng:
 </div> 
 
 ## SƠ ĐỒ USE CASE
+<img src="./healthcare_app_diagram/Healthcare Usecase.jpg" align="center"/>
 
 ## SƠ ĐỒ CLASS
+<img src="./healthcare_app_diagram/class_diagram.png" align="center"/>
 
 ## SƠ ĐỒ DATABASE
 
