@@ -125,7 +125,7 @@ export default function WaitingRoomScreen() {
                     console.error("Không thể mở đường dẫn:", err);
                     Alert.alert("Lỗi", "Không thể mở phòng khám trực tuyến");
                   });
-                  router.replace("/(tabs)/appointments");
+                  router.replace("/(tabs)/dashboard");
                 },
               },
             ],
