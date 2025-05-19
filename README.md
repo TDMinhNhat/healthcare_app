@@ -10,7 +10,6 @@
 		<a href="#sơ-đồ-database">📂 Sơ đồ database</a> -
 		<a href="#kiến-trúc-phần-mềm">📐 Kiến trúc phần mềm</a> - 
 		<a href="#màn-hình-kết-quả">📺 Màn hình kết quả</a> -
-		<a href="#cách-cài-đặt">💻 Cách cài đặt và sử dụng</a> - 
 		<a href="#thành-viên-thực-hiện">👪 Thành viên thực hiện</a>
 	</p>
 </div>
@@ -59,8 +58,6 @@ Một số tính năng đặc trưng của ứng dụng:
 <img src="./healthcare_app_diagram/software_architecture.png" align="center"/>
 
 ## HIỆN THỰC
-
-## CÁCH CÀI ĐẶT
 
 ## THÀNH VIÊN THỰC HIỆN
 <table align="center">
