@@ -9,7 +9,7 @@
 		<a href="#sơ-đồ-class">✏️ Sơ đồ class</a> -
 		<a href="#sơ-đồ-database">📂 Sơ đồ database</a> -
 		<a href="#kiến-trúc-phần-mềm">📐 Kiến trúc phần mềm</a> - 
-		<a href="#màn-hình-kết-quả">📺 Màn hình kết quả</a> -
+		<a href="#hiện-thực">📺 Hiện Thực</a> -
 		<a href="#thành-viên-thực-hiện">👪 Thành viên thực hiện</a>
 	</p>
 </div>
