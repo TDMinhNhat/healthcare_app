@@ -1,16 +1,15 @@
 <div align="center">
     <img src="./image/logo.png" width=400>
     <h1>SolarHealth</h1>
-    <h3>💏 Ứng dụng phần mềm chăm sóc sức khoẻ SolarHealth 💑</h3>
+    <h3>💏 SolarHealth - Ứng dụng hỗ trợ chăm sóc sức khoẻ dành cho bệnh tâm lý 💑</h3>
 	<p align="center">
 		<a href="#giới-thiệu">📘 Giới Thiệu</a> -
+		<a href="#công-nghệ-sử-dụng">📚 Công nghệ sử dụng</a> -
 		<a href="#sơ-đồ-use-case">📑 Sơ đồ use-case</a> -
 		<a href="#sơ-đồ-class">✏️ Sơ đồ class</a> -
 		<a href="#sơ-đồ-database">📂 Sơ đồ database</a> -
 		<a href="#kiến-trúc-phần-mềm">📐 Kiến trúc phần mềm</a> - 
-		<a href="#công-nghệ-sử-dụng">📚 Công nghệ sử dụng</a> -
-		<a href="#màn-hình-kết-quả">📺 Màn hình kết quả</a> -
-		<a href="#cách-cài-đặt">💻 Cách cài đặt và sử dụng</a> - 
+		<a href="#hiện-thực">📺 Hiện Thực</a> -
 		<a href="#thành-viên-thực-hiện">👪 Thành viên thực hiện</a>
 	</p>
 </div>
@@ -25,24 +24,76 @@ từ xa với nhiều phương thức giao tiếp khác nhau (tin nhắn, cuộc
 
 Một số tính năng đặc trưng của ứng dụng:
 1. Cho phép bệnh nhân có thể tư vấn khám sức khoẻ từ xa
-2. Bác sĩ có thể biết được vị trí bệnh nhân để tới khám
-3. Phần mềm có thể chuẩn đoán bệnh cơ bản cho bệnh nhân dựa vào các thông tin cung cấp
-4. Phần mềm có thể xác thực các triệu chứng thông qua các hình ảnh chụp x-quang, siêu âm,... 
+2. Bác sĩ có thể biết được vị trí bệnh nhân để tới khám dựa vào thông tin cung cấp của bệnh nhân khi gọi cấp cứu
+3. Bệnh nhân có thể gọi cấp cứu khi có trường hợp khẩn cấp </br>
+...
 
 ## CÔNG NGHỆ SỬ DỤNG
 <div>
 	<ul>
-		<li>Frontend: Website (ReactJS), Mobile (React-native), Desktop App (C# Winform)</li>
-		<li>Backend: Java (Spring boot), Javascript/Typescript (NodeJS), Python (Django)</li>
-		<li>Database: MariaDB, SQLite, MongoDB, Redis</li>
-		<li>Security: JWT (Json Web Token), Spring OAuth2 (đăng nhập bằng: Github, Discord, Microsoft,...)</li>
-		<li>CI/CD: Docker, Jenkins</li>
-		<li>Deployment: Vercel (cho Frontend) - có thể deploy lên: Google Play (Android) & App Store (iOS), EC2 (AWS - cho Backend)</li>
+		<li>Frontend: Website (ReactJS), Mobile (React-native)</li>
+		<li>Backend: Java (Spring boot), Javascript (NodeJS), Python (Django)</li>
+		<li>Database: MariaDB, MongoDB và Redis</li>
+		<li>Security: Đăng nhập bằng form</li>
+		<li>Deployment: Vercel (cho Web), Droplets (Digital Ocean - cho Backend)</li>
 		<li>Kiến trúc: Microservices, Event-driven và Multi-layered</li>
-		<li>Công nghệ khác: Spring OpenFeign, AI (dự báo, xử lý ảnh,...), Apache Kafka, Socket I/O</li>
-		<li>Công cụ khác: S3 (AWS - Lưu trữ dữ liệu), Jira (lập kế hoạch)</li>
+		<li>Công nghệ khác: Spring OpenFeign, OpenCV (dùng CNN model), ARIMA Model, SES Model, Apache Kafka, Socket I/O, StompJS, S3 (lưu trữ ảnh)</li>
 	</ul>
 </div> 
+
+## SƠ ĐỒ USE CASE
+<img src="./healthcare_app_diagram/Healthcare Usecase.jpg" align="center"/>
+
+## SƠ ĐỒ CLASS
+<img src="./healthcare_app_diagram/class_diagram.png" align="center"/>
+
+## SƠ ĐỒ DATABASE
+### SQL (MariaDB)
+<img src="./healthcare_app_diagram/sql_database_diagram.png" align="center"/>
+
+### NoSQL (MongoDB)
+<img src="./healthcare_app_diagram/nosql_database_diagram.png" align="center"/>
+
+## KIẾN TRÚC PHẦN MỀM
+<img src="./healthcare_app_diagram/software_architecture.png" align="center"/>
+
+## HIỆN THỰC
+<img src="./image/screens/homepage.png" align="center"/>
+<p align="center">Màn hình trang chủ ứng dụng</p>
+
+</br>
+
+<img src="./image/screens/patient_view_appointment.png" align="center"/>
+<p align="center">Bệnh nhân xem lịch khám của bản thân (Web - Mobile)</p>
+
+</br>
+
+<img src="./image/screens/doctor_view_appointment.png" align="center"/>
+<p align="center">Bác sĩ xem lịch khám của bản thân (Web)</p>
+
+</br>
+
+<img src="./image/screens/paitent_join_room_online.png" align="center">
+<p align="center">Bệnh nhân tham gia phòng khám online (Web - Mobile)</p>
+
+</br>
+
+<img src="./image/screens/doctor_join_room_online.png" align="center">
+<p align="center">Bác sĩ tham gia phòng khám online (Web)</p>
+
+</br>
+
+<img src="./image/screens/patient_call_emergency.png" align="center">
+<p align="center">Bệnh nhân gọi chức năng cấp cứu (Mobile)</p>
+
+</br>
+
+<img src="./image/screens/doctor_managing_emergency.png" align="center"/>
+<p align="center">Bác sĩ quản lý các bệnh nhân gọi cấp cứu (Web)</p>
+
+## LIÊN KẾT
+### Website
+<a href="https://healthcare-web-tau.vercel.app/">Truy cập website của ứng dụng. Click vào đây</a>
 
 ## THÀNH VIÊN THỰC HIỆN
 <table align="center">
