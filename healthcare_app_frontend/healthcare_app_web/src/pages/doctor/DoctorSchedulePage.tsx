@@ -140,15 +140,18 @@ const DoctorSchedulePage = () => {
 
   // Thêm state để lưu giá trị maxSlots hiện tại từ Formik
   const [currentMaxSlots, setCurrentMaxSlots] = useState<number>(20);
-
   // Gọi API để lấy thông tin về các ca làm việc khi component được tạo
   useEffect(() => {
     const fetchShifts = async () => {
       try {
         const response = await getShiftByStatusTrue();
         if (response.data && response.data.data) {
-          setShifts(response.data.data);
-          console.log("Đã lấy ca làm việc:", response.data.data);
+          // Sắp xếp ca làm việc theo số ca (Ca 1, Ca 2, Ca 3, ...)
+          const sortedShifts = response.data.data.sort(
+            (a: Shift, b: Shift) => a.shift - b.shift
+          );
+          setShifts(sortedShifts);
+          console.log("Đã lấy ca làm việc:", sortedShifts);
         }
       } catch (error) {
         console.error("Lỗi khi lấy ca làm việc:", error);
