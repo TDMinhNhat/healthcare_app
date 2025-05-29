@@ -108,8 +108,13 @@ export default function DateTimeSelectionScreen() {
             (schedule) => schedule.status !== false
           );
 
+          // Sort available slots by shift.shift
+          const sortedSlots = availableSlots.sort((a, b) => {
+            return a.shift.shift - b.shift.shift;
+          });
+
           // Convert work schedule data to time slots
-          const allSlots = availableSlots.map((slot, index) => ({
+          const allSlots = sortedSlots.map((slot, index) => ({
             id: index + 1,
             time:
               formatTimeFromTimeString(slot.shift.start, "string") +
