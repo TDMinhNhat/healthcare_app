@@ -59,7 +59,6 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
   // State lưu ca khám được chọn
   const [selectedShift, setSelectedShift] = useState<string>("");
   const [selectedShiftInfo, setSelectedShiftInfo] = useState<any>(null);
-
   // State lưu danh sách các ca khám có sẵn
   const [availableShifts, setAvailableShifts] = useState<
     {
@@ -68,6 +67,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
       start: string;
       end: string;
       isAvailable: boolean;
+      shiftNumber: number;
     }[]
   >([]);
 
@@ -138,9 +138,7 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
       }
 
       // Tạo map để nhóm các lịch làm việc theo shift id
-      const shiftsMap = new Map();
-
-      // Nhóm các lịch làm việc theo shift id
+      const shiftsMap = new Map(); // Nhóm các lịch làm việc theo shift id
       filteredResult.forEach((item: any) => {
         if (!shiftsMap.has(item.shift.id)) {
           shiftsMap.set(item.shift.id, {
@@ -149,12 +147,15 @@ const SelectDateTime: React.FC<SelectDateTimeProps> = ({
             start: item.shift.start,
             end: item.shift.end,
             isAvailable: true,
+            shiftNumber: item.shift.shift, // Thêm trường để sắp xếp
           });
         }
       });
 
-      // Chuyển map thành mảng để hiển thị
-      const shifts = Array.from(shiftsMap.values());
+      // Chuyển map thành mảng và sắp xếp theo số ca (Ca 1, Ca 2, Ca 3, ...)
+      const shifts = Array.from(shiftsMap.values()).sort(
+        (a, b) => a.shiftNumber - b.shiftNumber
+      );
 
       setAvailableShifts(shifts);
     } catch (err) {
