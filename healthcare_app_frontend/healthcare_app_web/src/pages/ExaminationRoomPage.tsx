@@ -285,11 +285,47 @@ export default function ExaminationRoomPage() {
       window.location.protocol +
       "//" +
       // window.location.host +
-      `${import.meta.env.VITE_HOST}:5173` +
+      `healthcare-web-tau.vercel.app` +
       window.location.pathname +
       "?role=patient"
     );
   };
+
+  // Hàm lưu thông tin bệnh nhân đang khám vào localStorage
+  const saveCurrentPatientToStorage = (patient: PatientQueueItem | null) => {
+    const storageKey = `currentPatient_${scheduleId}`;
+    if (patient) {
+      localStorage.setItem(storageKey, JSON.stringify(patient));
+    } else {
+      localStorage.removeItem(storageKey);
+    }
+  };
+
+  // Hàm load thông tin bệnh nhân đang khám từ localStorage
+  const loadCurrentPatientFromStorage = (): PatientQueueItem | null => {
+    const storageKey = `currentPatient_${scheduleId}`;
+    const stored = localStorage.getItem(storageKey);
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (error) {
+        console.error("Error parsing stored patient data:", error);
+        localStorage.removeItem(storageKey);
+      }
+    }
+    return null;
+  };
+
+  // Load current patient từ localStorage khi component mount
+  useEffect(() => {
+    if (!isPatient) {
+      const storedPatient = loadCurrentPatientFromStorage();
+      if (storedPatient) {
+        setCurrentPatient(storedPatient);
+        setSelectedAppointmentId(storedPatient.appointmentId || 0);
+      }
+    }
+  }, [isPatient]);
 
   // Tiếp nhận bệnh nhân vào phòng khám
   const acceptPatient = (patient: PatientQueueItem) => {
@@ -301,6 +337,8 @@ export default function ExaminationRoomPage() {
 
     // Set current patient in examination
     setCurrentPatient(patient);
+    // Lưu thông tin bệnh nhân vào localStorage
+    saveCurrentPatientToStorage(patient);
     console.log("Patient accepted:", patient);
 
     // Set appointment ID for medical record
@@ -380,6 +418,8 @@ export default function ExaminationRoomPage() {
 
       // Clear current patient
       setCurrentPatient(null);
+      // Xóa thông tin bệnh nhân khỏi localStorage
+      saveCurrentPatientToStorage(null);
 
       // Close medical record if open
       if (isModalOpen) {
@@ -483,12 +523,49 @@ export default function ExaminationRoomPage() {
           onUserJoin: (userList) => {
             console.log("User joined:", userList);
             setIsShowCurrentPatient(true);
+
+            // Set current patient from userList if doctor and patient joins
+            if (!isPatient) {
+              // Tìm bệnh nhân trong userList (user không phải là bác sĩ)
+              const patientInRoom = userList.find(
+                (user) => user.userID !== userId
+              );
+
+              if (patientInRoom) {
+                // Tạo đối tượng patient từ thông tin userList
+                const patientFromUserList: PatientQueueItem = {
+                  userId: patientInRoom.userID,
+                  name: patientInRoom.userName,
+                  // Các thông tin khác sẽ được giữ từ currentPatient nếu có
+                  appointmentId: currentPatient?.appointmentId,
+                  numericalOrder: currentPatient?.numericalOrder,
+                  doctorName: currentPatient?.doctorName,
+                  dateAppointment: currentPatient?.dateAppointment,
+                  bookAppointmentId: currentPatient?.bookAppointmentId,
+                };
+
+                setCurrentPatient(patientFromUserList);
+                saveCurrentPatientToStorage(patientFromUserList);
+              } else if (currentPatient) {
+                // Nếu không tìm thấy bệnh nhân mới nhưng có currentPatient, vẫn lưu localStorage
+                saveCurrentPatientToStorage(currentPatient);
+              }
+            }
           },
           // khi bệnh nhân rời khỏi phòng thì set null cho currentPatient
           onUserLeave: (userList) => {
-            setCurrentPatient(null);
-            setIsShowCurrentPatient(false);
             console.log("User left:", userList);
+
+            // Xóa ngay bệnh nhân đang khám khi có bất kỳ bệnh nhân nào rời khỏi phòng
+            if (!isPatient) {
+              console.log(
+                "A patient has left the room, clearing current patient"
+              );
+              setCurrentPatient(null);
+              setIsShowCurrentPatient(false);
+              // Xóa thông tin bệnh nhân khỏi localStorage
+              saveCurrentPatientToStorage(null);
+            }
           },
         });
         // Đánh dấu phòng đã được khởi tạo
